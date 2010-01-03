@@ -118,6 +118,9 @@ public class GraphElementFactory implements CreationFactory {
 
         else if (template.equals(IGraphEditorConstants.TEMPLATE_GENERIC))
             return this.createGeneric();
+        
+        else if (template.equals(IGraphEditorConstants.TEMPLATE_GENERIC_C))
+            return this.createGeneric_C();
 
         else
             return null;
@@ -168,6 +171,12 @@ public class GraphElementFactory implements CreationFactory {
 
     private ITopology createGeneric() {
         ITopology gen = new GenericGraph(this, this.shell);
+        gen.createTopology();
+        return gen;
+    }
+    
+    private ITopology createGeneric_C() {
+        ITopology gen = new GenericGraph(this, this.shell,IGraphEditorConstants.GENERIC_C);
         gen.createTopology();
         return gen;
     }

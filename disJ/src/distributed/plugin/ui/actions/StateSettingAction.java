@@ -10,6 +10,8 @@
 
 package distributed.plugin.ui.actions;
 
+import java.util.Hashtable;
+
 import org.eclipse.gef.ui.actions.WorkbenchPartAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.RGB;
@@ -77,38 +79,45 @@ public class StateSettingAction extends WorkbenchPartAction {
 
     private void executeAddState() {
         AddStatesDialog dialog = new AddStatesDialog(this.getShell());
-        Object[] values = dialog.open();
+        Hashtable ht = dialog.open();
 
         // cancel selected
-        if (values.length < 2)
+        if (ht==null)
             return;
 
         // invalid input
-        if (!this.validateStateInput(values))
+        if (!this.validateStateInput(ht))
             return;
 
         GraphEditor editor = (GraphEditor) getWorkbenchPart();
-        Short state = new Short(Short.parseShort((String) values[0]));
-        editor.getGraphElement().addStateColor(state, (RGB) values[1]);
+//        Short state = new Short(Short.parseShort((String) values[0]));
+//        editor.getGraphElement().addStateColor(state, (RGB) values[1]);
+        editor.getGraphElement().addStateColor(ht);
         editor.makeDirty();
 
     }
 
-    private boolean validateStateInput(Object[] param) {
+    private boolean validateStateInput(Hashtable ht) {
+    	Object aKey="";
         try {
-            short s = Short.parseShort((String) param[0]);
+        	for (Object key:ht.keySet()){
+        		aKey=key;
+            short s =(Short) key;
+        	}
         } catch (ClassCastException e) {
             MessageDialog.openError(this.getShell(), "Assign State Color",
-                    param[0] + " is not a number");
+                    aKey+ " is not a number");
         } catch (NumberFormatException e) {
             MessageDialog.openError(this.getShell(), "Assign State Color",
-                    param[0] + " is not a number");
+                    aKey + " is not a number");
         }
+        
+        return true;
 
-        if (param[1] != null)
-            return true;
-
-        return false;
+//        if (param[1] != null)
+//            return true;
+//
+//        return false;
     }
 
     private void executeRemoveStates() {

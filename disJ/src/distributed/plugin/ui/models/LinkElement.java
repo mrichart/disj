@@ -12,6 +12,7 @@ package distributed.plugin.ui.models;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -79,6 +80,8 @@ public abstract class LinkElement extends AdapterElement {
 
     public static final String RANDOM_CUSTOMS = "Random Customs";
     
+    private HashMap hmProperties = new HashMap();
+    
     private static final int NUM_PROPERTIES = 9;
 
     static {
@@ -141,6 +144,7 @@ public abstract class LinkElement extends AdapterElement {
             this.edge = new Edge(graphId, id, direction);
             this.orgEdge = null;
             this.bendpoints = new ArrayList();
+            this.edge.setLinkElement(this);
         } catch (DisJException ignore) {
             System.err.println("@LinkELement.constructor " + ignore);
         }
@@ -385,13 +389,13 @@ public abstract class LinkElement extends AdapterElement {
      * Copy the origin state of this edge
      */
     public void copyEdge(){
-        try {
-            this.orgEdge = (Edge)GraphLoader.deepClone(this.edge);
-        } catch (DisJException e) {
-            System.err.println(e);
-        } catch (IOException e) {
-            System.err.println(e);
-        }
+//        try {
+//            this.orgEdge = (Edge)GraphLoader.deepClone(this.edge);
+//        } catch (DisJException e) {
+//            System.err.println(e);
+//        } catch (IOException e) {
+//            System.err.println(e);
+//        }
     }
 
     /**
@@ -399,10 +403,12 @@ public abstract class LinkElement extends AdapterElement {
      * when method <code>copyEdge</code> is called last.
      */
     public void resetEdge(){
-        for(int i =0; i < descriptors.length; i++){
-            String prop = (String)descriptors[i].getId();
-            this.resetPropertyValue(prop);
-        }
+//        for(int i =0; i < descriptors.length; i++){
+//            String prop = (String)descriptors[i].getId();
+//            this.resetPropertyValue(PROPERTY_TOTAL_MSG);
+//        }
+    	 this.resetPropertyValue(PROPERTY_TOTAL_MSG);
+    	 this.setVisible(true); // make every edge visible
     }
     
     public void setEdge(Edge edge) {
@@ -542,4 +548,13 @@ public abstract class LinkElement extends AdapterElement {
     public String toString() {
         return "<LinkElement>name: " + this.name + " type: " + this.getType();
     }
+    
+	public void setVisible(boolean value){
+		this.fireVisibilityChange(IConstants.PROPERTY_CHANGE__LINK_INVISIBLE, value);
+	}
+
+	protected void fireVisibilityChange(String prop, boolean value){
+//	    System.err.println("[AdapterElement] fireStructureChange");
+		listeners.firePropertyChange(prop, null, value);
+	}
 }

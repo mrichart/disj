@@ -10,6 +10,7 @@
 
 package distributed.plugin.ui.figures;
 
+import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.RoundedRectangle;
 import org.eclipse.draw2d.ToolbarLayout;
 import org.eclipse.draw2d.geometry.Dimension;
@@ -32,17 +33,28 @@ public class NodeFigure extends RoundedRectangle {
     /**
      * Constructor
      */
-    public NodeFigure() {
+    private Label label;
+    
+    public NodeFigure(String name) {
         super();
 //        System.err.println("[NodeFigure] created");
         // this.anchor = new ChopboxAnchor(this);
+        label = new Label(name);
+        add(label);
         ToolbarLayout layout = new ToolbarLayout();
         setLayoutManager(layout);
         // setBorder(new RaisedBorder());
         setBackgroundColor(bgcolor);
         setOpaque(true);
-        setSize(new Dimension(IGraphEditorConstants.NODE_SIZE, IGraphEditorConstants.NODE_SIZE));
+        setSize(IGraphEditorConstants.NODE_SIZE, IGraphEditorConstants.NODE_SIZE);
     }
+
+	public Label getLabel() {
+		return label;
+	}
+    
+    
+
 
     // /**
     // * TODO need to have 2 type of anchors

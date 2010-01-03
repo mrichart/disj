@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.draw2d.Connection;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.RelativeBendpoint;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.editparts.AbstractConnectionEditPart;
@@ -110,6 +111,7 @@ public abstract class LinkPart extends AbstractConnectionEditPart implements
     public void propertyChange(PropertyChangeEvent iEvent) {
 
         String property = iEvent.getPropertyName();
+        Object value = iEvent.getNewValue();
         //System.err.println("[LinkPart] propertyChange " + property);
         if (Connection.PROPERTY_CONNECTION_ROUTER.equals(property)) {
             refreshBendpoints();
@@ -117,10 +119,41 @@ public abstract class LinkPart extends AbstractConnectionEditPart implements
         }
         if (IConstants.PROPERTY_CHANGE_BENDPOINT.equals(property))
             this.refreshBendpoints();
+		if (IConstants.PROPERTY_CHANGE__LINK_INVISIBLE.equals(property)) {
+			
+			this.makeInvisible((Boolean)value);
+		}
+
 
     }
 
-    /** Updates bendpoints. */
+    private void makeInvisible(final boolean value) {
+		// TODO Auto-generated method stub
+		final IFigure figure = this.getFigure();
+		Display display = Display.getCurrent();
+		Runnable ui = null;
+        if (display == null) {
+            ui = new Runnable() {
+                public void run() {
+                
+                	setVisualProperty(value);
+                }
+            };
+        } else {
+        	setVisualProperty(value);
+        }
+        if (ui != null) {
+            display = Display.getDefault();
+            display.asyncExec(ui);
+        }		
+	}
+    
+	protected void setVisualProperty(boolean value){
+    	figure.setVisible(value);
+    	super.refreshVisuals();
+	}
+
+	/** Updates bendpoints. */
     private void refreshBendpoints() {
 
         List modelConstraint = this.getLinkElement().getBendpoints();

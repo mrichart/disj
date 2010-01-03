@@ -16,9 +16,11 @@ import java.net.URL;
 import java.net.URI;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -33,8 +35,11 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.part.EditorPart;
 
 import distributed.plugin.core.DisJException;
@@ -42,6 +47,7 @@ import distributed.plugin.core.Node;
 import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.engine.Entity;
+import distributed.plugin.runtime.engine.Processor;
 import distributed.plugin.runtime.engine.SimulatorEngine;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.dialogs.SpeedDialog;
@@ -51,422 +57,437 @@ import distributed.plugin.ui.validators.ClassNameValidator;
 /**
  * @author Me
  * 
- * TODO To change the template for this generated type comment go to Window -
- * Preferences - Java - Code Style - Code Templates
+ *         TODO To change the template for this generated type comment go to
+ *         Window - Preferences - Java - Code Style - Code Templates
  */
 public class ProcessActions extends WorkbenchPartAction {
 
-    private String execType;
+	private String execType;
 
-    /**
-     * @param part
-     * @param type
-     *            a type of selected process
-     */
-    public ProcessActions(EditorPart part, String type) {
-        super(part);
-        this.execType = type;
-        setId(type);
-        //System.out.println("processAction created wit type " + this.execType);
-    }
+	/**
+	 * @param part
+	 * @param type
+	 *            a type of selected process
+	 */
+	public ProcessActions(EditorPart part, String type) {
+		super(part);
+		this.execType = type;
+		setId(type);
+		// System.out.println("processAction created wit type " +
+		// this.execType);
+	}
 
-    /**
-     * @see org.eclipse.gef.ui.actions.WorkbenchPartAction#calculateEnabled()
-     */
-    protected boolean calculateEnabled() {
-        return this.canPerformAction();
-    }
+	/**
+	 * @see org.eclipse.gef.ui.actions.WorkbenchPartAction#calculateEnabled()
+	 */
+	protected boolean calculateEnabled() {
+		return this.canPerformAction();
+	}
 
-    /*
-     * Validate the execution
-     */
-    private boolean canPerformAction() {
-        // if (getWorkbenchPart() instanceof GraphEditor) {
-        // GraphEditor editor = (GraphEditor) getWorkbenchPart();
-        // if (editor.getGraphElement() != null
-        // && (editor.getClientObject() != null || this.execType
-        // .equals(IGraphEditorConstants.LOAD_ID)))
-        // return true;
-        // }
-        // return false;
-        return true;
-    }
+	/*
+	 * Validate the execution
+	 */
+	private boolean canPerformAction() {
+		// if (getWorkbenchPart() instanceof GraphEditor) {
+		// GraphEditor editor = (GraphEditor) getWorkbenchPart();
+		// if (editor.getGraphElement() != null
+		// && (editor.getClientObject() != null || this.execType
+		// .equals(IGraphEditorConstants.LOAD_ID)))
+		// return true;
+		// }
+		// return false;
+		return true;
+	}
 
-    public void run() {
-        if (this.execType.equals(IGraphEditorConstants.RESUME_ID)) {
-            this.executeRun();
-        } else if (this.execType.equals(IGraphEditorConstants.LOAD_ID)) {
-            this.executeLoad();
-        } else if (this.execType.equals(IGraphEditorConstants.LOAD_RANDOM_ID)) {
-            this.executeRandomLoad();
-        } else if (this.execType.equals(IGraphEditorConstants.SUSPEND_ID)) {
-            this.executeSuspend();
-        } else if (this.execType.equals(IGraphEditorConstants.STOP_ID)) {
-            this.executeStop();
-        } else if (this.execType.equals(IGraphEditorConstants.NEXT_ID)) {
-            this.executeStepNext();
-        } else if (this.execType.equals(IGraphEditorConstants.SPEED_ID)) {
-            this.executeSpeed();
-        }
+	public void run() {
+		
+		GraphEditor editor = (GraphEditor) this.getWorkbenchPart();
+		if (editor.getController()==null){
+		editor.setController(new ProtocolExecutionController(this, editor));
+		}
+		
+		
+		if (this.execType.equals(IGraphEditorConstants.RESUME_ID)) {
+			this.executeRun();
+		} else if (this.execType.equals(IGraphEditorConstants.LOAD_ID)) {
+			this.executeLoad();
+			editor.setController(new ProtocolExecutionController(this, editor));
+		} else if (this.execType.equals(IGraphEditorConstants.LOAD_RANDOM_ID)) {
+			this.executeRandomLoad();
+		} else if (this.execType.equals(IGraphEditorConstants.SUSPEND_ID)) {
+			this.executeSuspend();
+		} else if (this.execType.equals(IGraphEditorConstants.STOP_ID)) {
+			this.executeStop();
+		} else if (this.execType.equals(IGraphEditorConstants.NEXT_ID)) {
+			this.executeStepNext();
+		} else if (this.execType.equals(IGraphEditorConstants.SPEED_ID)) {
+			this.executeSpeed();
+		} else if (this.execType.equals(IGraphEditorConstants.LOAD_RECORD_ID)) {
+			editor.setController(new PlaybackController(this, editor));
+			String fileName=openFileDialog();
+			if (editor.setRecFile(fileName)){
+				showMessageBox(null,"Record Loading Completed");
+			}else{
+				showMessageBox(null,"File not found");
+			}
+		} else if (this.execType.equals(IGraphEditorConstants.SAVE_RECORD_ID)) {
+			editor.setRecFileNameForSaving(saveFileDialog());
+		}
 
-    }
+	}
+	
+	private String openFileDialog() {
+		FileDialog dialog = new FileDialog(getWorkbenchPart().getSite().getShell(),SWT.OPEN);
 
-    private SimulatorEngine getEngine() {
-        GraphEditor editor = (GraphEditor) getWorkbenchPart();
-        return editor.getEngine();
-    }
+		dialog.setFilterExtensions(new String[]{"*.rec"});
+		return dialog.open();
+	}
+	
+	private String saveFileDialog() {
+		FileDialog dialog = new FileDialog(getWorkbenchPart().getSite().getShell(),SWT.SAVE);
+		return dialog.open();
+	}
 
-    /*
-     * Run a simulator action
-     */
-    private void executeRun() {
-        if(!this.validateAction())
-            return;
-        System.out.println("--- executeRun");
+	public void showMessageBox(String title,String msg){
+		Shell parent = getWorkbenchPart().getSite().getShell();
+		MessageDialog.openInformation(parent,title, msg);
+	}
 
-        // first run
-        if (this.getEngine().isStarted() == false) {
-            GraphEditor editor = (GraphEditor) getWorkbenchPart();
-            this.validateSavedGraph(editor);
-            Graph graph = editor.getGraphElement().getGraph();
+	SimulatorEngine getEngine() {
+		GraphEditor editor = (GraphEditor) getWorkbenchPart();
+		return editor.getEngine();
+	}
 
-            // FIXME a cheated way to refresh the node color
-            // to user setting state
-            Map nodes = graph.getNodes();
-            Iterator its = nodes.keySet().iterator();
-            for (Node node = null; its.hasNext();) {
-                node = (Node) nodes.get(its.next());
-                node.resetState(node.getCurState());
-            }
-            editor.getGraphElement().copyGraphElement();
-            this.getEngine().execute(graph, editor.getClientObject(), editor.getClientRandomObject());
-        } else {
-            try {
-                if ((!this.getEngine().isRunning())
-                        && this.getEngine().isStarted()
-                        && this.getEngine().isSuspend())
-                    this.getEngine().resume();
-                else{
-                    this.missUseActionMsg("Engine is not suspened or stoped.");
-                }
-            } catch (DisJException e) {
-                System.err.println(e);
-            }
-        }
-    }
+	/*
+	 * Run a simulator action
+	 */
+	private void executeRun() {
+		GraphEditor editor = (GraphEditor) this.getWorkbenchPart();
+		Controller controller=editor.getController();
+		controller.executeRun();
+	}
 
-    private void missUseActionMsg(String msg){
-        MessageDialog.openError(getWorkbenchPart().getSite().getShell(),
-                "Miss use of action",
-                msg);
-    }
-    
-    private boolean validateAction() {
-        GraphEditor editor = (GraphEditor) getWorkbenchPart();
-        if (editor.getClientObject() == null){
-            MessageDialog.openError(getWorkbenchPart().getSite().getShell(),
-                    "Algoithm has not been loaded",
-                    "Try to load algorithm before execute this action");
-            return false;
-        }else{
-            return true;
-        }
-        
-    }
+	void missUseActionMsg(String msg) {
+		MessageDialog.openError(getWorkbenchPart().getSite().getShell(),
+				"Miss use of action", msg);
+	}
 
-    private boolean validateSavedGraph(GraphEditor editor) {
-        if (editor.isDirty()) {
-            MessageDialog messageBox;
-            Shell parent = getWorkbenchPart().getSite().getShell();
-            String[] btnText = { "No", "Cancel", "Yes" };
-            messageBox = new MessageDialog(parent, "Save", null,
-                    "Graph has been modified. Do you want to save it?",
-                    MessageDialog.QUESTION, btnText, 2);
-            messageBox.open();
-            int ans = messageBox.getReturnCode();
-            if (ans == 0)
-                return true;
-            else if (ans == 1)
-                return false;
-            else if (ans == 2) {
-                // TODO might need to put progress monitor
-                IProgressMonitor monitor = null;
-                editor.doSave(monitor);
-                return true;
-            } else
-                return false;
+	boolean validateSavedGraph(GraphEditor editor) {
+		if (editor.isDirty()) {
+			MessageDialog messageBox;
+			Shell parent = getWorkbenchPart().getSite().getShell();
+			String[] btnText = { "No", "Cancel", "Yes" };
+			messageBox = new MessageDialog(parent, "Save", null,
+					"Graph has been modified. Do you want to save it?",
+					MessageDialog.QUESTION, btnText, 2);
+			messageBox.open();
+			int ans = messageBox.getReturnCode();
+			if (ans == 0)
+				return true;
+			else if (ans == 1)
+				return false;
+			else if (ans == 2) {
+				// TODO might need to put progress monitor
+				IProgressMonitor monitor = null;
+				editor.doSave(monitor);
+				return true;
+			} else
+				return false;
 
-        } else
-            return true;
-    }
+		} else
+			return true;
+	}
 
-    /*
-     * Load client's algorithm into the engine action
-     */
-    private void executeLoad() {
-        System.out.println("--- executeLoad");
+	/*
+	 * Load client's algorithm into the engine action
+	 */
+	private void executeLoad(String protocol) {
 
-        GraphEditor editor = (GraphEditor) getWorkbenchPart();
-        IFileEditorInput input = (IFileEditorInput) editor.getEditorInput();
-        IProject project = input.getFile().getProject();
-        String usrProjectName = project.getName();
+		String className = protocol;
 
-        IJavaModel javaModel = JavaCore.create(ResourcesPlugin.getWorkspace()
-                .getRoot());
-        IJavaProject javaProject = javaModel.getJavaProject(usrProjectName);
+		GraphEditor editor = (GraphEditor) getWorkbenchPart();
+		IFileEditorInput input = (IFileEditorInput) editor.getEditorInput();
+		IProject project = input.getFile().getProject();
+		String usrProjectName = project.getName();
 
-        ClassLoader loader = this.getClassLoader(javaProject);
+		IJavaModel javaModel = JavaCore.create(ResourcesPlugin.getWorkspace()
+				.getRoot());
+		IJavaProject javaProject = javaModel.getJavaProject(usrProjectName);
 
-        if (loader == null)
-            System.err.println("***Bugged*** Cannot instantiate classloader");
+		ClassLoader loader = this.getClassLoader(javaProject);
 
-        // open Dialog
-        Shell parent = getWorkbenchPart().getSite().getShell();
-        String className = "Fully Qualified Class Name";
+		if (loader == null)
+			System.err.println("***Bugged*** Cannot instantiate classloader");
 
-        if (editor.getClientObject() != null)
-            className = editor.getClientObject().getName();
+		// open Dialog
+		Shell parent = getWorkbenchPart().getSite().getShell();
 
-        InputDialog classNameDialog = new InputDialog(parent,
-                "Java Algorithm Input Dialog", "Class Name", className,
-                new ClassNameValidator());
-        classNameDialog.open();
+		try {
+			// kill current running or pending process if exist
+			this.getEngine().terminate();
 
-        // user pressed OK
-        if (classNameDialog.getReturnCode() == 0) {
-            className = classNameDialog.getValue();
+		} catch (DisJException ignore) {
+		}
 
-            try {
-                // kill current running or pending process if exist
-                this.getEngine().terminate();
+		try {
+			Class client = this.loadClientClass(parent, loader, className);
 
-            } catch (DisJException ignore) {
-            }
+			if (client == null)
+				return;
 
-            try {
-                Class client = this.loadClientClass(parent, loader, className);
+			// loas client's class into editor
+			editor.setClientObject(client);
 
-                if (client == null)
-                    return;
+		} catch (ClassNotFoundException e) {
+			MessageDialog.openError(parent, "Unable to load client Classd", e
+					.getMessage()
+					+ " not found");
 
-                // loas client's class into editor
-                editor.setClientObject(client);
+		} catch (Exception g) {
+			// unexpected error
+			String msg = g + "";
+			MessageDialog.openError(parent,
+					"Unexpected Load Client Class Error", msg);
+		}
 
-            } catch (ClassNotFoundException e) {
-                MessageDialog.openError(parent, "Unable to load client Classd",
-                        e.getMessage() + " not found");
+	}
 
-            } catch (Exception g) {
-                // unexpected error
-                String msg = g + "";
-                MessageDialog.openError(parent,
-                        "Unexpected Load Client Class Error", msg);
-            }
+	private void executeLoad() {
+		System.out.println("--- executeLoad");
 
-        } else {
-            // user press cancel
-            return;
-        }
-    }
-    
-    private void executeRandomLoad() {
-        System.out.println("--- executeRandomLoad");
+		Shell parent = getWorkbenchPart().getSite().getShell();
+		GraphEditor editor = (GraphEditor) getWorkbenchPart();
+		String className = "Fully Qualified Class Name";
 
-        GraphEditor editor = (GraphEditor) getWorkbenchPart();
-        IFileEditorInput input = (IFileEditorInput) editor.getEditorInput();
-        IProject project = input.getFile().getProject();
-        String usrProjectName = project.getName();
+		if (editor.getClientObject() != null)
+			className = editor.getClientObject().getName();
 
-        IJavaModel javaModel = JavaCore.create(ResourcesPlugin.getWorkspace()
-                .getRoot());
-        IJavaProject javaProject = javaModel.getJavaProject(usrProjectName);
+		InputDialog classNameDialog = new InputDialog(parent,
+				"Java Algorithm Input Dialog", "Class Name", className,
+				new ClassNameValidator());
+		classNameDialog.open();
 
-        ClassLoader loader = this.getClassLoader(javaProject);
+		// user pressed OK
+		if (classNameDialog.getReturnCode() == 0) {
+			className = classNameDialog.getValue();
+			executeLoad(className);
+			editor.getGraphElement().getGraph().setProtocol(className);
+		} else {
+			// user press cancel
+			return;
+		}
+	}
 
-        if (loader == null)
-            System.err.println("***Bugged*** Cannot instantiate classloader");
+	private void executeRandomLoad() {
+		System.out.println("--- executeRandomLoad");
 
-        // open Dialog
-        Shell parent = getWorkbenchPart().getSite().getShell();
-        String className = "Fully Qualified Class Name";
+		GraphEditor editor = (GraphEditor) getWorkbenchPart();
+		IFileEditorInput input = (IFileEditorInput) editor.getEditorInput();
+		IProject project = input.getFile().getProject();
+		String usrProjectName = project.getName();
 
-        if (editor.getClientRandomObject() != null)
-            className = editor.getClientRandomObject().getName();
+		IJavaModel javaModel = JavaCore.create(ResourcesPlugin.getWorkspace()
+				.getRoot());
+		IJavaProject javaProject = javaModel.getJavaProject(usrProjectName);
 
-        InputDialog classNameDialog = new InputDialog(parent,
-                "Random Number generator Input Dialog", "Class Name", className,
-                new ClassNameValidator());
-        classNameDialog.open();
+		ClassLoader loader = this.getClassLoader(javaProject);
 
-        // user pressed OK
-        if (classNameDialog.getReturnCode() == 0) {
-            className = classNameDialog.getValue();
+		if (loader == null)
+			System.err.println("***Bugged*** Cannot instantiate classloader");
 
-            try {
-                // kill current running or pending process if exist
-                this.getEngine().terminate();
+		// open Dialog
+		Shell parent = getWorkbenchPart().getSite().getShell();
+		String className = "Fully Qualified Class Name";
 
-            } catch (DisJException ignore) {
-            }
+		if (editor.getClientRandomObject() != null)
+			className = editor.getClientRandomObject().getName();
 
-            try {
-                Class clientRandom = this.loadClientRandomClass(parent, loader, className);
+		InputDialog classNameDialog = new InputDialog(parent,
+				"Random Number generator Input Dialog", "Class Name",
+				className, new ClassNameValidator());
+		classNameDialog.open();
 
-                if (clientRandom == null)
-                    return;
+		// user pressed OK
+		if (classNameDialog.getReturnCode() == 0) {
+			className = classNameDialog.getValue();
 
-                // loas client's class into editor
-                editor.setClientRandomObject(clientRandom);
+			try {
+				// kill current running or pending process if exist
+				this.getEngine().terminate();
 
-            } catch (ClassNotFoundException e) {
-                MessageDialog.openError(parent, "Unable to load client Classd",
-                        e.getMessage() + " not found");
+			} catch (DisJException ignore) {
+			}
 
-            } catch (Exception g) {
-                // unexpected error
-                String msg = g + "";
-                MessageDialog.openError(parent,
-                        "Unexpected Load Client Class Error", msg);
-            }
+			try {
+				Class clientRandom = this.loadClientRandomClass(parent, loader,
+						className);
 
-        } else {
-            // user press cancel
-            return;
-        }
-    }
+				if (clientRandom == null)
+					return;
 
-    /*
-     * @param javaProject @return
-     */
-    private ClassLoader getClassLoader(IJavaProject javaProject) {
-        ClassLoader loader = null;
-        try {
-            System.out.println("Enter getClassLoader()");
-            IClasspathEntry[] entries = javaProject.getRawClasspath();
-            List urls = new ArrayList(entries.length);
-            for (int i = 0; i < entries.length; i++) {
-                IPath classpathEntryPath = entries[i].getPath();
-                File classpathEntryFile = null;
-                switch (entries[i].getEntryKind()) {
-                case IClasspathEntry.CPE_SOURCE:
-                    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-                    IPath out = root.getProject(classpathEntryPath.lastSegment()).getLocation();
-                    if (out != null)
-                        classpathEntryFile = out.toFile();                             
-                    else
-                        classpathEntryFile = root.getFolder(javaProject.getOutputLocation()).getLocation().toFile();
-                    
-                    try {
-                    	URI uri =  classpathEntryFile.toURI();
-                        urls.add(uri.toURL());
-                    } catch (MalformedURLException e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                case IClasspathEntry.CPE_CONTAINER:
-                    break;
+				// loas client's class into editor
+				editor.setClientRandomObject(clientRandom);
 
-                // FIXME Must handle 2 more cases
-                }
-            }
-            System.out.println("[ProcessActions].getClassLoade()" + urls);
+			} catch (ClassNotFoundException e) {
+				MessageDialog.openError(parent, "Unable to load client Classd",
+						e.getMessage() + " not found");
 
-            // set the output file location w.r.t 1st urser src code location
-            this.getEngine().setOutputLocation((URL) urls.get(0));
-            // create class loader
-            loader = new URLClassLoader((URL[]) urls.toArray(new URL[urls
-                    .size()]), ProcessActions.class.getClassLoader());
-        } catch (JavaModelException e1) {
-            ///e1.printStackTrace();
-        }
-        return loader;
-    }
+			} catch (Exception g) {
+				// unexpected error
+				String msg = g + "";
+				MessageDialog.openError(parent,
+						"Unexpected Load Client Class Error", msg);
+			}
 
-    /**
-     * @param parent
-     * @param className
-     * @return
-     * @throws ClassNotFoundException
-     */
-    private Class loadClientClass(Shell parent, ClassLoader loader,
-            String className) throws ClassNotFoundException {
-        Class client = loader.loadClass(className);
+		} else {
+			// user press cancel
+			return;
+		}
+	}
 
-        if (!Entity.class.isAssignableFrom(client)) {
-            MessageDialog.openError(parent, "Load Client Class Error",
-                    "Class must extends Entity");
-            client = null;
-        }
-        return client;
-    }
-    
-    private Class loadClientRandomClass(Shell parent, ClassLoader loader,
-            String className) throws ClassNotFoundException {
-        Class clientRandom = loader.loadClass(className);
+	/*
+	 * @param javaProject @return
+	 */
+	private ClassLoader getClassLoader(IJavaProject javaProject) {
+		ClassLoader loader = null;
+		try {
+			System.out.println("Enter getClassLoader()");
+			IClasspathEntry[] entries = javaProject.getRawClasspath();
+			List urls = new ArrayList(entries.length);
+			for (int i = 0; i < entries.length; i++) {
+				IPath classpathEntryPath = entries[i].getPath();
+				File classpathEntryFile = null;
+				switch (entries[i].getEntryKind()) {
+				case IClasspathEntry.CPE_SOURCE:
+					IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
+							.getRoot();
+					IPath out = root.getProject(
+							classpathEntryPath.lastSegment()).getLocation();
+					if (out != null)
+						classpathEntryFile = out.toFile();
+					else
+						classpathEntryFile = root.getFolder(
+								javaProject.getOutputLocation()).getLocation()
+								.toFile();
 
-        if (!IRandom.class.isAssignableFrom(clientRandom)) {
-            MessageDialog.openError(parent, "Load Random number generator Class Error",
-                    "Class must extends IRandom");
-            clientRandom = null;
-        }
-        return clientRandom;
-    }
+					try {
+						URI uri = classpathEntryFile.toURI();
+						urls.add(uri.toURL());
+					} catch (MalformedURLException e) {
+						e.printStackTrace();
+					}
+					break;
+				case IClasspathEntry.CPE_CONTAINER:
+					break;
 
-    private void executeStop() {
-        if(!this.validateAction())
-            return;
-        
-        System.out.println("--- executeStop");
-        try {
-            if (this.getEngine().isStarted())
-                this.getEngine().terminate();
-            
+				// FIXME Must handle 2 more cases
+				}
+			}
+			System.out.println("[ProcessActions].getClassLoade()" + urls);
 
-            if (this.getEngine().getOriginGraph() != null) {
-                // reset the states and data of a graph
-                GraphEditor editor = (GraphEditor) getWorkbenchPart();
-                editor.getGraphElement().resetGraphElement();
-            } else {
-                this.missUseActionMsg("Engine is not running");
-            }
+			// set the output file location w.r.t 1st urser src code location
+			this.getEngine().setOutputLocation((URL) urls.get(0));
+			// create class loader
+			loader = new URLClassLoader((URL[]) urls.toArray(new URL[urls
+					.size()]), ProcessActions.class.getClassLoader());
+		} catch (JavaModelException e1) {
+			// /e1.printStackTrace();
+		}
+		return loader;
+	}
 
-        } catch (DisJException e) {
-            //e.printStackTrace();
-            //System.err.println(e);
-        }
+	/**
+	 * @param parent
+	 * @param className
+	 * @return
+	 * @throws ClassNotFoundException
+	 */
+	private Class loadClientClass(Shell parent, ClassLoader loader,
+			String className) throws ClassNotFoundException {
+		Class client = loader.loadClass(className);
 
-    }
+		if (!Entity.class.isAssignableFrom(client)) {
+			MessageDialog.openError(parent, "Load Client Class Error",
+					"Class must extends Entity");
+			client = null;
+		}
+		return client;
+	}
 
-    private void executeSuspend() {
-        if(!this.validateAction())
-            return;
-        
-        System.out.println("--- executeSuspend");
-        try {
-//            if(!this.getEngine().isRunning())
-//                this.missUseActionMsg("Engine is not running");
-               
-            if (!this.getEngine().isSuspend())
-                this.getEngine().suspend();
-            else{
-                this.missUseActionMsg("Engine already suspended");
-            }
-        } catch (DisJException e) {
-            //e.printStackTrace();
-            //System.err.println(e);
-        }
-    }
+	private Class loadClientRandomClass(Shell parent, ClassLoader loader,
+			String className) throws ClassNotFoundException {
+		Class clientRandom = loader.loadClass(className);
 
-    private void executeStepNext() {
-        MessageDialog.openInformation(getWorkbenchPart().getSite().getShell(),
-                "Step Next", "This feature is not yet supported");
-    }
+		if (!IRandom.class.isAssignableFrom(clientRandom)) {
+			MessageDialog.openError(parent,
+					"Load Random number generator Class Error",
+					"Class must extends IRandom");
+			clientRandom = null;
+		}
+		return clientRandom;
+	}
 
-    private void executeSpeed() {
-        SpeedDialog dialog = new SpeedDialog(getWorkbenchPart().getSite()
-                .getShell(), this.getEngine().getSpeed());
-        int newSpeed = dialog.open();
-        this.getEngine().setSpeed(newSpeed);
-        System.out.println("--- executeSpeed with speed: " + newSpeed);
-    }
+	private void executeStop() {
+		GraphEditor editor = (GraphEditor) this.getWorkbenchPart();
+		Controller controller=editor.getController();
+		controller.executeStop();
+	}
+
+	private void executeSuspend() {
+		GraphEditor editor = (GraphEditor) this.getWorkbenchPart();
+		Controller controller=editor.getController();
+		controller.executeSuspend();
+	}
+
+	private void executeStepNext() {
+		// MessageDialog.openInformation(getWorkbenchPart().getSite().getShell(),
+		// "Step Next", "This feature is not yet supported");
+		// implemented by Russell Dec 2008
+		GraphEditor editor = (GraphEditor) this.getWorkbenchPart();
+		Controller controller=editor.getController();
+		controller.executeStepNext();
+	}
+
+	private void executeSpeed() {
+		SpeedDialog dialog = new SpeedDialog(getWorkbenchPart().getSite()
+				.getShell(), this.getEngine().getSpeed());
+		int newSpeed = dialog.open();
+		this.getEngine().setSpeed(newSpeed);
+		System.out.println("--- executeSpeed with speed: " + newSpeed);
+	}
+
+	public boolean validateAction(String commandType) {
+
+		GraphEditor editor = (GraphEditor) getWorkbenchPart();
+		Graph graph = editor.getGraphElement().getGraph();
+
+		if (commandType == IGraphEditorConstants.STOP_ID
+				|| commandType == IGraphEditorConstants.SUSPEND_ID) {
+			if (editor.getClientObject() == null
+					&& graph.getProtocol().equals("")) {
+				MessageDialog.openError(
+						getWorkbenchPart().getSite().getShell(),
+						"Algoithm has not been loaded",
+						"Try to load algorithm before execute this action");
+				return false;
+			}
+		}
+
+		if (commandType == IGraphEditorConstants.RESUME_ID) {
+			if (editor.getClientObject() == null
+					&& graph.getProtocol().equals("")) {
+				MessageDialog.openError(
+						getWorkbenchPart().getSite().getShell(),
+						"Algoithm has not been loaded",
+						"Try to load algorithm before execute this action");
+				return false;
+			} else {
+				if (!graph.getProtocol().equals("")) {
+					executeLoad(graph.getProtocol());
+				}
+			}
+		}
+		// defaule return is true;
+		return true;
+	}
 }

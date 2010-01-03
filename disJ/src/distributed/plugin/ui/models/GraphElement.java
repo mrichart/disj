@@ -11,6 +11,7 @@
 package distributed.plugin.ui.models;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,7 @@ public class GraphElement extends AdapterElement {
     public static final String PROPERTY_TOTAL_MSG_SENT = "G5 Total Message Sent";
     public static final String PROPERTY_GLOBAL_DELAY_TYPE = "G6 Global Delay Type";
     public static final String PROPERTY_GLOBAL_DELAY_SEED = "G7 Global Delay Seed";
+    public static final String PROPERTY_PROTOCOL = "G8 Protocol";
     
     // message delay time supported types
     public static final String SYNCHRONOUS = "Synchronous";
@@ -60,7 +62,7 @@ public class GraphElement extends AdapterElement {
     
     static final long serialVersionUID = IConstants.SERIALIZE_VERSION;
 
-    private static final int NUM_PROPERTIES = 7;
+    private static final int NUM_PROPERTIES = 8;
     
     static {
         descriptors = new IPropertyDescriptor[NUM_PROPERTIES];
@@ -82,6 +84,7 @@ public class GraphElement extends AdapterElement {
                 PROPERTY_GLOBAL_DELAY_SEED);
         ((PropertyDescriptor) descriptors[6])
                 .setValidator(NumberCellEditorValidator.instance());
+        descriptors[7] = new TextPropertyDescriptor(PROPERTY_PROTOCOL,PROPERTY_PROTOCOL);
     }
     
     transient private Shell shell;
@@ -178,8 +181,8 @@ public class GraphElement extends AdapterElement {
         }
     }
     
-    public void addStateColor(Short state, RGB color){
-        this.graph.addColor(state, color);
+    public void addStateColor(Hashtable ht){
+        this.graph.addColor(ht);
         try {
 			GraphFactory.addGraph(this.graph);
 		} catch (DisJException e) {
@@ -299,7 +302,11 @@ public class GraphElement extends AdapterElement {
 
         } else if (propName.equals(PROPERTY_GLOBAL_DELAY_SEED)) {
             return "" + this.graph.getGlobalDelaySeed();
-        } else {
+        } 
+        else if (propName.equals(PROPERTY_PROTOCOL)) {
+            return this.graph.getProtocol();
+        } 
+        else {
             return  propName;
         }
     }
@@ -316,6 +323,10 @@ public class GraphElement extends AdapterElement {
     public void setPropertyValue(Object id, Object value) {
         super.setPropertyValue(id, value);
         // nothing to set here
+        if(id.equals(PROPERTY_PROTOCOL)){
+        	graph.setProtocol((String)value);
+        }
+        
         if (id.equals(PROPERTY_GLOBAL_DELAY_TYPE)){
         	short global_type = mapGlobalDelayType( value );
         	graph.setGlobalDelayType(global_type);

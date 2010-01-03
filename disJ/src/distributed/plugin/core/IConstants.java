@@ -102,6 +102,8 @@ public interface IConstants {
     public static final String PROPERTY_CHANGE_SIZE = "size";
     public static final String PROPERTY_CHANGE_LOCATION = "location";
     public static final String PROPERTY_CHANGE_BENDPOINT = "bendpoint";
+    public static final String PROPERTY_CHANGE__LINK_INVISIBLE = "link_invisible";
+    public static final String PROPERTY_CHANGE_NAME = "name";
 	
 	
 	

@@ -18,6 +18,7 @@ import java.util.Map;
 import distributed.plugin.core.DisJException;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.runtime.Graph;
+import distributed.plugin.ui.editor.GraphEditor;
 
 /**
  * @author npiyasin
@@ -26,7 +27,7 @@ import distributed.plugin.runtime.Graph;
  */
 public class SimulatorEngine {
 
-    private URL outLocation;
+	private URL outLocation;
     
     private boolean started;
 
@@ -38,7 +39,10 @@ public class SimulatorEngine {
 
     private Thread holder;
 
-    public SimulatorEngine() {
+	private GraphEditor ge;
+
+    public SimulatorEngine(GraphEditor ge) {
+    	this.ge=ge;
         this.speed = IConstants.SPEED_DEFAULT_RATE;
         this.started = false;
         this.engine = new HashMap(1);
@@ -56,7 +60,7 @@ public class SimulatorEngine {
         try {
 
            this.origin = graph;
-            Runnable proc = new Processor(graph, client, clientRandom, this.getOutputLocation());
+            Runnable proc = new Processor(ge,graph, client, clientRandom, this.getOutputLocation());
             this.engine.put(origin.getId(), proc);
 
             // FIXME risk of non atomic for next 2 lines
@@ -110,6 +114,19 @@ public class SimulatorEngine {
         this.holder = null;
        
     }
+    
+    public void stepForward() throws DisJException {
+        
+        if (this.origin == null)
+            throw new DisJException(IConstants.ERROR_18);
+
+        Processor proc = (Processor) this.engine.get(this.origin.getId());
+        if (proc == null)
+            throw new DisJException(IConstants.ERROR_19);
+        proc.setPause(false);
+        proc.setStepForward(true);
+    }
+    
 
     public void suspend() throws DisJException {
         
@@ -143,6 +160,7 @@ public class SimulatorEngine {
             throw new DisJException(IConstants.ERROR_19);
 
         proc.setPause(false);
+        proc.setStepForward(false);
     }
 
     public boolean isRunning() throws DisJException {

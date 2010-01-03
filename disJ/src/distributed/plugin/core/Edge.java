@@ -15,6 +15,7 @@ import java.util.Random;
 
 import distributed.plugin.random.*;
 import distributed.plugin.runtime.GraphFactory;
+import distributed.plugin.ui.models.LinkElement;
 
 /**
  * @author Me
@@ -56,6 +57,8 @@ public class Edge implements Serializable {
 	private Node end;
 
 	private EdgeLog log;
+
+	private LinkElement linkElement;
 	
 	/**
 	 * Constructor, create an edge with default values
@@ -416,4 +419,21 @@ public class Edge implements Serializable {
     public void setProbOfFailure(int probOfFailure) {
         this.probOfFailure = probOfFailure;
     }
+
+	public void setLinkElement(LinkElement linkElement) {
+		this.linkElement=linkElement;		
+	}
+	
+	public LinkElement getLinkElement(){
+		return this.linkElement;
+	}
+
+	public int getTotalMsg() {
+		return totalMsg;
+	}
+
+	public void setTotalMsg(int totalMsg) {
+		this.totalMsg = totalMsg;
+	}
+	
 }

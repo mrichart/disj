@@ -15,25 +15,31 @@ import org.eclipse.gef.EditPartFactory;
 
 import distributed.plugin.ui.models.GraphElement;
 import distributed.plugin.ui.models.NodeElement;
+
 /**
  * @author daanish
- *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * 
+ *         TODO To change the template for this generated type comment go to
+ *         Window - Preferences - Java - Code Style - Code Templates
  */
-public class GraphEditPartFactory implements EditPartFactory{
+public class GraphEditPartFactory implements EditPartFactory {
 
 	public EditPart createEditPart(EditPart context, Object model) {
-	    EditPart part = null;		
-	    if(model instanceof GraphElement)
-	        part = new GraphPart();
-		else if (model instanceof NodeElement)
-		    part = new NodePart();
+		EditPart part = null;
+		NodeElement nodeElement = null;
+		String NodeId;
+		if (model instanceof GraphElement)
+			part = new GraphPart();
+		else if (model instanceof NodeElement){
+			nodeElement = (NodeElement) model;
 
-		if(part != null)
-		    part.setModel(model); 
-		
+		 NodeId=nodeElement.getName();
+		 part = new NodePart(NodeId);
+//		part = new NodePart();
+		}
+		if (part != null)
+			part.setModel(model);
+
 		return part;
 	}
 }
-

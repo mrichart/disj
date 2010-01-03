@@ -50,7 +50,7 @@ public class GenericGraphDialog extends Dialog {
         final Shell shell = new Shell(getParent(), SWT.DIALOG_TRIM
                 | SWT.APPLICATION_MODAL);
         shell.setText(getText());
-        shell.setSize(300, 150);
+        shell.setSize(300,170);
 
         // number of node
         Label numNodeQs = new Label(shell, SWT.NONE);

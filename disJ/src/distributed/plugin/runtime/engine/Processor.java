@@ -35,6 +35,7 @@ import distributed.plugin.runtime.GraphFactory;
 import distributed.plugin.runtime.GraphLoader;
 import distributed.plugin.runtime.IMessage;
 import distributed.plugin.runtime.IProcesses;
+import distributed.plugin.ui.editor.GraphEditor;
 import distributed.plugin.ui.models.LinkElement;
 import distributed.plugin.random.IRandom;
 
@@ -45,593 +46,655 @@ import distributed.plugin.random.IRandom;
 public class Processor implements IProcesses {
 
 	private int callingChain;
-	
-    private boolean stop;
 
-    private boolean pause;
+	private boolean stop;
 
-    private int speed;
+	private boolean pause;
 
-    private String procName;
+	private int speed;
 
-    private PrintWriter nodeFile;
+	private String procName;
 
-    private PrintWriter edgeFile;
+	private PrintWriter nodeFile;
 
-    private Class client;
-    
-    private Class clientRandom;
+	private PrintWriter edgeFile;
 
-    private EventQueue queue;
+	private PrintWriter ConsoleOutputFile;
 
-    private Graph graph;
+	private Class client;
 
-    private TimeGenerator timeGen;
+	private Class clientRandom;
 
-    private Map stateFields;
+	private EventQueue queue;
 
-    // private SystemLog sysLog;
+	private Graph graph;
 
-    Processor(Graph graph, Class client, Class clientRandom, URL out) throws IOException {
-    	this.callingChain = 0;
-        this.speed = IConstants.SPEED_DEFAULT_RATE;
-        this.stop = false;
-        this.pause = false;
+	private TimeGenerator timeGen;
 
-        if (graph == null)
-            throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
+	private Map stateFields;
 
-        if (client == null)
-            throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
+	private boolean stepForward;
 
-        this.graph = graph;
-        this.procName = graph.getId();
-        this.client = client;
-        this.clientRandom = clientRandom;
-        this.queue = new EventQueue();
-        this.timeGen = TimeGenerator.getTimeGenerator();
-        this.timeGen.addGraph(graph.getId() + "");
-        this.stateFields = new HashMap();
+	private PrintWriter RecFile;
 
-        this.initClientStateVariables();
-        if(this.clientRandom != null){
-        	this.initClientRandomStateVariables();
-        }
-        this.initLogFile(out);
-    }
+	private GraphEditor ge;
 
-    private void initClientStateVariables() {
+	// private SystemLog sysLog;
 
-        try {
-            Field[] states = this.client.getFields();
-            Object obj = this.client.newInstance();
-          //  IRandom ran = this.clientRandom.newInstace();
-            for (int i = 0; i < states.length; i++) {
-                int mod = states[i].getModifiers();
-                if (Modifier.isPublic(mod) && Modifier.isFinal(mod)
-                        && states[i].getType().equals(int.class)) {
-                    String name = states[i].getName();
-                    String tmpName = name.toLowerCase();
-                    if ((tmpName.startsWith("state") || tmpName
-                            .startsWith("_state"))) {
-                        Object value = states[i].get(obj);
-                        this.stateFields.put(value, name);
-                    }
-                }
-            }
-        } catch (SecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+	Processor(GraphEditor ge, Graph graph, Class client, Class clientRandom,
+			URL out) throws IOException {
+		this.ge = ge;
+		this.callingChain = 0;
+		this.speed = IConstants.SPEED_DEFAULT_RATE;
+		this.stop = false;
+		this.pause = false;
 
-    }
-    
-    private void initClientRandomStateVariables() {
+		if (graph == null)
+			throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
 
-        try {
-            Field[] states = this.clientRandom.getFields();
-            IRandom ran = (IRandom)this.clientRandom.newInstance();
-            this.graph.setClientRandom(ran);
-           
-    		GraphFactory.addGraph(this.graph);
-    		
-    	} catch (DisJException e) {
-    		System.err.println("Error add graph into map "+ e);
-        } catch (SecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
+		if (client == null)
+			throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
 
-    /*
-     * Initialize the log's files
-     */
-    private void initLogFile(URL url) throws IOException {
-        File dir = new File(url.getPath());
-        StringTokenizer tok = new StringTokenizer(this.graph.getId(), ".");
-        String name = tok.nextToken();
-        File n = new File(dir, name + "_Node" + ".log");
-        File e = new File(dir, name + "_Edge" + ".log");
-        this.nodeFile = new PrintWriter(new FileWriter(n));
-        this.edgeFile = new PrintWriter(new FileWriter(e));
-    }
+		this.graph = graph;
+		this.procName = graph.getId();
+		this.client = client;
+		this.clientRandom = clientRandom;
+		this.queue = new EventQueue();
+		this.timeGen = TimeGenerator.getTimeGenerator();
+		this.timeGen.addGraph(graph.getId() + "");
+		this.stateFields = new HashMap();
 
-    /**
+		this.initClientStateVariables();
+		if (this.clientRandom != null) {
+			this.initClientRandomStateVariables();
+		}
+		this.initLogFile(out);
+	}
+
+	private void initClientStateVariables() {
+
+		try {
+			Field[] states = this.client.getFields();
+			Object obj = this.client.newInstance();
+			// IRandom ran = this.clientRandom.newInstace();
+			for (int i = 0; i < states.length; i++) {
+				int mod = states[i].getModifiers();
+				if (Modifier.isPublic(mod) && Modifier.isFinal(mod)
+						&& states[i].getType().equals(int.class)) {
+					String name = states[i].getName();
+					String tmpName = name.toLowerCase();
+					if ((tmpName.startsWith("state") || tmpName
+							.startsWith("_state"))) {
+						Object value = states[i].get(obj);
+						this.stateFields.put(value, name);
+					}
+				}
+			}
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	private void initClientRandomStateVariables() {
+
+		try {
+			Field[] states = this.clientRandom.getFields();
+			IRandom ran = (IRandom) this.clientRandom.newInstance();
+			this.graph.setClientRandom(ran);
+
+			GraphFactory.addGraph(this.graph);
+
+		} catch (DisJException e) {
+			System.err.println("Error add graph into map " + e);
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/*
+	 * Initialize the log's files
+	 */
+	private void initLogFile(URL url) throws IOException {
+		File dir = new File(url.getPath());
+		StringTokenizer tok = new StringTokenizer(this.graph.getId(), ".");
+		String name = tok.nextToken();
+		File n = new File(dir, name + "_Node" + ".log");
+		File e = new File(dir, name + "_Edge" + ".log");
+		File c = new File(dir, "ConsoleOutput" + ".log");
+		File r = new File(dir, name + ".rec");
+
+		if (ge.getRecFileNameForSaving() != null) {
+			r = new File(ge.getRecFileNameForSaving());
+		}
+
+		this.nodeFile = new PrintWriter(new FileWriter(n));
+		this.edgeFile = new PrintWriter(new FileWriter(e));
+		this.ConsoleOutputFile = new PrintWriter(new FileWriter(c));
+		this.RecFile = new PrintWriter(new FileWriter(r));
+	}
+
+	public void setRecFilename(String path) {
+		File r = new File(path);
+		try {
+			this.RecFile = new PrintWriter(new FileWriter(r));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
      * 
      */
-    public void processMessage(String sender, List receivers, IMessage message)
-            throws DisJException {
+	public void processMessage(String sender, List receivers, IMessage message)
+			throws DisJException {
 
-        Random ran = new Random(System.currentTimeMillis());
-        List newEvents = new ArrayList();
-        Node sNode = graph.getNode(sender);
-        // sending message
-        for (int i = 0; i < receivers.size(); i++) {
-            Edge recv = sNode.getEdge((String) receivers.get(i));
-            this.updateEdgeLog(recv, message.getLabel(), sender);
+		Random ran = new Random(System.currentTimeMillis());
+		List newEvents = new ArrayList();
+		Node sNode = graph.getNode(sender);
+		// sending message
+		for (int i = 0; i < receivers.size(); i++) {
+			Edge recv = sNode.getEdge((String) receivers.get(i));
+			this.updateEdgeLog(recv, message.getLabel(), sender);
 
-            // validate the probability of failure
-            if (!recv.isReliable()) {
-            	int prob = ran.nextInt(100) + 1;
+			// validate the probability of failure
+			if (!recv.isReliable()) {
+				int prob = ran.nextInt(100) + 1;
 				if (prob <= recv.getProbOfFailure()) {
 					this.logFailMsg(recv, message.getLabel(), sender);
 					continue;
 				}
-            }
-            
-            
-            
-            int execTime = recv.getDelayTime(sNode, this.timeGen
-                    .getCurrentTime(graph.getId() + ""));
-            int eventId = this.timeGen.getLastestId(graph.getId() + "");
-            try {
-                IMessage msg = new Message(message.getLabel(), GraphLoader
-                        .deepClone(message.getContent()));
-                newEvents.add(new Event(sender, IConstants.RECEIVE_MSG_TYPE,
-                        execTime, eventId, recv.getEdgeId(), msg));
-            } catch (IOException ie) {
-                throw new DisJException(ie);
-            }
-        }
-        // add new events into the queue
-        this.queue.pushEvents(newEvents);
-        // update time's lower bound
-        this.timeGen.setCurrentTime(graph.getId() + "", this.queue.topEvent()
-                .getExecTime());
-        // update log
-        this.updateSentLog(sNode, receivers, message.getLabel());
-    }
+			}
 
-    public void internalNotify(String owner, IMessage message)
-            throws DisJException {
-        if (message.getLabel().equals(IConstants.SET_ALARM_CLOCK)) {
-            int eventId = this.timeGen.getLastestId(graph.getId() + "");
-            int delay = ((Integer) message.getContent()).intValue();
-            int execTime = this.timeGen.getCurrentTime(graph.getId() + "") + delay;
+			int execTime = recv.getDelayTime(sNode, this.timeGen
+					.getCurrentTime(graph.getId() + ""));
+			int eventId = this.timeGen.getLastestId(graph.getId() + "");
+			// try {
+			// IMessage msg = new Message(message.getLabel(), GraphLoader
+			// .deepClone(message.getContent()));
+			// newEvents.add(new Event(sender, IConstants.RECEIVE_MSG_TYPE,
+			// execTime, eventId, recv.getEdgeId(), msg));
+			// } catch (IOException ie) {
+			// throw new DisJException(ie);
+			// }
+			newEvents.add(new Event(sender, IConstants.RECEIVE_MSG_TYPE,
+					execTime, eventId, recv.getEdgeId(), message));
+		}
+		// add new events into the queue
+		this.queue.pushEvents(newEvents);
+		// update time's lower bound
+		this.timeGen.setCurrentTime(graph.getId() + "", this.queue.topEvent()
+				.getExecTime());
+		// update log
+		this.updateSentLog(sNode, receivers, message.getLabel());
+	}
 
-            // add an event into a queue
-            Event e = new Event(owner, IConstants.ALARM_RING_TYPE, execTime,
-                    eventId, owner, message);
-            this.queue.pushEvent(e);
+	public void internalNotify(String owner, IMessage message)
+			throws DisJException {
+		if (message.getLabel().equals(IConstants.SET_ALARM_CLOCK)) {
+			int eventId = this.timeGen.getLastestId(graph.getId() + "");
+			int delay = ((Integer) message.getContent()).intValue();
+			int execTime = this.timeGen.getCurrentTime(graph.getId() + "")
+					+ delay;
 
-            // update time's lower bound, which may be the alarm ringing is
-            // a smallest
-            this.timeGen.setCurrentTime(graph.getId() + "", this.queue
-                    .topEvent().getExecTime());
-            
-        } else if( message.getLabel().equals(IConstants.SET_BLOCK_MSG)){
-            // set blocked/unblocked message
-            Object[] msg = (Object[]) message.getContent();
-            String port = (String) msg[0];
-            boolean block = ((Boolean) msg[1]).booleanValue();
-            Node node = this.graph.getNode(owner);
-            if (!block) {
-            	// flush blocked messages after unblock port
-                List events = node.getBlockedEvents(port);
-                if (events != null) {
-                    // put them in a queue with the current execution time
-                    int time = timeGen.getCurrentTime(graph.getId() + "");
-                    for (int i = 0; i < events.size(); i++) {
-                        Event e = (Event) events.get(i);
-                        e.setExecTime(time);
-                    }
-                    this.queue.pushEvents(events);
-                    node.clearBlockedPort(port);
-                }
-            }
-            node.setPortBlock(port, block);
-        }
-    }
+			// add an event into a queue
+			Event e = new Event(owner, IConstants.ALARM_RING_TYPE, execTime,
+					eventId, owner, message);
+			this.queue.pushEvent(e);
 
-    /*
-     * Update node's log after sent message
-     */
-    private void updateSentLog(Node sender, List recvPorts, String msgLabel) {
-        StringBuffer buff = new StringBuffer();
-        buff.append(msgLabel);
-        buff.append(IConstants.MAIN_DELIMETER);
-        for (int i = 0; i < recvPorts.size(); i++) {
-            if (i > 0)
-                buff.append(IConstants.SUB_DELIMETER);
-            buff.append(recvPorts.get(i));
-            sender.incMsgSend();
-        }
-        sender.logMsgSent(buff.toString());
-        this.nodeFile.println(IConstants.SEND_TAG + sender.getNodeId()
-                + IConstants.DELIMETER + buff.toString());
-    }
+			// update time's lower bound, which may be the alarm ringing is
+			// a smallest
+			this.timeGen.setCurrentTime(graph.getId() + "", this.queue
+					.topEvent().getExecTime());
 
-    /*
-     * Update node's log after received message
-     */
-    private void updateRecvLog(Node receiver, String port, String msgLabel) {
-        receiver.incMsgRecv();
-        receiver.logMsgRecv(msgLabel + IConstants.MAIN_DELIMETER + port);
-        this.nodeFile.println(IConstants.RECV_TAG + receiver.getNodeId()
-                + IConstants.DELIMETER + msgLabel + IConstants.MAIN_DELIMETER
-                + port);
-    }
+		} else if (message.getLabel().equals(IConstants.SET_BLOCK_MSG)) {
+			// set blocked/unblocked message
+			Object[] msg = (Object[]) message.getContent();
+			String port = (String) msg[0];
+			boolean block = ((Boolean) msg[1]).booleanValue();
+			Node node = this.graph.getNode(owner);
+			if (!block) {
+				// flush blocked messages after unblock port
+				List events = node.getBlockedEvents(port);
+				if (events != null) {
+					// put them in a queue with the current execution time
+					int time = timeGen.getCurrentTime(graph.getId() + "");
+					for (int i = 0; i < events.size(); i++) {
+						Event e = (Event) events.get(i);
+						e.setExecTime(time);
+					}
+					this.queue.pushEvents(events);
+					node.clearBlockedPort(port);
+				}
+			}
+			node.setPortBlock(port, block);
+		}
+	}
 
-    /*
-     * Update edge's log
-     */
-    private void updateEdgeLog(Edge edge, String msgLabel, String sender) {
-        edge.incNumMsg();
-        edge.logMsgPassed(msgLabel, sender);
-        this.edgeFile.println(IConstants.EDGE_TAG + edge.getEdgeId()
-                + IConstants.DELIMETER + msgLabel + IConstants.MAIN_DELIMETER
-                + sender);
-    }
+	/*
+	 * Update node's log after sent message
+	 */
+	private void updateSentLog(Node sender, List recvPorts, String msgLabel) {
+		StringBuffer buff = new StringBuffer();
+		buff.append(msgLabel);
+		buff.append(IConstants.MAIN_DELIMETER);
+		for (int i = 0; i < recvPorts.size(); i++) {
+			if (i > 0)
+				buff.append(IConstants.SUB_DELIMETER);
+			buff.append(recvPorts.get(i));
+			sender.incMsgSend();
+		}
+		sender.logMsgSent(buff.toString());
+		this.nodeFile.println(IConstants.SEND_TAG + sender.getNodeId()
+				+ IConstants.DELIMETER + buff.toString());
+	}
 
-    /*
-     * Update edge's log
-     */
-    private void logFailMsg(Edge edge, String msgLabel, String sender) {
-        edge.incNumMsg();
-        edge.logMsgPassed(msgLabel, sender);
-        this.edgeFile.println("Lost message @ " + IConstants.EDGE_TAG + edge.getEdgeId()
-                + IConstants.DELIMETER + msgLabel + IConstants.MAIN_DELIMETER
-                + sender);
-    }
-    /**
-     * TODO Flush the logs and clean up memories. Also generate reports
-     * 
-     * @throws DisJException
-     */
-    public void cleanUp() {
-        
-        System.out.println("*****Statistics report of the simulation in text format*****");
-        Map nodes = graph.getNodes();
-        Iterator it = nodes.keySet().iterator();
-        while (it.hasNext()) {
-            System.out.println(this.graph.getNode((String) it.next()));
-        }
+	/*
+	 * Update node's log after received message
+	 */
+	private void updateRecvLog(Node receiver, String port, String msgLabel) {
+		receiver.incMsgRecv();
+		receiver.logMsgRecv(msgLabel + IConstants.MAIN_DELIMETER + port);
+		this.nodeFile.println(IConstants.RECV_TAG + receiver.getNodeId()
+				+ IConstants.DELIMETER + msgLabel + IConstants.MAIN_DELIMETER
+				+ port);
+	}
 
-        Map edges = graph.getEdges();
-        it = edges.keySet().iterator();
-        while (it.hasNext()) {
-            System.out.println(this.graph.getEdge((String) it.next()));
-        }
-        // clean up the memory
-        this.graph = null;
+	/*
+	 * Update edge's log
+	 */
+	private void updateEdgeLog(Edge edge, String msgLabel, String sender) {
+		edge.incNumMsg();
+		edge.logMsgPassed(msgLabel, sender);
+		this.edgeFile.println(IConstants.EDGE_TAG + edge.getEdgeId()
+				+ IConstants.DELIMETER + msgLabel + IConstants.MAIN_DELIMETER
+				+ sender);
+	}
 
-        this.nodeFile.close();
-        this.edgeFile.close();
+	/*
+	 * Update edge's log
+	 */
+	private void logFailMsg(Edge edge, String msgLabel, String sender) {
+		edge.incNumMsg();
+		edge.logMsgPassed(msgLabel, sender);
+		this.edgeFile.println("Lost message @ " + IConstants.EDGE_TAG
+				+ edge.getEdgeId() + IConstants.DELIMETER + msgLabel
+				+ IConstants.MAIN_DELIMETER + sender);
+	}
 
-        // reset the flag the process is terminated
-        this.stop = true;
-        this.pause = false;
+	/**
+	 * TODO Flush the logs and clean up memories. Also generate reports
+	 * 
+	 * @throws DisJException
+	 */
+	public void cleanUp() {
 
-    }
+		String title = "*****Statistics report of the simulation in text format*****";
+		System.out.println(title);
+		appendToRecFile(title);
 
-    /**
-     * Start running a process w.r.t a given graph
-     * 
-     * @see java.lang.Runnable#run()
-     */
-    public void run() {
-        try {
-            // load and init any neccessary data
-            this.loadInitNodes();
+		Map nodes = graph.getNodes();
+		Iterator it = nodes.keySet().iterator();
+		while (it.hasNext()) {
+			String nodeSummary = this.graph.getNode((String) it.next())
+					.toString();
+			System.out.println(nodeSummary);
+			appendToRecFile(nodeSummary);
+		}
 
-            // start execute events
-            this.executeEvents();
+		Map edges = graph.getEdges();
+		it = edges.keySet().iterator();
+		while (it.hasNext()) {
+			String edgeSummary = this.graph.getEdge((String) it.next())
+					.toString();
+			System.out.println(edgeSummary);
+			appendToRecFile(edgeSummary);
+		}
+		// clean up the memory
+		this.graph = null;
 
-            System.out.println("\n*****Simulation for " + this.procName
-                    + " is successfully over.*****");
+		this.nodeFile.close();
+		this.edgeFile.close();
+		this.ConsoleOutputFile.close();
+		this.RecFile.close();
 
-        } catch (DisJException e) {
-            // system log here
-            e.printStackTrace();
-            System.err.println(e);
+		// reset the flag the process is terminated
+		this.stop = true;
+		this.pause = false;
 
-        } catch (Exception e) {
-            e.printStackTrace();
+	}
 
-        } finally {
-            this.cleanUp();
-            System.out.println("\n*****The simulation of " + this.procName
-                    + " is terminated.*****");
-        }
-    }
+	/**
+	 * Start running a process w.r.t a given graph
+	 * 
+	 * @see java.lang.Runnable#run()
+	 */
+	public void run() {
+		try {
+			// load and init any neccessary data
+			this.loadInitNodes();
 
-    /*
-     * Load client object into init nodes and create init event(s)
-     */
-    private void loadInitNodes() throws DisJException {
+			// start execute events
+			this.executeEvents();
 
-        List initNodes = GraphLoader.getInitNodes(graph);
-        try {
-            for (int i = 0; i < initNodes.size(); i++) {
-                Node init = (Node) initNodes.get(i);
-                Entity clientObj = GraphLoader.createEntityObject(client);
-                clientObj.initEntity(this, init, this.stateFields);
-                init.assignEntity(clientObj);
-            }
+			System.out.println("\n*****Simulation for " + this.procName
+					+ " is successfully over.*****");
 
-            Random r = new Random(System.currentTimeMillis());
-            List events = new ArrayList();
-            // create a set of init events
-            for (int i = 0; i < initNodes.size(); i++) {
-                Node init = (Node) initNodes.get(i);
-                int eventId = timeGen.getLastestId(graph.getId() + "");
-                int execTime = 0;
-                if (!init.isStarter())
-                    execTime = r.nextInt(IConstants.MAX_RANDOM_RANGE);
+		} catch (DisJException e) {
+			// system log here
+			e.printStackTrace();
+			System.err.println(e);
 
-                // add an event into a queue
-                IMessage msg = new Message("Initialized", new Integer(execTime));
-                Event e = new Event(init.getNodeId(), IConstants.INITIATE_TYPE,
-                        execTime, eventId, init.getNodeId(), msg);
+		} catch (Exception e) {
+			e.printStackTrace();
 
-                events.add(e);
-            }
+		} finally {
+			this.cleanUp();
+			System.out.println("\n*****The simulation of " + this.procName
+					+ " is terminated.*****");
+		}
+	}
 
-            // add to the queue
-            this.queue.pushEvents(events);
+	/*
+	 * Load client object into init nodes and create init event(s)
+	 */
+	private void loadInitNodes() throws DisJException {
 
-            // update time's lower bound
-            this.timeGen.setCurrentTime(graph.getId() + "", this.queue
-                    .topEvent().getExecTime());
+		List initNodes = GraphLoader.getInitNodes(graph);
+		try {
+			for (int i = 0; i < initNodes.size(); i++) {
+				Node init = (Node) initNodes.get(i);
+				Entity clientObj = GraphLoader.createEntityObject(client);
+				clientObj.initEntity(this, init, this.stateFields);
+				init.assignEntity(clientObj);
+			}
 
-        } catch (Exception e) {
-            throw new DisJException(IConstants.ERROR_8, e.toString());
-        }
-    }
+			Random r = new Random(System.currentTimeMillis());
+			List events = new ArrayList();
+			// create a set of init events
+			for (int i = 0; i < initNodes.size(); i++) {
+				Node init = (Node) initNodes.get(i);
+				int eventId = timeGen.getLastestId(graph.getId() + "");
+				int execTime = 0;
+				if (!init.isStarter())
+					execTime = r.nextInt(IConstants.MAX_RANDOM_RANGE);
 
-    /*
-     * Start executing event in the queue
-     * 
-     */
-    private void executeEvents() throws DisJException {
+				// add an event into a queue
+				IMessage msg = new Message("Initialized", new Integer(execTime));
+				Event e = new Event(init.getNodeId(), IConstants.INITIATE_TYPE,
+						execTime, eventId, init.getNodeId(), msg);
 
-        while (!this.queue.isEmpty()) {
-            if (this.stop)
-                break;
+				events.add(e);
+			}
 
-            // To slow down the simulation speed
-            try {
-                Thread.sleep(this.speed);
-            } catch (InterruptedException ignore) {
-                System.out.println("slow down process with speed: "
-                        + this.speed + " =>" + ignore);
-            }
+			// add to the queue
+			this.queue.pushEvents(events);
 
-            // suspend the process and/or hit breakpoint
-            if (!this.pause) {
-                Event e = (Event) this.queue.topEvent();
-                Node thisNode = this.graph.getNode(e.getOwner());
+			// update time's lower bound
+			this.timeGen.setCurrentTime(graph.getId() + "", this.queue
+					.topEvent().getExecTime());
 
-                if (thisNode.getBreakpoint() == true) {
-                    this.setPause(true);
-                    while (this.pause) {
-                        if (this.stop)
-                            break;
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException ignore) {
-                            System.err
-                                    .println("@[Processor].executeEvent() breakpoint=true: "
-                                            + ignore);
-                        }
-                    }
-                }
+		} catch (Exception e) {
+			throw new DisJException(IConstants.ERROR_8, e.toString());
+		}
+	}
 
-                if (this.stop)
-                    break;
+	/*
+	 * Start executing event in the queue
+	 */
+	private void executeEvents() throws DisJException {
 
-                if (e.getEventType() == IConstants.RECEIVE_MSG_TYPE) {
-                    this.invokeReceive(this.queue.popEvents());
+		while (!this.queue.isEmpty()) {
+			if (this.stop)
+				break;
 
-                    // tracking a length of message calling chain
-                    this.callingChain++;
-                    
-                } else if (e.getEventType() == IConstants.ALARM_RING_TYPE) {
-                    this.invokeAlarmRing(this.queue.popEvents());
-                    
-                } else {
-                    this.invokeInit(this.queue.popEvents());
-                }
-                
-                // FIXME print out the message to console that related to this
-                // entity then clean it up.
-                
-                
-            } else {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ignore) {
-                    System.err.println("@Processor.executeEvent() pause=true: "
-                            + ignore);
-                }
-            }
-           
-        }
-    }
+			// To slow down the simulation speed
+			try {
+				Thread.sleep(this.speed);
+			} catch (InterruptedException ignore) {
+				System.out.println("slow down process with speed: "
+						+ this.speed + " =>" + ignore);
+			}
 
-    /*
-     * Invoke client's init()
-     */
-    private void invokeInit(List events) throws DisJException {
-        for (int i = 0; i < events.size(); i++) {
-            Event e = (Event) events.get(i);
-            Node node = this.graph.getNode(e.getOwner());
-            
-            // Will NOT execute a Fail node
-            if(node.isStarter()){          	
-	            Entity entity = this.loadEntity(node);
-	            node.setInitExec(true);
-	            entity.init();
-	
-	            // catching up the holding events
-	            // this can happen only to recvMsg
-	            // since setAlarm will not be able to
-	            // occured until initNode is initailized
-	            this.invokeReceive(node.getHoldEvents());
-            }
-        }
-    }
+			// suspend the process and/or hit breakpoint
+			if (!this.pause) {
+				Event e = (Event) this.queue.topEvent();
+				Node thisNode = this.graph.getNode(e.getOwner());
 
-    /*
-     * Invoke client's receive() w.r.t the target node
-     */
-    private void invokeReceive(List events) throws DisJException {
-        List invokeList = new ArrayList();
-        for (int i = 0; i < events.size(); i++) {
-            Event e = (Event) events.get(i);
+				if (thisNode.getBreakpoint() == true) {
+					this.setPause(true);
+					while (this.pause) {
+						if (this.stop)
+							break;
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException ignore) {
+							System.err
+									.println("@[Processor].executeEvent() breakpoint=true: "
+											+ ignore);
+						}
+					}
+				}
 
-            // retrieve a receiver node for this event
-            Edge link = this.graph.getEdge(e.getEdgeName());
-            Node recv = link.getOthereEnd(this.graph.getNode(e.getOwner()));
-            String port = recv.getPortLabel(link);
+				if (this.stop)
+					break;
 
-            // Will NOT execute a Fail node
-            if(!recv.isStarter())
-            	continue;
-            
-            // check if the port is blocked
-            if (recv.isBlocked(port) == true) {
-                // add event to a block queue
-                recv.addEventToBlockedList(port, e);
-                // this.updateBlockedLog(recv, port, e.getMessage().getLabel());
+				if (e.getEventType() == IConstants.RECEIVE_MSG_TYPE) {
+					this.invokeReceive(this.queue.popEvents());
 
-                // not allow to execute receive msg if it is init node and
-                // it has not yet execute init()
-            } else if ((recv.isInitializer() == false)
-                    || (recv.isInitExec() == true)) {
-                // update log
-                this.updateRecvLog(recv, port, e.getMessage().getLabel());
+					// tracking a length of message calling chain
+					this.callingChain++;
 
-                Entity entity = this.loadEntity(recv);
-                String recvPort = GraphLoader.getEdgeLabel(recv, link);
-                Object[] params = new Object[] { e, entity, recvPort };
-                invokeList.add(params);
+				} else if (e.getEventType() == IConstants.ALARM_RING_TYPE) {
+					this.invokeAlarmRing(this.queue.popEvents());
 
-            } else {
-            	throw new DisJException(IConstants.ERROR_23, "@Processor.invokeReceiver() ");             
-            }
-        }
+				} else {
+					this.invokeInit(this.queue.popEvents());
+				}
 
-        // invoke receive() on a target node
-        for (int i = 0; i < invokeList.size(); i++) {
-            Object[] params = (Object[]) invokeList.get(i);
-            Event e = (Event) params[0];
-            Entity entity = (Entity) params[1];
-            String portLabel = (String) params[2];
-            entity.getNodeOwner().setLatestRecvPort(portLabel);
-            entity.receive(portLabel, e.getMessage());
-        }
-    }
+				if (this.stepForward) {
+					this.pause = true;
+				}
 
-    /*
-     * Internal clock ring, invoke client's alarmRing()
-     */
-    private void invokeAlarmRing(List events) throws DisJException {
-        for (int i = 0; i < events.size(); i++) {
-            Event e = (Event) events.get(i);
-            Node node = this.graph.getNode(e.getOwner());
-            
-            // Will NOT execute a Fail node
-            if(node.isStarter()){           
-	            Entity entity = this.loadEntity(node);
-	            entity.alarmRing();
-            }
-        }
-    }
+				// FIXME print out the message to console that related to this
+				// entity then clean it up.
 
-    /*
-     * Lazy initialize entity
-     */
-    private Entity loadEntity(Node node) throws DisJException {
-        // get client from receiver node
-        Entity clientObj = node.getEntity();
-        if (clientObj == null) {
-            try {
-                // lazy init
-                clientObj = GraphLoader.createEntityObject(this.client);
-                clientObj.initEntity(this, node, this.stateFields);
-                node.assignEntity(clientObj);
-            } catch (Exception ex) {
-                throw new DisJException(IConstants.ERROR_8, ex.toString());
-            }
-        }
-        return node.getEntity();
-    }
+			} else {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException ignore) {
+					System.err.println("@Processor.executeEvent() pause=true: "
+							+ ignore);
+				}
+			}
 
-    /**
-     * @return Returns the graph of this processor
-     */
-    public Graph getGraph() {
-        return this.graph;
-    }
+		}
+	}
 
-    public boolean isStop() {
-        return stop;
-    }
+	/*
+	 * Invoke client's init()
+	 */
+	private void invokeInit(List events) throws DisJException {
+		for (int i = 0; i < events.size(); i++) {
+			Event e = (Event) events.get(i);
+			Node node = this.graph.getNode(e.getOwner());
 
-    public void setStop(boolean stop) {
-        this.stop = stop;
-    }
+			// Will NOT execute a Fail node
+			if (node.isStarter()) {
+				Entity entity = this.loadEntity(node);
+				node.setInitExec(true);
+				entity.init();
 
-    public boolean isPause() {
-        return pause;
-    }
+				// catching up the holding events
+				// this can happen only to recvMsg
+				// since setAlarm will not be able to
+				// occured until initNode is initailized
+				this.invokeReceive(node.getHoldEvents());
+			}
+		}
+	}
 
-    public void setPause(boolean pause) {
-        this.pause = pause;
-    }
+	/*
+	 * Invoke client's receive() w.r.t the target node
+	 */
+	private void invokeReceive(List events) throws DisJException {
+		List invokeList = new ArrayList();
+		for (int i = 0; i < events.size(); i++) {
+			Event e = (Event) events.get(i);
 
-    public int getSpeed() {
-        return this.speed;
-    }
+			// retrieve a receiver node for this event
+			Edge link = this.graph.getEdge(e.getEdgeName());
+			Node recv = link.getOthereEnd(this.graph.getNode(e.getOwner()));
+			String port = recv.getPortLabel(link);
 
-    public void setSpeed(int speed) {
-        this.speed = speed;
-    }
-    
-    public int getCurrentTime(){
-    	return timeGen.getCurrentTime(graph.getId() + "");
-    }
-    
-    public int getCallingChain(){
-    	return this.callingChain;
-    }
+			// Will NOT execute a Fail node
+			if (!recv.isStarter())
+				continue;
+
+			// check if the port is blocked
+			if (recv.isBlocked(port) == true) {
+				// add event to a block queue
+				recv.addEventToBlockedList(port, e);
+				// this.updateBlockedLog(recv, port, e.getMessage().getLabel());
+
+				// not allow to execute receive msg if it is init node and
+				// it has not yet execute init()
+			} else if ((recv.isInitializer() == false)
+					|| (recv.isInitExec() == true)) {
+				// update log
+				this.updateRecvLog(recv, port, e.getMessage().getLabel());
+
+				Entity entity = this.loadEntity(recv);
+				String recvPort = GraphLoader.getEdgeLabel(recv, link);
+				Object[] params = new Object[] { e, entity, recvPort };
+				invokeList.add(params);
+
+			} else {
+				throw new DisJException(IConstants.ERROR_23,
+						"@Processor.invokeReceiver() ");
+			}
+		}
+
+		// invoke receive() on a target node
+		for (int i = 0; i < invokeList.size(); i++) {
+			Object[] params = (Object[]) invokeList.get(i);
+			Event e = (Event) params[0];
+			Entity entity = (Entity) params[1];
+			String portLabel = (String) params[2];
+			entity.getNodeOwner().setLatestRecvPort(portLabel);
+			entity.receive(portLabel, e.getMessage());
+		}
+	}
+
+	/*
+	 * Internal clock ring, invoke client's alarmRing()
+	 */
+	private void invokeAlarmRing(List events) throws DisJException {
+		for (int i = 0; i < events.size(); i++) {
+			Event e = (Event) events.get(i);
+			Node node = this.graph.getNode(e.getOwner());
+
+			// Will NOT execute a Fail node
+			if (node.isStarter()) {
+				Entity entity = this.loadEntity(node);
+				entity.alarmRing();
+			}
+		}
+	}
+
+	/*
+	 * Lazy initialize entity
+	 */
+	private Entity loadEntity(Node node) throws DisJException {
+		// get client from receiver node
+		Entity clientObj = node.getEntity();
+		if (clientObj == null) {
+			try {
+				// lazy init
+				clientObj = GraphLoader.createEntityObject(this.client);
+				clientObj.initEntity(this, node, this.stateFields);
+				node.assignEntity(clientObj);
+			} catch (Exception ex) {
+				throw new DisJException(IConstants.ERROR_8, ex.toString());
+			}
+		}
+		return node.getEntity();
+	}
+
+	/**
+	 * @return Returns the graph of this processor
+	 */
+	public Graph getGraph() {
+		return this.graph;
+	}
+
+	public boolean isStop() {
+		return stop;
+	}
+
+	public void setStop(boolean stop) {
+		this.stop = stop;
+	}
+
+	public boolean isPause() {
+		return pause;
+	}
+
+	public void setPause(boolean pause) {
+		this.pause = pause;
+	}
+
+	public int getSpeed() {
+		return this.speed;
+	}
+
+	public void setSpeed(int speed) {
+		this.speed = speed;
+	}
+
+	public int getCurrentTime() {
+		return timeGen.getCurrentTime(graph.getId() + "");
+	}
+
+	public int getCallingChain() {
+		return this.callingChain;
+	}
+
+	public boolean isStepForward() {
+		return stepForward;
+	}
+
+	public void setStepForward(boolean stepForward) {
+		this.stepForward = stepForward;
+	}
+
+	public void appendConsoleOutput(String string) {
+		this.ConsoleOutputFile.println(string);
+	}
+
+	public void appendToRecFile(String string) {
+		this.RecFile.println(string);
+	}
+
 }

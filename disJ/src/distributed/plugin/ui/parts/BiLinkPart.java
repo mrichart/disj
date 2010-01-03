@@ -35,7 +35,6 @@ public class BiLinkPart extends LinkPart {
      */
     protected IFigure createFigure() {
         IFigure connectionFigure = super.createFigure();
-
 //        System.err.println("[BiLinkPart] createFigure " + connectionFigure);
 
         return connectionFigure;

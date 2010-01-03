@@ -32,6 +32,10 @@ public interface IGraphEditorConstants {
 	public String GraphicalEditor_CLOSE_BUTTON_UI = GraphEditorPlugin
 			.getResourceString("%GraphicalEditor.CLOSE_BUTTON_UI_"); //$NON-NLS-1$
 
+
+
+
+
 	// drawing tool constants
 	public static final String SEPARATOR_ONE = "GraphEditor.separator.one";
 	
@@ -66,6 +70,8 @@ public interface IGraphEditorConstants {
 	public static final String TORUS_2_DESC = "Draw a Torus network";
 	public static final String GENERIC = "Generic";
 	public static final String GENERIC_DESC = "Draw a random network";
+	public static final String GENERIC_C = "Generic_Connected";
+	public static final String GENERIC_C_DESC = "Draw a random connected network";
 	
 	// action bar constants
 	public static final String EXECUTE_MENU = "Simulator";
@@ -79,6 +85,8 @@ public interface IGraphEditorConstants {
 	public static final String ADD_STATE = "Add State";
 	public static final String REMOVE_STATE = "View/Remove States";
 	public static final String SPEED = "Process Speed";
+	public static final String LOAD_RECORD = "Load Recording";
+	public static final String SAVE_RECORD = "Save the last run";
 	
 	public static final String EXECUTE_MENU_ID = "IGraphEditorConstants.Simulator";
 	public static final String SUB_MENU_ID = "IGraphEditorConstants.Debug Menu";
@@ -91,6 +99,8 @@ public interface IGraphEditorConstants {
 	public static final String ADD_STATE_ID = "IGraphEditorConstants.Add State";
 	public static final String REMOVE_STATE_ID = "IGraphEditorConstants.Remove State";
 	public static final String SPEED_ID = "IGraphEditorConstants.Process Speed";
+	public static final String LOAD_RECORD_ID="IGraphEditorConstants.LoadRecord Load_Recording";
+	public static final String SAVE_RECORD_ID="IGraphEditorConstants.SAVE_RECORD_ID Save_Recording";
 	
 	// command template
 	public static final String TEMPLATE_NODE = "0";
@@ -105,6 +115,8 @@ public interface IGraphEditorConstants {
 	public static final String TEMPLATE_TORUS_1 = "9";
 	public static final String TEMPLATE_TORUS_2 = "10";
 	public static final String TEMPLATE_GENERIC = "11";
+	public static final String TEMPLATE_GENERIC_C = "12";
+	
 	
 	// command label
 	public static final String CREATE_NODE_COMD = "Create Node";
@@ -122,7 +134,7 @@ public interface IGraphEditorConstants {
 	public static final String CREATE_GENERIC_COMD = "Create Generic Graph";
 	
 	// general constants
-	public static final int NODE_SIZE = 20;
+	public static final int NODE_SIZE = 30;
 	public static final String CONTEXT_MENU = "distributed.plugin.ui.actions";
 	public static final String ERROR_NAN = "It has to be an integer number";
 	public static final String ERROR_EMPTY_TEXT = "It cannot be an empty string";
@@ -132,6 +144,10 @@ public interface IGraphEditorConstants {
     public static final String UNI = "Uni-Dirctional";
 
     public static final String BI = "Bi-Directional";
+    
+    // Record File constant
+    public static final String STATE_CHANGE=" changes_its_state_to ";
+	public static final String LINK_VISIBILITY_CHANGE = " changes_its_visibility_to ";
 	
 	
 	
