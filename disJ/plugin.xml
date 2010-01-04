@@ -3,7 +3,7 @@
 <plugin
    id="org.carleton.scs.disj"
    name="DisJ Simulator"
-   version="1.0.0"
+   version="1.0.2"
    provider-name="SCS Carleton University"
    class="distributed.plugin.ui.GraphEditorPlugin">
 
@@ -30,7 +30,7 @@
             icon="icons/editor.gif"
             class="distributed.plugin.ui.editor.GraphEditor"
             default="true"
-            name="distributed.plugin.ui.editor.GraphEditor"
+            name="%editor.name.0"
             contributorClass="distributed.plugin.ui.actions.GraphEditorActionBarContributor"
             id="distributed.plugin.ui.editor.GraphEditor"/>
    </extension>
