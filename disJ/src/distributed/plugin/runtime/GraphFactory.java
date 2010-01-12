@@ -23,9 +23,9 @@ import distributed.plugin.core.IConstants;
  */
 public final class GraphFactory {
 
-	private static final Object lock = new Object();
+	//private static final Object lock = new Object();
 	
-	private static Map graphList = new HashMap(5);
+	private static Map<String, Graph> GRAPH_LIST = new HashMap<String, Graph>(4);
 
 	private GraphFactory() {
 		
@@ -45,8 +45,8 @@ public final class GraphFactory {
 	 * 
 	 * @return Returns the graphList.
 	 */
-	public static Map getGraphList() {
-		return graphList;
+	public static Map<String, Graph> getGraphList() {
+		return GRAPH_LIST;
 	}
 	
 	/**
@@ -60,7 +60,7 @@ public final class GraphFactory {
 			throw new DisJException(IConstants.ERROR_22);
 		}
 		String id = g.getId();		
-		graphList.put(id, g);		
+		GRAPH_LIST.put(id, g);		
 		 						
 	}
 	
@@ -71,7 +71,7 @@ public final class GraphFactory {
 	 * @return
 	 */
 	public static Graph getGraph(String graphId){
-		return (Graph)graphList.get(graphId);
+		return GRAPH_LIST.get(graphId);
 	}
 	
 

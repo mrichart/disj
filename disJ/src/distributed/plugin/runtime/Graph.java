@@ -10,17 +10,12 @@
 
 package distributed.plugin.runtime;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
-
-import org.eclipse.swt.graphics.RGB;
 
 import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
@@ -30,37 +25,35 @@ import distributed.plugin.random.IRandom;
 
 /**
  * @author Me
- * 
- *         A graph
+ *         A graph instance
  */
 public class Graph implements Serializable {
 
 	static final long serialVersionUID = IConstants.SERIALIZE_VERSION;
 
+	private int globalFlowType; // FIFO
+	
+	private int globalDelayType; // a type of delay i.e random uniform,
+	
+	private int globalDelaySeed; // it's useful for synch delay and random
+	
 	private int currentNodeId;
 
 	private int currentEdgeId;
 
 	private String id;
 
-	private Map nodes;
-
-	private Map edges;
-
-	private Map stateColors;
-
-	private short globalDelayType; // a type of delay i.e random uniform,
-
-	// synchronize
-
-	private short globalDelaySeed = 1; // it's usufull for synchronize delay and
-										// random
-
-	// uniform type
-
-	private IRandom clientRandom;
-
 	private String protocol;
+	
+	private Map<String, Node> nodes;
+
+	private Map<String, Edge> edges;
+
+	private Map<String, Integer> numMsgSent;
+	
+	private Map<String, Integer> numMsgRecv;	
+	
+	transient private IRandom clientRandom;
 
 	protected Graph() {
 		this("");
@@ -68,16 +61,17 @@ public class Graph implements Serializable {
 
 	private Graph(String id) {
 		this.id = id;
+		this.globalFlowType = IConstants.MSGFLOW_FIFO_TYPE;
+		this.globalDelayType = IConstants.MSGDELAY_GLOBAL_SYNCHRONOUS;
+		this.globalDelaySeed = IConstants.MSGDELAY_DEFAULT_SEED;
 		this.currentNodeId = 0;
 		this.currentEdgeId = 0;
-		this.stateColors = new HashMap();
-		this.nodes = new HashMap();
-		this.edges = new HashMap();
-
-
-		stateColors.put(new Short("99"), new RGB(100, 150, 50));
-
 		this.protocol = "";
+		
+		this.numMsgSent = new HashMap<String, Integer>();
+		this.numMsgRecv = new HashMap<String, Integer>();
+		this.nodes = new HashMap<String, Node>();
+		this.edges = new HashMap<String, Edge>();
 	}
 
 	/**
@@ -110,11 +104,6 @@ public class Graph implements Serializable {
 			throw new DisJException(IConstants.ERROR_3, id);
 	}
 
-	public void addColor(Hashtable ht) {
-		this.stateColors.putAll(ht);
-		System.out.println("States:"+this.stateColors.keySet());		
-	}
-
 	/**
 	 * Remove a node with a given id
 	 * 
@@ -139,10 +128,6 @@ public class Graph implements Serializable {
 			throw new DisJException(IConstants.ERROR_1, id);
 
 		edges.remove(id);
-	}
-
-	public void removeColor(Short state) {
-		this.stateColors.remove(state);
 	}
 
 	/**
@@ -178,7 +163,6 @@ public class Graph implements Serializable {
 			else
 				return (Node) nodes.get(id);
 		} catch (DisJException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
@@ -187,27 +171,8 @@ public class Graph implements Serializable {
 	/**
 	 * @return Returns all the edges in this graph
 	 */
-	public Map getEdges() {
+	public Map<String, Edge> getEdges() {
 		return edges;
-	}
-
-	public Iterator getStateColors() {
-		Set s= this.stateColors.keySet();
-		ArrayList ll = new ArrayList(s);
-		try{
-		Collections.sort(ll);
-		}catch (Exception e) {
-			e.printStackTrace();
-		}
-		return ll.iterator();
-	}
-
-	public RGB getColor(Object state) {
-		return (RGB) this.stateColors.get(state);
-	}
-
-	public int getNumberOfState() {
-		return this.stateColors.size();
 	}
 
 	/**
@@ -217,20 +182,28 @@ public class Graph implements Serializable {
 		return this.id;
 	}
 
-	public short getGlobalDelayType() {
+	public int getGlobalDelayType() {
 		return globalDelayType;
 	}
 
-	public short getGlobalDelaySeed() {
+	public int getGlobalDelaySeed() {
 		return globalDelaySeed;
 	}
 
-	public void setGlobalDelaySeed(short delaySeed) {
+	public void setGlobalDelaySeed(int delaySeed) {
 		this.globalDelaySeed = delaySeed;
 	}
 
-	public void setGlobalDelayType(short delayType) {
+	public void setGlobalDelayType(int delayType) {
 		this.globalDelayType = delayType;
+	}
+	
+	public int getGlobalFlowType() {
+		return globalFlowType;
+	}
+
+	public void setGlobalFlowType(int globalFlowType) {
+		this.globalFlowType = globalFlowType;
 	}
 
 	/**
@@ -246,7 +219,7 @@ public class Graph implements Serializable {
 	/**
 	 * @return Returns all the nodes in this graph
 	 */
-	public Map getNodes() {
+	public Map<String, Node> getNodes() {
 		return nodes;
 	}
 
@@ -273,5 +246,89 @@ public class Graph implements Serializable {
 	public void setProtocol(String protocol) {
 		this.protocol = protocol;
 	}
+	
+	/**
+	 * count number of message sent grouped by message label
+	 * @param msgLabel
+	 */
+	public void countMsgSent(String msgLabel){
+		int val;
+		if(this.numMsgSent.containsKey(msgLabel)){
+			val = this.numMsgSent.get(msgLabel) + 1;
+		}else{
+			val = 1;
+		}
+		//System.out.println("@Graph.conutMsgSent() " + msgLabel + " = " + val);
+		this.numMsgSent.put(msgLabel, val);
+	}
+	
+	public Map<String, Integer> getMsgSentCounter(){
+		return this.numMsgSent;
+	}
+	
+	public void resetMsgSentCounter(){
+		this.numMsgSent.clear();
+	}
+
+	/**
+	 * count number of message received grouped by message label
+	 * @param msgLabel
+	 */
+	public void countMsgRecv(String msgLabel){
+		int val;
+		if(this.numMsgRecv.containsKey(msgLabel)){
+			val = this.numMsgRecv.get(msgLabel) + 1;			
+		}else{
+			val = 1;
+		}
+		this.numMsgRecv.put(msgLabel, val);
+	}
+	
+	public Map<String, Integer> getMsgRecvCounter(){
+		return this.numMsgRecv;
+	}
+	
+	public void resetMsgRecvCounter(){
+		this.numMsgRecv.clear();
+	}
+
+
+	/**
+	 * Get a statistic of current state vs number of node
+	 * @return
+	 */
+	public Map<Integer, Integer> getStateCount(){
+		int s, c;
+		Map<Integer, Integer> count = new HashMap<Integer, Integer>();
+		for (String id : this.nodes.keySet()) {
+			Node n = this.nodes.get(id);
+			s = n.getCurState();
+			if(count.containsKey(s)){
+				c = count.get(s);
+				c++;
+			}else{
+				c = 1;
+			}
+			count.put(s, c);
+		}
+		return count;
+	}
+	
+
+	/*
+     * Overriding serialize object due to Java Bug4152790
+     */
+    private void writeObject(ObjectOutputStream os) throws IOException{    	
+   	 	// write the object
+		os.defaultWriteObject();
+	}
+    /*
+     * Overriding serialize object due to Java Bug4152790
+     */
+    private void readObject(ObjectInputStream os) throws IOException, ClassNotFoundException  {
+    	 // rebuild this object
+    	 os.defaultReadObject(); 
+    	 this.clientRandom = null;
+    }
 
 }

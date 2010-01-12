@@ -42,7 +42,7 @@ import org.eclipse.gef.ContextMenuProvider;
 import org.eclipse.gef.DefaultEditDomain;
 import org.eclipse.gef.EditDomain;
 import org.eclipse.gef.EditPartFactory;
-import org.eclipse.gef.EditPartViewer; //import org.eclipse.gef.GEFPlugin;
+import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.KeyHandler;
 import org.eclipse.gef.KeyStroke;
@@ -95,7 +95,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
-import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.FileEditorInput;
@@ -104,16 +103,18 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 
+import distributed.plugin.random.IRandom;
+import distributed.plugin.runtime.engine.Entity;
 import distributed.plugin.runtime.engine.SimulatorEngine;
 import distributed.plugin.ui.GraphEditorPlugin;
 import distributed.plugin.ui.IGraphEditorConstants;
-import distributed.plugin.ui.actions.Controller;
+import distributed.plugin.ui.actions.IController;
 import distributed.plugin.ui.actions.ProcessActions;
-import distributed.plugin.ui.actions.ProtocolExecutionController;
 import distributed.plugin.ui.actions.StateSettingAction;
 import distributed.plugin.ui.models.GraphElement;
 import distributed.plugin.ui.models.GraphElementFactory;
 import distributed.plugin.ui.parts.GraphEditPartFactory;
+
 
 /**
  * A graph editor for drawing topology
@@ -136,9 +137,11 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 	private SimulatorEngine engine;
 
-	transient private Class client;
+	transient private Class<Entity> client;
 
-	transient private Class clientRandom;
+	transient private Class<IRandom> clientRandom;
+	
+	transient private ClassLoader loader;
 
 	private Map graphFactories;
 
@@ -209,7 +212,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		}
 	};
 
-	private Controller controller;
+	private IController controller;
 
 	private StringBuffer bs_file;
 
@@ -420,11 +423,11 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	 * 
 	 * @return
 	 */
-	public Class getClientObject() {
+	public Class<Entity> getClientObject() {
 		return this.client;
 	}
 
-	public Class getClientRandomObject() {
+	public Class<IRandom> getClientRandomObject() {
 		return this.clientRandom;
 	}
 
@@ -433,12 +436,20 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	 * 
 	 * @param client
 	 */
-	public void setClientObject(Class client) {
+	public void setClientObject(Class<Entity> client) {
 		this.client = client;
 	}
 
-	public void setClientRandomObject(Class clientRandom) {
+	public void setClientRandomObject(Class<IRandom> clientRandom) {
 		this.clientRandom = clientRandom;
+	}
+
+	public ClassLoader getLoader() {
+		return loader;
+	}
+
+	public void setLoader(ClassLoader loader) {
+		this.loader = loader;
 	}
 
 	private void setContent(GraphElement element) {
@@ -574,6 +585,9 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_GENERIC_C,
 				new GraphElementFactory(this.getGraphElement(),
 						IGraphEditorConstants.TEMPLATE_GENERIC_C));
+		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_SPATIAL,
+				new GraphElementFactory(this.getGraphElement(),
+						IGraphEditorConstants.TEMPLATE_SPATIAL));
 	}
 
 	private CreationFactory getFactory(String template) {
@@ -593,9 +607,9 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	private List createCategories(PaletteRoot root) {
 		List categories = new ArrayList();
 
-		categories.add(createControlGroup(root));
-		categories.add(createDrawerComponents());
-		categories.add(createGraphComponents());
+		categories.add(this.createControlGroup(root));
+		categories.add(this.createDrawerComponents());
+		categories.add(this.createGraphComponents());
 		return categories;
 	}
 
@@ -711,6 +725,18 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		entries.add(combined);
 
 		combined = new CombinedTemplateCreationEntry(
+				IGraphEditorConstants.SPATIAL,
+				IGraphEditorConstants.SPATIAL_DESC,
+				IGraphEditorConstants.TEMPLATE_SPATIAL, this
+						.getFactory(IGraphEditorConstants.TEMPLATE_SPATIAL),
+				ImageDescriptor.createFromFile(GraphEditor.class,
+						"icons/temp.gif"), //$NON-NLS-1$
+				ImageDescriptor.createFromFile(GraphEditor.class,
+						"icons/temp.gif")//$NON-NLS-1$
+		);
+		entries.add(combined);
+		
+		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.MESH, IGraphEditorConstants.MESH_DESC,
 				IGraphEditorConstants.TEMPLATE_MESH, this
 						.getFactory(IGraphEditorConstants.TEMPLATE_MESH),
@@ -748,7 +774,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 						"icons/temp.gif")//$NON-NLS-1$
 		);
 		toruses.add(combined);
-
+		
 		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.TORUS_2,
 				IGraphEditorConstants.TORUS_2_DESC,
@@ -762,6 +788,10 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		toruses.add(combined);
 		entries.add(toruses);
 
+		PaletteStack random = new PaletteStack(
+				IGraphEditorConstants.RANDOM_STACK,
+				IGraphEditorConstants.RANDOM_STACK_DESC, null);
+		
 		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.GENERIC,
 				IGraphEditorConstants.GENERIC_DESC,
@@ -772,7 +802,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 				ImageDescriptor.createFromFile(GraphEditor.class,
 						"icons/temp.gif")//$NON-NLS-1$
 		);
-		entries.add(combined);
+		random.add(combined);
 
 		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.GENERIC_C,
@@ -784,7 +814,8 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 				ImageDescriptor.createFromFile(GraphEditor.class,
 						"icons/temp.gif")//$NON-NLS-1$
 		);
-		entries.add(combined);
+		random.add(combined);
+		entries.add(random);
 
 		drawer.addAll(entries);
 		return drawer;
@@ -859,31 +890,44 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	protected void createActions() {
 		super.createActions();
 
+		ProcessActions procAct;
+		
 		Action action = new DirectEditAction((IWorkbenchPart) this);
 		this.addAction(action);
 		getSelectionActions().add(action.getId());
 
 		this.addAction(new CopyTemplateAction(this));
-		this.addAction(new ProcessActions(this, IGraphEditorConstants.LOAD_ID));
-		this.addAction(new ProcessActions(this,
-				IGraphEditorConstants.LOAD_RANDOM_ID));
-		this
-				.addAction(new ProcessActions(this,
-						IGraphEditorConstants.RESUME_ID));
-		this.addAction(new ProcessActions(this, IGraphEditorConstants.STOP_ID));
-		this.addAction(new ProcessActions(this,
-				IGraphEditorConstants.SUSPEND_ID));
-		this.addAction(new ProcessActions(this, IGraphEditorConstants.NEXT_ID));
-		this
-				.addAction(new ProcessActions(this,
-						IGraphEditorConstants.SPEED_ID));
-		this.addAction(new ProcessActions(this,IGraphEditorConstants.LOAD_RECORD_ID));
-		this.addAction(new ProcessActions(this,IGraphEditorConstants.SAVE_RECORD_ID));
 		
-		this.addAction(new StateSettingAction(this,
-				IGraphEditorConstants.ADD_STATE_ID));
-		this.addAction(new StateSettingAction(this,
-				IGraphEditorConstants.REMOVE_STATE_ID));
+		procAct = new ProcessActions(this, IGraphEditorConstants.LOAD_ID);
+		this.addAction(procAct);
+		
+		procAct = new ProcessActions(this, IGraphEditorConstants.LOAD_RANDOM_ID);
+		this.addAction(procAct);
+		
+		procAct = new ProcessActions(this, IGraphEditorConstants.RESUME_ID);
+		this.addAction(procAct);
+		
+		procAct = new ProcessActions(this, IGraphEditorConstants.STOP_ID);
+		this.addAction(procAct);
+		
+		procAct = new ProcessActions(this, IGraphEditorConstants.SUSPEND_ID);
+		this.addAction(procAct);
+		
+		procAct = new ProcessActions(this, IGraphEditorConstants.NEXT_ID);
+		this.addAction(procAct);
+		
+		procAct = new ProcessActions(this, IGraphEditorConstants.SPEED_ID);
+		this.addAction(procAct);
+		
+		procAct = new ProcessActions(this, IGraphEditorConstants.LOAD_RECORD_ID);
+		this.addAction(procAct);
+		
+		procAct = new ProcessActions(this, IGraphEditorConstants.SAVE_RECORD_ID);
+		this.addAction(procAct);
+		
+		this.addAction(new StateSettingAction(this,	IGraphEditorConstants.ADD_STATE_ID));
+		
+		this.addAction(new StateSettingAction(this,	IGraphEditorConstants.REMOVE_STATE_ID));
 	}
 
 	private PropertySheetPage getPropertySheetPage() {
@@ -908,35 +952,56 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	}
 
 	/*
-	 * TODO write graph object into stream
+	 *
 	 */
 	private void createOutputStream(OutputStream os) throws IOException {
-		ObjectOutputStream out = new ObjectOutputStream(os);
-		out.writeObject(this.getContent());
-		out.close();
+		try{
+			ObjectOutputStream out = new ObjectOutputStream(os);
+			this.writeObject(out);
+		}catch(IOException e){
+			System.err.println("[GraphEditor].createOutputStream() " + e);
+			throw e;
+		}
+		
+	}
+	private void writeObject(ObjectOutputStream oos) throws IOException{	
+		Object obj = this.getContent();		
+		oos.writeObject(obj);
+		oos.close();
 	}
 
 	/*
-	 * TODO read a saved file from stream
+	 * Read a saved file from stream
 	 */
 	public void setInput(IEditorInput input) {
+		
 		this.superSetInput(input);
-
 		IFile file = ((IFileEditorInput) input).getFile();
+		ObjectInputStream ois = null;
+		InputStream is = null;
 		try {
-			InputStream is = file.getContents(false);
-			ObjectInputStream ois = new ObjectInputStream(is);
-			this.setContent((GraphElement) ois.readObject());
-			ois.close();
-
-			// System.err.println("SetInput " + System.currentTimeMillis() + " "
-			// + graphElement.getGraph());
-
+			is = file.getContents(false);
+			ois = new ObjectInputStream(is);
+			this.readObject(ois);
+			
 		} catch (Exception e) {
-			// This is just an example. All exceptions caught here.
-			// when create a file for a first time
+			// EOFException
+			// Happens when create a file for a first time!!!!
 			// e.printStackTrace();
-			System.err.println("[GraphEditor].setInput() " + e);
+			System.out.println("[GraphEditor].setInput() File " + file.getName() +" is created");
+		} finally{
+			if(ois != null){
+				try {
+					ois.close();
+					ois = null;
+				} catch (IOException e) {}
+			}
+			if(is != null){
+				try {
+					is.close();
+					is = null;
+				} catch (IOException e) {}
+			}
 		}
 
 		if (!editorSaving) {
@@ -949,27 +1014,37 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 			}
 		}
 	}
+	private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+		GraphElement g = (GraphElement) ois.readObject();
+		this.setContent(g);
+	}
+
 
 	private void superSetInput(IEditorInput input) {
-		// The workspace never changes for an editor. So, removing and re-adding
-		// the
-		// resourceListener is not necessary. But it is being done here for the
-		// sake
-		// of proper implementation. Plus, the resourceListener needs to be
-		// added
-		// to the workspace the first time around.
-		if (getEditorInput() != null) {
-			IFile file = ((FileEditorInput) getEditorInput()).getFile();
-			file.getWorkspace().removeResourceChangeListener(resourceListener);
-		}
+		try {
+			// The workspace never changes for an editor. So, removing and re-adding
+			// the
+			// resourceListener is not necessary. But it is being done here for the
+			// sake
+			// of proper implementation. Plus, the resourceListener needs to be
+			// added
+			// to the workspace the first time around.
+			if (getEditorInput() != null) {
+				IFile file = ((FileEditorInput) getEditorInput()).getFile();
+				file.getWorkspace().removeResourceChangeListener(resourceListener);
+			}
 
-		super.setInput(input);
+			super.setInput(input);
 
-		if (getEditorInput() != null) {
-			IFile file = ((FileEditorInput) getEditorInput()).getFile();
-			file.getWorkspace().addResourceChangeListener(resourceListener);
-			setPartName(file.getName());
-			this.graphElement.setGraphId(getPartName());
+			if (getEditorInput() != null) {
+				IFile file = ((FileEditorInput) getEditorInput()).getFile();
+				file.getWorkspace().addResourceChangeListener(resourceListener);
+				setPartName(file.getName());
+				this.graphElement.setGraphId(getPartName());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("[GraphEditor].superSetInput() " + e);
 		}
 	}
 
@@ -996,19 +1071,27 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	 * @see org.eclipse.ui.ISaveablePart#doSave(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void doSave(IProgressMonitor monitor) {
+		ByteArrayOutputStream out = null;
 		try {
 			editorSaving = true;
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			out = new ByteArrayOutputStream();
 			this.createOutputStream(out);
 			IFile file = ((IFileEditorInput) getEditorInput()).getFile();
-			file.setContents(new ByteArrayInputStream(out.toByteArray()), true,
+			byte[] contents = out.toByteArray();
+			file.setContents(new ByteArrayInputStream(contents, 0, contents.length), true,
 					false, monitor);
-			out.close();
 			this.getCommandStack().markSaveLocation();
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.err.println("[GraphEditor].doSave() " + e);
 		} finally {
 			editorSaving = false;
+			if(out != null){
+				try {
+					out.close();
+				} catch (IOException e) {}
+				out = null;
+			}
 		}
 	}
 
@@ -1016,8 +1099,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	 * @see org.eclipse.ui.ISaveablePart#doSaveAs()
 	 */
 	public void doSaveAs() {
-		this.performSaveAs();
-		this.getCommandStack().markSaveLocation();
+		this.performSaveAs();		
 	}
 
 	private boolean performSaveAs() {
@@ -1036,15 +1118,24 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		if (!file.exists()) {
 			WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
 				public void execute(final IProgressMonitor monitor) {
+					ByteArrayOutputStream out = null;
 					try {
-						ByteArrayOutputStream out = new ByteArrayOutputStream();
+						out = new ByteArrayOutputStream();
 						createOutputStream(out);
+						byte[] contents = out.toByteArray();
 						file.create(
-								new ByteArrayInputStream(out.toByteArray()),
+								new ByteArrayInputStream(contents, 0, contents.length),
 								true, monitor);
-						out.close();
 					} catch (Exception e) {
 						e.printStackTrace();
+						System.err.println("[GraphEditor].performSaveAs().execute() " + e);
+					} finally{
+						if(out != null){
+							try {
+								out.close();
+							} catch (IOException e) {}
+							out = null;
+						}
 					}
 				}
 			};
@@ -1053,13 +1144,16 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 						.getShell()).run(false, true, op);
 			} catch (Exception e) {
 				e.printStackTrace();
+				System.err.println("[GraphEditor].performSaveAs() " + e);
 			}
 		}
 
 		try {
-			superSetInput(new FileEditorInput(file));
+			this.superSetInput(new FileEditorInput(file));
+			this.getCommandStack().markSaveLocation();
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.err.println("[GraphEditor].performSaveAs() " + e);
 		}
 		return true;
 	}
@@ -1089,12 +1183,12 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		return true;
 	}
 
-	public void setController(Controller controller) {
+	public void setController(IController controller) {
 		this.controller=controller;
 		
 	}
 
-	public Controller getController() {
+	public IController getController() {
 		return controller;
 	}
 
@@ -1124,7 +1218,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	}
 
 	public void setRecFileNameForSaving(String fileName) {
-		this.recFileNameForSaving=fileName;
+		this.recFileNameForSaving = fileName;
 		
 	}
 

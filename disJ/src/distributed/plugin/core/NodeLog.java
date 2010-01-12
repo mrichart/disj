@@ -25,17 +25,23 @@ public class NodeLog implements Serializable {
     
 	private String graphId;
 	
-	private List states;
+	private List<String> states;
 
-	private List sentTo; 
+	private List<String> sentTo; 
 	
-	private List recvFrom;
+	private List<String> recvFrom;
 
 	protected NodeLog(String graphId) {
 		this.graphId = graphId;
-		this.states = new ArrayList();
-		this.sentTo = new ArrayList();		
-		this.recvFrom = new ArrayList();
+		this.states = new ArrayList<String>();
+		this.sentTo = new ArrayList<String>();		
+		this.recvFrom = new ArrayList<String>();
+	}
+
+	protected void clear(){
+		this.states.clear();
+		this.sentTo.clear();
+		this.recvFrom.clear();
 	}
 
 	protected void logState(String state) {
@@ -60,39 +66,39 @@ public class NodeLog implements Serializable {
 	/*
 	 * Shrink the log memory by 3/4
 	 */
-	private void shrinkMemory(){
-		if(this.sentTo.size() > 20){
-			for(int i =0; i < 15; i++){
-				this.sentTo.remove(i);
-			}
-		}		
-		if(this.recvFrom.size() > 20){
-			for(int i =0; i < 15; i++){
-				this.recvFrom.remove(i);
-			}
-		}
-	}
+//	private void shrinkMemory(){
+//		if(this.sentTo.size() > 20){
+//			for(int i =0; i < 15; i++){
+//				this.sentTo.remove(i);
+//			}
+//		}		
+//		if(this.recvFrom.size() > 20){
+//			for(int i =0; i < 15; i++){
+//				this.recvFrom.remove(i);
+//			}
+//		}
+//	}
 
 	/**
 	 * @return Returns the recvFrom.
 	 */
-	protected List getRecvFrom() {
+	protected List<String> getRecvFrom() {
 		return recvFrom;
 	}
 	/**
 	 * @return Returns the sentTo.
 	 */
-	protected List getSentTo() {
+	protected List<String> getSentTo() {
 		return sentTo;
 	}
 	/**
 	 * @return Returns the states.
 	 */
-	protected List getStates() {
+	protected List<String> getStates() {
 		return states;
 	}
 	
-	protected void setStates(List list){
+	protected void setStates(List<String> list){
 	    this.states = list;
 	}
 }

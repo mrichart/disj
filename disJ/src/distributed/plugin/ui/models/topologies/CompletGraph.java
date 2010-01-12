@@ -10,9 +10,6 @@
 
 package distributed.plugin.ui.models.topologies;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.swt.widgets.Shell;
@@ -29,39 +26,25 @@ import distributed.plugin.ui.models.NodeElement;
  * TODO To change the template for this generated type comment go to Window -
  * Preferences - Java - Code Style - Code Templates
  */
-public class CompletGraph implements ITopology {
+public class CompletGraph extends AbstractGraph {
 
     private static final int CONSTANT = 4;
 
     private static final int BASE = IGraphEditorConstants.NODE_SIZE * 4;
 
+    
     private int radius;
 
-    private int numberOfNode;
-
     private String linkType;
-
-    private List nodes;
-
-    private List links;
-
-    private Shell shell;
-
-    private GraphElementFactory factory;
-
+  
     /**
      * Constructor;
      */
     public CompletGraph(GraphElementFactory factory, Shell shell) {
-        this.factory = factory;
-        this.shell = shell;
-        CompleteGraphDialog dialog = new CompleteGraphDialog(this.shell);
-        dialog.open();
-        this.numberOfNode = dialog.getNumNode();
-        this.linkType = dialog.getLinkType();
-        this.radius = this.calculateRadius(this.numberOfNode);
-        this.nodes = new ArrayList();
-        this.links = new ArrayList();
+    	super(factory, shell);        
+        this.radius = 0;
+        this.linkType = IGraphEditorConstants.BI;        
+
     }
 
     /*
@@ -79,40 +62,38 @@ public class CompletGraph implements ITopology {
      * @see distributed.plugin.ui.models.topologies.ITopology#createTopology(int)
      */
     public void createTopology() {
-
-        for (int i = 0; i < this.numberOfNode; i++) {
-            this.nodes.add(this.factory.createNodeElement());
+    	
+    	CompleteGraphDialog dialog = new CompleteGraphDialog(this.shell);
+        dialog.open();       
+        if(!dialog.isCancel()){
+	        this.numNode = dialog.getNumNode();
+	        this.linkType = dialog.getLinkType();
+	        this.numInit = dialog.getNumInit();
+	        this.radius = this.calculateRadius(this.numNode);
+        
+	        for (int i = 0; i < this.numNode; i++) {
+	            this.nodes.add(this.factory.createNodeElement());
+	        }
+	
+	        // Uni-Complete Graph: num of link == num of node * num of node-1
+	        if (this.linkType.equals(IGraphEditorConstants.UNI)) {
+	            for (int i = 0; i < this.numNode; i++) {
+	                for (int j = 0; j < this.numNode - 1; j++)
+	                    this.links.add(this.factory.createUniLinkElement());
+	            }
+	        }
+	
+	        // Bi-CompleteGraph: sum of (n-1 + n-2 +...+ 2 + 1)
+	        if (this.linkType.equals(IGraphEditorConstants.BI)) {
+	            for (int i = 0; i < this.numNode - 1; i++) {
+	                for (int j = 0; j < i + 1; j++)
+	                    this.links.add(this.factory.createBiLinkElement());
+	            }
+	        }
+	        
+			// set init nodes		
+			this.setInitNodes();
         }
-
-        // Uni-Complete Graph: num of link == num of node * num of node-1
-        if (this.linkType.equals(IGraphEditorConstants.UNI)) {
-            for (int i = 0; i < this.numberOfNode; i++) {
-                for (int j = 0; j < this.numberOfNode - 1; j++)
-                    this.links.add(this.factory.createUniLinkElement());
-            }
-        }
-
-        // Bi-CompleteGraph: sum of (n-1 + n-2 +...+ 2 + 1)
-        if (this.linkType.equals(IGraphEditorConstants.BI)) {
-            for (int i = 0; i < this.numberOfNode - 1; i++) {
-                for (int j = 0; j < i + 1; j++)
-                    this.links.add(this.factory.createBiLinkElement());
-            }
-        }
-    }
-
-    /**
-     * @see distributed.plugin.ui.models.topologies.ITopology#getAllNodes()
-     */
-    public List getAllNodes() {
-        return this.nodes;
-    }
-
-    /**
-     * @see distributed.plugin.ui.models.topologies.ITopology#getAllLinks()
-     */
-    public List getAllLinks() {
-        return this.links;
     }
 
     /**
@@ -127,7 +108,7 @@ public class CompletGraph implements ITopology {
      */
     public void applyLocation(Point point) {
         NodeElement node;
-        double dTheta = 360.0 / (double) this.numberOfNode;
+        double dTheta = 360.0 / this.numNode;
         double thetaDeg, thetaRad, x, y;
 
         for (int i = 0; i < this.nodes.size(); i++) {
@@ -157,33 +138,35 @@ public class CompletGraph implements ITopology {
         int count = -1;
         if (this.linkType.equals(IGraphEditorConstants.BI)) {
             for (int i = 0; i < this.nodes.size(); i++) {
-                NodeElement source = (NodeElement) this.nodes.get(i);
+                NodeElement source = this.nodes.get(i);
                 for (int j = i + 1; j < this.nodes.size(); j++) {
-                    LinkElement link = (LinkElement) this.links.get(++count);
-                    NodeElement target = (NodeElement) this.nodes.get(j);
+                    LinkElement link = this.links.get(++count);
+                    NodeElement target = this.nodes.get(j);
                     link.setSource(source);
                     link.attachSource();
                     link.setTarget(target);
                     link.attachTarget();
+                   // System.out.println(": " + link.getEdge().getStart().getName() 
+                   // 		+ "-" + link.getEdge().getEnd().getName());
                 }
+                
             }
         }
 
         if (this.linkType.equals(IGraphEditorConstants.UNI)) {
             if (this.linkType.equals(IGraphEditorConstants.UNI)) {
-                for (int i = 0; i < this.numberOfNode; i++) {
-                    NodeElement source = (NodeElement) this.nodes.get(i);
-                    for (int j = 0; j < this.numberOfNode; j++)
+                for (int i = 0; i < this.numNode; i++) {
+                    NodeElement source =  this.nodes.get(i);
+                    for (int j = 0; j < this.numNode; j++){
                         if (i != j) {
-                            LinkElement link = (LinkElement) this.links
-                                    .get(++count);
-                            NodeElement target = (NodeElement) this.nodes
-                                    .get(j);
+                            LinkElement link = this.links.get(++count);
+                            NodeElement target = this.nodes.get(j);
                             link.setSource(source);
                             link.attachSource();
                             link.setTarget(target);
                             link.attachTarget();
                         }
+                    }
                 }
             }
         }

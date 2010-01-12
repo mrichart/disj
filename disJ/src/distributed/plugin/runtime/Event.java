@@ -16,7 +16,7 @@ import distributed.plugin.core.IConstants;
  * @author npiyasin A data storage that it will be use for execution for each
  *         message
  */
-public class Event implements Comparable {
+public class Event implements Comparable<Event> {
 
 	private short eventType;
 
@@ -112,8 +112,7 @@ public class Event implements Comparable {
 		return this.execTime + this.eventType;
 	}
 
-	public int compareTo(Object obj) {
-		Event e = (Event) obj;
+	public int compareTo(Event e) {
 		if (this.execTime < e.getExecTime())
 			return -1;
 		else if (this.execTime == e.getExecTime()) {

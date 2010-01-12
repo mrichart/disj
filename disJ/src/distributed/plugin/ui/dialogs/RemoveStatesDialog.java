@@ -10,12 +10,14 @@
 
 package distributed.plugin.ui.dialogs;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.TreeSet;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
@@ -26,8 +28,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
-import distributed.plugin.ui.editor.GraphEditor;
-
 /**
  * @author Me
  * 
@@ -36,51 +36,59 @@ import distributed.plugin.ui.editor.GraphEditor;
  */
 public class RemoveStatesDialog extends Dialog {
 
-	private boolean response;
-	private GraphEditor editor;
+	private Map<Short, RGB> stateColr;
 
+	private boolean response;
+	
 	/**
 	 * @param arg0
 	 */
-	public RemoveStatesDialog(Shell arg0, GraphEditor editor) {
+	public RemoveStatesDialog(Shell arg0, Map<Short, RGB> stateColr) {
 		super(arg0);
 		setText("View/Remove State Dialog");
-		this.editor = editor;
+		this.stateColr = stateColr;
+		this.response = false;
 	}
 
-	public void open() {
+	public Map<Short, RGB> open() {
 		final Shell shell = new Shell(getParent(), SWT.DIALOG_TRIM
 				| SWT.APPLICATION_MODAL);
 		shell.setText(getText());
-		shell.setSize(250, 250);
+		shell.setSize(250, 300);
 
 		// a table list
 		final Table table2 = new Table(shell, SWT.CHECK | SWT.HIDE_SELECTION);
 		table2.setBounds(10, 10, 200, 150);
 		table2.setHeaderVisible(true);
+		
 
 		TableColumn col = new TableColumn(table2, SWT.LEFT);
 		col.setText("State");
 		col.setWidth(40);
 		TableColumn colour = new TableColumn(table2, SWT.LEFT);
-		colour.setText("Colour");
+		colour.setText("Color");
 		colour.setWidth(50);
-
-		Iterator its = this.editor.getGraphElement().getStateColors();
-		for (Object key = null; its.hasNext();) {
-			key = its.next();
-			// "99" is reserved for resetting
-			if (!key.equals(new Short("99"))) {
-				Color color = this.editor.getGraphElement().getStateColor(key);
+		
+		// display existing colors
+		List<Short> temp = new ArrayList<Short>();
+		for (Short state : this.stateColr.keySet()) {
+			temp.add(state);
+		}
+		Collections.sort(temp);
+		for (Short num : temp) {
+			// FIXME why is 99???? use constant!!
+			if (num != 99) {
+				Color color = new Color(getParent().getDisplay(),
+						stateColr.get(num));
 				TableItem e = new TableItem(table2, SWT.NONE);
-				e.setText(0, key.toString());
+				e.setText(0, num.toString());
 				e.setBackground(1, color);
 			}
 		}
 
 		// final button
 		final Button btnOkay = new Button(shell, SWT.PUSH);
-		btnOkay.setText("Ok");
+		btnOkay.setText("Remove");
 		btnOkay.setLocation(20, 170);
 		btnOkay.setSize(100, 25);
 		btnOkay.setSelection(true);
@@ -88,23 +96,21 @@ public class RemoveStatesDialog extends Dialog {
 		Button btnCancel = new Button(shell, SWT.PUSH);
 		btnCancel.setText("Cancel");
 		btnCancel.setLocation(130, 170);
-		btnCancel.setSize(100, 25);
-
+		btnCancel.setSize(100, 25);		
+		
 		Listener listener = new Listener() {
 			public void handleEvent(Event event) {
 				if (event.widget == btnOkay) {
+					response = true;
 					TableItem[] items = table2.getItems();
-					boolean modified = false;
 					for (int i = 0; i < items.length; i++) {
-						if (items[i].getChecked()) {
-							modified = true;
+						if (items[i].getChecked()) {							
 							String state = items[i].getText(0);
-							editor.getGraphElement().removeStateColor(
-									new Short(state));
+							short s = Short.parseShort(state);
+							stateColr.remove(s);
 						}
 					}
-					if (modified)
-						editor.makeDirty();
+					
 				}
 				shell.close();
 			}
@@ -119,6 +125,11 @@ public class RemoveStatesDialog extends Dialog {
 			if (!display.readAndDispatch())
 				display.sleep();
 		}
+		
+		if (response)
+			return stateColr;
+		else
+			return null;
 	}
 
 }

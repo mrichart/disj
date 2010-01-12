@@ -29,7 +29,7 @@ import distributed.plugin.ui.models.NodeElement;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public class Torus implements ITopology {
+public class Torus extends AbstractGraph {
 
     private static final int GAP = IGraphEditorConstants.NODE_SIZE * 3;
 
@@ -41,28 +41,18 @@ public class Torus implements ITopology {
     
     private String linkType;
 
-    private GraphElementFactory factory;
-
-    private Shell shell;
-
     private NodeElement[][] nodes;
 
-    private List links;
-
     /**
-     * Construtor
+     * Constructor
      */
     public Torus(GraphElementFactory factory, Shell shell, String type) {
-        this.factory = factory;
-        this.shell = shell;
+    	super(factory, shell);       
         this.type = type;
-        TorusDialog dialog = new TorusDialog(this.shell);
-        dialog.open();
-        this.rows = dialog.getNumRows();
-        this.cols = dialog.getNumCols();
-        this.linkType = dialog.getLinkType();
-        this.nodes = new NodeElement[this.rows][this.cols];
-        this.links = new ArrayList();
+        this.rows = 0;
+        this.cols = 0;
+        this.linkType = IGraphEditorConstants.BI;
+        this.nodes = null;      
     }
 
     /**
@@ -76,48 +66,65 @@ public class Torus implements ITopology {
      * @see distributed.plugin.ui.models.topologies.ITopology#createTopology()
      */
     public void createTopology() {
-        for (int i = 0; i < this.rows; i++) {
-            for (int j = 0; j < this.cols; j++) {
-                this.nodes[i][j] = this.factory.createNodeElement();
-            }
-        }
 
-        // links for horizental directions
-        for (int i = 0; i < this.rows; i++) {
-            for (int j = 0; j < this.cols; j++) {
-                LinkElement link;
-                if (this.linkType.equals(IGraphEditorConstants.UNI))
-                    link = this.factory.createUniLinkElement();
-                else
-                    link = this.factory.createBiLinkElement();
-                this.links.add(link);
-            }
-        }
+		TorusDialog dialog = new TorusDialog(this.shell);
+		dialog.open();
+		
+		if (!dialog.isCancel()) {
+			this.rows = dialog.getNumRows();
+			this.cols = dialog.getNumCols();
+			this.linkType = dialog.getLinkType();
+			this.numInit = dialog.getNumInit();
+			this.nodes = new NodeElement[this.rows][this.cols];
+			
+			for (int i = 0; i < this.rows; i++) {
+				for (int j = 0; j < this.cols; j++) {
+					this.nodes[i][j] = this.factory.createNodeElement();
+				}
+			}
 
-        // links for vertical directions
-        for (int i = 0; i < this.cols; i++) {
-            for (int j = 0; j < this.rows; j++) {
-                LinkElement link;
-                if (this.linkType.equals(IGraphEditorConstants.UNI))
-                    link = this.factory.createUniLinkElement();
-                else
-                    link = this.factory.createBiLinkElement();
-                this.links.add(link);
-            }
-        }
-        
-        // Torus2: a bottom end will have a repeated link for both
-        // horizental and vertical connection
-        if(this.type.equals(IGraphEditorConstants.TORUS_2))
-            this.links.remove(links.size()-1);
+			// links for horizontal directions
+			for (int i = 0; i < this.rows; i++) {
+				for (int j = 0; j < this.cols; j++) {
+					LinkElement link;
+					if (this.linkType.equals(IGraphEditorConstants.UNI))
+						link = this.factory.createUniLinkElement();
+					else
+						link = this.factory.createBiLinkElement();
+					this.links.add(link);
+				}
+			}
 
-    }
+			// links for vertical directions
+			for (int i = 0; i < this.cols; i++) {
+				for (int j = 0; j < this.rows; j++) {
+					LinkElement link;
+					if (this.linkType.equals(IGraphEditorConstants.UNI))
+						link = this.factory.createUniLinkElement();
+					else
+						link = this.factory.createBiLinkElement();
+					this.links.add(link);
+				}
+			}
+
+			// Torus2: a bottom end will have a repeated link for both
+			// horizontal and vertical connection
+			if (this.type.equals(IGraphEditorConstants.TORUS_2)) {
+				this.links.remove(links.size() - 1);
+			}
+			
+			// set init nodes
+			super.nodes = this.getAllNodes();
+			super.numNode = super.nodes.size();
+	        this.setInitNodes();
+		}
+	}
 
     /**
      * @see distributed.plugin.ui.models.topologies.ITopology#getAllNodes()
      */
-    public List getAllNodes() {
-        List tmp = new ArrayList();
+    public List<NodeElement> getAllNodes() {
+        List<NodeElement> tmp = new ArrayList<NodeElement>();
         for (int i = 0; i < this.rows; i++) {
             for (int j = 0; j < this.cols; j++) {
                 tmp.add(this.nodes[i][j]);
@@ -125,14 +132,7 @@ public class Torus implements ITopology {
         }
         return tmp;
     }
-
-    /**
-     * @see distributed.plugin.ui.models.topologies.ITopology#getAllLinks()
-     */
-    public List getAllLinks() {
-        return this.links;
-    }
-
+    
     /**
      * @see distributed.plugin.ui.models.topologies.ITopology#getConnectionType()
      */
@@ -161,6 +161,9 @@ public class Torus implements ITopology {
      * @see distributed.plugin.ui.models.topologies.ITopology#setConnections()
      */
     public void setConnections() {
+    	if(this.rows <= 0){
+        	return;
+        }
         if(this.type.equals(IGraphEditorConstants.TORUS_1))
             this.connectType1();
         else

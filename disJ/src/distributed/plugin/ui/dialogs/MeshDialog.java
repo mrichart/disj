@@ -32,10 +32,10 @@ import distributed.plugin.ui.IGraphEditorConstants;
  */
 public class MeshDialog extends Dialog {
 
+	private boolean cancel;	
     private int numRows;
-
     private int numCols;
-
+    private int numInit;
     private String linkType;
 
     /**
@@ -44,6 +44,7 @@ public class MeshDialog extends Dialog {
     public MeshDialog(Shell arg0) {
         super(arg0);
         setText("Mesh Dialog");
+        this.cancel = true;
         this.numRows = 0;
         this.numCols = 0;
         this.linkType = null;
@@ -54,7 +55,7 @@ public class MeshDialog extends Dialog {
         final Shell shell = new Shell(getParent(), SWT.DIALOG_TRIM
                 | SWT.APPLICATION_MODAL);
         shell.setText(getText());
-        shell.setSize(320, 200);
+        shell.setSize(320, 220);
 
         // number of row
         Label numNodeQs = new Label(shell, SWT.NONE);
@@ -76,16 +77,26 @@ public class MeshDialog extends Dialog {
         diaRes.setLocation(190, 40);
         diaRes.setSize(50, 25);
 
+        // number of initiators
+		final Label numIts = new Label(shell, SWT.NONE);
+		numIts.setLocation(25, 70);
+		numIts.setSize(160, 25);
+		numIts.setText("Num of Init: ");
+
+		final Text txtInitResponse = new Text(shell, SWT.BORDER);
+		txtInitResponse.setLocation(190, 70);
+		txtInitResponse.setSize(50, 25);
+		
         // link type
         Label direct = new Label(shell, SWT.NONE);
-        direct.setLocation(25, 70);
+        direct.setLocation(25, 100);
         direct.setSize(100, 25);
         direct.setText("Type of Link: ");
 
         final Combo type = new Combo(shell, SWT.DROP_DOWN | SWT.READ_ONLY);
         type.setItems(new String[] { IGraphEditorConstants.UNI, IGraphEditorConstants.BI });
         type.select(1);
-        type.setLocation(130, 70);
+        type.setLocation(130, 100);
         type.setSize(150, 25);
 
         // final button
@@ -114,7 +125,7 @@ public class MeshDialog extends Dialog {
                                 .parseInt(txtResponse.getText().trim());
                     }
 
-                    // get number of colums
+                    // get number of columns
                     res = validateColsInput(diaRes.getText().trim());
                     if (res != null) {
                         MessageDialog.openError(getParent(), "Invalid Input",
@@ -123,7 +134,19 @@ public class MeshDialog extends Dialog {
                     } else {
                         numCols = Integer.parseInt(diaRes.getText().trim());
                     }
+                    
+                    // read number of init input
+                    res = validateInitInput(txtInitResponse.getText());
+                    if(res != null){
+                        MessageDialog.openError(getParent(), "Invalid Input",
+                                res);
+                        return;
+                    } else {
+                    	numInit = Integer.parseInt(txtInitResponse.getText().trim());
+                    }   
+                    
                     linkType = type.getText();
+                    cancel = false;
                 }
                 shell.close();
             }
@@ -165,6 +188,23 @@ public class MeshDialog extends Dialog {
 
     }
 
+    private String validateInitInput(Object param){
+        try{
+            int i = Integer.parseInt(((String)param).trim());
+            if(i > this.numCols * this.numRows)
+                return "The number of init node cannot be more than number of node";
+            else if(i < 0)
+            	return "Number of init node cannot be negative";
+            else
+                return null;
+        }catch(NumberFormatException n){
+            return "Input must be an integer number";
+        }      
+    } 
+    public int getNumInit(){
+    	return this.numInit;
+    }
+    
     public String getLinkType() {
         return this.linkType;
     }
@@ -176,4 +216,9 @@ public class MeshDialog extends Dialog {
     public int getNumCols() {
         return this.numCols;
     }
+    
+    public boolean isCancel(){
+    	return this.cancel;
+    }
+    
 }

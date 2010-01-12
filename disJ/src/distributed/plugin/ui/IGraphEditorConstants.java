@@ -68,10 +68,14 @@ public interface IGraphEditorConstants {
 	public static final String TORUS_1_DESC = "Draw a Torus network";
 	public static final String TORUS_2 = "Torus_2";
 	public static final String TORUS_2_DESC = "Draw a Torus network";
+	public static final String RANDOM_STACK = "Random Generic";
+	public static final String RANDOM_STACK_DESC = "Draw random generic graph network";
 	public static final String GENERIC = "Generic";
 	public static final String GENERIC_DESC = "Draw a random network";
-	public static final String GENERIC_C = "Generic_Connected";
+	public static final String GENERIC_C = "Connected";
 	public static final String GENERIC_C_DESC = "Draw a random connected network";
+	public static final String SPATIAL = "Spatial";
+	public static final String SPATIAL_DESC = "Draw a random spatial triangulation polygon";
 	
 	// action bar constants
 	public static final String EXECUTE_MENU = "Simulator";
@@ -116,6 +120,7 @@ public interface IGraphEditorConstants {
 	public static final String TEMPLATE_TORUS_2 = "10";
 	public static final String TEMPLATE_GENERIC = "11";
 	public static final String TEMPLATE_GENERIC_C = "12";
+	public static final String TEMPLATE_SPATIAL = "13";
 	
 	
 	// command label
@@ -132,6 +137,7 @@ public interface IGraphEditorConstants {
 	public static final String CREATE_TORUS_COMD ="Create Torus";
 	public static final String CREATE_HYPECUBE_COMD = "Create HyperCube";
 	public static final String CREATE_GENERIC_COMD = "Create Generic Graph";
+	public static final String CREATE_SPATIAL_COMD = "Create Spatial Graph";
 	
 	// general constants
 	public static final int NODE_SIZE = 30;
@@ -139,7 +145,8 @@ public interface IGraphEditorConstants {
 	public static final String ERROR_NAN = "It has to be an integer number";
 	public static final String ERROR_EMPTY_TEXT = "It cannot be an empty string";
 	public static final String ERROR_OUTOF_RAND = "The range must be between 0 - 100";
-
+	public static final String DISJ_CONSOLE = "DisJ Console";
+	
     // message direction types
     public static final String UNI = "Uni-Dirctional";
 

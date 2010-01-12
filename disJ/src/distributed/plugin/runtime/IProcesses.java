@@ -29,7 +29,7 @@ public interface IProcesses extends Runnable {
 	 * @param message A message object that need to be processed
 	 * @throws DisJException
 	 */
-	public void processMessage(String sender, List receivers, IMessage message) throws DisJException;
+	public void processMessage(String sender, List<String> receivers, IMessage message) throws DisJException;
 		
 	/**
 	 * An internal notification

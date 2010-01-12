@@ -10,9 +10,11 @@
 
 package distributed.plugin.ui.models;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,32 +40,37 @@ import distributed.plugin.ui.validators.NumberCellEditorValidator;
  */
 public class GraphElement extends AdapterElement {
 
-    public static final String PROPERTY_NAME = "G1 Graph Name";
-    public static final String PROPERTY_TOTAL_NODE = "G2 Total Node";
-    public static final String PROPERTY_TOTAL_LINK = "G3 Total Link";
-    public static final String PROPERTY_TOTAL_MSG_RECV = "G4 Total Message Received";
-    public static final String PROPERTY_TOTAL_MSG_SENT = "G5 Total Message Sent";
-    public static final String PROPERTY_GLOBAL_DELAY_TYPE = "G6 Global Delay Type";
-    public static final String PROPERTY_GLOBAL_DELAY_SEED = "G7 Global Delay Seed";
-    public static final String PROPERTY_PROTOCOL = "G8 Protocol";
+	static final long serialVersionUID = IConstants.SERIALIZE_VERSION;
+	
+	private static final String PROPERTY_NAME = "G1 Graph Name";
+	private static final String PROPERTY_TOTAL_NODE = "G2 Total Node";
+	private static final String PROPERTY_TOTAL_LINK = "G3 Total Link";
+	private static final String PROPERTY_TOTAL_MSG_RECV = "G4 Total Received Messages";
+	private static final String PROPERTY_TOTAL_MSG_SENT = "G5 Total Sent Messages";
+	private static final String PROPERTY_GLOBAL_MSG_FLOW_TYPE = "G6 Global Message Flow Type";
+	private static final String PROPERTY_GLOBAL_DELAY_TYPE = "G7 Global Delay Type";
+	private static final String PROPERTY_GLOBAL_DELAY_SEED = "G8 Global Delay Seed";
+	private static final String PROPERTY_PROTOCOL = "G9 Protocol";
     
+	private static final String[] propertyArray = {PROPERTY_NAME, PROPERTY_TOTAL_NODE,
+		PROPERTY_TOTAL_LINK, PROPERTY_TOTAL_MSG_RECV, PROPERTY_TOTAL_MSG_SENT,
+		PROPERTY_GLOBAL_MSG_FLOW_TYPE, PROPERTY_GLOBAL_DELAY_TYPE, PROPERTY_GLOBAL_DELAY_SEED, 
+		PROPERTY_PROTOCOL};
+	
+	private static final int NUM_PROPERTIES = propertyArray.length;
+	
     // message delay time supported types
-    public static final String SYNCHRONOUS = "Synchronous";
+	private static final String SYNCHRONOUS = "Synchronous";   
+	private static final String CUSTOMS = "Customs";
+	private static final String RANDOM_UNIFORM = "Random Uniform";
+	private static final String RANDOM_POISSON = "Random Poisson";
+	private static final String RANDOM_CUSTOMS = "Random Customs";
+	
+	private static final String FIFO_TYPE = "FIFO";
+	private static final String NO_ORDER_TYPE = "No Order";
+	private static final String MIX_TYPE = "Mix Order";
     
-    public static final String CUSTOMS = "Customs";
-
-    public static final String RANDOM_UNIFORM = "Random Uniform";
-
-    public static final String RANDOM_POISSON = "Random Poisson";
-
-    public static final String RANDOM_CUSTOMS = "Random Customs";
-    
-    protected static IPropertyDescriptor[] descriptors;
-    
-    static final long serialVersionUID = IConstants.SERIALIZE_VERSION;
-
-    private static final int NUM_PROPERTIES = 8;
-    
+    protected static IPropertyDescriptor[] descriptors;      
     static {
         descriptors = new IPropertyDescriptor[NUM_PROPERTIES];
 
@@ -77,23 +84,32 @@ public class GraphElement extends AdapterElement {
                 PROPERTY_TOTAL_MSG_RECV);
         descriptors[4] = new PropertyDescriptor(PROPERTY_TOTAL_MSG_SENT,
                 PROPERTY_TOTAL_MSG_SENT);
-        descriptors[5] = new ComboBoxPropertyDescriptor(PROPERTY_GLOBAL_DELAY_TYPE,
-                PROPERTY_GLOBAL_DELAY_TYPE, new String[] { SYNCHRONOUS,
-                RANDOM_UNIFORM, RANDOM_POISSON, RANDOM_CUSTOMS, CUSTOMS });
-        descriptors[6] = new TextPropertyDescriptor(PROPERTY_GLOBAL_DELAY_SEED,
+        descriptors[5] = new ComboBoxPropertyDescriptor(PROPERTY_GLOBAL_MSG_FLOW_TYPE,
+                PROPERTY_GLOBAL_MSG_FLOW_TYPE,
+                // FIXME the index order must corresponding to value in IConstance
+                new String[] {FIFO_TYPE, NO_ORDER_TYPE, MIX_TYPE});
+        descriptors[6] = new ComboBoxPropertyDescriptor(PROPERTY_GLOBAL_DELAY_TYPE,
+                PROPERTY_GLOBAL_DELAY_TYPE, 
+                // FIXME the index order must corresponding to value in IConstance
+                new String[] {SYNCHRONOUS, RANDOM_UNIFORM, RANDOM_POISSON, RANDOM_CUSTOMS, CUSTOMS });
+        descriptors[7] = new TextPropertyDescriptor(PROPERTY_GLOBAL_DELAY_SEED,
                 PROPERTY_GLOBAL_DELAY_SEED);
-        ((PropertyDescriptor) descriptors[6])
+        ((PropertyDescriptor) descriptors[7])
                 .setValidator(NumberCellEditorValidator.instance());
-        descriptors[7] = new TextPropertyDescriptor(PROPERTY_PROTOCOL,PROPERTY_PROTOCOL);
+        descriptors[8] = new TextPropertyDescriptor(PROPERTY_PROTOCOL,PROPERTY_PROTOCOL);
     }
+    
+    private String graphId;
     
     transient private Shell shell;
     
     private Graph graph;
 
-    private List nodeElements;
+    private Map<Short, RGB> stateColors;
+    
+    private List<NodeElement> nodeElements;
 
-    private List linkElements;
+    private List<LinkElement> linkElements;
     
 
     /**
@@ -102,8 +118,13 @@ public class GraphElement extends AdapterElement {
      */
     public GraphElement() {
         this.graph = GraphFactory.createGraph();
-        this.nodeElements = new ArrayList();
-        this.linkElements = new ArrayList();
+        this.graphId = "";
+        this.stateColors = new HashMap<Short, RGB>();
+        this.nodeElements = new ArrayList<NodeElement>();
+        this.linkElements = new ArrayList<LinkElement> ();
+        
+        // FIXME what is 99 state???
+		this.stateColors.put((short)99, new RGB(100, 150, 50));		
         //System.out.println("[GraphElement] created "   + this.graph);
     }
     
@@ -111,23 +132,24 @@ public class GraphElement extends AdapterElement {
      * @return
      */
     public String getGraphId(){
-        return this.graph.getId();
+        return this.graphId;
     }
     
     public void setGraphId(String partName){
-        this.graph.setId(partName);
-        try {
-			GraphFactory.addGraph(this.graph);
+        try {        	
+        	this.graph.setId(partName);
+			this.graphId = partName;
+        	GraphFactory.addGraph(this.graph);
 		} catch (DisJException e) {
 			System.err.println("Error add graph into map "+ e);
 		}
 //        System.err.println("[GraphElement] setGraphId " + this.graph + " <" + this.graph.getId() + ">");
     }
     
-    public Graph getGraph(){
+    public Graph getGraph(){   	
         return this.graph;
     }
-    
+        
     public Shell getShell(){
         return this.shell;
     }
@@ -138,26 +160,29 @@ public class GraphElement extends AdapterElement {
     
     public void copyGraphElement(){       
         for(int i =0; i < this.nodeElements.size(); i++){
-            NodeElement e = (NodeElement)this.nodeElements.get(i);
+            NodeElement e = this.nodeElements.get(i);
             e.copyNode();     
         }       
         for(int i =0; i < this.linkElements.size(); i++){
-            LinkElement e = (LinkElement)this.linkElements.get(i);
+            LinkElement e = this.linkElements.get(i);
             e.copyEdge();
         }
     }
     
-    public void resetGraphElement(){       
+    public void resetGraphElement(){ 
+    	for (int i = 0; i <  NUM_PROPERTIES; i++) {
+			this.resetPropertyValue(propertyArray[i]);
+		}
         for(int i =0; i < this.nodeElements.size(); i++){
-            NodeElement e = (NodeElement)this.nodeElements.get(i);
+            NodeElement e = this.nodeElements.get(i);
             e.resetNode();
-            e.getNode().setEntity(null);           
+            //e.getNode().setEntity(null);           
         }      
         for(int i =0; i < this.linkElements.size(); i++){
-            LinkElement e = (LinkElement)this.linkElements.get(i);
+            LinkElement e = this.linkElements.get(i);
             e.resetEdge();
         }
-        this.resetPropertyValue("");
+        
     }
     
     public void addNode(String id, final NodeElement element) {
@@ -181,13 +206,12 @@ public class GraphElement extends AdapterElement {
         }
     }
     
-    public void addStateColor(Hashtable ht){
-        this.graph.addColor(ht);
-        try {
-			GraphFactory.addGraph(this.graph);
-		} catch (DisJException e) {
-			System.err.println("Error add graph into map "+ e);
-		}
+    public void addStateColor(Map<Short, RGB> stateMap){
+        this.stateColors.putAll(stateMap);		
+    }
+    
+    public void setStateColor(Map<Short, RGB> stateMap){
+       this.stateColors = stateMap;
     }
 
     public void removeNode(String id, final NodeElement element) {
@@ -211,37 +235,36 @@ public class GraphElement extends AdapterElement {
         }
     }
     
-    public void removeStateColor(Short state){
-        this.graph.removeColor(state);
-        try {
-			GraphFactory.addGraph(this.graph);
-		} catch (DisJException e) {
-			System.err.println("Error add graph into map "+ e);
-		}
+    public void removeStateColor(Short state){      
+       this.stateColors.remove(state);
+    }
+    
+    public void removeAllStateColor(){       
+       this.stateColors.clear();
     }
 
-    public List getNodeElements() {
+    public List<NodeElement> getNodeElements() {
         return this.nodeElements;
     }
 
-    public List getLinkElements() {
+    public List<LinkElement> getLinkElements() {
         return this.linkElements;
     }
     
-    public Iterator getStateColors(){
-        return this.graph.getStateColors();
+    public Map<Short, RGB> getStateColors(){
+        return this.stateColors;
     }
     
-    public Color getStateColor(Object state){
-        RGB rgb = (RGB)this.graph.getColor(state);
+    public Color getColor(Short state){
+        RGB rgb = this.stateColors.get(state);
         if(rgb != null)
             return  new Color(this.shell.getDisplay(), rgb);
         else
             return null;
     }
     
-    public int getNumberOfState(){
-        return this.graph.getNumberOfState();
+    public int getNumStateColor(){
+        return this.stateColors.size();
     }
     
     /**
@@ -263,45 +286,42 @@ public class GraphElement extends AdapterElement {
      * @return Object which is the value of the property.
      */
     public Object getPropertyValue(Object propName) {
+    	// get a graph with a latest updated
+    	this.graph = GraphFactory.getGraph(this.graphId);
+    	
         if (propName.equals(PROPERTY_NAME)) {
             return this.getGraphId();
             
         } else if (propName.equals(PROPERTY_TOTAL_NODE)) {
-            return new Integer(this.nodeElements.size());
+            return this.nodeElements.size();
             
         } else if (propName.equals(PROPERTY_TOTAL_LINK)) {
-            return new Integer(this.linkElements.size());
+            return this.linkElements.size();
             
         } else if (propName.equals(PROPERTY_TOTAL_MSG_RECV)) {
             int sum = 0;
-            for(int i=0; i < this.nodeElements.size(); i++){
-                NodeElement n = (NodeElement)this.nodeElements.get(i);
-                sum += n.getNumMsgRecieved();
-            }
-            return new Integer(sum);
+            Map<String, Integer> counter = this.graph.getMsgRecvCounter();
+            for (String msgLabel : counter.keySet()) {
+				sum += counter.get(msgLabel);
+			}
+            return sum;
             
         } else if (propName.equals(PROPERTY_TOTAL_MSG_SENT)) {
-            int sum = 0;
-            for(int i=0; i < this.nodeElements.size(); i++){
-                NodeElement n = (NodeElement)this.nodeElements.get(i);
-                sum += n.getNumMsgSent();
-            }
-            return new Integer(sum);
+        	int sum = 0;
+            Map<String, Integer> counter = this.graph.getMsgSentCounter();
+            for (String msgLabel : counter.keySet()) {
+				sum += counter.get(msgLabel);
+			}
+            return sum;
             
-        } else if (propName.equals(PROPERTY_TOTAL_MSG_SENT)) {
-            int sum = 0;
-            for(int i=0; i < this.nodeElements.size(); i++){
-            	LinkElement n = (LinkElement)this.linkElements.get(i);
-                // NOTE do this
-            }
-            return new Integer(sum);
-
-        } else if (propName.equals(PROPERTY_GLOBAL_DELAY_TYPE)) {
-            return new Integer(this.mapGlobalDelayType(this.graph.getGlobalDelayType()));
+        } else if (propName.equals(PROPERTY_GLOBAL_MSG_FLOW_TYPE)) {
+            return this.mapGlobalFlowType(this.graph.getGlobalFlowType());
            
-
+        } else if (propName.equals(PROPERTY_GLOBAL_DELAY_TYPE)) {
+            return this.mapGlobalDelayType(this.graph.getGlobalDelayType());
+           
         } else if (propName.equals(PROPERTY_GLOBAL_DELAY_SEED)) {
-            return "" + this.graph.getGlobalDelaySeed();
+            return this.graph.getGlobalDelaySeed();
         } 
         else if (propName.equals(PROPERTY_PROTOCOL)) {
             return this.graph.getProtocol();
@@ -320,122 +340,190 @@ public class GraphElement extends AdapterElement {
      * @param value
      *            Value to be set to the given parameter.
      */
-    public void setPropertyValue(Object id, Object value) {
-        super.setPropertyValue(id, value);
-        // nothing to set here
+    public void setPropertyValue(Object id, Object value) {   	
+    	
         if(id.equals(PROPERTY_PROTOCOL)){
-        	graph.setProtocol((String)value);
-        }
-        
-        if (id.equals(PROPERTY_GLOBAL_DELAY_TYPE)){
-        	short global_type = mapGlobalDelayType( value );
-        	graph.setGlobalDelayType(global_type);
-    		short local_type;
-        	if (global_type == IConstants.GLOBAL_CUSTOMS){
-        		try {
-    				GraphFactory.addGraph(this.graph);
-    			} catch (DisJException e) {
-    				// TODO Auto-generated catch block
-    				e.printStackTrace();
-    			}
-        		return;        		
-        	}else if(global_type == IConstants.GLOBAL_RANDOM_CUSTOMS){
-    			local_type = IConstants.LOCAL_RANDOM_CUSTOMS;
+        	// nothing to set here
+        	this.graph.setProtocol((String)value);
+        	
+        } else if (id.equals(PROPERTY_GLOBAL_MSG_FLOW_TYPE)){
+      		int local_type;
+        	int global_type = this.mapGlobalFlowType(((Integer)value).intValue());
+        	
+        	this.graph.setGlobalFlowType(global_type); 
+        	if (global_type == IConstants.MSGDELAY_GLOBAL_CUSTOMS){
+        		// no specific setting for local       		
+        		
+        	}else {
+    			local_type = global_type;
+    			Map<String, Edge> edges = this.graph.getEdges();
+	        	for (String label : edges.keySet()) {
+	        		Edge ed = edges.get(label);             
+	        		ed.setMsgFlowType(local_type);
+				}
     		}
-    		else if(global_type == IConstants.GLOBAL_RANDOM_UNIFORM){
-    			local_type = IConstants.LOCAL_RANDOM_UNIFORM;
+        } else if (id.equals(PROPERTY_GLOBAL_DELAY_TYPE)){
+      		int local_type;
+      		int temp = ((Integer)value).intValue();
+        	int global_type = this.mapGlobalDelayType(temp);
+        	
+        	this.graph.setGlobalDelayType(global_type); 
+        	if (global_type == IConstants.MSGDELAY_GLOBAL_CUSTOMS){
+        		// no specific setting for local
+        		local_type = -9;
+        		
+        	}else if(global_type == IConstants.MSGDELAY_GLOBAL_RANDOM_CUSTOMS){
+    			local_type = IConstants.MSGDELAY_LOCAL_RANDOM_CUSTOMS;
     		}
-    		else if(global_type == IConstants.GLOBAL_RANDOM_POISSON){
-    			local_type = IConstants.LOCAL_RANDOM_POISSON;
+    		else if(global_type == IConstants.MSGDELAY_GLOBAL_RANDOM_UNIFORM){
+    			local_type = IConstants.MSGDELAY_LOCAL_RANDOM_UNIFORM;
+    		}
+    		else if(global_type == IConstants.MSGDELAY_GLOBAL_RANDOM_POISSON){
+    			local_type = IConstants.MSGDELAY_LOCAL_RANDOM_POISSON;
     		}
     		else{
-    			local_type = IConstants.LOCAL_FIXED;
+    			local_type = IConstants.MSGDELAY_LOCAL_FIXED;
     		}
-        	
-        	Map edges = this.graph.getEdges();
-        	Iterator itr = edges.keySet().iterator();
-        	while(itr.hasNext()){
-        		Object key = itr.next();
-        		Edge ed = (Edge)edges.get(key);
-        		ed.setDelaySeed(this.graph.getGlobalDelaySeed());
-                System.out.print("graph: local delay seed: "+ this.graph.getGlobalDelaySeed());
-        		ed.setDelayType(local_type);
+        	if(local_type != -9){
+	    		Map<String, Edge> edges = this.graph.getEdges();
+	        	for (String label : edges.keySet()) {
+	        		Edge ed = edges.get(label);
+	        		ed.setDelaySeed(this.graph.getGlobalDelaySeed());              
+	        		ed.setDelayType(local_type);
+				}
         	}
-        	try {
-				GraphFactory.addGraph(this.graph);
-			} catch (DisJException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-        }
-        else if (id.equals(PROPERTY_GLOBAL_DELAY_SEED)) {
-        	System.out.print("graph: global delay seed is set ");
-        	int val = Integer.parseInt((String)value);
+        } else if (id.equals(PROPERTY_GLOBAL_DELAY_SEED)) {
+        	int val = ((Integer)value).intValue();
         	if(val > 255 || val < 1){
         		// default value
-        		this.graph.setGlobalDelaySeed((short)1);
-        		
-        		Map edges = this.graph.getEdges();
-            	Iterator itr = edges.keySet().iterator();
-            	while(itr.hasNext()){   
-            		Object key = itr.next();
-            		Edge ed = (Edge)edges.get(key);
-            		ed.setDelaySeed((short)1);
-            	}
+        		val = IConstants.MSGDELAY_DEFAULT_SEED;       		
         	} else {
-        		this.graph.setGlobalDelaySeed((short)val);
+        		this.graph.setGlobalDelaySeed(val);
         		
-        		Map edges = this.graph.getEdges();
-            	Iterator itr = edges.keySet().iterator();
-            	while(itr.hasNext()){   
-                	Object key = itr.next();
-            		Edge ed = (Edge)edges.get(key);
-            		ed.setDelaySeed((short)val);
-            	}
-        	}
-        	try {
-				GraphFactory.addGraph(this.graph);
-			} catch (DisJException e) {
-				e.printStackTrace();
-			}
+        		Map<String, Edge> edges = this.graph.getEdges();
+        		for (String label : edges.keySet()) {
+        			Edge ed = (Edge)edges.get(label);
+            		ed.setDelaySeed(val);
+				}
+        	}       	
         }else {
+        	// unknown prop do nothing
             return;
         }
+        
+        try {
+        	// store new updated
+			GraphFactory.addGraph(this.graph);
+		} catch (DisJException e) {
+			e.printStackTrace();
+		}
     }
+
     
 
     public void resetPropertyValue(Object propName) {
-        super.resetPropertyValue(propName);
-        // nothinng to set here
+   	/*
+    	if (propName.equals("PROPERTY_GLOBAL_DELAY_SEED")) {
+			this.graph.setGlobalDelaySeed(0);
+
+		} else if (propName.equals("PROPERTY_GLOBAL_DELAY_TYPE")) {
+			this.graph.setGlobalDelayType(IConstants.MSGDELAY_GLOBAL_SYNCHRONOUS);
+
+		} else if (propName.equals("PROPERTY_PROTOCOL")) {
+			this.graph.setProtocol("");
+
+		} else 
+		*/if (propName.equals(PROPERTY_TOTAL_MSG_SENT)) {
+			this.graph.resetMsgSentCounter();
+
+		} else if (propName.equals(PROPERTY_TOTAL_MSG_RECV)) {
+			this.graph.resetMsgRecvCounter();
+		}
+    	 try {
+    		// store new updated
+ 			GraphFactory.addGraph(this.graph);
+ 		} catch (DisJException e) {
+ 			e.printStackTrace();
+ 		}       
     }
     
 
-    private final short mapGlobalDelayType(Object type) {
-    	
-    	short global_type;
-    	if (type instanceof Short) {
-    		System.out.print("graph: its short");
-			Short new_name = (Short) type;
-			System.out.println(": " + new_name );
-			global_type = new_name.shortValue();
-		}else{
-			System.out.print("graph: its int");
-			Integer i = (Integer)type;
-			System.out.println(": " + i );
-			global_type = (short) i.intValue(); 
-		}
-    	
-    	if (global_type == 0){
-    		return IConstants.GLOBAL_SYNCHRONOUS;
-    	} else if (global_type == 1){
-    		return IConstants.GLOBAL_RANDOM_UNIFORM;
-    	} else if (global_type == 2){
-    		return IConstants.GLOBAL_RANDOM_POISSON;
-    	} else if (global_type == 3){
-    		return IConstants.GLOBAL_RANDOM_CUSTOMS;
+    private final int mapGlobalDelayType(int type) {   	
+    	if (type == 0){
+    		return IConstants.MSGDELAY_GLOBAL_SYNCHRONOUS;
+    		
+    	} else if (type == 1){
+    		return IConstants.MSGDELAY_GLOBAL_RANDOM_UNIFORM;
+    		
+    	} else if (type == 2){
+    		return IConstants.MSGDELAY_GLOBAL_RANDOM_POISSON;
+    		
+    	} else if (type == 3){
+    		return IConstants.MSGDELAY_GLOBAL_RANDOM_CUSTOMS;
+    		
     	}else{
-    		return IConstants.GLOBAL_CUSTOMS;
+    		return IConstants.MSGDELAY_GLOBAL_CUSTOMS;
     	}
+    }
+    
+    private final int mapGlobalFlowType(int type) {
+        if(type == IConstants.MSGFLOW_FIFO_TYPE){
+        	return IConstants.MSGFLOW_FIFO_TYPE;
+        	
+        } else if(type == IConstants.MSGFLOW_NO_ORDER_TYPE){
+            return IConstants.MSGFLOW_NO_ORDER_TYPE;
+            
+        }else{
+        	 return IConstants.MSGFLOW_MIX_TYPE;
+        }
+    }
+
+    /*
+     * Overriding serialize object due to Java Bug4152790
+     */
+    private void writeObject(ObjectOutputStream os) throws IOException{
+		os.defaultWriteObject();
+	}
+    /*
+     * Overriding serialize object due to Java Bug4152790
+     */
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException  {
+    	// rebuild this object
+    	 ois.defaultReadObject();
+
+    	 // rebuild transient instances in Node/Link Element object	
+		try {
+			String nId;
+			for (NodeElement ne : this.nodeElements) {
+				nId = ne.getNodeId();
+				ne.setNode(this.graph.getNode(nId));
+			}
+			String eId;
+			for (LinkElement le : this.linkElements) {
+				eId = le.getEdgeId();
+				le.setEdge(this.graph.getEdge(eId));
+				
+				// rebuild source/target of each LinkElement
+				String sId = le.getSourceId();
+				le.setSource(this.getNodeElement(sId));
+
+				String tId = le.getTargetId();
+				le.setTarget(this.getNodeElement(tId));
+			}
+			
+			
+		} catch (Exception e) {
+			System.err.println("@GraphElement.readObject() " + e);
+		}    	
+    }
+
+    private NodeElement getNodeElement(String nId) throws DisJException{
+    	for (NodeElement ne : this.nodeElements) {
+			if(ne.getNodeId().equals(nId)){
+				return ne;
+			}
+		}   	
+    	throw new DisJException(IConstants.ERROR_0, nId);
     }
 
 }

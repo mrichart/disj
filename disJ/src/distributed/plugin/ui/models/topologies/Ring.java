@@ -10,9 +10,6 @@
 
 package distributed.plugin.ui.models.topologies;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.swt.widgets.Shell;
@@ -29,7 +26,7 @@ import distributed.plugin.ui.models.NodeElement;
  * TODO To change the template for this generated type comment go to Window -
  * Preferences - Java - Code Style - Code Templates
  */
-public class Ring implements ITopology {
+public class Ring extends AbstractGraph {
 
     private static final int CONSTANT = 4;
 
@@ -37,31 +34,16 @@ public class Ring implements ITopology {
 
     private int radius;
 
-    private int numberOfNode;
-
     private String linkType;
-
-    private List nodes;
-    
-    private List links;
-
-    private Shell shell;
-
-    private GraphElementFactory factory;
 
     /**
      * Constructor;
      */
     public Ring(GraphElementFactory factory, Shell shell) {
-        this.factory = factory;
-        this.shell = shell;
-        RingDialog dialog = new RingDialog(this.shell);
-        dialog.open();
-        this.numberOfNode = dialog.getNumNode();
-        this.linkType = dialog.getLinkType();
-        this.radius = this.calculateRadius(this.numberOfNode);
-        this.nodes = new ArrayList();
-        this.links = new ArrayList();
+    	super(factory, shell);      
+        this.radius = 0;
+        this.linkType = IGraphEditorConstants.BI;      
+      
     }
 
     /*
@@ -78,34 +60,34 @@ public class Ring implements ITopology {
     /**
      * @see distributed.plugin.ui.models.topologies.ITopology#createTopology(int)
      */
-    public void createTopology() {
-        // Ring: num of link == num of node
-        for (int i = 0; i < this.numberOfNode; i++) {          
-            if(this.linkType.equals(IGraphEditorConstants.UNI))
-                this.links.add(this.factory.createUniLinkElement());
-            else
-                this.links.add(this.factory.createBiLinkElement());
-            
-            this.nodes.add(this.factory.createNodeElement());
-        }
+    public void createTopology() {  	
+    	RingDialog dialog = new RingDialog(this.shell);
+        dialog.open();
         
-        // Bi-Ring with size 2 has only one link
-        if(this.numberOfNode == 2 && this.linkType.equals(IGraphEditorConstants.BI))
-            this.links.remove(1);
-    }
-
-    /**
-     * @see distributed.plugin.ui.models.topologies.ITopology#getAllNodes()
-     */
-    public List getAllNodes() {
-        return this.nodes;
-    }
-
-    /**
-     * @see distributed.plugin.ui.models.topologies.ITopology#getAllLinks()
-     */
-    public List getAllLinks() {
-        return this.links;
+        if(!dialog.isCancel()){
+	        this.numNode = dialog.getNumNode();
+	        this.linkType = dialog.getLinkType();
+	        this.numInit = dialog.getNumInit();
+	        this.radius = this.calculateRadius(this.numNode);
+	        
+	        // Ring: num of link == num of node
+	        for (int i = 0; i < this.numNode; i++) {          
+	            if(this.linkType.equals(IGraphEditorConstants.UNI))
+	                this.links.add(this.factory.createUniLinkElement());
+	            else
+	                this.links.add(this.factory.createBiLinkElement());
+	            
+	            this.nodes.add(this.factory.createNodeElement());
+	        }
+	        
+	        // Bi-Ring with size 2 has only one link
+	        if(this.numNode == 2 && this.linkType.equals(IGraphEditorConstants.BI)){
+	        	 this.links.remove(1);
+	        }
+	        
+	        // set init nodes
+	        this.setInitNodes();
+        }
     }
     
     /**
@@ -120,7 +102,7 @@ public class Ring implements ITopology {
      */
     public void applyLocation(Point point) {
         NodeElement node;
-        double dTheta = 360.0 / (double) this.numberOfNode;
+        double dTheta = 360.0 / (double) this.numNode;
         double thetaDeg, thetaRad, x, y;
 
         for (int i = 0; i < this.nodes.size(); i++) {            

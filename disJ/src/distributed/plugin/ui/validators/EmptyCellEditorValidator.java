@@ -37,7 +37,7 @@ public class EmptyCellEditorValidator implements ICellEditorValidator {
 	 * @see org.eclipse.jface.viewers.ICellEditorValidator#isValid(java.lang.Object)
 	 */
 	public String isValid(Object value) {
-		if(((String)value).trim().equals(""))
+		if(value == null || ((String)value).trim().equals(""))
 			return IGraphEditorConstants.ERROR_EMPTY_TEXT;
 		else
 			return null;

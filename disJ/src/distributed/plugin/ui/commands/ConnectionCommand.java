@@ -77,10 +77,10 @@ public class ConnectionCommand extends Command {
                     Edge e = (Edge) links.get(key);
                     Object s = e.getStart().getNodeId();
                     Object d = e.getEnd().getNodeId();
-                    if (e.getDirection() == IConstants.UNI_DIRECTION) {
+                    if (e.getDirection() == IConstants.DIRECTION_UNI) {
                         if (org.equals(s) && dist.equals(d))
                             return false;
-                    } else if (e.getDirection() == IConstants.BI_DIRECTION) {
+                    } else if (e.getDirection() == IConstants.DIRECTION_BI) {
                         if (org.equals(s) && dist.equals(d))
                             return false;
                         if (org.equals(d) && dist.equals(s))

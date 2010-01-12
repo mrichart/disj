@@ -12,6 +12,9 @@ package distributed.plugin.core;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +51,9 @@ public class Node implements Serializable {
 	private int curState;
 
 	private boolean isInitializer;
+	
+	private String userInput;
+
 
 	/**
 	 * specify as a starter for init node
@@ -67,48 +73,54 @@ public class Node implements Serializable {
 	private NodeLog log;
 
 	/**
+	 * Edges that connected to node{port label, edge}
+	 */
+	private Map<String, Edge> edges;
+	
+	/**
+	 * a list of blocking state of each port{port label,boolean}
+	 */
+	private Map<String, Boolean> blockPort;
+
+	/**
+	 * mapping between port's name and port's type {portlabel, type (Short)} i.e
+	 * {portA, BI_DIRECTION} {portB, OUT_DIRECTION} {portC, IN_DIRECTION}
+	 */
+	private Map<String, Short> ports;
+
+	/**
+	 * a list of msg queue for blocking message {localport label, list of
+	 * events}
+	 */
+	transient private Map<String, List<Event>> blockMsg;
+
+	/**
 	 * keeping track of user internal data of this entity and it cannot
 	 * 
 	 */
 	transient private Entity entity;
 
 	/**
-	 * Edges that connected to node{port label, edge}
-	 */
-	private Map edges;
-
-	/**
-	 * mapping between port's name and port's type {portlabel, type (Short)} i.e
-	 * {portA, BI_DIRECTION} {portB, OUT_DIRECTION} {portC, IN_DIRECTION}
-	 */
-	private Map ports;
-
-	/**
-	 * a list of msg queue for blocking message {localport label, list of
-	 * events}
-	 */
-	private Map blockMsg;
-
-	/**
-	 * a lis of blocking state of each port{port label,boolean}
-	 */
-	private Map blockPort;
-
-	/**
 	 * hold the events if initializer node receive message before it has been
 	 * initialized to notify the change of state a list of state-name pair of
 	 * the corresponding entity
 	 */
-	private List holdEvents;
+	transient private List<Event> holdEvents;
 
+	transient private Map<Integer, String> stateNames;
+	
 	/**
 	 * X, Y coordinate in graph editor
 	 */
 	private int x;
 
 	private int y;
-
-	transient private Map stateNames;
+	
+	private int maxX;
+	
+	private int maxY;
+	
+	
 
 	protected PropertyChangeSupport listeners = new PropertyChangeSupport(this);
 
@@ -134,6 +146,8 @@ public class Node implements Serializable {
 			boolean isStarter, int x, int y) {
 		this.x = x;
 		this.y = y;
+		this.maxX = 0;
+		this.maxY = 0;
 		this.nodeId = nodeId;
 		this.graphId = graphId;
 		this.name = name;
@@ -145,13 +159,14 @@ public class Node implements Serializable {
 		this.numMsgSend = 0;
 		this.latestRecvPort = null;
 		this.entity = null;
+		this.userInput = "";
 		this.log = new NodeLog(graphId);
-		this.edges = new HashMap();
-		this.ports = new HashMap(4);
-		this.blockMsg = new HashMap(4);
-		this.blockPort = new HashMap(4);
-		this.holdEvents = new ArrayList(0);
-		this.stateNames = new HashMap();
+		this.edges = new HashMap<String, Edge>();
+		this.ports = new HashMap<String, Short>(4);
+		this.blockMsg = new HashMap<String, List<Event>>(4);
+		this.blockPort = new HashMap<String, Boolean>(4);
+		this.holdEvents = new ArrayList<Event>(4);
+		this.stateNames = new HashMap<Integer, String>();
 
 	}
 
@@ -179,7 +194,7 @@ public class Node implements Serializable {
 	 * 
 	 * @param states
 	 */
-	public void setStateNames(Map states) {
+	public void setStateNames(Map<Integer, String> states) {
 		this.stateNames = states;
 	}
 
@@ -191,9 +206,8 @@ public class Node implements Serializable {
 	 * @return
 	 */
 	public String getStateName(int state) {
-		Object key = new Integer(state);
-		if (this.stateNames.containsKey(key)) {
-			return (String) this.stateNames.get(key);
+		if (this.stateNames.containsKey(state)) {
+			return (String) this.stateNames.get(state);
 		} else {
 			return IConstants.STATE_NOT_FOUND;
 		}
@@ -266,11 +280,11 @@ public class Node implements Serializable {
 	 */
 	public String getPortLabel(Edge edge) throws DisJException {
 		if (this.edges.containsValue(edge)) {
-			Iterator it = this.edges.keySet().iterator();
+			Iterator<String> it = this.edges.keySet().iterator();
 			while (it.hasNext()) {
-				Object label = it.next();
+				String label = it.next();
 				if (this.edges.get(label).equals(edge))
-					return (String) label;
+					return label;
 			}
 			throw new DisJException(IConstants.ERROR_1,
 					"This should not happen");
@@ -292,16 +306,17 @@ public class Node implements Serializable {
 	public void setPortLable(String port, Edge edge) throws DisJException {
 
 		// port already exist
-		if (this.edges.containsKey(port))
+		if (this.edges.containsKey(port)){
 			return;
-
+		}
+		
 		// set the edges collections
 		String old = this.getPortLabel(edge);
 		this.edges.remove(old);
 		this.edges.put(port, edge);
 
 		// set the port type tracking collection
-		Object portType = this.ports.get(old);
+		Short portType = this.ports.get(old);
 		this.ports.remove(old);
 		this.ports.put(port, portType);
 
@@ -335,7 +350,7 @@ public class Node implements Serializable {
 		if (state == true) {
 			// create a block message holding place
 			if (!this.blockMsg.containsKey(label))
-				this.blockMsg.put(label, new ArrayList());
+				this.blockMsg.put(label, new ArrayList<Event>());
 		}
 		this.blockPort.put(label, new Boolean(state));
 	}
@@ -352,7 +367,7 @@ public class Node implements Serializable {
 		if (!this.blockMsg.containsKey(portLabel))
 			throw new DisJException(IConstants.ERROR_14, portLabel);
 
-		List events = (List) this.blockMsg.get(portLabel);
+		List<Event> events = this.blockMsg.get(portLabel);
 		events.add(event);
 		this.blockMsg.put(portLabel, events);
 	}
@@ -381,8 +396,8 @@ public class Node implements Serializable {
 	 * @param portLabel
 	 * @return
 	 */
-	public List getBlockedEvents(String portLabel) {
-		return (List) this.blockMsg.get(portLabel);
+	public List<Event> getBlockedEvents(String portLabel) {
+		return this.blockMsg.get(portLabel);
 	}
 
 	/**
@@ -401,22 +416,21 @@ public class Node implements Serializable {
 	 * @throws DisJException
 	 */
 	public void assignEntity(Entity entity) throws DisJException {
-
-		if (this.entity != null)
-			throw new DisJException(IConstants.ERROR_6);
+		if (entity == null)
+			throw new DisJException(IConstants.ERROR_22);
 
 		this.entity = entity;
 	}
 
 	/**
-	 * Increment number of message receive and log the receiver TODO
+	 * Increment number of message receive and log the receiver
 	 */
 	public void incMsgRecv() {
 		this.numMsgRecv++;
 	}
 
 	/**
-	 * Increment number of message is sent and log the msg sent TODO
+	 * Increment number of message is sent and log the msg sent
 	 * 
 	 */
 	public void incMsgSend() {
@@ -517,15 +531,15 @@ public class Node implements Serializable {
 	/**
 	 * @return Returns the edges.
 	 */
-	public Map getEdges() {
+	public Map<String, Edge> getEdges() {
 		return edges;
 	}
 
-	public List getStateList() {
+	public List<String> getStateList() {
 		return this.log.getStates();
 	}
 
-	public void setStateList(List list) {
+	public void setStateList(List<String> list) {
 		this.log.setStates(list);
 	}
 
@@ -580,14 +594,14 @@ public class Node implements Serializable {
 	/**
 	 * @return Returns the holdEvents.
 	 */
-	public List getHoldEvents() {
-		return holdEvents;
+	public List<Event> getHoldEvents() {
+		return this.holdEvents;
 	}
 
 	/**
 	 * @return Returns the ports.
 	 */
-	public Map getPorts() {
+	public Map<String, Short> getPorts() {
 		return this.ports;
 	}
 
@@ -596,14 +610,12 @@ public class Node implements Serializable {
 	 * 
 	 * @return
 	 */
-	public List getOutgoingPorts() {
-		List out = new ArrayList();
-		Iterator its = this.ports.keySet().iterator();
-		while (its.hasNext()) {
-			Object port = its.next();
-			Short type = ((Short) this.ports.get(port));
-			if (type.shortValue() == IConstants.OUT_DIRECTION
-					|| type.shortValue() == IConstants.BI_DIRECTION) {
+	public List<String> getOutgoingPorts() {
+		List<String> out = new ArrayList<String>();
+		for (String port : this.ports.keySet()) {
+			short type = this.ports.get(port);
+			if (type == IConstants.DIRECTION_OUT
+					|| type == IConstants.DIRECTION_BI) {
 				out.add(port);
 			}
 		}
@@ -615,14 +627,12 @@ public class Node implements Serializable {
 	 * 
 	 * @return
 	 */
-	public List getIncomingPorts() {
-		List in = new ArrayList();
-		Iterator its = ports.keySet().iterator();
-		while (its.hasNext()) {
-			Object port = its.next();
-			Short type = ((Short) ports.get(port));
-			if (type.shortValue() == IConstants.IN_DIRECTION
-					|| type.shortValue() == IConstants.BI_DIRECTION) {
+	public List<String> getIncomingPorts() {
+		List<String> in = new ArrayList<String>();
+		for (String port : this.ports.keySet()) {
+			short type = this.ports.get(port);
+			if (type == IConstants.DIRECTION_IN
+					|| type == IConstants.DIRECTION_BI) {
 				in.add(port);
 			}
 		}
@@ -673,7 +683,7 @@ public class Node implements Serializable {
 		this.entity = entity;
 	}
 
-	public Map getBlockPort() {
+	public Map<String, Boolean> getBlockPort() {
 		return this.blockPort;
 	}
 
@@ -692,5 +702,55 @@ public class Node implements Serializable {
 	public void setY(int y) {
 		this.y = y;
 	}
+
+	public String getUserInput() {
+		return this.userInput;
+	}
+
+	public void setUserInput(String userInput) {
+		if(userInput == null){
+			userInput = "";
+		}
+		this.userInput = userInput;
+	}
+
+	public int getMaxX() {
+		return maxX;
+	}
+
+	public void setMaxX(int maxX) {
+		this.maxX = maxX;
+	}
+
+	public int getMaxY() {
+		return maxY;
+	}
+
+	public void setMaxY(int maxY) {
+		this.maxY = maxY;
+	}
+	
+	/*
+     * Overriding serialize object due to Java Bug4152790
+     */
+    private void writeObject(ObjectOutputStream os) throws IOException{    	
+   	 	// write the object
+		os.defaultWriteObject();
+	}
+    /*
+     * Overriding serialize object due to Java Bug4152790
+     */
+    private void readObject(ObjectInputStream os) throws IOException, ClassNotFoundException  {
+    	 // rebuild this object
+    	 os.defaultReadObject();
+    	 this.blockMsg = new HashMap<String, List<Event>>();
+    	 this.holdEvents = new ArrayList<Event>();
+    	 this.stateNames = new HashMap<Integer, String>();
+    	
+    	 // clean up log
+    	 this.log.clear();
+    	 	
+    }
+
 
 }

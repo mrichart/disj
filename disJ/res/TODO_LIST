@@ -1,0 +1,9 @@
+TODO
+
+1. Where is direct system.out from Eclipse VM into Eclipse plugin console
+2. Fix the the icon under Simulation Menu
+4. Add more statistic detail at the end
+5. Create log file error with special char
+6. Class loader when do deep clone
+7. Display error message from plugin to user console
+8. Display warning when there is no init state at the node

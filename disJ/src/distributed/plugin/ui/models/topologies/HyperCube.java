@@ -29,7 +29,7 @@ import distributed.plugin.ui.models.NodeElement;
  * TODO To change the template for this generated type comment go to Window -
  * Preferences - Java - Code Style - Code Templates
  */
-public class HyperCube implements ITopology {
+public class HyperCube extends AbstractGraph {
 
     private static final int GAP = IGraphEditorConstants.NODE_SIZE * 2;
     private static final int IN_GAP = IGraphEditorConstants.NODE_SIZE * 3;
@@ -41,40 +41,21 @@ public class HyperCube implements ITopology {
     private int next2;
 
     private int dimension;
-
-    private int numNode;
-
-    private int numLink;
-
+   
     private String linkType;
 
-    private List nodes;
-
-    private List links;
-
-    private Shell shell;
-
-    private GraphElementFactory factory;
-
-    private List packs3D;
+    private List<NodeElement[][]> packs3D;
 
     /**
      * 
      */
     public HyperCube(GraphElementFactory factory, Shell shell) {
+    	super(factory, shell);
         this.next1 = -1;
-        this.next2 = -1;
-        this.factory = factory;
-        this.shell = shell;
-        HyperCubeDialog dialog = new HyperCubeDialog(this.shell);
-        dialog.open();
-        this.dimension = dialog.getDimension();
-        this.numNode = (int) Math.pow(2, this.dimension);
-        this.numLink = (this.numNode * this.dimension) / 2;
-        this.linkType = dialog.getLinkType();
-        this.nodes = new ArrayList();
-        this.links = new ArrayList();
-        this.packs3D = new ArrayList();
+        this.next2 = -1;         
+    	this.dimension = 0;  	
+    	this.linkType = IGraphEditorConstants.BI;    
+        this.packs3D = new ArrayList<NodeElement[][]>();
     }
 
     /**
@@ -88,39 +69,39 @@ public class HyperCube implements ITopology {
      * @see distributed.plugin.ui.models.topologies.ITopology#createTopology()
      */
     public void createTopology() {
-        for (int i = 0; i < this.numNode; i++) {
-            this.nodes.add(this.factory.createNodeElement());
+    	
+    	HyperCubeDialog dialog = new HyperCubeDialog(this.shell);
+        dialog.open();
+        if(!dialog.isCancel()){
+	        this.dimension = dialog.getDimension();
+	        this.numNode = (int) Math.pow(2, this.dimension);
+	        this.numLink = (this.numNode * this.dimension) / 2;
+	        this.linkType = dialog.getLinkType();
+	        this.numInit = dialog.getNumInit();
+        
+	        for (int i = 0; i < this.numNode; i++) {
+	            this.nodes.add(this.factory.createNodeElement());
+	        }
+	
+	        if (this.linkType.equals(IGraphEditorConstants.BI)) {
+	            for (int i = 0; i < this.numLink; i++) {
+	                this.links.add(this.factory.createBiLinkElement());
+	            }
+	        } else {
+	            for (int i = 0; i < this.numLink; i++) {
+	                this.links.add(this.factory.createUniLinkElement());
+	            }
+	        }
+	        
+	        // set init nodes
+	        this.setInitNodes();
         }
-
-        if (this.linkType.equals(IGraphEditorConstants.BI)) {
-            for (int i = 0; i < this.numLink; i++) {
-                this.links.add(this.factory.createBiLinkElement());
-            }
-        } else {
-            for (int i = 0; i < this.numLink; i++) {
-                this.links.add(this.factory.createUniLinkElement());
-            }
-        }
-    }
-
-    /**
-     * @see distributed.plugin.ui.models.topologies.ITopology#getAllNodes()
-     */
-    public List getAllNodes() {
-        return this.nodes;
     }
 
     private NodeElement nextNode() {
         return (NodeElement) this.nodes.get(++next1);
     }
 
-    /**
-     * @see distributed.plugin.ui.models.topologies.ITopology#getAllLinks()
-     */
-    public List getAllLinks() {
-        return this.links;
-    }
-    
     private LinkElement nextLink(){
         return (LinkElement)this.links.get(++next2);
     }
@@ -136,21 +117,25 @@ public class HyperCube implements ITopology {
      * @see distributed.plugin.ui.models.topologies.ITopology#applyLocation(org.eclipse.draw2d.geometry.Point)
      */
     public void applyLocation(Point point) {
-        if (this.dimension == 2) {
-            NodeElement[][] pack = this.get2DPack();
-            this.draw2Dimension(point, IN_GAP, pack);
-            this.packs3D.add(pack);
-        } else if (this.dimension == 3) {
-            this.draw3Dimension(point);
-        } else if (this.dimension == 4) {
-            this.draw4Dimension(point);
-        } else if (this.dimension == 5) {
-            this.draw5Dimension(point);
-        } else if (this.dimension == 6) {
-            this.draw4Dimension(point);
-        } else if (this.dimension == 7) {
-            this.draw5Dimension(point);
-        }
+    	if(this.numNode > 0){
+	        if (this.dimension == 2) {
+	            NodeElement[][] pack = this.get2DPack();
+	            this.draw2Dimension(point, IN_GAP, pack);
+	            this.packs3D.add(pack);
+	        } else if (this.dimension == 3) {
+	            this.draw3Dimension(point);
+	        } else if (this.dimension == 4) {
+	            this.draw4Dimension(point);
+	        } else if (this.dimension == 5) {
+	            this.draw5Dimension(point);
+	        } else if (this.dimension == 6) {
+	            this.draw4Dimension(point);
+	        } else if (this.dimension == 7) {
+	            this.draw5Dimension(point);
+	        }else{
+	        	//not support
+	        }
+    	}
     }
 
     private NodeElement[][] get2DPack() {
@@ -238,18 +223,18 @@ public class HyperCube implements ITopology {
 
     }
     
-    private List connect4(int i0, int i1, int i2, int i3){
-        NodeElement[][] out1 = (NodeElement[][])this.packs3D.get(i0);
-        NodeElement[][] in1  = (NodeElement[][])this.packs3D.get(i1);
+    private List<NodeElement[][]> connect4(int i0, int i1, int i2, int i3){
+        NodeElement[][] out1 = this.packs3D.get(i0);
+        NodeElement[][] in1  = this.packs3D.get(i1);
         this.connect3D(out1, in1);
         
-        NodeElement[][] out2 = (NodeElement[][])this.packs3D.get(i2);
-        NodeElement[][] in2  = (NodeElement[][])this.packs3D.get(i3);
+        NodeElement[][] out2 = this.packs3D.get(i2);
+        NodeElement[][] in2  = this.packs3D.get(i3);
         this.connect3D(out2, in2);  
         
         this.connecXD(out1, in1, out2, in2);
         
-        ArrayList list = new ArrayList();
+        List<NodeElement[][]> list = new ArrayList<NodeElement[][]>();
         list.add(out1);
         list.add(in1);
         list.add(out2);
@@ -257,23 +242,23 @@ public class HyperCube implements ITopology {
         return list;
     }
     
-    private List connect5(int s){
-        List part1 = this.connect4(s++, s++,s++,s++);
-        NodeElement[][] out1 = (NodeElement[][])part1.get(0);
-        NodeElement[][] in1 = (NodeElement[][])part1.get(1);
-        NodeElement[][] out2 = (NodeElement[][])part1.get(2);
-        NodeElement[][] in2 = (NodeElement[][])part1.get(3);
+    private List<NodeElement[][]> connect5(int s){
+        List<NodeElement[][]> part1 = this.connect4(s++, s++,s++,s++);
+        NodeElement[][] out1 = part1.get(0);
+        NodeElement[][] in1 = part1.get(1);
+        NodeElement[][] out2 = part1.get(2);
+        NodeElement[][] in2 = part1.get(3);
         
-        List part2 = this.connect4(s++,s++,s++,s++);
-        NodeElement[][] out3 = (NodeElement[][])part2.get(0);
-        NodeElement[][] in3 = (NodeElement[][])part2.get(1);
-        NodeElement[][] out4 = (NodeElement[][])part2.get(2);
-        NodeElement[][] in4 = (NodeElement[][])part2.get(3);
+        List<NodeElement[][]> part2 = this.connect4(s++,s++,s++,s++);
+        NodeElement[][] out3 = part2.get(0);
+        NodeElement[][] in3 = part2.get(1);
+        NodeElement[][] out4 = part2.get(2);
+        NodeElement[][] in4 = part2.get(3);
         
         this.connecXD(out1,in1, out3, in3);
         this.connecXD(out2, in2, out4, in4);
         
-        ArrayList list = new ArrayList();
+        List<NodeElement[][]> list = new ArrayList<NodeElement[][]>();
         list.add(out1);
         list.add(in1);
         list.add(out2);
@@ -286,33 +271,33 @@ public class HyperCube implements ITopology {
         return list;       
     }
     
-    private List connect6(){
-        List part1 = this.connect5(0);
-        NodeElement[][] out1 = (NodeElement[][])part1.get(0);
-        NodeElement[][] in1 = (NodeElement[][])part1.get(1);
-        NodeElement[][] out2 = (NodeElement[][])part1.get(2);
-        NodeElement[][] in2 = (NodeElement[][])part1.get(3);
-        NodeElement[][] out3 = (NodeElement[][])part1.get(4);
-        NodeElement[][] in3 = (NodeElement[][])part1.get(5);
-        NodeElement[][] out4 = (NodeElement[][])part1.get(6);
-        NodeElement[][] in4 = (NodeElement[][])part1.get(7);
+    private List<NodeElement[][]> connect6(){
+        List<NodeElement[][]> part1 = this.connect5(0);
+        NodeElement[][] out1 = part1.get(0);
+        NodeElement[][] in1 = part1.get(1);
+        NodeElement[][] out2 = part1.get(2);
+        NodeElement[][] in2 = part1.get(3);
+        NodeElement[][] out3 = part1.get(4);
+        NodeElement[][] in3 = part1.get(5);
+        NodeElement[][] out4 = part1.get(6);
+        NodeElement[][] in4 = part1.get(7);
         
-        List part2 = this.connect5(8);
-        NodeElement[][] out5 = (NodeElement[][])part2.get(0);
-        NodeElement[][] in5 = (NodeElement[][])part2.get(1);
-        NodeElement[][] out6 = (NodeElement[][])part2.get(2);
-        NodeElement[][] in6 = (NodeElement[][])part2.get(3);
-        NodeElement[][] out7 = (NodeElement[][])part2.get(4);
-        NodeElement[][] in7 = (NodeElement[][])part2.get(5);
-        NodeElement[][] out8 = (NodeElement[][])part2.get(6);
-        NodeElement[][] in8 = (NodeElement[][])part2.get(7);
+        List<NodeElement[][]> part2 = this.connect5(8);
+        NodeElement[][] out5 = part2.get(0);
+        NodeElement[][] in5 = part2.get(1);
+        NodeElement[][] out6 = part2.get(2);
+        NodeElement[][] in6 = part2.get(3);
+        NodeElement[][] out7 = part2.get(4);
+        NodeElement[][] in7 = part2.get(5);
+        NodeElement[][] out8 = part2.get(6);
+        NodeElement[][] in8 = part2.get(7);
         
         this.connecXD(out1,in1, out5, in5);
         this.connecXD(out2, in2, out6, in6);
         this.connecXD(out3,in3, out7, in7);
         this.connecXD(out4, in4, out8, in8);
         
-        ArrayList list = new ArrayList();
+        List<NodeElement[][]> list = new ArrayList<NodeElement[][]>();
         list.add(out1);
         list.add(in1);
         list.add(out2);

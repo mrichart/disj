@@ -24,13 +24,13 @@ public class EdgeLog implements Serializable {
     static final long serialVersionUID = IConstants.SERIALIZE_VERSION;
 	private String graphId;
 	private int count; // count number of messages passed through
-	private List msgPassed; // a set of message that passed through this link
+	private List<String> msgPassed; // a set of message that passed through this link
 	// need to be orderded by entered time
 	
 	public EdgeLog(String graphId){
 		this.graphId = graphId;
 		this.count = 0;
-		this.msgPassed = new ArrayList();
+		this.msgPassed = new ArrayList<String>();
 	}
 
 	/**
@@ -40,6 +40,11 @@ public class EdgeLog implements Serializable {
 		return count;
 	}
 	
+	protected void clear(){
+		this.count = 0;
+		this.msgPassed.clear();
+	}
+
 	/**
 	 * @see distributed.plugin.core.Logable#getOwnerId()
 	 */
@@ -55,12 +60,13 @@ public class EdgeLog implements Serializable {
 	/*
 	 * Shrink the log memory by 3/4
 	 */
-	private void shrinkMemory(){
-		if(this.msgPassed.size() > 20){
-			for(int i =0; i < 15; i++){
-				this.msgPassed.remove(i);
-			}
-		}		
-	}
+
+//	private void shrinkMemory(){
+//		if(this.msgPassed.size() > 20){
+//			for(int i =0; i < 15; i++){
+//				this.msgPassed.remove(i);
+//			}
+//		}		
+//	}
 	
 }

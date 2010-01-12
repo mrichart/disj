@@ -17,7 +17,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +35,7 @@ public class GraphLoader {
 
     // caching storages; for a long operation and using more than one time
 
-    private static Map initNodeTable = new HashMap();
+    private static Map<Graph, List<Node>> initNodeTable = new HashMap<Graph, List<Node>>();
 
     /**
      * Get all the initializer node of a given graph
@@ -44,23 +43,21 @@ public class GraphLoader {
      * @param graph
      * @return
      */
-    public static List getInitNodes(Graph graph) {
+    public static List<Node> getInitNodes(Graph graph) {
 
         if (graph == null)
             throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
 
-        List initList = (List) initNodeTable.get(graph);
-        if (initList == null) {
-            Map nodes = graph.getNodes();
-            Iterator itr = nodes.keySet().iterator();
-            initList = new ArrayList();
-            while (itr.hasNext()) {
-                Object nodeName = itr.next();
-                Node initNode = (Node) nodes.get(nodeName);
+        List<Node> initList = initNodeTable.get(graph);
+        if (initList == null || initList.isEmpty()) {
+        	initList = new ArrayList<Node>();
+            Map<String, Node> nodes = graph.getNodes();
+            for (String id : nodes.keySet()) {
+            	Node initNode = nodes.get(id);
                 if (initNode.isInitializer()) {
                     initList.add(initNode);
                 }
-            }
+			}          
             initNodeTable.put(graph, initList);
         }
         return initList;
@@ -105,13 +102,11 @@ public class GraphLoader {
      */
     public static String getEdgeLabel(Node node, Edge edge) {
 
-        Map edges = node.getEdges();
-        Iterator it = edges.keySet().iterator();
-        while (it.hasNext()) {
-            Object label = it.next();
-            if (edges.get(label).equals(edge))
-                return (String) label;
-        }
+        Map<String, Edge> edges = node.getEdges();
+        for (String label : edges.keySet()) {
+        	 if (edges.get(label).equals(edge))
+                 return (String) label;
+		}
         return null;
     }
 

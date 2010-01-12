@@ -30,22 +30,26 @@ import distributed.plugin.ui.IGraphEditorConstants;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public class CompleteGraphDialog extends Dialog {
+public class SpatialDialog extends Dialog {
 
 	private boolean cancel;
     private int numNode;
-    private String linkType;
     private int numInit;
+    private int maxX;
+    private int maxY;
+    private String linkType;
     
     /**
      * @param arg0
      */
-    public CompleteGraphDialog(Shell arg0) {
+    public SpatialDialog(Shell arg0) {
         super(arg0);
-        setText("Complete Graph Dialog");
+        setText("Spaitil Dialog");
         this.cancel = true;
         this.numNode = 0;
         this.numInit = 0;
+        this.maxX = 0;
+        this.maxY = 0;
         this.linkType = null;
     }
 
@@ -60,7 +64,7 @@ public class CompleteGraphDialog extends Dialog {
         Label numNodeQs = new Label(shell, SWT.NONE);
         numNodeQs.setLocation(25, 10);
         numNodeQs.setSize(160, 25);
-        numNodeQs.setText("Number of Node: ");
+        numNodeQs.setText("Number of node: ");
 
         final Text txtResponse = new Text(shell, SWT.BORDER);
         txtResponse.setLocation(190, 10);
@@ -75,7 +79,28 @@ public class CompleteGraphDialog extends Dialog {
 		final Text txtInitResponse = new Text(shell, SWT.BORDER);
 		txtInitResponse.setLocation(190, 40);
 		txtInitResponse.setSize(50, 25);
-				
+
+		/*
+		// max size of x,y coordinate
+		final Label maxXLabel = new Label(shell, SWT.NONE);
+		maxXLabel.setLocation(25, 70);
+		maxXLabel.setSize(160, 25);
+		maxXLabel.setText("Max X: ");
+
+		final Text txtXResponse = new Text(shell, SWT.BORDER);
+		txtXResponse.setLocation(190, 70);
+		txtXResponse.setSize(50, 25);
+		
+		// max size of x,y coordinate
+		final Label maxYLabel = new Label(shell, SWT.NONE);
+		maxYLabel.setLocation(25, 100);
+		maxYLabel.setSize(160, 25);
+		maxYLabel.setText("Max Y: ");
+
+		final Text txtYResponse = new Text(shell, SWT.BORDER);
+		txtYResponse.setLocation(190, 100);
+		txtYResponse.setSize(50, 25);
+		*/
         // link type
         Label direct = new Label(shell, SWT.NONE);
         direct.setLocation(25, 70);
@@ -91,20 +116,18 @@ public class CompleteGraphDialog extends Dialog {
         // final button
         final Button btnOkay = new Button(shell, SWT.PUSH);
         btnOkay.setText("Ok");
-        btnOkay.setLocation(40, 120);
+        btnOkay.setLocation(40, 100);
         btnOkay.setSize(100, 30);
 
         final Button btnCancel = new Button(shell, SWT.PUSH);
         btnCancel.setText("Cancel");
-        btnCancel.setLocation(160, 120);
+        btnCancel.setLocation(160, 100);
         btnCancel.setSize(100, 30);
         btnCancel.setSelection(true);
-        
         
         Listener listener = new Listener() {
             public void handleEvent(Event event) {
                 if(event.widget == btnOkay){
-                	// read number of node input
                     String res = validateInput(txtResponse.getText());
                     if(res != null){
                         MessageDialog.openError(getParent(), "Invalid Input",
@@ -113,7 +136,7 @@ public class CompleteGraphDialog extends Dialog {
                     } else {
                         numNode = Integer.parseInt(txtResponse.getText().trim());
                     }
-                                       
+                    
                     // read number of init input
                     res = validateInitInput(txtInitResponse.getText());
                     if(res != null){
@@ -122,8 +145,28 @@ public class CompleteGraphDialog extends Dialog {
                         return;
                     } else {
                     	numInit = Integer.parseInt(txtInitResponse.getText().trim());
-                    }                                  
+                    }   
+                    /*
+                    // read number of max X input
+                    res = validateCoordinateInput(txtXResponse.getText());
+                    if(res != null){
+                        MessageDialog.openError(getParent(), "Invalid Input",
+                                res);
+                        return;
+                    } else {
+                    	maxX = Integer.parseInt(txtXResponse.getText().trim());
+                    }
                     
+                    // read number of max Y input
+                    res = validateCoordinateInput(txtYResponse.getText());
+                    if(res != null){
+                        MessageDialog.openError(getParent(), "Invalid Input",
+                                res);
+                        return;
+                    } else {
+                    	maxY = Integer.parseInt(txtYResponse.getText().trim());
+                    }   
+                    */
                     linkType = type.getText();
                     cancel = false;
                 }                
@@ -135,18 +178,19 @@ public class CompleteGraphDialog extends Dialog {
         btnCancel.addListener(SWT.Selection, listener);
 
         shell.open();
-        Display display = getParent().getDisplay();
+        Display display = shell.getDisplay();
         while (!shell.isDisposed()) {
-            if (!display.readAndDispatch())
+            if (!display.readAndDispatch()){
                 display.sleep();
+            }
         }
     }
     
     private String validateInput(Object param){
         try{
             int i = Integer.parseInt(((String)param).trim());
-            if(i < 2)
-                return "The size of graph should more than 1";
+            if(i < 3)
+                return "The size of spatial triangulation must be more than 2";
             else
                 return null;
         }catch(NumberFormatException n){
@@ -167,23 +211,39 @@ public class CompleteGraphDialog extends Dialog {
         }catch(NumberFormatException n){
             return "Input must be an integer number";
         }      
-    }  
-
-    public String getLinkType() {
-        return linkType;
-    }
-    
-    public int getNumNode() {
-        return numNode;
-    }
-    
+    } 
+    private String validateCoordinateInput(Object param){
+        try{
+            int i = Integer.parseInt(((String)param).trim());
+            if(i < this.numNode * IGraphEditorConstants.NODE_SIZE)
+                return "The size is too small";
+            else
+                return null;
+        }catch(NumberFormatException n){
+            return "Input must be an integer number";
+        }      
+    } 
     
     public int getNumInit(){
     	return this.numInit;
     }
-    
-	public boolean isCancel() {
-		return cancel;
+
+    public String getLinkType() {
+        return this.linkType;
+    }
+    public int getNumNode() {
+        return this.numNode;
+    }
+    public boolean isCancel(){
+    	return this.cancel;
+    }
+
+	public int getMaxX() {
+		return maxX;
+	}
+
+	public int getMaxY() {
+		return maxY;
 	}
     
     

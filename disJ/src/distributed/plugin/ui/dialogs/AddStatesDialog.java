@@ -10,11 +10,12 @@
 
 package distributed.plugin.ui.dialogs;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Hashtable;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
@@ -41,20 +42,21 @@ public class AddStatesDialog extends Dialog {
 
 	// a pair of state and color {Short, RGB};
 
-	private Hashtable ht;
+	private Map<Short, RGB> stateColr;
 
 	private boolean response;
 
 	/**
 	 * @param arg0
 	 */
-	public AddStatesDialog(Shell arg0) {
+	public AddStatesDialog(Shell arg0, Map<Short, RGB> stateColr) {
 		super(arg0);
 		setText("Add State Color Dialog");
-		ht = new Hashtable();
+		this.response = false;
+		this.stateColr = stateColr;
 	}
 
-	public Hashtable open() {
+	public Map<Short, RGB> open() {
 
 		final Shell shell = new Shell(getParent(), SWT.DIALOG_TRIM
 				| SWT.APPLICATION_MODAL);
@@ -86,9 +88,8 @@ public class AddStatesDialog extends Dialog {
 		colBtn.setText("Set Color");
 		colBtn.setLocation(145, 50);
 		colBtn.setSize(130, 30);
-
+		
 		// final button
-
 		// final Button btnAdd = new Button(shell, SWT.PUSH);
 		// btnAdd.setText("Add");
 		// btnAdd.setLocation(10, 100);
@@ -115,11 +116,28 @@ public class AddStatesDialog extends Dialog {
 
 		TableColumn col = new TableColumn(colorTable, SWT.CENTER);
 		col.setText("State");
-		col.setWidth(40);
+		col.setWidth(70);
 		TableColumn colour = new TableColumn(colorTable, SWT.LEFT);
 		colour.setText("Colour");
-		colour.setWidth(50);
+		colour.setWidth(100);
 
+		// display existing colors
+		List<Short> temp = new ArrayList<Short>();
+		for (Short state : this.stateColr.keySet()) {
+			temp.add(state);
+		}
+		Collections.sort(temp);
+		for (Short num : temp) {
+			// FIXME why is 99???? use constant!!
+			if (num != 99) {
+				Color color = new Color(getParent().getDisplay(),
+						stateColr.get(num));
+				TableItem e = new TableItem(colorTable, SWT.NONE);
+				e.setText(0, num.toString());
+				e.setBackground(1, color);
+			}
+		}
+		
 		Listener listener = new Listener() {
 			public void handleEvent(Event event) {
 				response = (event.widget == btnOkay);
@@ -133,24 +151,43 @@ public class AddStatesDialog extends Dialog {
 				colorDialog.setText("Color Palette");
 				colorDialog.setRGB(new RGB(255, 0, 0));
 				RGB color = colorDialog.open();
-				colRes
-						.setBackground(new Color(getParent().getDisplay(),
+				colRes.setBackground(new Color(getParent().getDisplay(),
 								color));
 
-				// show in color table
+				// validate input
+				short state;
+				 String res = validateInput(txtResponse.getText());
+                 if(res != null){
+                     MessageDialog.openError(getParent(), "Invalid Input",
+                             res);
+                     return;
+                 } else {
+                     state = Short.parseShort(txtResponse.getText().trim());
+                 }
+                 
 				if (!txtResponse.getText().equals("")) {
-					ht.put(new Short(txtResponse.getText()), color);
-					colorTable.removeAll();
-					List keys = new LinkedList(ht.keySet());
-					Collections.sort(keys);
-					for (Object key : keys) {
+					stateColr.put(state, color);									
+				}
+				
+				// add color and state into table
+				List<Short> temp = new ArrayList<Short>();
+				for (Short s : stateColr.keySet()) {
+					temp.add(s);
+				}
+				Collections.sort(temp);
+				colorTable.removeAll();
+				for (Short num : temp) {
+					// FIXME why is 99???? use constant!!
+					if (num != 99) {
 						Color aColor = new Color(getParent().getDisplay(),
-								(RGB) ht.get(key));
+								stateColr.get(num));
 						TableItem e = new TableItem(colorTable, SWT.NONE);
-						e.setText(0, key.toString());
+						e.setText(0, num.toString());
 						e.setBackground(1, aColor);
 					}
 				}
+								
+				// clear input text
 				txtResponse.setText("");
 				btnOkay.setSelection(true);
 				btnCancel.setSelection(false);
@@ -158,10 +195,11 @@ public class AddStatesDialog extends Dialog {
 		};
 
 		// btnAdd.addListener(SWT.Selection, addListener);
-		btnOkay.addListener(SWT.Selection, listener);
-		btnCancel.addListener(SWT.Selection, listener);
 		colBtn.addListener(SWT.Selection, colrListerner);
 
+		btnOkay.addListener(SWT.Selection, listener);
+		btnCancel.addListener(SWT.Selection, listener);
+				
 		shell.open();
 		Display display = getParent().getDisplay();
 		while (!shell.isDisposed()) {
@@ -169,8 +207,17 @@ public class AddStatesDialog extends Dialog {
 				display.sleep();
 		}
 		if (response)
-			return ht;
+			return stateColr;
 		else
 			return null;
 	}
+	
+	  private String validateInput(Object param){
+	        try{
+	        	Short.parseShort(((String)param).trim());
+	            return null;
+	        }catch(NumberFormatException n){
+	            return "Input must be a short number";
+	        }
+	  }
 }

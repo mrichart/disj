@@ -19,7 +19,10 @@ import distributed.plugin.runtime.IMessage;
  */
 public class Message implements IMessage {
 
+	private static final long serialVersionUID = 1L;
+	
 	private String label;
+	
 	private Object clientMessage;
 	
 	protected Message(Object clientMessage){

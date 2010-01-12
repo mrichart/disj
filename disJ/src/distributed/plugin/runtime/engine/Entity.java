@@ -13,7 +13,6 @@ package distributed.plugin.runtime.engine;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +23,7 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 import distributed.plugin.core.DisJException;
+import distributed.plugin.core.Edge;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
 import distributed.plugin.runtime.ICommunicable;
@@ -39,6 +39,8 @@ public abstract class Entity implements ICommunicable {
 
 	private int startState;
 
+	private int lastState = -1;
+	
 	private Processor processor;
 
 	private Node nodeOwner;
@@ -47,13 +49,11 @@ public abstract class Entity implements ICommunicable {
 
 	private MessageConsoleStream out;
 
-	private int lastState=-1;
-
 	protected Entity(int state) {
 		this.startState = state;
 		this.processor = null;
 		this.nodeOwner = null;
-		this.console = this.findConsole("DisJ Console");
+		this.console = Entity.findConsole(IGraphEditorConstants.DISJ_CONSOLE);
 		this.out = this.console.newMessageStream();
 		System.setOut(new PrintStream(this.out));
 	}
@@ -86,7 +86,7 @@ public abstract class Entity implements ICommunicable {
 	 * @param processor
 	 * @param owner
 	 */
-	void initEntity(Processor processor, Node owner, Map states) {
+	void initEntity(Processor processor, Node owner, Map<Integer, String> states) {
 		if (this.processor == null)
 			this.processor = processor;
 
@@ -100,8 +100,8 @@ public abstract class Entity implements ICommunicable {
 	/**
 	 * @return Returns the nodeOwner.
 	 */
-	public final Node getNodeOwner() {
-		return nodeOwner;
+	final Node getNodeOwner() {
+		return this.nodeOwner;
 	}
 
 	/**
@@ -136,17 +136,37 @@ public abstract class Entity implements ICommunicable {
 	}
 
 	/**
+	 * Get user input value from the editor
+	 * @return A string of value, if value is empty, it returns
+	 * an empty string
+	 */
+	public final String getUserInput(){
+		try {
+			if (this.nodeOwner == null)
+				throw new DisJException(IConstants.ERROR_7);
+
+		} catch (DisJException e) {
+			e.printStackTrace();
+			this.printToConsole(e);
+
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			this.printToConsole(e);
+		}
+		return this.nodeOwner.getUserInput();
+	}
+	
+	/**
 	 * Get all local in and out port labels of this entity. If a port of
 	 * bi-directoin link it will consider as one port.
 	 * 
 	 * @return A list of String of all local port labels
 	 */
-	public final List getPorts() {
-		Iterator it = this.nodeOwner.getPorts().keySet().iterator();
-		List ports = new ArrayList();
-		while (it.hasNext())
-			ports.add(it.next());
-
+	public final List<String> getPorts() {		
+		List<String> ports = new ArrayList<String>();
+		for (String label : this.nodeOwner.getPorts().keySet()) {
+			ports.add(label);
+		}
 		return ports;
 	}
 
@@ -155,16 +175,16 @@ public abstract class Entity implements ICommunicable {
 	 * 
 	 * @return A list of String all out going port labels
 	 */
-	public final List getOutPorts() {
+	public final List<String> getOutPorts() {
 		return this.nodeOwner.getOutgoingPorts();
 	}
 
 	/**
-	 * Get all incomming port labels of this entity
+	 * Get all incoming port labels of this entity
 	 * 
-	 * @return A list of String of all incomming port labels
+	 * @return A list of String of all incoming port labels
 	 */
-	public final List getInPorts() {
+	public final List<String> getInPorts() {
 		return this.nodeOwner.getIncomingPorts();
 	}
 
@@ -184,9 +204,10 @@ public abstract class Entity implements ICommunicable {
 				throw new DisJException(IConstants.ERROR_7);
 
 			this.nodeOwner.setCurState(state);
-			this.processor.appendToRecFile("sc:"+this.getId()
-					+ IGraphEditorConstants.STATE_CHANGE + state);
+			
 			//state change record
+			//this.processor.appendToRecFile("sc:"+this.getId()
+			//		+ IGraphEditorConstants.STATE_CHANGE + state);
 			
 
 		} catch (DisJException e) {
@@ -199,36 +220,42 @@ public abstract class Entity implements ICommunicable {
 		}
 	}
 
-	private String getId() {
+	private String getNodeId() {
 		return this.nodeOwner.getNodeId();
 	}
 
+	// FIXME what is lvc ?????
 	public final void setLinkVisibility(String port, boolean visible) {
-		try {
-			getNodeOwner().getEdge(port).getLinkElement().setVisible(visible);
-			this.processor.appendToRecFile("lvc:"+port
-					+ IGraphEditorConstants.LINK_VISIBILITY_CHANGE + visible);
-			//link visibility change record
-		} catch (DisJException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			getNodeOwner().getEdge(port).getLinkElement().setVisible(visible);
+//			//this.processor.appendToRecFile("lvc:"+port
+//			//		+ IGraphEditorConstants.LINK_VISIBILITY_CHANGE + visible);
+//			//link visibility change record
+//		} catch (DisJException e) {
+//			e.printStackTrace();
+//		}
 	}
 
+	// FIXME this will NOT work!!!
 	public final String getNeighbourName(String port) {
 		String returnValue = "";
 		try {
-			String name1 = getNodeOwner().getEdge(port).getLinkElement()
-					.getSource().getNode().getName();
-			String name2 = getNodeOwner().getEdge(port).getLinkElement()
-					.getTarget().getNode().getName();
+//			String name1 = getNodeOwner().getEdge(port).getLinkElement()
+//					.getSource().getNode().getName();
+			String name1 = getNodeOwner().getEdge(port).getStart().getName();
+			
+//			String name2 = getNodeOwner().getEdge(port).getLinkElement()
+//					.getTarget().getNode().getName();
+			
+			String name2 = getNodeOwner().getEdge(port).getEnd().getName();
+
+			
 			if (name1.endsWith(this.getName())) {
 				return returnValue = name2;
 			} else {
 				return returnValue = name1;
 			}
 		} catch (DisJException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return returnValue;
@@ -251,10 +278,10 @@ public abstract class Entity implements ICommunicable {
 			}
 		} catch (DisJException e) {
 			e.printStackTrace();
-			this.printToConsole("@Entity.setAlarm() " + e);
+			this.printToConsole(e);
 		} catch (RuntimeException e) {
 			e.printStackTrace();
-			this.printToConsole("@Entity.setAlarm() " + e);
+			this.printToConsole(e);
 		}
 	}
 
@@ -281,7 +308,7 @@ public abstract class Entity implements ICommunicable {
 	}
 
 	/**
-	 * Send a ginven message through a given port name. If a port name does not
+	 * Send a given message through a given port name. If a port name does not
 	 * exist, there will be no message sending.
 	 * 
 	 * @param portLabel
@@ -294,7 +321,7 @@ public abstract class Entity implements ICommunicable {
 	}
 
 	/**
-	 * Send a ginven message through a given port name. If a port name does not
+	 * Send a given message through a given port name. If a port name does not
 	 * exist, there will be no message sending.
 	 * 
 	 * @param portLabel
@@ -307,7 +334,7 @@ public abstract class Entity implements ICommunicable {
 	}
 
 	/**
-	 * Send a ginven message through a given port name. If a port name does not
+	 * Send a given message through a given port name. If a port name does not
 	 * exist, there will be no message sending.
 	 * 
 	 * @param portLabel
@@ -320,7 +347,7 @@ public abstract class Entity implements ICommunicable {
 	}
 
 	/**
-	 * Send a ginven message through a given port name. If a port name does not
+	 * Send a given message through a given port name. If a port name does not
 	 * exist, there will be no message sending.
 	 * 
 	 * @param portLabel
@@ -333,7 +360,7 @@ public abstract class Entity implements ICommunicable {
 	}
 
 	/**
-	 * Send a ginven message through a given port name. If a port name does not
+	 * Send a given message through a given port name. If a port name does not
 	 * exist, there will be no message sending.
 	 * 
 	 * @param portLabel
@@ -346,7 +373,7 @@ public abstract class Entity implements ICommunicable {
 	}
 
 	/**
-	 * Send a ginven message through a given port name. If a port name does not
+	 * Send a given message through a given port name. If a port name does not
 	 * exist, there will be no message sending.
 	 * 
 	 * @param portLabel
@@ -359,7 +386,7 @@ public abstract class Entity implements ICommunicable {
 	}
 
 	/**
-	 * Send a ginven message through a given port name. If a port name does not
+	 * Send a given message through a given port name. If a port name does not
 	 * exist, there will be no message sending.
 	 * 
 	 * @param portLabel
@@ -479,14 +506,15 @@ public abstract class Entity implements ICommunicable {
 			if (this.processor == null)
 				throw new DisJException(IConstants.ERROR_7);
 
-			List recv = new ArrayList();
+			List<String> recv = new ArrayList<String>();
 			recv.add(portLabel);
+			
 			this.processor.processMessage(this.nodeOwner.getNodeId(), recv,
 					new Message(msgLabel, message));
+			
 		} catch (DisJException e) {
 			e.printStackTrace();
 			this.printToConsole(e);
-
 		} catch (RuntimeException e) {
 			e.printStackTrace();
 			this.printToConsole(e);
@@ -706,13 +734,13 @@ public abstract class Entity implements ICommunicable {
 						IConstants.ERROR_20).toString());
 
 			// send the message to all given ports if it exists
-			List recv = new ArrayList();
-			Map ports = this.nodeOwner.getPorts();
+			List<String> recv = new ArrayList<String>();
+			Map<String, Short> ports = this.nodeOwner.getPorts();
 			for (int i = 0; i < portLabels.length; i++) {
 				if (ports.containsKey(portLabels[i])) {
-					Short p = (Short) ports.get(portLabels[i]);
-					if (p.shortValue() == IConstants.OUT_DIRECTION
-							|| p.shortValue() == IConstants.BI_DIRECTION) {
+					short portType = ports.get(portLabels[i]);
+					if (portType == IConstants.DIRECTION_OUT
+							|| portType == IConstants.DIRECTION_BI) {
 						recv.add(portLabels[i]);
 					}
 				}
@@ -723,6 +751,7 @@ public abstract class Entity implements ICommunicable {
 			}
 		} catch (DisJException e) {
 			e.printStackTrace();
+			this.printToConsole(e);
 		} catch (RuntimeException e) {
 			e.printStackTrace();
 			this.printToConsole(e);
@@ -884,50 +913,48 @@ public abstract class Entity implements ICommunicable {
 	 */
 	public final void sendToAll(String msgLabel, Serializable message) {
 		try {
-			if (this.processor == null)
+			if (this.processor == null){
 				throw new DisJException(IConstants.ERROR_7);
-
-			List recv = getOutgoingPorts();
+			}
+			
+			List<String> recv = this.getOutgoingPorts();
+			
 			this.processor.processMessage(this.nodeOwner.getNodeId(), recv,
 					new Message(msgLabel, message));
 
 		} catch (DisJException e) {
 			e.printStackTrace();
 			this.printToConsole(e);
-
 		} catch (RuntimeException e) {
 			e.printStackTrace();
 			this.printToConsole(e);
 		}
-
 	}
 
 	/*
      * 
      */
-	private List getOutgoingPorts() {
+	private List<String> getOutgoingPorts() {
 		// retrieve all outgoing port's labels of sender's node
-		Map edges = this.nodeOwner.getEdges();
-		Map ports = this.nodeOwner.getPorts();
-		Iterator iter = edges.keySet().iterator();
-		List recv = new ArrayList();
-		while (iter.hasNext()) {
-			Object port = iter.next();
-			Short p = (Short) ports.get(port);
-			if (p.shortValue() == IConstants.OUT_DIRECTION
-					|| p.shortValue() == IConstants.BI_DIRECTION) {
-				recv.add(port);
+		Map<String, Edge> edges = this.nodeOwner.getEdges();
+		Map<String, Short> ports = this.nodeOwner.getPorts();
+		List<String> recv = new ArrayList<String>();
+		for (String pLabel : edges.keySet()) {
+			short p = ports.get(pLabel);
+			if (p== IConstants.DIRECTION_OUT
+					|| p == IConstants.DIRECTION_BI) {
+				recv.add(pLabel);
 			}
 		}
 		return recv;
 	}
 
 	/**
-	 * Send a message to all out going ports, execept a port that it just
+	 * Send a message to all out going ports, except a port that it just
 	 * received.
 	 * 
 	 * NOTE: This will work only for Bidirectional link. For Uni-directional
-	 * link, it will work only if a lable of incomming port is the same as out
+	 * link, it will work only if a label of incoming port is the same as out
 	 * going port label. Otherwise, all out going ports will be sent.
 	 * 
 	 * @param message
@@ -938,11 +965,11 @@ public abstract class Entity implements ICommunicable {
 	}
 
 	/**
-	 * Send a message to all out going ports, execept a port that it just
+	 * Send a message to all out going ports, except a port that it just
 	 * received.
 	 * 
 	 * NOTE: This will work only for Bidirectional link. For Uni-directional
-	 * link, it will work only if a lable of incomming port is the same as out
+	 * link, it will work only if a label of incoming port is the same as out
 	 * going port label. Otherwise, all out going ports will be sent.
 	 * 
 	 * @param message
@@ -1159,20 +1186,19 @@ public abstract class Entity implements ICommunicable {
 			}
 
 			// retrieve all outgoing port's labels of sender's node
-			// minus a lastest received port
-			Map edges = this.nodeOwner.getEdges();
-			Map ports = this.nodeOwner.getPorts();
-			Iterator iter = edges.keySet().iterator();
-			List recv = new ArrayList();
-			while (iter.hasNext()) {
-				Object port = iter.next();
-				Short p = (Short) ports.get(port);
-				if (p.shortValue() == IConstants.OUT_DIRECTION
-						|| p.shortValue() == IConstants.BI_DIRECTION) {
-					if (!recvPort.equals(port))
-						recv.add(port);
+			// minus a latest received port
+			Map<String, Edge> edges = this.nodeOwner.getEdges();
+			Map<String, Short> ports = this.nodeOwner.getPorts();
+			List<String> recv = new ArrayList<String>();
+			for (String pLabel : edges.keySet()) {
+				short portType = ports.get(pLabel);
+				if (portType == IConstants.DIRECTION_OUT
+						|| portType == IConstants.DIRECTION_BI) {
+					if (!recvPort.equals(pLabel))
+						recv.add(pLabel);
 				}
 			}
+			
 			if (!recv.isEmpty()) {
 				this.processor.processMessage(this.nodeOwner.getNodeId(), recv,
 						new Message(msgLabel, message));
@@ -1181,7 +1207,6 @@ public abstract class Entity implements ICommunicable {
 		} catch (DisJException e) {
 			e.printStackTrace();
 			this.printToConsole(e);
-
 		} catch (RuntimeException e) {
 			e.printStackTrace();
 			this.printToConsole(e);
@@ -1190,14 +1215,16 @@ public abstract class Entity implements ICommunicable {
 
 	public static MessageConsole findConsole(String name) {
 		ConsolePlugin plugin = ConsolePlugin.getDefault();
-		IConsoleManager conMan = plugin.getConsoleManager();
-		IConsole[] existing = conMan.getConsoles();
-		for (int i = 0; i < existing.length; i++)
-			if (name.equals(existing[i].getName()))
+		IConsoleManager conMgr = plugin.getConsoleManager();
+		IConsole[] existing = conMgr.getConsoles();
+		for (int i = 0; i < existing.length; i++){
+			if (name.equals(existing[i].getName())){
 				return (MessageConsole) existing[i];
+			}
+		}
 		// no console found, so create a new one
 		MessageConsole myConsole = new MessageConsole(name, null);
-		conMan.addConsoles(new IConsole[] { myConsole });
+		conMgr.addConsoles(new IConsole[] { myConsole });
 		return myConsole;
 	}
 
@@ -1282,6 +1309,14 @@ public abstract class Entity implements ICommunicable {
 	 */
 	public final int getLocationY() {
 		return this.nodeOwner.getY();
+	}
+	
+	public final int getMaxXLocation(){
+		return this.nodeOwner.getMaxX();
+	}
+	
+	public final int getMaxYLocation(){
+		return this.nodeOwner.getMaxY();
 	}
 
 }

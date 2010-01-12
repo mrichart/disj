@@ -30,9 +30,10 @@ import distributed.plugin.core.IConstants;
 public abstract class AdapterElement implements IPropertySource, Cloneable,
 		Serializable {
 
-    transient protected PropertyChangeSupport listeners = new PropertyChangeSupport(this);
 	static final long serialVersionUID = IConstants.SERIALIZE_VERSION;
 
+    protected PropertyChangeSupport listeners = new PropertyChangeSupport(this);
+	
 
 	/**
 	 * @see org.eclipse.ui.views.properties.IPropertySource#getEditableValue()
@@ -65,24 +66,20 @@ public abstract class AdapterElement implements IPropertySource, Cloneable,
 	/**
 	 * @see org.eclipse.ui.views.properties.IPropertySource#resetPropertyValue(java.lang.Object)
 	 */
-	public void resetPropertyValue(Object id) {
-		// not yet supported
-	}
+	public abstract void resetPropertyValue(Object id);
 
 	/**
 	 * @see org.eclipse.ui.views.properties.IPropertySource#setPropertyValue(java.lang.Object, java.lang.Object)
 	 */
-	public void setPropertyValue(Object id, Object value) {
-
-	}
+	public abstract void setPropertyValue(Object id, Object value);
 	
-	public void addPropertyChangeListener(PropertyChangeListener l){
+	public void addPropertyChangeListener(PropertyChangeListener listener){
 	    //System.err.println("[AdapterElement] addPropertyChangeListener: " + l);
-		listeners.addPropertyChangeListener(l);
+		listeners.addPropertyChangeListener(listener);
 	}
 
-	public void removePropertyChangeListener(PropertyChangeListener l){
-		listeners.removePropertyChangeListener(l);
+	public void removePropertyChangeListener(PropertyChangeListener listener){
+		listeners.removePropertyChangeListener(listener);
 	}
 	
 	protected void firePropertyChange(String prop, Object old, Object newValue){
@@ -107,9 +104,4 @@ public abstract class AdapterElement implements IPropertySource, Cloneable,
 		in.defaultReadObject();
 		listeners = new PropertyChangeSupport(this);
 	}
-
-
-	public void update(){
-	}
-
 }

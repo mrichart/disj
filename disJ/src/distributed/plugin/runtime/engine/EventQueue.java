@@ -25,10 +25,10 @@ import distributed.plugin.runtime.Event;
  */
 public class EventQueue {
 
-	private List queue;
+	private List<Event> queue;
 
 	protected EventQueue() {
-		this.queue = new ArrayList();
+		this.queue = new ArrayList<Event>();
 	}
 
 	protected synchronized boolean isEmpty() {
@@ -43,7 +43,7 @@ public class EventQueue {
 	/*
 	 * Add an Event into a queue
 	 */
-	protected synchronized void pushEvents(List events) {
+	protected synchronized void pushEvents(List<Event> events) {
 		for (int i = 0; i < events.size(); i++) {
 			this.queue.add(events.get(i));
 		}
@@ -65,10 +65,10 @@ public class EventQueue {
 	 * Get and remove all the events that have a smallest timeId in the queue
 	 * and follow the priority order of execution
 	 */
-	protected synchronized List popEvents() {
+	protected synchronized List<Event> popEvents() {
 		int t = -1;
 		int s = -1;
-		List eList = new ArrayList();
+		List<Event> eList = new ArrayList<Event>();
 		for (int i = 0; i < this.queue.size(); i++) {
 			Event e = (Event) this.queue.get(i);
 			if (t == -1) {

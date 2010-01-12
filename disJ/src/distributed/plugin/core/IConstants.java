@@ -18,26 +18,30 @@ package distributed.plugin.core;
 public interface IConstants {
 
 	// message direction support for port
-	public static final short IN_DIRECTION = 0;
-	public static final short OUT_DIRECTION = 1;
-	public static final short BI_DIRECTION = 2;
-	public static final short UNI_DIRECTION = 3;
+	public static final short DIRECTION_IN = 0;
+	public static final short DIRECTION_OUT = 1;
+	public static final short DIRECTION_BI = 2;
+	public static final short DIRECTION_UNI = 3;
 	
 	// message flow supported types
-	public static final short FIFO_TYPE = 0;
-	public static final short NO_ORDER_TYPE = 1;
+	public static final short MSGFLOW_FIFO_TYPE = 0;
+	public static final short MSGFLOW_NO_ORDER_TYPE = 1;
+	public static final short MSGFLOW_MIX_TYPE = 2;
 	
 	// message delay time supported types
-	public static final short GLOBAL_SYNCHRONOUS = 0;
-	public static final short GLOBAL_RANDOM_UNIFORM = 1;
-	public static final short GLOBAL_RANDOM_POISSON = 2;
-	public static final short GLOBAL_RANDOM_CUSTOMS= 3;
-	public static final short GLOBAL_CUSTOMS = 4;
+	public static final short MSGDELAY_GLOBAL_SYNCHRONOUS = 0;
+	public static final short MSGDELAY_GLOBAL_RANDOM_UNIFORM = 1;
+	public static final short MSGDELAY_GLOBAL_RANDOM_POISSON = 2;
+	public static final short MSGDELAY_GLOBAL_RANDOM_CUSTOMS= 3;
+	public static final short MSGDELAY_GLOBAL_CUSTOMS = 4;
 	
-	public static final short LOCAL_FIXED = 0;
-	public static final short LOCAL_RANDOM_UNIFORM = 1;
-	public static final short LOCAL_RANDOM_POISSON = 2;
-	public static final short LOCAL_RANDOM_CUSTOMS= 3;
+	public static final short MSGDELAY_DEFAULT_SEED = 1;
+	public static final short MSGFAILURE_DEFAULT_PROB = 5;
+	
+	public static final short MSGDELAY_LOCAL_FIXED = 0;
+	public static final short MSGDELAY_LOCAL_RANDOM_UNIFORM = 1;
+	public static final short MSGDELAY_LOCAL_RANDOM_POISSON = 2;
+	public static final short MSGDELAY_LOCAL_RANDOM_CUSTOMS= 3;
 	
 	// the priority order of execution	
 	public static final short INITIATE_TYPE = 0;
@@ -97,13 +101,14 @@ public interface IConstants {
     public static final String PROPERTY_CHANGE_NODE = "node";
     public static final String PROPERTY_CHANGE_EDGE = "edge";
     public static final String PROPERTY_CHANGE_BOUND = "bound";
-    public static final String PROPERTY_CHANGE_INPUT = "input";
-    public static final String PROPERTY_CHANGE_OUTPUT = "output";
+    public static final String PROPERTY_CHANGE_INPUT = "input_link";
+    public static final String PROPERTY_CHANGE_OUTPUT = "output_link";
     public static final String PROPERTY_CHANGE_SIZE = "size";
     public static final String PROPERTY_CHANGE_LOCATION = "location";
     public static final String PROPERTY_CHANGE_BENDPOINT = "bendpoint";
     public static final String PROPERTY_CHANGE__LINK_INVISIBLE = "link_invisible";
     public static final String PROPERTY_CHANGE_NAME = "name";
+    public static final String PROPERTY_CHANGE_USER_INPUT = "user_input";
 	
 	
 	

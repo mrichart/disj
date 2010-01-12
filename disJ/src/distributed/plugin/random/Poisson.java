@@ -62,7 +62,6 @@ public class Poisson implements IRandom {
 		rand = new PoissonHelper( seed );
 	}
 	
-	@Override
 	public int nextInt( double n ) {
 		return rand.nextPoisson(n);
 	}
@@ -70,7 +69,7 @@ public class Poisson implements IRandom {
 	public double nextExponential(double b){
 		return rand.nextExponential(b);
 	}
-	@Override
+	
 	public void setSeed( long seed ) {
 		rand.setSeed( seed );
 

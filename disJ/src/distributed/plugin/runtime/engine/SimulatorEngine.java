@@ -17,6 +17,7 @@ import java.util.Map;
 
 import distributed.plugin.core.DisJException;
 import distributed.plugin.core.IConstants;
+import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.Graph;
 import distributed.plugin.ui.editor.GraphEditor;
 
@@ -33,7 +34,7 @@ public class SimulatorEngine {
 
     private int speed;
 
-    private Map engine;
+    private Map<String, Runnable> engine;
 
     private Graph origin;
 
@@ -42,10 +43,10 @@ public class SimulatorEngine {
 	private GraphEditor ge;
 
     public SimulatorEngine(GraphEditor ge) {
-    	this.ge=ge;
+    	this.ge = ge;
         this.speed = IConstants.SPEED_DEFAULT_RATE;
         this.started = false;
-        this.engine = new HashMap(1);
+        this.engine = new HashMap<String, Runnable>(4);
         this.origin = null;
         this.holder = null;
     }
@@ -56,11 +57,11 @@ public class SimulatorEngine {
      * @param graphId
      * @param client
      */
-    public void execute(Graph graph, Class client, Class clientRandom) {
+    public void execute(Graph graph, Class<Entity> client, Class<IRandom> clientRandom) {
         try {
 
            this.origin = graph;
-            Runnable proc = new Processor(ge,graph, client, clientRandom, this.getOutputLocation());
+            Runnable proc = new Processor(ge, graph, client, clientRandom, this.getOutputLocation());
             this.engine.put(origin.getId(), proc);
 
             // FIXME risk of non atomic for next 2 lines
@@ -72,11 +73,8 @@ public class SimulatorEngine {
 
            
         } catch (IOException e) {
-        	// TODO all these errors must notify user via SWT widget
             e.printStackTrace();
-            System.out.println(e);
         } catch (Exception e) {
-        	// TODO all these errors must notify user via SWT widget
             e.printStackTrace();
         }
     }

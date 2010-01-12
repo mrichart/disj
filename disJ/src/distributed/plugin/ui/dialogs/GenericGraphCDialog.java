@@ -32,9 +32,14 @@ import distributed.plugin.ui.IGraphEditorConstants;
  */
 public class GenericGraphCDialog extends Dialog {
 
+	private boolean cancel;
+	
 	private int numNode;
+	
 	private int numLink;
-	private int numInitiators;
+	
+	private int numInit;
+	
 	private String linkType;
 
 	/**
@@ -42,7 +47,8 @@ public class GenericGraphCDialog extends Dialog {
 	 */
 	public GenericGraphCDialog(Shell arg0) {
 		super(arg0);
-		setText("Arbitrary Graph Dialog");
+		setText("Random Connected Graph Dialog");
+		this.cancel = true;
 		this.numNode = 0;
 		this.linkType = null;
 	}
@@ -52,7 +58,7 @@ public class GenericGraphCDialog extends Dialog {
 		final Shell shell = new Shell(getParent(), SWT.DIALOG_TRIM
 				| SWT.APPLICATION_MODAL);
 		shell.setText(getText());
-		shell.setSize(300, 200);
+		shell.setSize(320, 220);
 
 		// number of node
 		Label numNodeQs = new Label(shell, SWT.NONE);
@@ -85,44 +91,55 @@ public class GenericGraphCDialog extends Dialog {
 		txtInitResponse.setSize(40, 25);
 
 		// link type
-//		Label direct = new Label(shell, SWT.NONE);
-//		direct.setLocation(25, 70);
-//		direct.setSize(80, 25);
-//		direct.setText("Type of Link: ");
-//
-//		final Combo type = new Combo(shell, SWT.DROP_DOWN | SWT.READ_ONLY);
-//		type.setItems(new String[] { IGraphEditorConstants.UNI,
-//				IGraphEditorConstants.BI });
-//		type.select(1);
-//		type.setLocation(105, 70);
-//		type.setSize(150, 25);
+		Label direct = new Label(shell, SWT.NONE);
+		direct.setLocation(25, 100);
+		direct.setSize(80, 25);
+		direct.setText("Type of Link: ");
+
+		final Combo type = new Combo(shell, SWT.DROP_DOWN | SWT.READ_ONLY);
+		type.setItems(new String[] { IGraphEditorConstants.UNI,
+				IGraphEditorConstants.BI });
+		type.select(1);
+		type.setLocation(105, 100);
+		type.setSize(150, 25);
 
 		// final button
 		final Button btnOkay = new Button(shell, SWT.PUSH);
 		btnOkay.setText("Ok");
-		btnOkay.setLocation(40, 120);
+		btnOkay.setLocation(40, 140);
 		btnOkay.setSize(100, 30);
 
 		final Button btnCancel = new Button(shell, SWT.PUSH);
 		btnCancel.setText("Cancel");
-		btnCancel.setLocation(160, 120);
+		btnCancel.setLocation(160, 140);
 		btnCancel.setSize(100, 30);
 		btnCancel.setSelection(true);
 
 		Listener listener = new Listener() {
 			public void handleEvent(Event event) {
-				if (event.widget == btnOkay) {
-					String res = validateInput(txtResponse.getText());
-					if (res != null) {
-						MessageDialog.openError(getParent(), "Invalid Input",
-								res);
-						return;
-					} else {
-						numNode = Integer
-								.parseInt(txtResponse.getText().trim());
-					}
-					
-					res = validateInputLinkNumber(txtResponse.getText(),txtLinkResponse.getText());
+                if(event.widget == btnOkay){
+                	// read number of node input
+                    String res = validateNodeInput(txtResponse.getText());
+                    if(res != null){
+                        MessageDialog.openError(getParent(), "Invalid Input",
+                                res);
+                        return;
+                    } else {
+                        numNode = Integer.parseInt(txtResponse.getText().trim());
+                    }
+                    
+                    // read number of init input
+                    res = validateInitInput(txtInitResponse.getText());
+                    if(res != null){
+                        MessageDialog.openError(getParent(), "Invalid Input",
+                                res);
+                        return;
+                    } else {
+                    	numInit = Integer.parseInt(txtInitResponse.getText().trim());
+                    }
+                    
+                    // read number of link
+                	res = validateLinkInput(numNode, txtLinkResponse.getText());
 					if (res != null) {
 						MessageDialog.openError(getParent(), "Invalid Input",
 								res);
@@ -130,15 +147,14 @@ public class GenericGraphCDialog extends Dialog {
 					} else {
 						numLink = Integer
 								.parseInt(txtLinkResponse.getText().trim());
-					}
-					
-					numInitiators= Integer	.parseInt(txtInitResponse.getText().trim());
-					
-//					linkType = type.getText();
-					linkType =IGraphEditorConstants.BI;
-				}
-				shell.close();
-			}
+					}				
+                    
+                    // read link type
+                    linkType = type.getText();
+                    cancel = false;
+                }                
+                shell.close();
+            }
 		};
 
 		btnOkay.addListener(SWT.Selection, listener);
@@ -152,24 +168,38 @@ public class GenericGraphCDialog extends Dialog {
 		}
 	}
 
-	private String validateInput(Object param) {
-		try {
-			int i = Integer.parseInt(((String) param).trim());
-			if (i < 2)
-				return "The size of graph should more than 1";
-			else
-				return null;
-		} catch (NumberFormatException n) {
-			return "Input must be an integer number";
-		}
-
-	}
-	
-	private String validateInputLinkNumber(Object nodes,Object links) {
-		try {
-			int n = Integer.parseInt(((String) nodes).trim());
+  private String validateNodeInput(Object param){
+        try{
+            int i = Integer.parseInt(((String)param).trim());
+            if(i < 2)
+                return "The size of graph should more be than 1";
+            else
+                return null;
+        }catch(NumberFormatException n){
+            return "Input must be an integer number";
+        }
+        
+    }
+    
+    private String validateInitInput(Object param){
+        try{
+            int i = Integer.parseInt(((String)param).trim());
+            if(i > this.numNode)
+                return "The number of init node cannot be more than number of node";
+            else if(i < 0)
+            	return "Number of init node cannot be negative";
+            else
+                return null;
+        }catch(NumberFormatException n){
+            return "Input must be an integer number";
+        }
+        
+    }
+	    
+	private String validateLinkInput(int numNode, Object links) {
+		try {			
 			int l = Integer.parseInt(((String) links).trim());
-			if (l>(n)*(n-1)/2)
+			if (l>(numNode)*(numNode-1)/2)
 				return "Too many links";
 			else
 				return null;
@@ -191,9 +221,13 @@ public class GenericGraphCDialog extends Dialog {
 		return numLink;
 	}
 
-	public int getNumInitiators() {
-		return numInitiators;
-	}
+	   
+    public int getNumInit(){
+    	return this.numInit;
+    }
 	
+	public boolean isCancel(){
+		return this.cancel;
+	}
 	
 }

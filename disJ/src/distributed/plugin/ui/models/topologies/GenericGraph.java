@@ -10,7 +10,6 @@
 
 package distributed.plugin.ui.models.topologies;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Vector;
@@ -32,68 +31,24 @@ import distributed.plugin.ui.models.NodeElement;
  *         TODO To change the template for this generated type comment go to
  *         Window - Preferences - Java - Code Style - Code Templates
  */
-public class GenericGraph implements ITopology {
+public class GenericGraph extends AbstractGraph {
 
 	private int count;
 
-	private int numberOfNode;
-
 	private String linkType;
-
-	private List nodes;
-
-	private List links;
-
-	private Shell shell;
-
-	private GraphElementFactory factory;
-
-	private Random random;
 
 	private String defaultType = IGraphEditorConstants.GENERIC;
 
 	private String type = defaultType;
 
-	private int numberOfLink;
-
-	private int numberOfInitiators;
-
 	/**
      * 
      */
-	public GenericGraph(GraphElementFactory factory, Shell shell) {
-		this.count = -1;
-		this.factory = factory;
-		this.shell = shell;
-		GenericGraphDialog dialog = new GenericGraphDialog(this.shell);
-		dialog.open();
-		this.numberOfNode = dialog.getNumNode();
-		this.linkType = dialog.getLinkType();
-		init();
-	}
-
 	public GenericGraph(GraphElementFactory factory, Shell shell, String type) {
-		this.type = type;
+		super(factory, shell);
 		this.count = -1;
-		this.factory = factory;
-		this.shell = shell;
-		if (type == IGraphEditorConstants.GENERIC_C){
-		GenericGraphCDialog dialog = new GenericGraphCDialog(this.shell);
-		dialog.open();
-		this.numberOfNode = dialog.getNumNode();
-		this.numberOfLink = dialog.getNumLink();
-		this.linkType = dialog.getLinkType();
-		this.numberOfInitiators = dialog.getNumInitiators();
-		
-		}
-
-		init();
-	}
-
-	private void init() {
-		this.random = new Random(System.currentTimeMillis());
-		this.nodes = new ArrayList();
-		this.links = new ArrayList();
+		this.type = type;		
+		this.linkType = IGraphEditorConstants.BI;
 	}
 
 	/**
@@ -107,42 +62,39 @@ public class GenericGraph implements ITopology {
 	 * @see distributed.plugin.ui.models.topologies.ITopology#createTopology()
 	 */
 	public void createTopology() {
-		for (int i = 0; i < this.numberOfNode; i++) {
-			NodeElement n = this.factory.createNodeElement();
-			n.setSize(new Dimension(IGraphEditorConstants.NODE_SIZE,
-					IGraphEditorConstants.NODE_SIZE));			
-			this.nodes.add(n);
-		}
-		if (type == IGraphEditorConstants.GENERIC_C){
-			Vector<Integer> inits=new Vector<Integer>();
-			int rn;
-			for (int i=0;i<this.numberOfInitiators;i++){
-				rn=random.nextInt(this.numberOfNode);
-				while(inits.contains(rn)){
-					rn=random.nextInt(this.numberOfNode);
-				}
-				inits.add(rn);
-				((NodeElement)(nodes.get(rn))).setPropertyValue(NodeElement.PROPERTY_IS_INIT, 1);
+		
+		if(this.type.equals(IGraphEditorConstants.GENERIC)){
+			GenericGraphDialog dialog = new GenericGraphDialog(this.shell);
+			dialog.open();
+			if(!dialog.isCancel()){
+				this.numNode = dialog.getNumNode();
+				this.linkType = dialog.getLinkType();
+				this.numInit = dialog.getNumInit();
+			}
+		}else{
+			GenericGraphCDialog dialog = new GenericGraphCDialog(this.shell);
+			dialog.open();
+			if(!dialog.isCancel()){
+				this.numNode = dialog.getNumNode();
+				this.numLink = dialog.getNumLink();
+				this.linkType = dialog.getLinkType();
+				this.numInit = dialog.getNumInit();
 			}
 		}
-	}
-
-	/**
-	 * @see distributed.plugin.ui.models.topologies.ITopology#getAllNodes()
-	 */
-	public List getAllNodes() {
-		return this.nodes;
+		
+		for (int i = 0; i < this.numNode; i++) {
+			NodeElement n = this.factory.createNodeElement();
+			n.setSize(new Dimension(IGraphEditorConstants.NODE_SIZE,
+					IGraphEditorConstants.NODE_SIZE));
+			this.nodes.add(n);
+		}
+		
+		// set init nodes		
+		this.setInitNodes();
 	}
 
 	public NodeElement nextNode() {
 		return (NodeElement) this.nodes.get(++this.count);
-	}
-
-	/**
-	 * @see distributed.plugin.ui.models.topologies.ITopology#getAllLinks()
-	 */
-	public List getAllLinks() {
-		return this.links;
 	}
 
 	/**
@@ -156,9 +108,13 @@ public class GenericGraph implements ITopology {
 	 * @see distributed.plugin.ui.models.topologies.ITopology#applyLocation(org.eclipse.draw2d.geometry.Point)
 	 */
 	public void applyLocation(Point point) {
-		int range = this.numberOfNode * 20;
-		int up = this.numberOfNode / 2;
-		int down = this.numberOfNode - up;
+		if(this.numNode < 1){
+			return;
+		}
+		
+		int range = this.numNode * 20;
+		int up = this.numNode / 2;
+		int down = this.numNode - up;
 
 		int x = point.x;
 		int y = point.y;
@@ -207,7 +163,7 @@ public class GenericGraph implements ITopology {
 	 */
 	public void setConnections() {
 		if (this.type == IGraphEditorConstants.GENERIC) {
-			for (int i = 0; i < this.numberOfNode; i++) {
+			for (int i = 0; i < this.numNode; i++) {
 				NodeElement source = (NodeElement) this.nodes.get(i);
 				int numNeighbour = this.random.nextInt(4) + 1;
 				for (int j = 1; j < numNeighbour; j++) {
@@ -230,16 +186,16 @@ public class GenericGraph implements ITopology {
 				}
 			}
 			// inter conect
-			int up = this.numberOfNode / 2;
-			int down = this.numberOfNode - up;
+			int up = this.numNode / 2;
+			int down = this.numNode - up;
 			int size = (up < down) ? up : down;
 			for (int i = 0; i < size; i++) {
 				NodeElement source = (NodeElement) this.nodes.get(i);
 				int p = this.random.nextInt(2);
 				if (p == 1) {
 					int target = i + size;
-					if (target >= this.numberOfNode)
-						target = this.numberOfNode - 1;
+					if (target >= this.numNode)
+						target = this.numNode - 1;
 					this.connectTarget(source, target);
 				}
 			}
@@ -259,8 +215,8 @@ public class GenericGraph implements ITopology {
 		Vector<Integer> unconnectedNodes = new Vector<Integer>();
 		Vector<String> links = new Vector<String>();
 		Random random = new Random(System.currentTimeMillis());
-		int numberOfNode=this.numberOfNode;
-		int numberOfLinks=this.numberOfLink;
+		int numberOfNode=this.numNode;
+		int numberOfLinks=this.numLink;
 		connectedNodes.add(0);
 		for (int i = 1; i < numberOfNode; i++) {
 			unconnectedNodes.add(i);
@@ -302,29 +258,29 @@ public class GenericGraph implements ITopology {
 
 		// remove repeated connection from a same pair
 		NodeElement target = (NodeElement) this.nodes.get(t);
-		List targets = target.getTargetConnections();
+		List<LinkElement> targets = target.getTargetConnections();
 		for (int i = 0; i < targets.size(); i++) {
-			LinkElement tar = (LinkElement) targets.get(i);
+			LinkElement tar = targets.get(i);
 			if (tar.getTarget().getNodeId().equals(source.getNodeId()))
 				return;
 		}
 		targets = target.getSourceConnections();
 		for (int i = 0; i < targets.size(); i++) {
-			LinkElement tar = (LinkElement) targets.get(i);
+			LinkElement tar =  targets.get(i);
 			if (tar.getTarget().getNodeId().equals(source.getNodeId()))
 				return;
 		}
 
 		// remove repeated connection from a same source
-		List sources = source.getTargetConnections();
+		List<LinkElement> sources = source.getTargetConnections();
 		for (int i = 0; i < sources.size(); i++) {
-			LinkElement tar = (LinkElement) sources.get(i);
+			LinkElement tar =  sources.get(i);
 			if (tar.getTarget().getNodeId().equals(target.getNodeId()))
 				return;
 		}
 		sources = source.getSourceConnections();
 		for (int i = 0; i < sources.size(); i++) {
-			LinkElement tar = (LinkElement) sources.get(i);
+			LinkElement tar = sources.get(i);
 			if (tar.getTarget().getNodeId().equals(target.getNodeId()))
 				return;
 		}

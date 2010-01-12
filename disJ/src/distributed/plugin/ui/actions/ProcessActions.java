@@ -12,15 +12,11 @@ package distributed.plugin.ui.actions;
 
 import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URI;
+import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -39,15 +35,11 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.console.MessageConsoleStream;
-import org.eclipse.ui.part.EditorPart;
 
 import distributed.plugin.core.DisJException;
-import distributed.plugin.core.Node;
 import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.engine.Entity;
-import distributed.plugin.runtime.engine.Processor;
 import distributed.plugin.runtime.engine.SimulatorEngine;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.dialogs.SpeedDialog;
@@ -63,19 +55,42 @@ import distributed.plugin.ui.validators.ClassNameValidator;
 public class ProcessActions extends WorkbenchPartAction {
 
 	private String execType;
+	
+	private ClassLoader loader;
 
+//	private GraphElement graphElement;
+	
 	/**
 	 * @param part
 	 * @param type
 	 *            a type of selected process
 	 */
-	public ProcessActions(EditorPart part, String type) {
+	public ProcessActions(GraphEditor part, String type) {
 		super(part);
+		this.loader = this.getClassLoader(this.getClientProject());
+//		this.graphElement = part.getGraphElement();
 		this.execType = type;
 		setId(type);
 		// System.out.println("processAction created wit type " +
 		// this.execType);
 	}
+	
+	private IJavaProject getClientProject(){
+		GraphEditor editor = (GraphEditor) getWorkbenchPart();
+		IFileEditorInput input = (IFileEditorInput) editor.getEditorInput();
+		IProject project = input.getFile().getProject();
+		String usrProjectName = project.getName();
+
+		IJavaModel javaModel = JavaCore.create(ResourcesPlugin.getWorkspace()
+				.getRoot());
+		IJavaProject javaProject = javaModel.getJavaProject(usrProjectName);
+
+		return javaProject;
+	}
+
+//	public GraphElement getGraphElement() {
+//		return graphElement;
+//	}
 
 	/**
 	 * @see org.eclipse.gef.ui.actions.WorkbenchPartAction#calculateEnabled()
@@ -102,26 +117,34 @@ public class ProcessActions extends WorkbenchPartAction {
 	public void run() {
 		
 		GraphEditor editor = (GraphEditor) this.getWorkbenchPart();
-		if (editor.getController()==null){
-		editor.setController(new ProtocolExecutionController(this, editor));
+		
+		if (editor.getController() == null){
+			editor.setController(new ProtocolExecutionController(this, editor));
 		}
 		
 		
 		if (this.execType.equals(IGraphEditorConstants.RESUME_ID)) {
 			this.executeRun();
+			
 		} else if (this.execType.equals(IGraphEditorConstants.LOAD_ID)) {
 			this.executeLoad();
-			editor.setController(new ProtocolExecutionController(this, editor));
+			//editor.setController(new ProtocolExecutionController(this, editor));
+			
 		} else if (this.execType.equals(IGraphEditorConstants.LOAD_RANDOM_ID)) {
 			this.executeRandomLoad();
+			
 		} else if (this.execType.equals(IGraphEditorConstants.SUSPEND_ID)) {
 			this.executeSuspend();
+			
 		} else if (this.execType.equals(IGraphEditorConstants.STOP_ID)) {
 			this.executeStop();
+			
 		} else if (this.execType.equals(IGraphEditorConstants.NEXT_ID)) {
 			this.executeStepNext();
+			
 		} else if (this.execType.equals(IGraphEditorConstants.SPEED_ID)) {
 			this.executeSpeed();
+			
 		} else if (this.execType.equals(IGraphEditorConstants.LOAD_RECORD_ID)) {
 			editor.setController(new PlaybackController(this, editor));
 			String fileName=openFileDialog();
@@ -163,7 +186,7 @@ public class ProcessActions extends WorkbenchPartAction {
 	 */
 	private void executeRun() {
 		GraphEditor editor = (GraphEditor) this.getWorkbenchPart();
-		Controller controller=editor.getController();
+		IController controller = editor.getController();
 		controller.executeRun();
 	}
 
@@ -205,20 +228,14 @@ public class ProcessActions extends WorkbenchPartAction {
 
 		String className = protocol;
 
-		GraphEditor editor = (GraphEditor) getWorkbenchPart();
-		IFileEditorInput input = (IFileEditorInput) editor.getEditorInput();
-		IProject project = input.getFile().getProject();
-		String usrProjectName = project.getName();
+		GraphEditor editor = (GraphEditor) getWorkbenchPart();		
 
-		IJavaModel javaModel = JavaCore.create(ResourcesPlugin.getWorkspace()
-				.getRoot());
-		IJavaProject javaProject = javaModel.getJavaProject(usrProjectName);
-
-		ClassLoader loader = this.getClassLoader(javaProject);
-
-		if (loader == null)
-			System.err.println("***Bugged*** Cannot instantiate classloader");
-
+		if (loader == null){
+			this.loader = this.getClassLoader(this.getClientProject());
+			if(loader == null){
+				System.err.println("***Bugged*** Cannot instantiate classloader");
+			}
+		}
 		// open Dialog
 		Shell parent = getWorkbenchPart().getSite().getShell();
 
@@ -230,12 +247,12 @@ public class ProcessActions extends WorkbenchPartAction {
 		}
 
 		try {
-			Class client = this.loadClientClass(parent, loader, className);
+			Class<Entity> client = this.loadClientClass(parent, className);
 
 			if (client == null)
 				return;
 
-			// loas client's class into editor
+			// load client's class into editor
 			editor.setClientObject(client);
 
 		} catch (ClassNotFoundException e) {
@@ -282,19 +299,13 @@ public class ProcessActions extends WorkbenchPartAction {
 		System.out.println("--- executeRandomLoad");
 
 		GraphEditor editor = (GraphEditor) getWorkbenchPart();
-		IFileEditorInput input = (IFileEditorInput) editor.getEditorInput();
-		IProject project = input.getFile().getProject();
-		String usrProjectName = project.getName();
-
-		IJavaModel javaModel = JavaCore.create(ResourcesPlugin.getWorkspace()
-				.getRoot());
-		IJavaProject javaProject = javaModel.getJavaProject(usrProjectName);
-
-		ClassLoader loader = this.getClassLoader(javaProject);
-
-		if (loader == null)
-			System.err.println("***Bugged*** Cannot instantiate classloader");
-
+		
+		if (loader == null){
+			this.loader = this.getClassLoader(this.getClientProject());
+			if(loader == null){
+				System.err.println("***Bugged*** Cannot instantiate classloader");
+			}
+		}
 		// open Dialog
 		Shell parent = getWorkbenchPart().getSite().getShell();
 		String className = "Fully Qualified Class Name";
@@ -319,13 +330,13 @@ public class ProcessActions extends WorkbenchPartAction {
 			}
 
 			try {
-				Class clientRandom = this.loadClientRandomClass(parent, loader,
+				Class<IRandom> clientRandom = this.loadClientRandomClass(parent,
 						className);
 
 				if (clientRandom == null)
 					return;
 
-				// loas client's class into editor
+				// load client's class into editor
 				editor.setClientRandomObject(clientRandom);
 
 			} catch (ClassNotFoundException e) {
@@ -351,47 +362,54 @@ public class ProcessActions extends WorkbenchPartAction {
 	private ClassLoader getClassLoader(IJavaProject javaProject) {
 		ClassLoader loader = null;
 		try {
-			System.out.println("Enter getClassLoader()");
+			System.out.println("[ProcessActions].getClassLoader()");
 			IClasspathEntry[] entries = javaProject.getRawClasspath();
-			List urls = new ArrayList(entries.length);
+			List<URL> urls = new ArrayList<URL>(entries.length);
 			for (int i = 0; i < entries.length; i++) {
 				IPath classpathEntryPath = entries[i].getPath();
 				File classpathEntryFile = null;
 				switch (entries[i].getEntryKind()) {
-				case IClasspathEntry.CPE_SOURCE:
-					IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
-							.getRoot();
-					IPath out = root.getProject(
-							classpathEntryPath.lastSegment()).getLocation();
-					if (out != null)
-						classpathEntryFile = out.toFile();
-					else
-						classpathEntryFile = root.getFolder(
-								javaProject.getOutputLocation()).getLocation()
-								.toFile();
-
-					try {
-						URI uri = classpathEntryFile.toURI();
-						urls.add(uri.toURL());
-					} catch (MalformedURLException e) {
-						e.printStackTrace();
-					}
-					break;
-				case IClasspathEntry.CPE_CONTAINER:
-					break;
-
-				// FIXME Must handle 2 more cases
+					case IClasspathEntry.CPE_SOURCE:
+						IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
+								.getRoot();
+						IPath out = root.getProject(
+								classpathEntryPath.lastSegment()).getLocation();
+						if (out != null)
+							classpathEntryFile = out.toFile();
+						else
+							classpathEntryFile = root.getFolder(
+									javaProject.getOutputLocation()).getLocation()
+									.toFile();
+	
+						try {
+							URI uri = classpathEntryFile.toURI();
+							urls.add(uri.toURL());
+						} catch (MalformedURLException e) {
+							e.printStackTrace();
+						}
+						break;
+					case IClasspathEntry.CPE_CONTAINER:
+						break;
+	
+					// FIXME Must handle 2 more cases to handle the location of 
+					// client source code
 				}
 			}
-			System.out.println("[ProcessActions].getClassLoade()" + urls);
+			System.out.println("[ProcessActions].getClassLoader()" + urls);
 
 			// set the output file location w.r.t 1st urser src code location
 			this.getEngine().setOutputLocation((URL) urls.get(0));
+			
 			// create class loader
 			loader = new URLClassLoader((URL[]) urls.toArray(new URL[urls
 					.size()]), ProcessActions.class.getClassLoader());
+			
+			// set class loader
+			GraphEditor editor = (GraphEditor) this.getWorkbenchPart();
+			editor.setLoader(loader);
+			
 		} catch (JavaModelException e1) {
-			// /e1.printStackTrace();
+			e1.printStackTrace();
 		}
 		return loader;
 	}
@@ -402,9 +420,9 @@ public class ProcessActions extends WorkbenchPartAction {
 	 * @return
 	 * @throws ClassNotFoundException
 	 */
-	private Class loadClientClass(Shell parent, ClassLoader loader,
+	private Class<Entity> loadClientClass(Shell parent,
 			String className) throws ClassNotFoundException {
-		Class client = loader.loadClass(className);
+		Class client = this.loader.loadClass(className);
 
 		if (!Entity.class.isAssignableFrom(client)) {
 			MessageDialog.openError(parent, "Load Client Class Error",
@@ -414,9 +432,9 @@ public class ProcessActions extends WorkbenchPartAction {
 		return client;
 	}
 
-	private Class loadClientRandomClass(Shell parent, ClassLoader loader,
+	private Class<IRandom> loadClientRandomClass(Shell parent,
 			String className) throws ClassNotFoundException {
-		Class clientRandom = loader.loadClass(className);
+		Class clientRandom = this.loader.loadClass(className);
 
 		if (!IRandom.class.isAssignableFrom(clientRandom)) {
 			MessageDialog.openError(parent,
@@ -429,13 +447,13 @@ public class ProcessActions extends WorkbenchPartAction {
 
 	private void executeStop() {
 		GraphEditor editor = (GraphEditor) this.getWorkbenchPart();
-		Controller controller=editor.getController();
+		IController controller=editor.getController();
 		controller.executeStop();
 	}
 
 	private void executeSuspend() {
 		GraphEditor editor = (GraphEditor) this.getWorkbenchPart();
-		Controller controller=editor.getController();
+		IController controller=editor.getController();
 		controller.executeSuspend();
 	}
 
@@ -444,7 +462,7 @@ public class ProcessActions extends WorkbenchPartAction {
 		// "Step Next", "This feature is not yet supported");
 		// implemented by Russell Dec 2008
 		GraphEditor editor = (GraphEditor) this.getWorkbenchPart();
-		Controller controller=editor.getController();
+		IController controller=editor.getController();
 		controller.executeStepNext();
 	}
 

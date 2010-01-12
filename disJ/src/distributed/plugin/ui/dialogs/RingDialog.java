@@ -32,7 +32,9 @@ import distributed.plugin.ui.IGraphEditorConstants;
  */
 public class RingDialog extends Dialog {
 
+	private boolean cancel;
     private int numNode;
+    private int numInit;
     private String linkType;
     
     /**
@@ -41,7 +43,9 @@ public class RingDialog extends Dialog {
     public RingDialog(Shell arg0) {
         super(arg0);
         setText("Ring Dialog");
+        this.cancel = true;
         this.numNode = 0;
+        this.numInit = 0;
         this.linkType = null;
     }
 
@@ -50,7 +54,7 @@ public class RingDialog extends Dialog {
         final Shell shell = new Shell(getParent(), SWT.DIALOG_TRIM
                 | SWT.APPLICATION_MODAL);
         shell.setText(getText());
-        shell.setSize(350, 150);
+        shell.setSize(320, 200);
 
         // number of node
         Label numNodeQs = new Label(shell, SWT.NONE);
@@ -62,33 +66,45 @@ public class RingDialog extends Dialog {
         txtResponse.setLocation(190, 10);
         txtResponse.setSize(50, 25);
 
+        // number of initiators
+		final Label numIts = new Label(shell, SWT.NONE);
+		numIts.setLocation(25, 40);
+		numIts.setSize(160, 25);
+		numIts.setText("Num of Init: ");
+
+		final Text txtInitResponse = new Text(shell, SWT.BORDER);
+		txtInitResponse.setLocation(190, 40);
+		txtInitResponse.setSize(50, 25);
+				
         // link type
         Label direct = new Label(shell, SWT.NONE);
-        direct.setLocation(25, 40);
+        direct.setLocation(25, 70);
         direct.setSize(100, 25);
         direct.setText("Type of Link: ");
 
         final Combo type = new Combo(shell, SWT.DROP_DOWN | SWT.READ_ONLY);
         type.setItems(new String[] {IGraphEditorConstants.UNI, IGraphEditorConstants.BI});
         type.select(1);
-        type.setLocation(130, 40);
-        type.setSize(150, 25);
+        type.setLocation(130, 70);
+        type.setSize(160, 25);
         
         // final button
         final Button btnOkay = new Button(shell, SWT.PUSH);
         btnOkay.setText("Ok");
-        btnOkay.setLocation(40, 100);
+        btnOkay.setLocation(40, 120);
         btnOkay.setSize(100, 30);
 
         final Button btnCancel = new Button(shell, SWT.PUSH);
         btnCancel.setText("Cancel");
-        btnCancel.setLocation(160, 100);
+        btnCancel.setLocation(160, 120);
         btnCancel.setSize(100, 30);
         btnCancel.setSelection(true);
+        
 
         Listener listener = new Listener() {
             public void handleEvent(Event event) {
                 if(event.widget == btnOkay){
+                	// read number of node input
                     String res = validateInput(txtResponse.getText());
                     if(res != null){
                         MessageDialog.openError(getParent(), "Invalid Input",
@@ -97,7 +113,19 @@ public class RingDialog extends Dialog {
                     } else {
                         numNode = Integer.parseInt(txtResponse.getText().trim());
                     }
+                    
+                    // read number of init input
+                    res = validateInitInput(txtInitResponse.getText());
+                    if(res != null){
+                        MessageDialog.openError(getParent(), "Invalid Input",
+                                res);
+                        return;
+                    } else {
+                    	numInit = Integer.parseInt(txtInitResponse.getText().trim());
+                    }                                  
+                    
                     linkType = type.getText();
+                    cancel = false;
                 }                
                 shell.close();
             }
@@ -123,15 +151,34 @@ public class RingDialog extends Dialog {
                 return null;
         }catch(NumberFormatException n){
             return "Input must be an integer number";
-        }
-        
+        }       
     }
     
-
+    private String validateInitInput(Object param){
+        try{
+            int i = Integer.parseInt(((String)param).trim());
+            if(i > this.numNode)
+                return "The number of init node cannot be more than number of node";
+            else if(i < 0)
+            	return "Number of init node cannot be negative";
+            else
+                return null;
+        }catch(NumberFormatException n){
+            return "Input must be an integer number";
+        }      
+    } 
+    public int getNumInit(){
+    	return this.numInit;
+    }
     public String getLinkType() {
         return linkType;
     }
     public int getNumNode() {
         return numNode;
     }
+   
+    public boolean isCancel(){
+    	return this.cancel;
+    }
+    
 }

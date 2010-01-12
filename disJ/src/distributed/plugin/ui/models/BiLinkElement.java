@@ -11,7 +11,6 @@
 package distributed.plugin.ui.models;
 
 import distributed.plugin.core.IConstants;
-import distributed.plugin.runtime.Graph;
 import distributed.plugin.ui.IGraphEditorConstants;
 
 /**
@@ -22,35 +21,32 @@ import distributed.plugin.ui.IGraphEditorConstants;
  */
 public class BiLinkElement extends LinkElement {
 
-    static final long serialVersionUID = 1;
-
-    private String type;
+    static final long serialVersionUID = IConstants.SERIALIZE_VERSION;
 
     /**
      * Constructor
      */
     protected BiLinkElement(String graphId, String id) {
-        super(graphId, id, IConstants.BI_DIRECTION);
-        this.type = IGraphEditorConstants.BI;
-        this.getEdge().setDirection(IConstants.BI_DIRECTION);
+        super(graphId, id, IConstants.DIRECTION_BI);
+        this.getEdge().setDirection(IConstants.DIRECTION_BI);
     }
 
     public String getType() {
-        return this.type;
+        return IGraphEditorConstants.BI;
     }
 
     
     public void attachSource() {
         if (this.getSource() == null)
             return;
-        this.getSource().connectInLink(this);
+        this.getSource().connectOutLink(this);
     }
 
  
     public void attachTarget() {
         if (this.getTarget() == null)
             return;
-        this.getTarget().connectOutLink(this);
+        this.getTarget().connectInLink(this);
     }
 
 }

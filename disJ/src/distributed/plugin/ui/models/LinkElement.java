@@ -11,8 +11,9 @@
 package distributed.plugin.ui.models;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +29,6 @@ import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
 import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.GraphFactory;
-import distributed.plugin.runtime.GraphLoader;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.validators.EmptyCellEditorValidator;
 import distributed.plugin.ui.validators.NumberCellEditorValidator;
@@ -42,48 +42,39 @@ import distributed.plugin.ui.validators.PercentageCellEditorValidator;
  */
 public abstract class LinkElement extends AdapterElement {
 
-    public static final String PROPERTY_DIRECTION_TYPE = "L1 Type of Direction";
-    
-    public static final String PROPERTY_START_PORT = "L2 Source Port Name";
-    
-    public static final String PROPERTY_END_PORT = "L3 Target Port Name";
+	static final long serialVersionUID = IConstants.SERIALIZE_VERSION;
+		
+	private static final String PROPERTY_DIRECTION_TYPE = "L1 Type of Direction";   
+	private static final String PROPERTY_START_PORT = "L2 Source Port Name";   
+	private static final String PROPERTY_END_PORT = "L3 Target Port Name";
+	private static final String PROPERTY_MSG_FLOW_TYPE = "L4 Message Flow Type";
+	private static final String PROPERTY_DELAY_TYPE = "L5 Delay Type";   
+	private static final String PROPERTY_DELAY_SEED = "L6 Delay Seed";   
+	private static final String PROPERTY_RELIABLE = "L7 Reliable";   
+	private static final String PROPERTY_PROB_FAILURE = "L8 Probability of Failure";
+	private static final String PROPERTY_TOTAL_MSG = "L9 Total Traffic";
 
-    public static final String PROPERTY_MSG_FLOW_TYPE = "L4 Message Flow Type";
+	private static final String[] propertyArray = {PROPERTY_DIRECTION_TYPE, 
+		PROPERTY_START_PORT, PROPERTY_END_PORT, PROPERTY_MSG_FLOW_TYPE, 
+		PROPERTY_DELAY_TYPE, PROPERTY_DELAY_SEED, PROPERTY_RELIABLE,
+		PROPERTY_PROB_FAILURE,PROPERTY_TOTAL_MSG};
 
-    public static final String PROPERTY_DELAY_TYPE = "L5 Delay Type";
-    
-    public static final String PROPERTY_DELAY_SEED = "L6 Delay Seed";
-    
-    public static final String PROPERTY_RELIABLE = "L7 Reliable";
-    
-    public static final String PROPERTY_PROB_FAILURE = "L8 Probability of Failure";
-
-    public static final String PROPERTY_TOTAL_MSG = "L9 Total Traffic";
-
-    
-
-    static final long serialVersionUID = 1;
-
-    protected static IPropertyDescriptor[] descriptors;
+	private static final int NUM_PROPERTIES = propertyArray.length;
 
     // message flow supported types
     protected static final String FIFO_TYPE = "FIFO";
-
     protected static final String NO_ORDER_TYPE = "No Order";
 
     // message delay time supported types
-    public static final String FIXED = "Fixed";
-
-    public static final String RANDOM_UNIFORM = "Random Uniform";
-
-    public static final String RANDOM_POISSON = "Random Poisson";
-
-    public static final String RANDOM_CUSTOMS = "Random Customs";
+    private static final String FIXED = "Fixed";
+    private static final String RANDOM_UNIFORM = "Random Uniform";
+    private static final String RANDOM_POISSON = "Random Poisson";
+    private static final String RANDOM_CUSTOMS = "Random Customs";
     
-    private HashMap hmProperties = new HashMap();
     
-    private static final int NUM_PROPERTIES = 9;
-
+    //private Map hmProperties = new HashMap();
+    
+    protected static IPropertyDescriptor[] descriptors;
     static {
         descriptors = new IPropertyDescriptor[NUM_PROPERTIES];
 
@@ -95,9 +86,11 @@ public abstract class LinkElement extends AdapterElement {
         
         descriptors[2] = new ComboBoxPropertyDescriptor(PROPERTY_MSG_FLOW_TYPE,
                 PROPERTY_MSG_FLOW_TYPE,
-                new String[] { FIFO_TYPE, NO_ORDER_TYPE });
+                // FIXME the index order must corresponding to value in IConstance 
+                new String[] {FIFO_TYPE, NO_ORDER_TYPE});
         
         descriptors[3] = new ComboBoxPropertyDescriptor(PROPERTY_DELAY_TYPE,
+                //FIXME the index order must corresponding to value in IConstance 
                 PROPERTY_DELAY_TYPE, new String[] { FIXED,
                         RANDOM_UNIFORM, RANDOM_POISSON, RANDOM_CUSTOMS });
 
@@ -128,23 +121,32 @@ public abstract class LinkElement extends AdapterElement {
 
     private String name;
 
-    private Edge edge;
-    
-    private Edge orgEdge;
+    private String sId;
 
-    private NodeElement source, target;
+    private String tId;
+
+    private String eId;
     
-    transient protected List bendpoints;
+    transient private Edge edge;
+    
+    transient private NodeElement source, target;
+
+    protected List<Bendpoint> bendpoints;
+
+    //private Edge orgEdge;
 
     /**
-     * Contructor
+     * Constructor
      */
-    protected LinkElement(String graphId, String id, short direction) {
+    protected LinkElement(String graphId, String eId, short direction) {
         try {
-            this.edge = new Edge(graphId, id, direction);
-            this.orgEdge = null;
-            this.bendpoints = new ArrayList();
-            this.edge.setLinkElement(this);
+            this.sId = null;
+            this.tId = null;
+            this.eId = eId;
+        	this.edge = new Edge(graphId, eId, direction);
+            this.bendpoints = new ArrayList<Bendpoint>();
+            //this.edge.setLinkElement(this);
+            
         } catch (DisJException ignore) {
             System.err.println("@LinkELement.constructor " + ignore);
         }
@@ -184,7 +186,7 @@ public abstract class LinkElement extends AdapterElement {
 
         } else if (propName.equals(PROPERTY_DIRECTION_TYPE)) {
             String direction = IGraphEditorConstants.UNI;
-            if(this.edge.getDirection() == IConstants.BI_DIRECTION)
+            if(this.edge.getDirection() == IConstants.DIRECTION_BI)
                 direction = IGraphEditorConstants.BI;
             return direction;
 
@@ -243,42 +245,64 @@ public abstract class LinkElement extends AdapterElement {
                 boolean bool = false;
                 if (((Integer) value).intValue() == 1){
                     bool = true;
+                    // since it is total reliability
+                    this.edge.setProbOfFailure(0);
                 }
                 this.edge.setReliable(bool);
             }
+        } else if (id.equals(PROPERTY_PROB_FAILURE)) {
+            int val = Integer.parseInt((String)value);
+            if(val < 0 || val > 100){
+            	// default value
+            	 this.edge.setProbOfFailure(IConstants.MSGFAILURE_DEFAULT_PROB);
+            	 if(val == 0){
+            		 this.edge.setReliable(true);
+            	 }
+            }else{
+            	this.edge.setProbOfFailure(val);
+            }
 
         } else if (id.equals(PROPERTY_MSG_FLOW_TYPE)) {
-            this.edge.setMsgFlowType(this.mapFlowType(value));
-
+        	if (value instanceof Integer) {
+        		int val = ((Integer)value).intValue();
+        		this.edge.setMsgFlowType(this.mapDelayType(val));         		 
+        		try {
+        			 // since some links have been modified to be different
+        			 // so overall of the graph should be mixed
+                	 Graph g = GraphFactory.getGraph(this.edge.getGraphId());
+                     g.setGlobalFlowType(IConstants.MSGFLOW_MIX_TYPE);
+    				 GraphFactory.addGraph(g);    				 
+    			} catch (DisJException e) {
+    				 e.printStackTrace();
+    			}
+        	}
         } else if (id.equals(PROPERTY_DELAY_TYPE)) {
-            this.edge.setDelayType(this.mapDelayType(value));
-
-            Graph g = GraphFactory.getGraph(this.edge.getGraphId());
-            g.setGlobalDelayType(IConstants.GLOBAL_CUSTOMS);
-            
-            System.out.println("Global delay type: " + g.getGlobalDelayType());
-            try {
-				GraphFactory.addGraph(g);
-			} catch (DisJException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
+        	if (value instanceof Integer) {
+        		int val = ((Integer)value).intValue();
+        		this.edge.setDelayType(this.mapDelayType(val));         		 
+        		try {
+        			 // since some links have been modified to be different
+        			 // so overall of the graph should be customs
+                	 Graph g = GraphFactory.getGraph(this.edge.getGraphId());
+                     g.setGlobalDelayType(IConstants.MSGDELAY_GLOBAL_CUSTOMS);
+    				 GraphFactory.addGraph(g);    				 
+    			} catch (DisJException e) {
+    				 e.printStackTrace();
+    			}
+        	}
         } else if (id.equals(PROPERTY_DELAY_SEED)) {
-        	int val = Integer.parseInt((String)value);
+        	int val = ((Integer)value).intValue();
         	if(val > 255 || val < 1){
         		// default value
-        		this.edge.setDelaySeed((short)1);
+        		this.edge.setDelaySeed(IConstants.MSGDELAY_DEFAULT_SEED);
         	} else {
-        		this.edge.setDelaySeed((short)val);
-        	}
-
-            Graph g = GraphFactory.getGraph(this.edge.getGraphId());
-            g.setGlobalDelayType(IConstants.GLOBAL_CUSTOMS);
+        		this.edge.setDelaySeed(val);
+        	}           
             try {
+            	Graph g = GraphFactory.getGraph(this.edge.getGraphId());
+                g.setGlobalDelayType(IConstants.MSGDELAY_GLOBAL_CUSTOMS);
 				GraphFactory.addGraph(g);
 			} catch (DisJException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
             
@@ -327,15 +351,6 @@ public abstract class LinkElement extends AdapterElement {
             } catch (DisJException ignore) {
                 System.err.println("[LinkElement].setPropertyValue " + ignore);
             }
-        } else if (id.equals(PROPERTY_PROB_FAILURE)) {
-            int val = Integer.parseInt((String)value);
-            if(val < 0 || val > 100){
-            	// default value
-            	 this.edge.setProbOfFailure(5);
-            }else{
-            	this.edge.setProbOfFailure(val);
-            }
-
         } else {
             return;
         }
@@ -343,8 +358,10 @@ public abstract class LinkElement extends AdapterElement {
     
     public void resetPropertyValue(Object propName){
 
+    	/*
         if (propName.equals(PROPERTY_RELIABLE)) {
-                this.edge.setReliable(this.orgEdge.isReliable());
+        	this.edge.setReliable(this.orgEdge.isReliable());
+                
         } else if (propName.equals(PROPERTY_MSG_FLOW_TYPE)) {
             this.edge.setMsgFlowType(this.orgEdge.getMsgFlowType());
 
@@ -368,7 +385,8 @@ public abstract class LinkElement extends AdapterElement {
             } catch (DisJException ignore) {
                 System.err.println("[LinkElement].setPropertyValue " + ignore);
             }
-        } else if (propName.equals(PROPERTY_TOTAL_MSG)) {
+        } else
+        */ if (propName.equals(PROPERTY_TOTAL_MSG)) {
             this.edge.resetNumMsg();
 
         } else {
@@ -407,7 +425,9 @@ public abstract class LinkElement extends AdapterElement {
 //            String prop = (String)descriptors[i].getId();
 //            this.resetPropertyValue(PROPERTY_TOTAL_MSG);
 //        }
-    	 this.resetPropertyValue(PROPERTY_TOTAL_MSG);
+    	for (int i = 0; i <  NUM_PROPERTIES; i++) {
+			this.resetPropertyValue(propertyArray[i]);
+		}
     	 this.setVisible(true); // make every edge visible
     }
     
@@ -416,7 +436,7 @@ public abstract class LinkElement extends AdapterElement {
     }
     
     public String getEdgeId(){
-        return this.edge.getEdgeId();
+        return this.eId;
     }
     
     public abstract void attachSource();
@@ -424,48 +444,38 @@ public abstract class LinkElement extends AdapterElement {
     public abstract void attachTarget();
 
     public void detachSource() {
-        if (source == null)
+        if (source == null){
             return;
-        source.disconnectInLink(this);
+        }
+        source.disconnectOutLink(this);
     }
 
     public void detachTarget() {
-        if (target == null)
+        if (target == null){
             return;
-        target.disconnectOutLink(this);
+        }
+        target.disconnectInLink(this);
     }
 
-    private final Integer mapFlowType(short type) {
-        return new Integer(type);
-    }
-
-    private final short mapFlowType(Object type) {
-        if (type instanceof Integer)
-            return (short) ((Integer) type).intValue();
-        else
-            return (short) -9;
-    }
-
-    private final short mapDelayType(Object type) {
-    	// FIXME quick fix for now
-    	short local_type;
-    	
-    	if (type instanceof Short) {
-			Short new_name = (Short) type;
-			local_type =  new_name.shortValue();
-		}else{
-			Integer i = (Integer)type;
-			local_type = (short) i.intValue();
-		}
-
-    	if (local_type == 0){
-    		return IConstants.LOCAL_FIXED;
-    	} else if (local_type == 1){
-    		return IConstants.LOCAL_RANDOM_UNIFORM;
-    	} else if (local_type == 2){
-    		return IConstants.LOCAL_RANDOM_POISSON;
+    private final int mapFlowType(int type) {
+    	if(type == IConstants.MSGFLOW_FIFO_TYPE){
+    		return type; // FIFO
+    	}else if(type == IConstants.MSGFLOW_NO_ORDER_TYPE){
+    		return IConstants.MSGFLOW_NO_ORDER_TYPE;
     	}else{
-    		return IConstants.LOCAL_RANDOM_CUSTOMS;
+    		return IConstants.MSGFLOW_MIX_TYPE;
+    	}
+}
+
+    private final int mapDelayType(int type) {
+    	if (type == 0){
+    		return IConstants.MSGDELAY_LOCAL_FIXED;
+    	} else if (type == 1){
+    		return IConstants.MSGDELAY_LOCAL_RANDOM_UNIFORM;
+    	} else if (type == 2){
+    		return IConstants.MSGDELAY_LOCAL_RANDOM_POISSON;
+    	}else{
+    		return IConstants.MSGDELAY_LOCAL_RANDOM_CUSTOMS;
     	}
     	
     }
@@ -491,9 +501,9 @@ public abstract class LinkElement extends AdapterElement {
         return target;
     }
 
-    public List getBendpoints() {
+    public List<Bendpoint> getBendpoints() {
         if(this.bendpoints ==  null)
-            this.bendpoints = new ArrayList();
+            this.bendpoints = new ArrayList<Bendpoint>();
         return this.bendpoints;
     }
 
@@ -504,6 +514,7 @@ public abstract class LinkElement extends AdapterElement {
      *            The source to set.
      */
     public void setSource(NodeElement source) {
+    	this.sId = source.getNodeId();
         this.source = source;
         this.edge.setStart(source.getNode());
     }
@@ -513,6 +524,7 @@ public abstract class LinkElement extends AdapterElement {
      *            The target to set.
      */
     public void setTarget(NodeElement target) {
+    	this.tId = target.getNodeId();
         this.target = target;
         this.edge.setEnd(target.getNode());
     }
@@ -554,7 +566,33 @@ public abstract class LinkElement extends AdapterElement {
 	}
 
 	protected void fireVisibilityChange(String prop, boolean value){
-//	    System.err.println("[AdapterElement] fireStructureChange");
 		listeners.firePropertyChange(prop, null, value);
 	}
+	
+	/*
+	 * Tracking IDs for reconstruction of object
+	 */
+	public String getSourceId(){
+		return this.sId;
+	}
+	public String getTargetId(){
+		return this.tId;
+	}
+
+	/*
+     * Overriding serialize object due to Java Bug4152790
+     */
+    private void writeObject(ObjectOutputStream os) throws IOException{    	
+   	 	// write the object
+		os.defaultWriteObject();
+	}
+    /*
+     * Overriding serialize object due to Java Bug4152790
+     */
+    private void readObject(ObjectInputStream os) throws IOException, ClassNotFoundException  {
+    	 // rebuild this object
+    	 os.defaultReadObject();    	 	
+    }
+    
+
 }

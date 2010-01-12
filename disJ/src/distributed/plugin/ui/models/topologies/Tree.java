@@ -30,106 +30,80 @@ import distributed.plugin.ui.models.NodeElement;
  * TODO To change the template for this generated type comment go to Window -
  * Preferences - Java - Code Style - Code Templates
  */
-public class Tree implements ITopology {
+public class Tree extends AbstractGraph {
 
     private static final int GAP = IGraphEditorConstants.NODE_SIZE + 10;
 
     private static final int HIGHT = IGraphEditorConstants.NODE_SIZE * 4;
 
+    
     private int count;
-
     private int nextL;
-
-    private int numOfNode;
-
     private int diameter;
-
     private boolean rootedTree;
 
     private String linkType;
-
-    private GraphElementFactory factory;
-
-    private Shell shell;
-
-    private List nodes;
-
-    private List links;
-
     private int[] hops;
-
     private InternalNode tree[];
-
-    private Random random;
-
-    class InternalNode {
-
-        private int level;
-
-        final private NodeElement element;
-
-        private List children;
-
-        InternalNode(NodeElement root) {
-            this.level = 1;
-            this.element = root;
-            this.children = new ArrayList();
-        }
-
-        NodeElement getElement() {
-            return this.element;
-        }
-
-        void addChild(InternalNode node) {
-            this.children.add(node);
-        }
-
-        List getChildren() {
-            return this.children;
-        }
-
-        int getNumOfChildren() {
-            return this.children.size();
-        }
-
-        InternalNode getChild(int i) {
-            return (InternalNode) this.children.get(i);
-        }
-
-        int getLevel() {
-            return this.level;
-        }
-
-        void setLevel(int level) {
-            this.level = level;
-        }
-    }
 
     /**
      * Constructor
      */
     public Tree(GraphElementFactory factory, Shell shell) {
+    	super(factory, shell);
         this.count = -1;
-        this.nextL = -1;
-        this.factory = factory;
-        this.shell = shell;
-        TreeDialog dialog = new TreeDialog(this.shell);
-        dialog.open();
-        this.numOfNode = dialog.getNumNode();
-        this.diameter = dialog.getDiamerLength();
-        this.linkType = dialog.getLinkType();
-        this.rootedTree = dialog.isRooted();
-        this.nodes = new ArrayList();
-        this.links = new ArrayList();
-        this.hops = new int[this.diameter + 1];
-        if (this.rootedTree)
-            this.tree = new InternalNode[this.numOfNode];
-        else
-            this.tree = new InternalNode[this.diameter + 1];
-        this.random = new Random(System.currentTimeMillis());
+        this.nextL = -1;       
+        this.diameter = 0;
+        this.linkType = IGraphEditorConstants.BI;
+        this.rootedTree = false;      
+        this.hops = null;
+        this.tree = null;     
     }
 
-    /**
+    class InternalNode {
+	
+	    private int level;
+	
+	    final private NodeElement element;
+	
+	    private List<InternalNode> children;
+	
+	    InternalNode(NodeElement root) {
+	        this.level = 1;
+	        this.element = root;
+	        this.children = new ArrayList<InternalNode>();
+	    }
+	
+	    NodeElement getElement() {
+	        return this.element;
+	    }
+	
+	    void addChild(InternalNode node) {
+	        this.children.add(node);
+	    }
+	
+	    List<InternalNode> getChildren() {
+	        return this.children;
+	    }
+	
+	    int getNumOfChildren() {
+	        return this.children.size();
+	    }
+	
+	    InternalNode getChild(int i) {
+	        return (InternalNode) this.children.get(i);
+	    }
+	
+	    int getLevel() {
+	        return this.level;
+	    }
+	
+	    void setLevel(int level) {
+	        this.level = level;
+	    }
+	}
+
+	/**
      * @see distributed.plugin.ui.models.topologies.ITopology#getName()
      */
     public String getName() {
@@ -137,54 +111,74 @@ public class Tree implements ITopology {
     }
 
     private NodeElement nextNode() {
-        return (NodeElement) this.nodes.get(++count);
+        return this.nodes.get(++count);
     }
 
     private LinkElement nextLink() {
-        return (LinkElement) this.links.get(++nextL);
+        return this.links.get(++nextL);
     }
 
     /**
      * @see distributed.plugin.ui.models.topologies.ITopology#createTopology()
      */
     public void createTopology() {
-        // Tree: the number of link == number of node - 1
-
-        // create links
-        if (this.linkType.equals(IGraphEditorConstants.UNI))
-            for (int i = 0; i < this.numOfNode - 1; i++) {
-                this.links.add(this.factory.createUniLinkElement());
-            }
-        else
-            for (int i = 0; i < this.numOfNode - 1; i++) {
-                this.links.add(this.factory.createBiLinkElement());
-            }
-
-        // create nodes
-        for (int i = 0; i < this.numOfNode; i++) {
-            NodeElement node = this.factory.createNodeElement();
-            node.setSize(new Dimension(IGraphEditorConstants.NODE_SIZE,
-                    IGraphEditorConstants.NODE_SIZE));
-            this.nodes.add(node);
-        }
-
-        if (this.rootedTree) {
-            // add node into a list
-            for (int i = 0; i < this.tree.length; i++) {
-                this.tree[i] = new InternalNode(this.nextNode());
-            }
-            // a random rooted tree;
-            // r.h.s index of "i" is parent of "i",
-            // therefore, the last index is root
-            for (int i = 0; i < this.tree.length - 1; i++) {
-                int par = this.random.nextInt(this.tree.length - 1 - i) + 1;
-                this.tree[par + i].addChild(this.tree[i]);
-            }
-        } else {
-            // assign number of nodes for each hop along a diameter line
-            int maxChild = this.numOfNode - this.diameter - 1;
-            this.assignChildren(maxChild);
-            this.constructSubTree();
+    	TreeDialog dialog = new TreeDialog(this.shell);
+        dialog.open();
+        
+        if(!dialog.isCancel()){
+	        this.numNode = dialog.getNumNode();
+	        this.diameter = dialog.getDiamerLength();
+	        this.linkType = dialog.getLinkType();
+	        this.rootedTree = dialog.isRooted();
+	        this.numInit = dialog.getNumInit();
+	        this.hops = new int[this.diameter + 1];
+	        
+	        if (this.rootedTree){
+	            this.tree = new InternalNode[this.numNode];
+	        }else{
+	            this.tree = new InternalNode[this.diameter + 1];
+	        }
+	        
+	        // Tree: the number of link == number of node - 1	
+	        // create links
+	        if (this.linkType.equals(IGraphEditorConstants.UNI))
+	            for (int i = 0; i < this.numNode - 1; i++) {
+	                this.links.add(this.factory.createUniLinkElement());
+	            }
+	        else
+	            for (int i = 0; i < this.numNode - 1; i++) {
+	                this.links.add(this.factory.createBiLinkElement());
+	            }
+	
+	        // create nodes
+	        for (int i = 0; i < this.numNode; i++) {
+	            NodeElement node = this.factory.createNodeElement();
+	            node.setSize(new Dimension(IGraphEditorConstants.NODE_SIZE,
+	                    IGraphEditorConstants.NODE_SIZE));
+	            this.nodes.add(node);
+	        }
+	
+	        if (this.rootedTree) {
+	            // add node into a list
+	            for (int i = 0; i < this.tree.length; i++) {
+	                this.tree[i] = new InternalNode(this.nextNode());
+	            }
+	            // a random rooted tree;
+	            // r.h.s index of "i" is parent of "i",
+	            // therefore, the last index is root
+	            for (int i = 0; i < this.tree.length - 1; i++) {
+	                int par = this.random.nextInt(this.tree.length - 1 - i) + 1;
+	                this.tree[par + i].addChild(this.tree[i]);
+	            }
+	        } else {
+	            // assign number of nodes for each hop along a diameter line
+	            int maxChild = this.numNode - this.diameter - 1;
+	            this.assignChildren(maxChild);
+	            this.constructSubTree();
+	        }
+	        
+	        // set init nodes
+	        this.setInitNodes();
         }
     }
 
@@ -287,20 +281,6 @@ public class Tree implements ITopology {
     }
 
     /**
-     * @see distributed.plugin.ui.models.topologies.ITopology#getAllNodes()
-     */
-    public List getAllNodes() {
-        return this.nodes;
-    }
-
-    /**
-     * @see distributed.plugin.ui.models.topologies.ITopology#getAllLinks()
-     */
-    public List getAllLinks() {
-        return this.links;
-    }
-
-    /**
      * @see distributed.plugin.ui.models.topologies.ITopology#getConnectionType()
      */
     public String getConnectionType() {
@@ -311,19 +291,20 @@ public class Tree implements ITopology {
      * @see distributed.plugin.ui.models.topologies.ITopology#applyLocation(org.eclipse.draw2d.geometry.Point)
      */
     public void applyLocation(Point point) {
-
-        if (this.rootedTree)
-            this.drawRootedTree(point, this.tree[this.tree.length - 1], 2);
-        else
-            // draw a random tree
-            this.drawTree(point);
-
+    	if(this.numNode > 0){
+	        if (this.rootedTree){
+	            this.drawRootedTree(point, this.tree[this.tree.length - 1], 2);
+	        }else{
+	            // draw a random tree
+	            this.drawTree(point);
+	        }
+    	}
     }
 
     private void drawRootedTree(Point point, InternalNode par, int varies) {
         par.getElement().setLocation(point);
         if (par.getNumOfChildren() > 0) {
-            List children = par.getChildren();
+            List<InternalNode> children = par.getChildren();
             int half = children.size() / 2;
             for (int i = 0; i < children.size(); i++) {
                 Point p;
@@ -337,7 +318,7 @@ public class Tree implements ITopology {
                     p = new Point(point.x + ((GAP + varies) * (i - half)),
                             point.y + HIGHT);
 
-                this.drawRootedTree(p, (InternalNode) children.get(i),
+                this.drawRootedTree(p, children.get(i),
                         (int) (varies * 2));
             }
         }
@@ -401,10 +382,13 @@ public class Tree implements ITopology {
      * @see distributed.plugin.ui.models.topologies.ITopology#setConnections()
      */
     public void setConnections() {
-        if (this.rootedTree)
-            this.connectRootedTree();
-        else
-            this.connectTree();
+    	if(this.numNode > 0){   	
+	        if (this.rootedTree){
+	            this.connectRootedTree();
+	        }else{
+	            this.connectTree();
+	        }
+    	}
 
     }
 

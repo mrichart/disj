@@ -10,18 +10,17 @@
 
 package distributed.plugin.ui.actions;
 
-import java.util.Hashtable;
+import java.util.Map;
 
 import org.eclipse.gef.ui.actions.WorkbenchPartAction;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.part.EditorPart;
 
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.dialogs.AddStatesDialog;
 import distributed.plugin.ui.dialogs.RemoveStatesDialog;
 import distributed.plugin.ui.editor.GraphEditor;
+import distributed.plugin.ui.models.GraphElement;
 
 /**
  * @author Me
@@ -36,7 +35,7 @@ public class StateSettingAction extends WorkbenchPartAction {
     /**
      * @param part
      */
-    public StateSettingAction(EditorPart part, String type) {
+    public StateSettingAction(GraphEditor part, String type) {
         super(part);
         this.execType = type;
         setId(type);
@@ -70,64 +69,57 @@ public class StateSettingAction extends WorkbenchPartAction {
     public void run() {     
         if (this.execType.equals(IGraphEditorConstants.ADD_STATE_ID)) {
             this.executeAddState();
+            
         } else if (this.execType.equals(IGraphEditorConstants.REMOVE_STATE_ID)) {
             this.executeRemoveStates();
+            
         }else {
             return;
         }
     }
 
     private void executeAddState() {
-        AddStatesDialog dialog = new AddStatesDialog(this.getShell());
-        Hashtable ht = dialog.open();
+    	GraphEditor editor = (GraphEditor) getWorkbenchPart();
+    	GraphElement ge = editor.getGraphElement();
+    	Map<Short, RGB> stateColr = ge.getStateColors();
+    	
+    	 // display existing colors
+        AddStatesDialog dialog = new AddStatesDialog(this.getShell(), stateColr);
+              
+        // accept new updated
+        stateColr = dialog.open();
 
         // cancel selected
-        if (ht==null)
+        if (stateColr == null)
             return;
-
-        // invalid input
-        if (!this.validateStateInput(ht))
-            return;
-
-        GraphEditor editor = (GraphEditor) getWorkbenchPart();
-//        Short state = new Short(Short.parseShort((String) values[0]));
-//        editor.getGraphElement().addStateColor(state, (RGB) values[1]);
-        editor.getGraphElement().addStateColor(ht);
-        editor.makeDirty();
-
-    }
-
-    private boolean validateStateInput(Hashtable ht) {
-    	Object aKey="";
-        try {
-        	for (Object key:ht.keySet()){
-        		aKey=key;
-            short s =(Short) key;
-        	}
-        } catch (ClassCastException e) {
-            MessageDialog.openError(this.getShell(), "Assign State Color",
-                    aKey+ " is not a number");
-        } catch (NumberFormatException e) {
-            MessageDialog.openError(this.getShell(), "Assign State Color",
-                    aKey + " is not a number");
-        }
         
-        return true;
-
-//        if (param[1] != null)
-//            return true;
-//
-//        return false;
+        // ok selected
+        if (stateColr != null){
+	        // update data
+	        ge.addStateColor(stateColr);
+	        editor.makeDirty();
+        }
     }
 
     private void executeRemoveStates() {
-        GraphEditor editor = (GraphEditor) getWorkbenchPart();
-        //System.out.println("Size of states colors: " + 
-        //        editor.getGraphElement().getGraph().getNumberOfState());
-        
+    	GraphEditor editor = (GraphEditor) getWorkbenchPart();
+    	GraphElement ge = editor.getGraphElement();
+    	Map<Short, RGB> stateColr = ge.getStateColors();
+    	
+   	 	// display existing colors
         RemoveStatesDialog dialog = new RemoveStatesDialog(this.getShell(),
-                editor);
-        dialog.open();
+                stateColr);
+        
+        // accept new updated
+        stateColr = dialog.open();
+        
+        // ok selected
+        if (stateColr != null){
+	        // update data
+        	ge.removeAllStateColor();
+	        ge.addStateColor(stateColr);
+	        editor.makeDirty();
+        }
 
     }
 

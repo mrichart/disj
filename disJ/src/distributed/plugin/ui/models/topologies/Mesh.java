@@ -29,7 +29,7 @@ import distributed.plugin.ui.models.NodeElement;
  * TODO To change the template for this generated type comment go to Window -
  * Preferences - Java - Code Style - Code Templates
  */
-public class Mesh implements ITopology {
+public class Mesh extends AbstractGraph {
 
     private static final int GAP = IGraphEditorConstants.NODE_SIZE * 3;
 
@@ -39,27 +39,17 @@ public class Mesh implements ITopology {
 
     private String linkType;
 
-    private GraphElementFactory factory;
-
-    private Shell shell;
-
     private NodeElement[][] nodes;
 
-    private List links;
-
     /**
-     * Construtor
+     * Constructor
      */
     public Mesh(GraphElementFactory factory, Shell shell) {
-        this.factory = factory;
-        this.shell = shell;
-        MeshDialog dialog = new MeshDialog(this.shell);
-        dialog.open();
-        this.rows = dialog.getNumRows();
-        this.cols = dialog.getNumCols();
-        this.linkType = dialog.getLinkType();
-        this.nodes = new NodeElement[this.rows][this.cols];
-        this.links = new ArrayList();
+    	super(factory, shell);       
+        this.rows = 0;
+        this.cols = 0;
+        this.linkType = IGraphEditorConstants.BI;
+        this.nodes = null;
     }
 
     /**
@@ -73,57 +63,65 @@ public class Mesh implements ITopology {
      * @see distributed.plugin.ui.models.topologies.ITopology#createTopology()
      */
     public void createTopology() {
-        for (int i = 0; i < this.rows; i++) {
-            for (int j = 0; j < this.cols; j++) {
-                this.nodes[i][j] = this.factory.createNodeElement();
-            }
+    	
+    	MeshDialog dialog = new MeshDialog(this.shell);
+        dialog.open();
+        
+        if(!dialog.isCancel()){
+        	this.rows = dialog.getNumRows();
+            this.cols = dialog.getNumCols();
+            this.linkType = dialog.getLinkType();
+            this.nodes = new NodeElement[this.rows][this.cols];
+            this.numInit = dialog.getNumInit();
+            
+	        for (int i = 0; i < this.rows; i++) {
+	            for (int j = 0; j < this.cols; j++) {
+	                this.nodes[i][j] = this.factory.createNodeElement();
+	            }
+	        }
+	
+	        // links for horizontal directions
+	        for (int i = 0; i < this.rows; i++) {
+	            for (int j = 0; j < this.cols-1; j++) {
+	                LinkElement link;
+	                if (this.linkType.equals(IGraphEditorConstants.UNI))
+	                    link = this.factory.createUniLinkElement();
+	                else
+	                    link = this.factory.createBiLinkElement();
+	                this.links.add(link);
+	            }
+	        }
+	
+	        // links for vertical directions
+	        for (int i = 0; i < this.cols; i++) {
+	            for (int j = 0; j < this.rows-1; j++) {
+	                LinkElement link;
+	                if (this.linkType.equals(IGraphEditorConstants.UNI))
+	                    link = this.factory.createUniLinkElement();
+	                else
+	                    link = this.factory.createBiLinkElement();
+	                this.links.add(link);
+	            }
+	        }
+	        
+	        // set init nodes
+	        super.nodes = this.getAllNodes();
+	        super.numNode = super.nodes.size();
+	        this.setInitNodes();
         }
-
-        // links for horizental directions
-        for (int i = 0; i < this.rows; i++) {
-            for (int j = 0; j < this.cols-1; j++) {
-                LinkElement link;
-                if (this.linkType.equals(IGraphEditorConstants.UNI))
-                    link = this.factory.createUniLinkElement();
-                else
-                    link = this.factory.createBiLinkElement();
-                this.links.add(link);
-            }
-        }
-
-        // links for vertical directions
-        for (int i = 0; i < this.cols; i++) {
-            for (int j = 0; j < this.rows-1; j++) {
-                LinkElement link;
-                if (this.linkType.equals(IGraphEditorConstants.UNI))
-                    link = this.factory.createUniLinkElement();
-                else
-                    link = this.factory.createBiLinkElement();
-                this.links.add(link);
-            }
-        }
-        //System.out.println("********** size: " + links.size());
-
     }
 
     /**
      * @see distributed.plugin.ui.models.topologies.ITopology#getAllNodes()
      */
-    public List getAllNodes() {
-        List tmp = new ArrayList();
+    public List<NodeElement> getAllNodes() {
+        List<NodeElement> tmp = new ArrayList<NodeElement>();
         for (int i = 0; i < this.rows; i++) {
             for (int j = 0; j < this.cols; j++) {
                 tmp.add(this.nodes[i][j]);
             }
         }
         return tmp;
-    }
-
-    /**
-     * @see distributed.plugin.ui.models.topologies.ITopology#getAllLinks()
-     */
-    public List getAllLinks() {
-        return this.links;
     }
 
     /**
@@ -155,7 +153,11 @@ public class Mesh implements ITopology {
      */
     public void setConnections() {
         int count = -1;
-        // horizental connections
+        
+        if(this.rows <= 0){
+        	return;
+        }
+        // horizontal connections
         for (int i = 0; i < this.rows - 1; i++) {
             for (int j = 0; j < this.cols - 1; j++) {
                 LinkElement link = (LinkElement) this.links.get(++count);
@@ -177,7 +179,7 @@ public class Mesh implements ITopology {
         }
 
         // vertical connections
-        // first colum
+        // first column
         for (int i = 0; i < 1; i++) {
             for (int j = this.rows - 1; j > 0; j--) {
                 LinkElement link = (LinkElement) this.links.get(++count);

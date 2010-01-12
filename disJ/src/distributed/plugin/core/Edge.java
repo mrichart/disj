@@ -10,12 +10,15 @@
 
 package distributed.plugin.core;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Random;
 
-import distributed.plugin.random.*;
+import distributed.plugin.random.IRandom;
+import distributed.plugin.random.Poisson;
+import distributed.plugin.random.Uniform;
 import distributed.plugin.runtime.GraphFactory;
-import distributed.plugin.ui.models.LinkElement;
 
 /**
  * @author Me
@@ -30,35 +33,32 @@ public class Edge implements Serializable {
 	
 	private String edgeId; // unique id system use only
 
-	private short msgFlowType; // i.e. FIFO
+	private int msgFlowType; // i.e. FIFO
 
 	private int lastestMsgTimeForStart;
 
 	private int lastestMsgTimeForEnd;
 
-	private int totalMsg; // total messages have been passed throug this edge
+	private int totalMsg; // total messages have been passed through this edge
 
 	private boolean isReliable;
 	
 	private int probOfFailure;
 
-	private short delayType; // a type of delay i.e random uniform,
+	private int delayType; //i.e random uniform, synchronize
 
-	// synchronize
-
-	private short delaySeed; // it's usufull for synchronize delay and random
-
-	// uniform type
+	private int delaySeed; // for synchronize delay and random uniform type
 
 	private short direction;
 
-	private Node start;
-
-	private Node end;
-
 	private EdgeLog log;
 
-	private LinkElement linkElement;
+	transient private Node start;
+
+	transient private Node end;
+
+	
+	//private LinkElement linkElement;
 	
 	/**
 	 * Constructor, create an edge with default values
@@ -83,21 +83,25 @@ public class Edge implements Serializable {
 	 */
 	private Edge(String graphId, String id, short direction, Node start, Node end)
 			throws DisJException {
-		this(graphId, id, true, direction, IConstants.FIFO_TYPE, IConstants.LOCAL_FIXED,
-				(short) 1, start, end);
+		this(graphId, id, true, direction, IConstants.MSGFLOW_FIFO_TYPE, IConstants.MSGDELAY_LOCAL_FIXED,
+				IConstants.MSGDELAY_DEFAULT_SEED, start, end);
 	}
 
 	public Edge(String graphId, String id, boolean isReliable,
-			short direction, short msgFlowType, short delayType,
-			short delaySeed, Node start, Node end) throws DisJException {
+			short direction, int msgFlowType, int delayType,
+			int delaySeed, Node start, Node end) throws DisJException {
 
 		this.graphId = graphId;
 		this.msgFlowType = msgFlowType;
 		this.totalMsg = 0;
 		this.edgeId = id;
-		this.probOfFailure = 5;
 		this.direction = direction;
 		this.isReliable = isReliable;
+		if(this.isReliable){
+			this.probOfFailure = 0;
+		}else{
+			this.probOfFailure = IConstants.MSGFAILURE_DEFAULT_PROB;
+		}
 		this.delayType = delayType;
 		this.delaySeed = delaySeed;
 		if (start == end && start != null)
@@ -125,7 +129,7 @@ public class Edge implements Serializable {
 	 */
 	public int getDelayTime(Node sender, int curTime) {
 
-		if (this.delayType == IConstants.LOCAL_FIXED) {	
+		if (this.delayType == IConstants.MSGDELAY_LOCAL_FIXED) {	
 			if (sender.equals(this.start)) {
 				this.lastestMsgTimeForStart = curTime + this.delaySeed;				
 				return this.lastestMsgTimeForStart;
@@ -140,7 +144,7 @@ public class Edge implements Serializable {
 				throw new RuntimeException(msg);
 			}
 	
-		} else if (this.delayType == IConstants.LOCAL_RANDOM_UNIFORM) {
+		} else if (this.delayType == IConstants.MSGDELAY_LOCAL_RANDOM_UNIFORM) {
 			int base = 0;
 			if (sender.equals(this.start)) {
 				if(this.lastestMsgTimeForStart > curTime){
@@ -162,7 +166,7 @@ public class Edge implements Serializable {
 
 			IRandom r = Uniform.getInstance(System.currentTimeMillis());
 			int t = 0;						
-			if (this.msgFlowType == IConstants.FIFO_TYPE) {
+			if (this.msgFlowType == IConstants.MSGFLOW_FIFO_TYPE) {
 				t = r.nextInt(IConstants.MAX_RANDOM_RANGE) + base + 1;
 			}else{
 				t = r.nextInt(IConstants.MAX_RANDOM_RANGE) + curTime + 1;
@@ -175,7 +179,7 @@ public class Edge implements Serializable {
 			}
 			return t;
 
-		} else if (this.delayType == IConstants.LOCAL_RANDOM_POISSON) {
+		} else if (this.delayType == IConstants.MSGDELAY_LOCAL_RANDOM_POISSON) {
 			int base = 0;
 			if (sender.equals(this.start)) {
 				if(this.lastestMsgTimeForStart > curTime){
@@ -197,7 +201,7 @@ public class Edge implements Serializable {
 
 			IRandom r = Poisson.getInstance(System.currentTimeMillis());
 			int t = 0;						
-			if (this.msgFlowType == IConstants.FIFO_TYPE) {
+			if (this.msgFlowType == IConstants.MSGFLOW_FIFO_TYPE) {
 				t = r.nextInt(IConstants.MAX_RANDOM_RANGE) + base + 1;
 			}else{
 				t = r.nextInt(IConstants.MAX_RANDOM_RANGE) + curTime + 1;
@@ -238,7 +242,7 @@ public class Edge implements Serializable {
 				}
 
 				int t = 0;						
-				if (this.msgFlowType == IConstants.FIFO_TYPE) {
+				if (this.msgFlowType == IConstants.MSGFLOW_FIFO_TYPE) {
 					t = clientRandom.nextInt(IConstants.MAX_RANDOM_RANGE) + base + 1;
 				}else{
 					t = clientRandom.nextInt(IConstants.MAX_RANDOM_RANGE) + curTime + 1;
@@ -332,14 +336,14 @@ public class Edge implements Serializable {
 	/**
 	 * @return Returns the delayType.
 	 */
-	public short getDelayType() {
+	public int getDelayType() {
 		return delayType;
 	}
 
 	/**
 	 * @return Returns the delaySeed.
 	 */
-	public short getDelaySeed() {
+	public int getDelaySeed() {
 		return delaySeed;
 	}
 
@@ -347,26 +351,36 @@ public class Edge implements Serializable {
 	 * @param delaySeed
 	 *            The delaySeed to set.
 	 */
-	public void setDelaySeed(short delaySeed) {
+	public void setDelaySeed(int delaySeed) {
 		this.delaySeed = delaySeed;
 	}
 
 	/**
 	 * @return Returns the msgFlowType.
 	 */
-	public short getMsgFlowType() {
+	public int getMsgFlowType() {
 		return msgFlowType;
 	}
 
 	/**
-	 * Wrtie a current states in a readable format
+	 * Write a current states in a readable format
 	 */
 	public String toString() {
-		return ("\n\nEdge: " + this.edgeId + "\nReliable: " + this.isReliable
+		if(this.start != null && this.end != null){
+			String s1 = ("\n\nEdge: " + this.edgeId + "\nReliable: " + this.isReliable
 				+ "\nMessage Flow Type: " + this.msgFlowType
 				+ "\nNum Message Entered: " + this.totalMsg + "\nDelay type: "
 				+ this.delayType + "\nNode 1: " + this.start.getNodeId()
 				+ "\nNode 2: " + this.end.getNodeId());
+			return s1;
+			
+		}else{		
+			String s2 = ("\n\nEdge: " + this.edgeId + "\nReliable: " + this.isReliable
+				+ "\nMessage Flow Type: " + this.msgFlowType
+				+ "\nNum Message Entered: " + this.totalMsg + "\nDelay type: "
+				+ this.delayType);
+			return s2;
+		}		
 	}
 
 	/**
@@ -388,7 +402,7 @@ public class Edge implements Serializable {
 	 * @param delayType
 	 *            The delayType to set.
 	 */
-	public void setDelayType(short delayType) {
+	public void setDelayType(int delayType) {
 		this.delayType = delayType;
 	}
 
@@ -404,7 +418,7 @@ public class Edge implements Serializable {
 	 * @param msgFlowType
 	 *            The msgFlowType to set.
 	 */
-	public void setMsgFlowType(short msgFlowType) {
+	public void setMsgFlowType(int msgFlowType) {
 		this.msgFlowType = msgFlowType;
 	}
     public void setEnd(Node end) {
@@ -419,7 +433,7 @@ public class Edge implements Serializable {
     public void setProbOfFailure(int probOfFailure) {
         this.probOfFailure = probOfFailure;
     }
-
+/*
 	public void setLinkElement(LinkElement linkElement) {
 		this.linkElement=linkElement;		
 	}
@@ -427,7 +441,7 @@ public class Edge implements Serializable {
 	public LinkElement getLinkElement(){
 		return this.linkElement;
 	}
-
+*/
 	public int getTotalMsg() {
 		return totalMsg;
 	}
@@ -436,4 +450,22 @@ public class Edge implements Serializable {
 		this.totalMsg = totalMsg;
 	}
 	
+	/*
+     * Overriding serialize object due to Java Bug4152790
+     */
+    private void writeObject(ObjectOutputStream os) throws IOException{   	
+		os.defaultWriteObject();
+	}
+    /*
+     * Overriding serialize object due to Java Bug4152790
+     */
+    private void readObject(ObjectInputStream os) throws IOException, ClassNotFoundException  {
+    	// rebuild this object
+    	os.defaultReadObject();
+
+     	// clean up log 
+     	this.log.clear();
+     	
+    }
+
 }

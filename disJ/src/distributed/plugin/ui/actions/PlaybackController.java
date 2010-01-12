@@ -16,10 +16,12 @@ import distributed.plugin.core.Node;
 import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.engine.Entity;
 import distributed.plugin.runtime.engine.Processor;
+import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.editor.GraphEditor;
+import distributed.plugin.ui.models.GraphElement;
 import distributed.plugin.ui.models.LinkElement;
 
-public class PlaybackController implements Controller {
+public class PlaybackController implements IController {
 
 	ProcessActions pa;
 	GraphEditor editor;
@@ -38,7 +40,7 @@ public class PlaybackController implements Controller {
 
 	public void executeRun() {
 
-		MessageConsole mc = Entity.findConsole("DisJ Console");
+		MessageConsole mc = Entity.findConsole(IGraphEditorConstants.DISJ_CONSOLE);
 		MessageConsoleStream out = mc.newMessageStream();
 		System.setOut(new PrintStream(out));
 		StringBuffer sb = editor.getRecFile();
@@ -57,24 +59,24 @@ public class PlaybackController implements Controller {
 
 	}
 
-	@Override
+
 	public void executeStepNext() {
 		pause = false;
 		stepNext = true;
 
 	}
 
-	@Override
+
 	public void executeStop() {
 		if (stop==true){
-			resetState();
+			this.resetState();
 		}else{
 		stop = true;
 		}
 
 	}
 
-	@Override
+
 	public void executeSuspend() {
 
 		pause = true;
@@ -142,9 +144,10 @@ public class PlaybackController implements Controller {
 							EdgeId = parts[0];
 							// state = new Integer(parts[2]);
 							// System.out.println(NodeId + "-->state:" + state);
-							edge = (Edge) edges.get(EdgeId);
-							LinkElement le = edge.getLinkElement();
-							le.setVisible(visibility);
+// FIXME set link visibility() 							
+//							edge = (Edge) edges.get(EdgeId);
+//							LinkElement le = edge.getLinkElement();
+//							le.setVisible(visibility);
 						}
 
 						if (line.startsWith("Node")) {
@@ -209,10 +212,9 @@ public class PlaybackController implements Controller {
 				}
 				if (line == null) {
 					stop=true;
-					System.out.println("==Finished==");
+					//System.out.println("==Finished==");
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -221,6 +223,7 @@ public class PlaybackController implements Controller {
 	}
 
 	void resetState() {
+		/*
 		Graph graph = editor.getGraphElement().getGraph();
 		Map nodes = graph.getNodes();
 		Map edges = graph.getEdges();
@@ -234,6 +237,9 @@ public class PlaybackController implements Controller {
 			edge = (Edge) edges.get(key);
 			edge.getLinkElement().setVisible(true);
 		}
+		*/
+		GraphElement graph = editor.getGraphElement();
+		graph.resetGraphElement();
 	}
 
 }

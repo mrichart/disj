@@ -21,6 +21,7 @@ import distributed.plugin.ui.models.topologies.HyperCube;
 import distributed.plugin.ui.models.topologies.ITopology;
 import distributed.plugin.ui.models.topologies.Mesh;
 import distributed.plugin.ui.models.topologies.Ring;
+import distributed.plugin.ui.models.topologies.Spatial;
 import distributed.plugin.ui.models.topologies.Torus;
 import distributed.plugin.ui.models.topologies.Tree;
 
@@ -85,7 +86,7 @@ public class GraphElementFactory implements CreationFactory {
         if(this.shell == null){
             this.shell = this.graphElement.getShell();
         }
-        
+
         if (template.equals(IGraphEditorConstants.TEMPLATE_NODE))
             return this.createNodeElement();
 
@@ -98,33 +99,35 @@ public class GraphElementFactory implements CreationFactory {
         } else if (template.equals(IGraphEditorConstants.TEMPLATE_RING)) {
             return this.createRing();
 
-        } else if (template.equals(IGraphEditorConstants.TEMPLATE_TREE))
+        } else if (template.equals(IGraphEditorConstants.TEMPLATE_TREE)){
             return this.createTree();
 
-        else if (template.equals(IGraphEditorConstants.TEMPLATE_MESH))
+        } else if (template.equals(IGraphEditorConstants.TEMPLATE_MESH)) {
             return this.createMesh();
 
-        else if (template.equals(IGraphEditorConstants.TEMPLATE_COMPLETE))
+        } else if (template.equals(IGraphEditorConstants.TEMPLATE_COMPLETE)){
             return this.createComplete();
 
-        else if (template.equals(IGraphEditorConstants.TEMPLATE_HYPER_CUBE))
+        } else if (template.equals(IGraphEditorConstants.TEMPLATE_HYPER_CUBE)){
             return this.createHyperCube();
 
-        else if (template.equals(IGraphEditorConstants.TEMPLATE_TORUS_1))
+        } else if (template.equals(IGraphEditorConstants.TEMPLATE_TORUS_1)){
             return this.createTorus1();
 
-        else if (template.equals(IGraphEditorConstants.TEMPLATE_TORUS_2))
+        } else if (template.equals(IGraphEditorConstants.TEMPLATE_TORUS_2)){
             return this.createTorus2();
 
-        else if (template.equals(IGraphEditorConstants.TEMPLATE_GENERIC))
+        } else if (template.equals(IGraphEditorConstants.TEMPLATE_GENERIC)){
             return this.createGeneric();
         
-        else if (template.equals(IGraphEditorConstants.TEMPLATE_GENERIC_C))
+        } else if (template.equals(IGraphEditorConstants.TEMPLATE_SPATIAL)){
+            return this.createSpatialGraph();
+        
+        } else if (template.equals(IGraphEditorConstants.TEMPLATE_GENERIC_C)){
             return this.createGeneric_C();
-
-        else
+        } else{
             return null;
-
+        }
     }
 
     private ITopology createRing(){
@@ -170,13 +173,19 @@ public class GraphElementFactory implements CreationFactory {
     }
 
     private ITopology createGeneric() {
-        ITopology gen = new GenericGraph(this, this.shell);
+        ITopology gen = new GenericGraph(this, this.shell, IGraphEditorConstants.GENERIC);
         gen.createTopology();
         return gen;
     }
     
     private ITopology createGeneric_C() {
-        ITopology gen = new GenericGraph(this, this.shell,IGraphEditorConstants.GENERIC_C);
+        ITopology gen = new GenericGraph(this, this.shell, IGraphEditorConstants.GENERIC_C);
+        gen.createTopology();
+        return gen;
+    }
+
+    private ITopology createSpatialGraph() {
+        ITopology gen = new Spatial(this, this.shell);
         gen.createTopology();
         return gen;
     }

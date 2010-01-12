@@ -14,6 +14,9 @@ import java.util.List;
 
 import org.eclipse.draw2d.geometry.Point;
 
+import distributed.plugin.ui.models.LinkElement;
+import distributed.plugin.ui.models.NodeElement;
+
 /**
  * @author Me
  * 
@@ -39,13 +42,13 @@ public interface ITopology {
      * 
      * @return
      */
-    public List getAllNodes();
+    public List<NodeElement> getAllNodes();
     
     /**
      * Get all links in this topology
      * @return
      */
-    public List getAllLinks();
+    public List<LinkElement> getAllLinks();
 
     /**
      * Get a connection type in this topology. Note: All link in the topology

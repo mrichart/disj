@@ -11,7 +11,6 @@
 package distributed.plugin.ui.editor;
 
 /**
- * @author daanish
  *
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
@@ -29,7 +28,6 @@ import org.eclipse.gef.ui.palette.customize.EntryPage;
 /**
  * PaletteCustomizer for the logic example.
  * 
- * @author Pratik Shah
  */
 public class GraphPaletteCustomizer 
 	extends PaletteCustomizer 

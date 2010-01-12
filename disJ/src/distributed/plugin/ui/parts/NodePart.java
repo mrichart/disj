@@ -254,21 +254,21 @@ public class NodePart extends AbstractGraphicalEditPart implements
 				if (display == null) {
 					ui = new Runnable() {
 						public void run() {
-							refreshSourceConnections();
-						}
-					};
-				} else {
-					refreshSourceConnections();
-				}
-			} else if (prop.equals(IConstants.PROPERTY_CHANGE_OUTPUT)) {
-				if (display == null) {
-					ui = new Runnable() {
-						public void run() {
 							refreshTargetConnections();
 						}
 					};
 				} else {
 					refreshTargetConnections();
+				}
+			} else if (prop.equals(IConstants.PROPERTY_CHANGE_OUTPUT)) {
+				if (display == null) {
+					ui = new Runnable() {
+						public void run() {
+							refreshSourceConnections();
+						}
+					};
+				} else {
+					refreshSourceConnections();
 				}
 			} else if (prop.equals(IConstants.PROPERTY_CHANGE_NODE_STATE)) {
 				final Integer value = (Integer) evt.getNewValue();
@@ -293,7 +293,7 @@ public class NodePart extends AbstractGraphicalEditPart implements
 				} else {
 					this.refreshVisuals();
 				}
-			} else {
+			}else {
 				return;
 			}
 			if (ui != null) {
@@ -312,7 +312,7 @@ public class NodePart extends AbstractGraphicalEditPart implements
 		// System.err.println("[NodePart] refreshStateColor: " + newState);
 		Short state = new Short(newState.shortValue());
 		GraphElement g = (GraphElement) this.getGraphicalParent().getModel();
-		Color color = g.getStateColor(state);
+		Color color = g.getColor(state);
 		if (color == null)
 			return;
 		this.getNodeFigure().setBackgroundColor(color);

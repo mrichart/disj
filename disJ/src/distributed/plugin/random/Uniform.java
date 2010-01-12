@@ -24,12 +24,11 @@ public class Uniform implements IRandom {
 		return INSTANCE;
 	}
 	
-	@Override
+
 	public int nextInt( double n ) {
 		return rand.nextInt((int)n);
 	}
 
-	@Override
 	public void setSeed( long seed ) {
 		rand.setSeed( seed );
 
