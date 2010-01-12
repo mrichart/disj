@@ -7,3 +7,4 @@ TODO
 6. Class loader when do deep clone
 7. Display error message from plugin to user console
 8. Display warning when there is no init state at the node
+9. Clean up icons in src ( move to icons dir)
