@@ -8,3 +8,7 @@ TODO
 7. Display error message from plugin to user console
 8. Display warning when there is no init state at the node
 9. Clean up icons in src ( move to icons dir)
+10.Clean up exception catch is disj
+11.Handle the path in windows with space in a dir name
+12.Modify in document that disj doesn't allow user to call any Entity 
+	function inside it constructor coz of reflection !!

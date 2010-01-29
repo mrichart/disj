@@ -10,6 +10,8 @@
 
 package distributed.plugin.runtime.engine;
 
+import java.io.Serializable;
+
 import distributed.plugin.runtime.IMessage;
 
 /**
@@ -23,13 +25,13 @@ public class Message implements IMessage {
 	
 	private String label;
 	
-	private Object clientMessage;
+	private Serializable clientMessage;
 	
-	protected Message(Object clientMessage){
+	protected Message(Serializable clientMessage){
 		this("", clientMessage);
 	}
 	
-	protected Message(String label, Object clientMessage){
+	protected Message(String label, Serializable clientMessage){
 		this.label = label;
 		this.clientMessage = clientMessage;
 	}
@@ -39,7 +41,7 @@ public class Message implements IMessage {
 	 * 
 	 * @return Returns clientMessage.
 	 */
-	public Object getContent() {
+	public Serializable getContent() {
 		return clientMessage;
 	}
 	/**

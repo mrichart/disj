@@ -362,7 +362,7 @@ public class ProcessActions extends WorkbenchPartAction {
 	private ClassLoader getClassLoader(IJavaProject javaProject) {
 		ClassLoader loader = null;
 		try {
-			System.out.println("[ProcessActions].getClassLoader()");
+			//System.out.println("[ProcessActions].getClassLoader()");
 			IClasspathEntry[] entries = javaProject.getRawClasspath();
 			List<URL> urls = new ArrayList<URL>(entries.length);
 			for (int i = 0; i < entries.length; i++) {
@@ -395,7 +395,7 @@ public class ProcessActions extends WorkbenchPartAction {
 					// client source code
 				}
 			}
-			System.out.println("[ProcessActions].getClassLoader()" + urls);
+			//System.out.println("[ProcessActions].getClassLoader()" + urls);
 
 			// set the output file location w.r.t 1st urser src code location
 			this.getEngine().setOutputLocation((URL) urls.get(0));

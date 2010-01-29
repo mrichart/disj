@@ -10,7 +10,6 @@
 
 package distributed.plugin.runtime.engine;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -72,10 +71,8 @@ public class SimulatorEngine {
             System.out.println("*****[SimulatorEngine] DisJ processors are started*****");
 
            
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (Exception e) {
-            e.printStackTrace();
+        	System.err.println("ERROR @SimultorEngine.execute() " + e);
         }
     }
 

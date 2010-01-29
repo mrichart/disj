@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URL;
@@ -80,8 +81,6 @@ public class Processor implements IProcesses {
 	private PrintWriter RecFile;
 
 	private GraphEditor ge;
-	
-	private ClassLoader loader;
 
 	// private SystemLog sysLog;
 
@@ -102,7 +101,6 @@ public class Processor implements IProcesses {
 
 		this.graph = graph;
 		this.procName = graph.getId();
-		this.loader = ge.getLoader();
 		this.client = client;
 		this.clientRandom = clientRandom;
 		this.queue = new EventQueue();
@@ -136,16 +134,8 @@ public class Processor implements IProcesses {
 					}
 				}
 			}
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (ClassCastException e){
-			e.printStackTrace();
+		} catch (Exception e){
+			this.appendConsoleOutput(e.toString());
 		}
 
 	}
@@ -161,15 +151,9 @@ public class Processor implements IProcesses {
 			GraphFactory.addGraph(this.graph);
 
 		} catch (DisJException e) {
-			System.err.println("Error add graph into map " + e);
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			this.appendConsoleOutput("ERROR add graph into map " + e);
+		} catch (Exception e) {
+			this.appendConsoleOutput(e.toString());
 		}
 	}
 
@@ -200,8 +184,8 @@ public class Processor implements IProcesses {
 		File r = new File(path);
 		try {
 			this.RecFile = new PrintWriter(new FileWriter(r));
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			this.appendConsoleOutput(e.toString());
 		}
 	}
 
@@ -215,7 +199,7 @@ public class Processor implements IProcesses {
 		List<Event> newEvents = new ArrayList<Event>();
 		Node sNode = graph.getNode(sender);
 		String msgLabel = message.getLabel();
-		Object data = message.getContent();
+		Serializable data = message.getContent();
 		
 		try{
 			data.getClass();
@@ -547,7 +531,7 @@ public class Processor implements IProcesses {
 						try {
 							Thread.sleep(1000);
 						} catch (InterruptedException ignore) {
-							System.err
+							System.out
 									.println("@[Processor].executeEvent() breakpoint=true: "
 											+ ignore);
 						}
@@ -581,7 +565,7 @@ public class Processor implements IProcesses {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException ignore) {
-					System.err.println("@Processor.executeEvent() pause=true: "
+					System.out.println("@Processor.executeEvent() pause=true: "
 							+ ignore);
 				}
 			}
@@ -670,9 +654,9 @@ public class Processor implements IProcesses {
 			}
 		}catch(RuntimeException e){		
 			if(entity != null){
-				System.err.println("@Processor.invokeReceive() by node " + entity.getNodeOwner().getName());
+				this.appendConsoleOutput("ERROR @Processor.invokeReceive() node " + entity.getNodeOwner().getName() + e);
 			}else {
-				System.err.println("@Processor.invokeReceive() entity is null ");
+				this.appendConsoleOutput("ERROR @Processor.invokeReceive() entity is null " + e);
 			}
 			throw e;
 		}
@@ -768,14 +752,16 @@ public class Processor implements IProcesses {
 		this.RecFile.println(string);
 	}
 
-	 private static Object deepClone(Object object) throws DisJException, IOException {
+	 private static Serializable deepClone(Serializable object) throws DisJException, IOException {
 		if (object == null)
 			return null;
 
-		Object obj;
+		Serializable obj;
 		ObjectOutputStream oos = null;
 		ObjectInputStream ois = null;
-		try {
+		try {			
+			ClassLoader ld = object.getClass().getClassLoader();
+			
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			oos = new ObjectOutputStream(bos);
 			oos.writeObject(object);
@@ -783,12 +769,13 @@ public class Processor implements IProcesses {
 			
 			ByteArrayInputStream bin = new ByteArrayInputStream(bos
 					.toByteArray());
+			ois = new CustomObjectInputStream(bin, ld);				
+			obj = (Serializable)ois.readObject();
 			
-			ois = new ObjectInputStream(bin);			
-			obj = ois.readObject();
+			return obj;
 			
-			return obj;			
-		} catch (Exception ie) {			
+		} catch (Exception ie) {
+			System.err.println("@Processor.deepClone() " + ie);
 			throw new DisJException(ie);
 			
 		} finally {

@@ -15,6 +15,6 @@ public interface IMessage extends Serializable{
 	 * Get a message content of  message
 	 * @return
 	 */
-	public Object getContent();
+	public Serializable getContent();
 	
 }
