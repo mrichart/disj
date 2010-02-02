@@ -56,6 +56,7 @@ public abstract class Entity implements ICommunicable {
 		this.console = Entity.findConsole(IGraphEditorConstants.DISJ_CONSOLE);
 		this.out = this.console.newMessageStream();
 		System.setOut(new PrintStream(this.out));
+		System.setErr(new PrintStream(this.out));
 	}
 
 	/**

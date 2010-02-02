@@ -3,12 +3,14 @@ TODO
 1. Where is direct system.out from Eclipse VM into Eclipse plugin console
 2. Fix the the icon under Simulation Menu
 4. Add more statistic detail at the end
-5. Create log file error with special char
+5. Create log file error with special char i.e the path in windows with 
+	space in a dir name
 6. Class loader when do deep clone
 7. Display error message from plugin to user console
-8. Display warning when there is no init state at the node
+8. Display warning when there is no init state at any node in the network
 9. Clean up icons in src ( move to icons dir)
 10.Clean up exception catch is disj
-11.Handle the path in windows with space in a dir name
-12.Modify in document that disj doesn't allow user to call any Entity 
+11.Modify in document that disj doesn't allow user to call any Entity 
 	function inside it constructor coz of reflection !!
+12.Creating new graph after reopen a .gph file from I/O need to track the 
+	node and link ID properly
