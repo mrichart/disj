@@ -19,6 +19,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.HashMap;
@@ -115,7 +117,6 @@ import distributed.plugin.ui.models.GraphElement;
 import distributed.plugin.ui.models.GraphElementFactory;
 import distributed.plugin.ui.parts.GraphEditPartFactory;
 
-
 /**
  * A graph editor for drawing topology
  * 
@@ -140,7 +141,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	transient private Class<Entity> client;
 
 	transient private Class<IRandom> clientRandom;
-	
+
 	transient private ClassLoader loader;
 
 	private Map graphFactories;
@@ -637,44 +638,59 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 	private PaletteContainer createDrawerComponents() {
 
+		URL installUrl = GraphEditorPlugin.getDefault().getBundle().getEntry(
+				"/");
+		URL imageUrl = null;
+
+		try {
+			imageUrl = new URL(installUrl, "icons/comp.gif");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		PaletteDrawer drawer = new PaletteDrawer(
 				IGraphEditorConstants.DRAW_COMPONENTS, ImageDescriptor
-						.createFromFile(GraphEditor.class, "icons/comp.gif"));//$NON-NLS-1$
+						.createFromURL(imageUrl));
 
 		List entries = new ArrayList();
 
+		try {
+			imageUrl = new URL(installUrl, "icons/node.gif");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		CombinedTemplateCreationEntry combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.DRAW_NODE,
 				IGraphEditorConstants.DRAW_NODE_DESC,
 				IGraphEditorConstants.TEMPLATE_NODE, this
 						.getFactory(IGraphEditorConstants.TEMPLATE_NODE),
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/node.gif"), //$NON-NLS-1$
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/node.gif")//$NON-NLS-1$
-		);
+				ImageDescriptor.createFromURL(imageUrl), ImageDescriptor
+						.createFromURL(imageUrl));
 		entries.add(combined);
 
+		try {
+			imageUrl = new URL(installUrl, "icons/uni_link.gif");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		ToolEntry tool = new ConnectionCreationToolEntry(
 				IGraphEditorConstants.DRAW_UNI_LINK,
 				IGraphEditorConstants.DRAW_UNI_LINK_DESC, this
 						.getFactory(IGraphEditorConstants.TEMPLATE_UNI_LINK),
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/uni_link.gif"), //$NON-NLS-1$
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/uni_link.gif")//$NON-NLS-1$
-		);
+				ImageDescriptor.createFromURL(imageUrl), ImageDescriptor
+						.createFromURL(imageUrl));
 		entries.add(tool);
 
+		try {
+			imageUrl = new URL(installUrl, "icons/bi_link.gif");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		tool = new ConnectionCreationToolEntry(
 				IGraphEditorConstants.DRAW_BI_LINK,
 				IGraphEditorConstants.DRAW_BI_LINK_DESC, this
 						.getFactory(IGraphEditorConstants.TEMPLATE_BI_LINK),
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/bi_link.gif"), //$NON-NLS-1$
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/bi_link.gif")//$NON-NLS-1$
-		);
+				ImageDescriptor.createFromURL(imageUrl), ImageDescriptor
+						.createFromURL(imageUrl));
 		entries.add(tool);
 
 		drawer.addAll(entries);
@@ -682,22 +698,32 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	}
 
 	private PaletteContainer createGraphComponents() {
-
+		
+		URL installUrl = GraphEditorPlugin.getDefault().getBundle().getEntry("/");
+		URL imageUrl = null;
+		
+		try {
+			imageUrl = new URL(installUrl, "icons/topology.gif");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		PaletteDrawer drawer = new PaletteDrawer(
 				IGraphEditorConstants.TOPOLOGY_TYPES,
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/topology.gif"));//$NON-NLS-1$
+				ImageDescriptor.createFromURL(imageUrl));
 
 		List entries = new ArrayList();
 
+		try {
+			imageUrl = new URL(installUrl, "icons/temp.gif");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		CombinedTemplateCreationEntry combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.RING, IGraphEditorConstants.RING_DESC,
 				IGraphEditorConstants.TEMPLATE_RING, this
 						.getFactory(IGraphEditorConstants.TEMPLATE_RING),
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif"), //$NON-NLS-1$
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif")//$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl),
+						ImageDescriptor.createFromURL(imageUrl)
 		);
 		entries.add(combined);
 
@@ -705,10 +731,8 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 				IGraphEditorConstants.TREE, IGraphEditorConstants.TREE_DESC,
 				IGraphEditorConstants.TEMPLATE_TREE, this
 						.getFactory(IGraphEditorConstants.TEMPLATE_TREE),
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif"), //$NON-NLS-1$
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif")//$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl), //$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl)//$NON-NLS-1$
 		);
 		entries.add(combined);
 
@@ -717,10 +741,8 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 				IGraphEditorConstants.COMPLETE_DESC,
 				IGraphEditorConstants.TEMPLATE_COMPLETE, this
 						.getFactory(IGraphEditorConstants.TEMPLATE_COMPLETE),
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif"), //$NON-NLS-1$
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif")//$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl), //$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl)//$NON-NLS-1$
 		);
 		entries.add(combined);
 
@@ -729,21 +751,17 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 				IGraphEditorConstants.SPATIAL_DESC,
 				IGraphEditorConstants.TEMPLATE_SPATIAL, this
 						.getFactory(IGraphEditorConstants.TEMPLATE_SPATIAL),
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif"), //$NON-NLS-1$
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif")//$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl), //$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl)//$NON-NLS-1$
 		);
 		entries.add(combined);
-		
+
 		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.MESH, IGraphEditorConstants.MESH_DESC,
 				IGraphEditorConstants.TEMPLATE_MESH, this
 						.getFactory(IGraphEditorConstants.TEMPLATE_MESH),
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif"), //$NON-NLS-1$
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif")//$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl), //$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl)//$NON-NLS-1$
 		);
 		entries.add(combined);
 
@@ -752,10 +770,8 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 				IGraphEditorConstants.HYPER_CUBE_DESC,
 				IGraphEditorConstants.TEMPLATE_HYPER_CUBE, this
 						.getFactory(IGraphEditorConstants.TEMPLATE_HYPER_CUBE),
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif"), //$NON-NLS-1$
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif")//$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl), //$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl)//$NON-NLS-1$
 		);
 		entries.add(combined);
 
@@ -768,22 +784,18 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 				IGraphEditorConstants.TORUS_1_DESC,
 				IGraphEditorConstants.TEMPLATE_TORUS_1, this
 						.getFactory(IGraphEditorConstants.TEMPLATE_TORUS_1),
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif"), //$NON-NLS-1$
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif")//$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl), //$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl)//$NON-NLS-1$
 		);
 		toruses.add(combined);
-		
+
 		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.TORUS_2,
 				IGraphEditorConstants.TORUS_2_DESC,
 				IGraphEditorConstants.TEMPLATE_TORUS_2, this
 						.getFactory(IGraphEditorConstants.TEMPLATE_TORUS_2),
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif"), //$NON-NLS-1$
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif")//$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl), //$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl)//$NON-NLS-1$
 		);
 		toruses.add(combined);
 		entries.add(toruses);
@@ -791,16 +803,14 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		PaletteStack random = new PaletteStack(
 				IGraphEditorConstants.RANDOM_STACK,
 				IGraphEditorConstants.RANDOM_STACK_DESC, null);
-		
+
 		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.GENERIC,
 				IGraphEditorConstants.GENERIC_DESC,
 				IGraphEditorConstants.TEMPLATE_GENERIC, this
 						.getFactory(IGraphEditorConstants.TEMPLATE_GENERIC),
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif"), //$NON-NLS-1$
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif")//$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl), //$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl)//$NON-NLS-1$
 		);
 		random.add(combined);
 
@@ -809,10 +819,8 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 				IGraphEditorConstants.GENERIC_C_DESC,
 				IGraphEditorConstants.TEMPLATE_GENERIC_C, this
 						.getFactory(IGraphEditorConstants.TEMPLATE_GENERIC_C),
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif"), //$NON-NLS-1$
-				ImageDescriptor.createFromFile(GraphEditor.class,
-						"icons/temp.gif")//$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl), //$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl)//$NON-NLS-1$
 		);
 		random.add(combined);
 		entries.add(random);
@@ -891,43 +899,45 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		super.createActions();
 
 		ProcessActions procAct;
-		
+
 		Action action = new DirectEditAction((IWorkbenchPart) this);
 		this.addAction(action);
 		getSelectionActions().add(action.getId());
 
 		this.addAction(new CopyTemplateAction(this));
-		
+
 		procAct = new ProcessActions(this, IGraphEditorConstants.LOAD_ID);
 		this.addAction(procAct);
-		
+
 		procAct = new ProcessActions(this, IGraphEditorConstants.LOAD_RANDOM_ID);
 		this.addAction(procAct);
-		
+
 		procAct = new ProcessActions(this, IGraphEditorConstants.RESUME_ID);
 		this.addAction(procAct);
-		
+
 		procAct = new ProcessActions(this, IGraphEditorConstants.STOP_ID);
 		this.addAction(procAct);
-		
+
 		procAct = new ProcessActions(this, IGraphEditorConstants.SUSPEND_ID);
 		this.addAction(procAct);
-		
+
 		procAct = new ProcessActions(this, IGraphEditorConstants.NEXT_ID);
 		this.addAction(procAct);
-		
+
 		procAct = new ProcessActions(this, IGraphEditorConstants.SPEED_ID);
 		this.addAction(procAct);
-		
+
 		procAct = new ProcessActions(this, IGraphEditorConstants.LOAD_RECORD_ID);
 		this.addAction(procAct);
-		
+
 		procAct = new ProcessActions(this, IGraphEditorConstants.SAVE_RECORD_ID);
 		this.addAction(procAct);
-		
-		this.addAction(new StateSettingAction(this,	IGraphEditorConstants.ADD_STATE_ID));
-		
-		this.addAction(new StateSettingAction(this,	IGraphEditorConstants.REMOVE_STATE_ID));
+
+		this.addAction(new StateSettingAction(this,
+				IGraphEditorConstants.ADD_STATE_ID));
+
+		this.addAction(new StateSettingAction(this,
+				IGraphEditorConstants.REMOVE_STATE_ID));
 	}
 
 	private PropertySheetPage getPropertySheetPage() {
@@ -955,17 +965,18 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	 *
 	 */
 	private void createOutputStream(OutputStream os) throws IOException {
-		try{
+		try {
 			ObjectOutputStream out = new ObjectOutputStream(os);
 			this.writeObject(out);
-		}catch(IOException e){
+		} catch (IOException e) {
 			System.err.println("[GraphEditor].createOutputStream() " + e);
 			throw e;
 		}
-		
+
 	}
-	private void writeObject(ObjectOutputStream oos) throws IOException{	
-		Object obj = this.getContent();		
+
+	private void writeObject(ObjectOutputStream oos) throws IOException {
+		Object obj = this.getContent();
 		oos.writeObject(obj);
 		oos.close();
 	}
@@ -974,7 +985,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	 * Read a saved file from stream
 	 */
 	public void setInput(IEditorInput input) {
-		
+
 		this.superSetInput(input);
 		IFile file = ((IFileEditorInput) input).getFile();
 		ObjectInputStream ois = null;
@@ -983,24 +994,27 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 			is = file.getContents(false);
 			ois = new ObjectInputStream(is);
 			this.readObject(ois);
-			
+
 		} catch (Exception e) {
 			// EOFException
 			// Happens when create a file for a first time!!!!
 			// e.printStackTrace();
-			System.out.println("[GraphEditor].setInput() File " + file.getName() +" is created");
-		} finally{
-			if(ois != null){
+			System.out.println("[GraphEditor].setInput() File "
+					+ file.getName() + " is created");
+		} finally {
+			if (ois != null) {
 				try {
 					ois.close();
 					ois = null;
-				} catch (IOException e) {}
+				} catch (IOException e) {
+				}
 			}
-			if(is != null){
+			if (is != null) {
 				try {
 					is.close();
 					is = null;
-				} catch (IOException e) {}
+				} catch (IOException e) {
+				}
 			}
 		}
 
@@ -1014,24 +1028,28 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 			}
 		}
 	}
-	private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+
+	private void readObject(ObjectInputStream ois)
+			throws ClassNotFoundException, IOException {
 		GraphElement g = (GraphElement) ois.readObject();
 		this.setContent(g);
 	}
 
-
 	private void superSetInput(IEditorInput input) {
 		try {
-			// The workspace never changes for an editor. So, removing and re-adding
+			// The workspace never changes for an editor. So, removing and
+			// re-adding
 			// the
-			// resourceListener is not necessary. But it is being done here for the
+			// resourceListener is not necessary. But it is being done here for
+			// the
 			// sake
 			// of proper implementation. Plus, the resourceListener needs to be
 			// added
 			// to the workspace the first time around.
 			if (getEditorInput() != null) {
 				IFile file = ((FileEditorInput) getEditorInput()).getFile();
-				file.getWorkspace().removeResourceChangeListener(resourceListener);
+				file.getWorkspace().removeResourceChangeListener(
+						resourceListener);
 			}
 
 			super.setInput(input);
@@ -1078,18 +1096,19 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 			this.createOutputStream(out);
 			IFile file = ((IFileEditorInput) getEditorInput()).getFile();
 			byte[] contents = out.toByteArray();
-			file.setContents(new ByteArrayInputStream(contents, 0, contents.length), true,
-					false, monitor);
+			file.setContents(new ByteArrayInputStream(contents, 0,
+					contents.length), true, false, monitor);
 			this.getCommandStack().markSaveLocation();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("[GraphEditor].doSave() " + e);
 		} finally {
 			editorSaving = false;
-			if(out != null){
+			if (out != null) {
 				try {
 					out.close();
-				} catch (IOException e) {}
+				} catch (IOException e) {
+				}
 				out = null;
 			}
 		}
@@ -1099,7 +1118,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	 * @see org.eclipse.ui.ISaveablePart#doSaveAs()
 	 */
 	public void doSaveAs() {
-		this.performSaveAs();		
+		this.performSaveAs();
 	}
 
 	private boolean performSaveAs() {
@@ -1123,17 +1142,19 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 						out = new ByteArrayOutputStream();
 						createOutputStream(out);
 						byte[] contents = out.toByteArray();
-						file.create(
-								new ByteArrayInputStream(contents, 0, contents.length),
-								true, monitor);
+						file.create(new ByteArrayInputStream(contents, 0,
+								contents.length), true, monitor);
 					} catch (Exception e) {
 						e.printStackTrace();
-						System.err.println("[GraphEditor].performSaveAs().execute() " + e);
-					} finally{
-						if(out != null){
+						System.err
+								.println("[GraphEditor].performSaveAs().execute() "
+										+ e);
+					} finally {
+						if (out != null) {
 							try {
 								out.close();
-							} catch (IOException e) {}
+							} catch (IOException e) {
+							}
 							out = null;
 						}
 					}
@@ -1184,8 +1205,8 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	}
 
 	public void setController(IController controller) {
-		this.controller=controller;
-		
+		this.controller = controller;
+
 	}
 
 	public IController getController() {
@@ -1193,24 +1214,24 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	}
 
 	public boolean setRecFile(String fileName) {
-		boolean returnValue=true;
+		boolean returnValue = true;
 		try {
 			Scanner sc = new Scanner(new FileReader(fileName));
-			bs_file= new StringBuffer();
-			String k ;
-			while (sc.hasNextLine()){
-				k=sc.nextLine();
+			bs_file = new StringBuffer();
+			String k;
+			while (sc.hasNextLine()) {
+				k = sc.nextLine();
 				bs_file.append(k);
-				bs_file.append(System.getProperty("line.separator"));		
+				bs_file.append(System.getProperty("line.separator"));
 			}
-			sc.close();			
-			returnValue=true;
+			sc.close();
+			returnValue = true;
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
-			//e.printStackTrace();
-			returnValue=false;
+			// e.printStackTrace();
+			returnValue = false;
 		}
-		return returnValue;		
+		return returnValue;
 	}
 
 	public StringBuffer getRecFile() {
@@ -1219,7 +1240,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 	public void setRecFileNameForSaving(String fileName) {
 		this.recFileNameForSaving = fileName;
-		
+
 	}
 
 	public String getRecFileNameForSaving() {

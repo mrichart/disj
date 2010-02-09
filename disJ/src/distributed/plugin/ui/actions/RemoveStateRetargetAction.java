@@ -10,10 +10,13 @@
 
 package distributed.plugin.ui.actions;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.actions.RetargetAction;
 
-import distributed.plugin.ui.editor.GraphEditor;
+import distributed.plugin.ui.GraphEditorPlugin;
 
 /**
  * @author Me
@@ -29,10 +32,13 @@ public class RemoveStateRetargetAction extends RetargetAction {
      */
     public RemoveStateRetargetAction(String actionID, String text) {
         super(actionID, text);
-        setImageDescriptor(ImageDescriptor
-                .createFromFile(
-                        GraphEditor.class,
-                        "icons/rem_state_en.gif"));
+    	try {
+			final URL installUrl = GraphEditorPlugin.getDefault().getBundle().getEntry("/");
+			final URL imageUrl = new URL(installUrl, "icons/rem_state_en.gif");
+			setImageDescriptor(ImageDescriptor.createFromURL(imageUrl));
+			
+		} catch (MalformedURLException e) {					
+		}
         setToolTipText(text);
 
     }

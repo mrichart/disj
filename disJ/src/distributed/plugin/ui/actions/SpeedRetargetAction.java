@@ -39,9 +39,6 @@ public class SpeedRetargetAction extends RetargetAction {
 			
 		} catch (MalformedURLException e) {					
 		}
-//        setImageDescriptor(ImageDescriptor
-//                .createFromFile(GraphEditor.class,
-//                        "icons/speed_en.gif"));
         setToolTipText(text);
     }
 }
