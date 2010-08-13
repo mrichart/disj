@@ -6,11 +6,17 @@ import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 import java.io.StreamCorruptedException;
 
+/**
+ * Custom loader that allows Eclipse VM able to see a loaded classed by
+ * Plug-in VM vice-versa
+ * 
+ * @author rpiyasin
+ *
+ */
 public class CustomObjectInputStream extends ObjectInputStream {
 
 	   private ClassLoader loader;
-
-
+	   
 	    /**
 	     * @exception IOException Signals that an I/O exception of some
 	     * sort has occurred.

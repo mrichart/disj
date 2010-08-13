@@ -17,7 +17,7 @@ import distributed.plugin.runtime.IMessage;
 /**
  * @author Me
  *
- * A message wraper
+ * A message wrapper
  */
 public class Message implements IMessage {
 

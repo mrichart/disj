@@ -26,7 +26,7 @@ import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
-import distributed.plugin.runtime.ICommunicable;
+import distributed.plugin.runtime.IMessagePassingModel;
 import distributed.plugin.runtime.IMessage;
 import distributed.plugin.ui.IGraphEditorConstants;
 
@@ -35,7 +35,7 @@ import distributed.plugin.ui.IGraphEditorConstants;
  * 
  *         An entity class use for client for create an algorithm for testing
  */
-public abstract class Entity implements ICommunicable {
+public abstract class Entity implements IMessagePassingModel {
 
 	private int startState;
 
@@ -268,7 +268,7 @@ public abstract class Entity implements ICommunicable {
 	 * 
 	 * Time unit is a DisJ simulation clock
 	 * 
-	 * @see distributed.plugin.runtime.ICommunicable#setAlarm(short)
+	 * @see distributed.plugin.runtime.IMessagePassingModel#setAlarm(short)
 	 */
 	public final void setAlarm(int time) {
 		try {
@@ -290,7 +290,7 @@ public abstract class Entity implements ICommunicable {
 	 * Block and unblock any incoming message through a given port label, state
 	 * of block is true and unblock is false.
 	 * 
-	 * @see distributed.plugin.runtime.ICommunicable#blockPort(java.lang.String,
+	 * @see distributed.plugin.runtime.IMessagePassingModel#blockPort(java.lang.String,
 	 *      boolean)
 	 */
 	public final void blockPort(String label, boolean state) {
@@ -500,6 +500,8 @@ public abstract class Entity implements ICommunicable {
 	 *            An out going port label
 	 * @param message
 	 *            A message that need to be sent
+	 *            
+	 * FIXME need to throw exception to plug-in VM
 	 */
 	public final void sendTo(String msgLabel, String portLabel,
 			Serializable message) {

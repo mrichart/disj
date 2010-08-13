@@ -15,12 +15,13 @@ import java.io.Serializable;
 /**
  * @author npiyasin
  *
- * API for communication between entities in distributed environment
+ * Message Passing model API for communication interface of entities 
+ * in distributed environment
  */
-public interface ICommunicable {
+public interface IMessagePassingModel {
 	
 	/**
-	 * Send a ginven message through a given port name. 
+	 * Send a given message through a given port name. 
 	 * If a port name does not exist, there will be no message sending.
 	 * 
 	 * @param distination An out going port label
@@ -113,11 +114,11 @@ public interface ICommunicable {
 	
 	
 	/**
-	 * Send a message to all out going ports execept a port that it
+	 * Send a message to all out going ports except a port that it
 	 * received latest.
 	 * 
 	 * NOTE: This will work only for Bidirectional link. For Uni-directional
-	 * link, it will work only if a lable of incomming port is the same as 
+	 * link, it will work only if a label of incoming port is the same as 
 	 * out going port label. Otherwise, all out going ports will be sent.
 	 * 
 	 * @param message A message that need to be sent
@@ -131,12 +132,12 @@ public interface ICommunicable {
 	public void sendToOthers(Serializable message) ;
 	
 	/**
-	 * Send a message with a given message labelto all out going 
-	 * ports execept a port that it received latest.
+	 * Send a message with a given message label to all out going 
+	 * ports except a port that it received latest.
 	 * 
 	 * 
 	 * NOTE: This will work only for Bidirectional link. For Uni-directional
-	 * link, it will work only if a lable of incomming port is the same as 
+	 * link, it will work only if a label of incoming port is the same as 
 	 * out going port label. Otherwise, all out going ports will be sent.
 	 * 
 	 *  @param msgLabel A message label
@@ -178,7 +179,7 @@ public interface ICommunicable {
 	 * 
 	 * NOTE: If it is Bidirectional link, it will block both incoming and out going ports
 	 * 
-	 * @param portLabel A local port label of this enity
+	 * @param portLabel A local port label of this entity
 	 * @param state True is for block, False is unblock
 	 * 
 	 */
@@ -186,9 +187,9 @@ public interface ICommunicable {
 	
 	/**
 	 * Print out a text object into an Eclipse Console, the function will use
-	 * toString() methode of that object to print
+	 * toString() method of that object to print
 	 * 
-	 * Note: This work only with eclipse plugin
+	 * Note: This work only with eclipse plug-in
 	 * 
 	 * @param text An object that need to be printed to a console
 	 */
