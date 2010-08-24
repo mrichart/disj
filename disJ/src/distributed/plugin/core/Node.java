@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import distributed.plugin.runtime.Event;
-import distributed.plugin.runtime.engine.Entity;
+import distributed.plugin.runtime.IDistributedModel;
 
 /**
  * @author Me
@@ -50,7 +50,16 @@ public class Node implements Serializable {
 
 	private int curState;
 
+	/*
+	 * This node is set to be init/host node
+	 */
 	private boolean isInitializer;
+	
+	/*
+	 * Number of agent to be started at this node
+	 * TODO add this to GUI (follow isInitializer ref)
+	 */
+	private int numInitAgentHost;
 	
 	private String userInput;
 
@@ -95,18 +104,21 @@ public class Node implements Serializable {
 	transient private Map<String, List<Event>> blockMsg;
 
 	/**
-	 * keeping track of user internal data of this entity and it cannot
+	 * keeping track of user internal data that stay at this node
 	 * 
 	 */
-	transient private Entity entity;
+	transient private List<IDistributedModel> entity;
 
 	/**
-	 * hold the events if initializer node receive message before it has been
+	 * hold the events if initializer host has other actions before it has been
 	 * initialized to notify the change of state a list of state-name pair of
 	 * the corresponding entity
 	 */
 	transient private List<Event> holdEvents;
 
+	/**
+	 * A mapping table of every possible state name and value defined by user
+	 */
 	transient private Map<Integer, String> stateNames;
 	
 	/**
@@ -153,12 +165,13 @@ public class Node implements Serializable {
 		this.name = name;
 		this.breakpoint = false;
 		this.isInitializer = isInit;
+		this.numInitAgentHost = 0;
 		this.initExec = false;
 		this.isStarter = isStarter;
 		this.numMsgRecv = 0;
 		this.numMsgSend = 0;
 		this.latestRecvPort = null;
-		this.entity = null;
+		this.entity = new ArrayList<IDistributedModel>();
 		this.userInput = "";
 		this.log = new NodeLog(graphId);
 		this.edges = new HashMap<String, Edge>();
@@ -217,7 +230,7 @@ public class Node implements Serializable {
 	 * Add more link out of this node
 	 * 
 	 * @param label
-	 *            A local lable of the edge for this node
+	 *            A local label of the edge for this node
 	 * @param type
 	 *            A type of port
 	 * @param edge
@@ -410,16 +423,16 @@ public class Node implements Serializable {
 	}
 
 	/**
-	 * Assign a user algorithm representative (Entity object) into this node
+	 * Add a user algorithm representative who will stay at this node
 	 * 
-	 * @param entity
+	 * @param entity A user algorithm object
 	 * @throws DisJException
 	 */
-	public void assignEntity(Entity entity) throws DisJException {
+	public void addEntity(IDistributedModel entity) throws DisJException {
 		if (entity == null)
 			throw new DisJException(IConstants.ERROR_22);
 
-		this.entity = entity;
+		this.entity.add(entity);
 	}
 
 	/**
@@ -443,8 +456,7 @@ public class Node implements Serializable {
 	public String toString() {
 		return ("\n\nNode: " + this.name + "\nState: " + this.curState
 				+ "\nInit: " + this.isInitializer + "\nStarter: "
-				+ this.isStarter + "\nNum Msg Received: " + this.numMsgRecv
-				+ "\nNum Msg Sent: " + this.numMsgSend);
+				+ this.isStarter);
 	}
 
 	/**
@@ -464,7 +476,7 @@ public class Node implements Serializable {
 	/**
 	 * @return Returns the entity.
 	 */
-	public Entity getEntity() {
+	public List<IDistributedModel> getAllEntities() {
 		return entity;
 	}
 
@@ -473,6 +485,14 @@ public class Node implements Serializable {
 	 */
 	public boolean isInitializer() {
 		return isInitializer;
+	}	
+	
+	public int getNumInitAgentHost() {
+		return numInitAgentHost;
+	}
+
+	public void setNumInitAgentHost(int numInitAgentHost) {
+		this.numInitAgentHost = numInitAgentHost;
 	}
 
 	/**
@@ -640,14 +660,6 @@ public class Node implements Serializable {
 	}
 
 	/**
-	 * @param isInitializer
-	 *            The isInitializer to set.
-	 */
-	public void setInitializer(boolean isInitializer) {
-		this.isInitializer = isInitializer;
-	}
-
-	/**
 	 * @param isStarter
 	 *            The isStarter to set.
 	 */
@@ -679,8 +691,19 @@ public class Node implements Serializable {
 		this.numMsgSend = numMsgSend;
 	}
 
-	public void setEntity(Entity entity) {
-		this.entity = entity;
+	/**
+	 * Clear all entities that stay at this node
+	 */
+	public void clearEntities() {
+		this.entity.clear();
+	}
+	
+	/**
+	 * remove a given entity from this node
+	 * @param entity
+	 */
+	public boolean removeEntity(IDistributedModel entity){
+		return this.entity.remove(entity);
 	}
 
 	public Map<String, Boolean> getBlockPort() {

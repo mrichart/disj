@@ -27,7 +27,6 @@ import distributed.plugin.core.Edge;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
 import distributed.plugin.runtime.IMessagePassingModel;
-import distributed.plugin.runtime.IMessage;
 import distributed.plugin.ui.IGraphEditorConstants;
 
 /**
@@ -41,7 +40,7 @@ public abstract class Entity implements IMessagePassingModel {
 
 	private int lastState = -1;
 	
-	private Processor processor;
+	private MsgPassingProcessor processor;
 
 	private Node nodeOwner;
 
@@ -60,34 +59,12 @@ public abstract class Entity implements IMessagePassingModel {
 	}
 
 	/**
-	 * Initialize this entity if it is set as initializer entity
-	 * 
-	 */
-	public abstract void init();
-
-	/**
-	 * Method invoke when this entity receives the message
-	 * 
-	 * @param incomingPort
-	 *            A receiving port label
-	 * @param message
-	 *            A received message
-	 */
-	public abstract void receive(String incomingPort, IMessage message);
-
-	/**
-	 * Method invoke when an internal alarm clock of this entity is ring
-	 * 
-	 */
-	public abstract void alarmRing();
-
-	/**
 	 * Assign processor and the corresponding node to this entity
 	 * 
 	 * @param processor
 	 * @param owner
 	 */
-	void initEntity(Processor processor, Node owner, Map<Integer, String> states) {
+	void initEntity(MsgPassingProcessor processor, Node owner, Map<Integer, String> states) {
 		if (this.processor == null)
 			this.processor = processor;
 

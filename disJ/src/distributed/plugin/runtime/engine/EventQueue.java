@@ -17,6 +17,7 @@ import java.util.List;
 import distributed.plugin.core.DisJException;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.runtime.Event;
+import distributed.plugin.runtime.MsgPassingEvent;
 
 /**
  * @author npiyasin
@@ -54,11 +55,11 @@ public class EventQueue {
 	 * Get a next event that has a smallest timeId and highest priority 
 	 * order of execution in the queue without remove
 	 */
-	protected synchronized Event topEvent() throws DisJException{
+	protected synchronized MsgPassingEvent topEvent() throws DisJException{
 		if(this.queue.isEmpty())
 			throw new DisJException(IConstants.ERROR_13);
 		
-		return (Event) this.queue.get(0);
+		return (MsgPassingEvent) this.queue.get(0);
 	}
 
 	/*
@@ -70,7 +71,7 @@ public class EventQueue {
 		int s = -1;
 		List<Event> eList = new ArrayList<Event>();
 		for (int i = 0; i < this.queue.size(); i++) {
-			Event e = (Event) this.queue.get(i);
+			Event e = this.queue.get(i);
 			if (t == -1) {
 				t = e.getExecTime();
 				s = e.getEventType();

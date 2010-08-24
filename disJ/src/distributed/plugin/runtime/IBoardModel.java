@@ -18,43 +18,15 @@ import java.util.List;
  * @author rpiyasin
  *
  */
-public interface IBoardModel {
-
-
-	/**
-	 * Initialize this entity if it is set as initializer entity
-	 * 
-	 */
-	public abstract void init();
-
+public interface IBoardModel extends IDistributedModel{
 	
 	/**
-	 * Get a current internal state of this entity
-	 *
+	 * Method invoke when an agent arrives at a host
+	 * 
+	 * @param incomingPort is a port that the agent entering
 	 */
-	public int getState() ;
+	public abstract void arrive(String incomingPort);
 	
-	/**
-	 * Set an internal state of an entity. The default value at the beginning is 0
-	 * 
-	 * @param state
-	 */
-	public void become(int state) ;
-	
-	/**
-	 * Method invoke when an internal alarm clock of this entity is ring
-	 * 
-	 */
-	public abstract void alarmRing();
-
-	/**
-	 * Set an alarm internal clock time interval, The clock will ring after
-	 * a given time from the time that is set.
-	 * 
-	 * @param time An offset of waiting time (positive integer)
-	 * 
-	 */
-	public void setAlarm(int time) ;
 	
 	/**
 	 * Moving an agent into a given out-going port of a current node that an agent
@@ -106,11 +78,11 @@ public interface IBoardModel {
 	public int getMaxSlot();
 	
 	/**
-	 * Get a node (host) ID that agent currently resides
+	 * Get a node ID that agent currently resides
 	 * 
 	 * @return node ID in String format
 	 */
-	public String getHostId();
+	public String getNodeId();
 	
 	/**
 	 * Read info that posted on a board of current host
@@ -140,4 +112,11 @@ public interface IBoardModel {
 	 * @return true if the data successfully remove otherwise false
 	 */
 	public boolean remove(String info);
+	
+	/**
+	 * Set a state of the host
+	 * 
+	 * @param state A new state of this host
+	 */
+	public void setHostState(int state);
 }

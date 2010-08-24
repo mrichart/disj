@@ -43,10 +43,11 @@ public interface IConstants {
 	public static final short MSGDELAY_LOCAL_RANDOM_POISSON = 2;
 	public static final short MSGDELAY_LOCAL_RANDOM_CUSTOMS= 3;
 	
-	// the priority order of execution	
-	public static final short INITIATE_TYPE = 0;
-	public static final short ALARM_RING_TYPE = 1;
-	public static final short RECEIVE_MSG_TYPE = 2;
+	// the priority order of Event execution	
+	public static final short EVENT_INITIATE_TYPE = 0;
+	public static final short EVENT_ALARM_RING_TYPE = 1;
+	public static final short EVENT_ARRIVAL_TYPE = 2;
+	public static final short EVENT_ACTION_TYPE = 3;
 		
 	// Catched exception messages
 	public static final short ERROR_0 = 0;

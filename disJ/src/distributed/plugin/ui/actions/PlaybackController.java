@@ -15,7 +15,7 @@ import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
 import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.engine.Entity;
-import distributed.plugin.runtime.engine.Processor;
+import distributed.plugin.runtime.engine.MsgPassingProcessor;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.editor.GraphEditor;
 import distributed.plugin.ui.models.GraphElement;

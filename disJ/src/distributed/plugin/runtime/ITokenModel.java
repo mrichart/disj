@@ -9,43 +9,15 @@ import java.util.List;
  * @author rpiyasin
  *
  */
-public interface ITokenModel {
-
-
-	/**
-	 * Initialize this entity if it is set as initializer entity
-	 * 
-	 */
-	public abstract void init();
-
+public interface ITokenModel extends IDistributedModel {
 	
 	/**
-	 * Get a current internal state of this entity
-	 *
-	 */
-	public int getState() ;
-	
-	/**
-	 * Set an internal state of an entity. The default value at the beginning is 0
+	 * Method invoke when an agent arrives at a host
 	 * 
-	 * @param state
+	 * @param incomingPort is a port that the agent entering
 	 */
-	public void become(int state) ;
-	
-	/**
-	 * Method invoke when an internal alarm clock of this entity is ring
-	 * 
-	 */
-	public abstract void alarmRing();
+	public abstract void arrive(String incomingPort);
 
-	/**
-	 * Set an alarm internal clock time interval, The clock will ring after
-	 * a given time from the time that is set.
-	 * 
-	 * @param time An offset of waiting time (positive integer)
-	 * 
-	 */
-	public void setAlarm(int time) ;
 	
 	/**
 	 * Moving an agent into a given out-going port of a current node that an agent

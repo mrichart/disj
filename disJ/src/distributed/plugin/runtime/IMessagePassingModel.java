@@ -18,7 +18,7 @@ import java.io.Serializable;
  * Message Passing model API for communication interface of entities 
  * in distributed environment
  */
-public interface IMessagePassingModel {
+public interface IMessagePassingModel extends IDistributedModel {
 	
 	/**
 	 * Send a given message through a given port name. 
@@ -150,29 +150,18 @@ public interface IMessagePassingModel {
 	public void sendToOthers(String msgLabel, long message) ;
 	public void sendToOthers(String msgLabel, double message) ;
 	public void sendToOthers(String msgLabel, Serializable message) ;
-		
+
+
 	/**
-	 * Get a current internal state of this entity
-	 *
-	 */
-	public int getState() ;
-	
-	/**
-	 * Set an internal state of an entity. The default value at the beginning is 0
+	 * Method invoke when this entity receives a message
 	 * 
-	 * @param state
+	 * @param incomingPort
+	 *            A receiving port label
+	 * @param message
+	 *            A received message
 	 */
-	public void become(int state) ;
-	
-	/**
-	 * Set an alarm internal clock time interval, The clock will ring after
-	 * a given time from the time that is set.
-	 * 
-	 * @param time An offset of waiting time
-	 * 
-	 */
-	public void setAlarm(int time) ;
-	
+	public abstract void receive(String incomingPort, IMessage message);
+
 	/**
 	 * Set a new blocking state of a given local port of this entity. By default
 	 * each entity's ports are not blocked

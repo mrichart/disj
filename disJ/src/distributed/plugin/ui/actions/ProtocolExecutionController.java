@@ -67,7 +67,7 @@ public class ProtocolExecutionController implements IController {
 			
 			// FIXME why we need this copy???
 			editor.getGraphElement().copyGraphElement();
-			procAct.getEngine().execute(graph, editor.getClientObject(),
+			procAct.getEngine().executeMsgPassing(graph, editor.getClientObject(),
 					editor.getClientRandomObject());
 		} else {
 			try {

@@ -38,15 +38,17 @@ import distributed.plugin.runtime.Event;
 import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.GraphFactory;
 import distributed.plugin.runtime.GraphLoader;
+import distributed.plugin.runtime.IDistributedModel;
 import distributed.plugin.runtime.IMessage;
 import distributed.plugin.runtime.IProcesses;
+import distributed.plugin.runtime.MsgPassingEvent;
 import distributed.plugin.ui.editor.GraphEditor;
 
 /**
- * @author npiyasin An core processor that exceutes an event for a given graph.
+ * @author npiyasin An core processor that executes an event for a given graph.
  *         The relation between a Processor and a Graph is bijection mapping
  */
-public class Processor implements IProcesses {
+public class MsgPassingProcessor implements IProcesses {
 
 	private int callingChain;
 
@@ -84,7 +86,7 @@ public class Processor implements IProcesses {
 
 	// private SystemLog sysLog;
 
-	Processor(GraphEditor ge, Graph graph, Class<Entity> client, Class<IRandom> clientRandom,
+	MsgPassingProcessor(GraphEditor ge, Graph graph, Class<Entity> client, Class<IRandom> clientRandom,
 			URL out) throws IOException {
 		this.ge = ge;
 		this.callingChain = 0;
@@ -231,7 +233,7 @@ public class Processor implements IProcesses {
 			 try {
 				 IMessage msg = new Message(message.getLabel(), deepClone(data));
 				 
-				 newEvents.add(new Event(sender, IConstants.RECEIVE_MSG_TYPE,
+				 newEvents.add(new MsgPassingEvent(sender, IConstants.EVENT_ARRIVAL_TYPE,
 						 execTime, eventId, recv.getEdgeId(), msg));
 			 } catch (Exception ie) {
 				 throw new DisJException(ie);
@@ -258,7 +260,7 @@ public class Processor implements IProcesses {
 					+ delay;
 
 			// add an event into a queue
-			Event e = new Event(owner, IConstants.ALARM_RING_TYPE, execTime,
+			Event e = new MsgPassingEvent(owner, IConstants.EVENT_ALARM_RING_TYPE, execTime,
 					eventId, owner, message);
 			this.queue.pushEvent(e);
 
@@ -280,7 +282,7 @@ public class Processor implements IProcesses {
 					// put them in a queue with the current execution time
 					int time = timeGen.getCurrentTime(graph.getId() + "");
 					for (int i = 0; i < events.size(); i++) {
-						Event e = (Event) events.get(i);
+						MsgPassingEvent e = (MsgPassingEvent) events.get(i);
 						e.setExecTime(time);
 					}
 					this.queue.pushEvents(events);
@@ -465,17 +467,17 @@ public class Processor implements IProcesses {
 		List<Node> initNodes = GraphLoader.getInitNodes(graph);
 		try {
 			for (int i = 0; i < initNodes.size(); i++) {
-				Node init = (Node) initNodes.get(i);
+				Node init = initNodes.get(i);
 				Entity clientObj = GraphLoader.createEntityObject(client);
 				clientObj.initEntity(this, init, this.stateFields);
-				init.assignEntity(clientObj);
+				init.addEntity(clientObj);
 			}
 
 			Random r = new Random(System.currentTimeMillis());
 			List<Event> events = new ArrayList<Event> ();
 			// create a set of init events
 			for (int i = 0; i < initNodes.size(); i++) {
-				Node init = (Node) initNodes.get(i);
+				Node init = initNodes.get(i);
 				int eventId = timeGen.getLastestId(graph.getId() + "");
 				int execTime = 0;
 				if (!init.isStarter())
@@ -483,7 +485,7 @@ public class Processor implements IProcesses {
 
 				// add an event into a queue
 				IMessage msg = new Message("Initialized", new Integer(execTime));
-				Event e = new Event(init.getNodeId(), IConstants.INITIATE_TYPE,
+				Event e = new MsgPassingEvent(init.getNodeId(), IConstants.EVENT_INITIATE_TYPE,
 						execTime, eventId, init.getNodeId(), msg);
 
 				events.add(e);
@@ -520,8 +522,8 @@ public class Processor implements IProcesses {
 
 			// suspend the process and/or hit breakpoint
 			if (!this.pause) {
-				Event e = (Event) this.queue.topEvent();
-				Node thisNode = this.graph.getNode(e.getOwner());
+				MsgPassingEvent e = (MsgPassingEvent) this.queue.topEvent();
+				Node thisNode = this.graph.getNode(e.getHostId());
 
 				if (thisNode.getBreakpoint() == true) {
 					this.setPause(true);
@@ -541,13 +543,13 @@ public class Processor implements IProcesses {
 				if (this.stop)
 					break;
 
-				if (e.getEventType() == IConstants.RECEIVE_MSG_TYPE) {
+				if (e.getEventType() == IConstants.EVENT_ARRIVAL_TYPE) {
 					this.invokeReceive(this.queue.popEvents());
 
 					// tracking a length of message calling chain
 					this.callingChain++;
 
-				} else if (e.getEventType() == IConstants.ALARM_RING_TYPE) {
+				} else if (e.getEventType() == IConstants.EVENT_ALARM_RING_TYPE) {
 					this.invokeAlarmRing(this.queue.popEvents());
 
 				} else {
@@ -578,8 +580,8 @@ public class Processor implements IProcesses {
 	 */
 	private void invokeInit(List<Event> events) throws DisJException {
 		for (int i = 0; i < events.size(); i++) {
-			Event e = events.get(i);
-			Node node = this.graph.getNode(e.getOwner());
+			MsgPassingEvent e = (MsgPassingEvent)events.get(i);
+			Node node = this.graph.getNode(e.getHostId());
 
 			// Will NOT execute a Fail node
 			if (node.isStarter()) {
@@ -602,11 +604,11 @@ public class Processor implements IProcesses {
 	private void invokeReceive(List<Event> events) throws DisJException {
 		List<Object[]> invokeList = new ArrayList<Object[]>();
 		for (int i = 0; i < events.size(); i++) {
-			Event e = events.get(i);
+			MsgPassingEvent e = (MsgPassingEvent)events.get(i);
 
 			// retrieve a receiver node for this event
 			Edge link = this.graph.getEdge(e.getEdgeName());
-			Node recv = link.getOthereEnd(this.graph.getNode(e.getOwner()));
+			Node recv = link.getOthereEnd(this.graph.getNode(e.getHostId()));
 			String port = recv.getPortLabel(link);
 
 			// Will NOT execute a Fail node
@@ -646,7 +648,7 @@ public class Processor implements IProcesses {
 			// invoke receive() on a target node
 			for (int i = 0; i < invokeList.size(); i++) {
 				Object[] params = (Object[]) invokeList.get(i);
-				Event e = (Event) params[0];
+				MsgPassingEvent e = (MsgPassingEvent) params[0];
 				entity = (Entity) params[1];
 				String portLabel = (String) params[2];
 				entity.getNodeOwner().setLatestRecvPort(portLabel);
@@ -667,8 +669,8 @@ public class Processor implements IProcesses {
 	 */
 	private void invokeAlarmRing(List<Event> events) throws DisJException {
 		for (int i = 0; i < events.size(); i++) {
-			Event e = events.get(i);
-			Node node = this.graph.getNode(e.getOwner());
+			MsgPassingEvent e = (MsgPassingEvent)events.get(i);
+			Node node = this.graph.getNode(e.getHostId());
 
 			// Will NOT execute a Fail node
 			if (node.isStarter()) {
@@ -682,19 +684,19 @@ public class Processor implements IProcesses {
 	 * Lazy initialize entity
 	 */
 	private Entity loadEntity(Node node) throws DisJException {
-		// get client from receiver node
-		Entity clientObj = node.getEntity();
-		if (clientObj == null) {
+		// get client who is at a given node
+		List<IDistributedModel> entities = node.getAllEntities();
+		if(entities.isEmpty()){
 			try {
-				// lazy init
-				clientObj = GraphLoader.createEntityObject(this.client);
+				// lazy init				
+				Entity clientObj = GraphLoader.createEntityObject(this.client);
 				clientObj.initEntity(this, node, this.stateFields);
-				node.assignEntity(clientObj);
+				node.addEntity(clientObj);
 			} catch (Exception ex) {
 				throw new DisJException(IConstants.ERROR_8, ex.toString());
 			}
 		}
-		return node.getEntity();
+		return (Entity)entities.get(0);
 	}
 
 	/**

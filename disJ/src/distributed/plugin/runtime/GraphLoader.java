@@ -24,6 +24,7 @@ import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
+import distributed.plugin.runtime.engine.BoardAgent;
 import distributed.plugin.runtime.engine.Entity;
 
 /**
@@ -80,7 +81,7 @@ public class GraphLoader {
      * @throws Exception
      *             All the exception that caused by reflection processes
      */
-    public static Entity createEntityObject(Class client) throws Exception {
+    public static Entity createEntityObject(Class<Entity> client) throws Exception {
         if (client == null)
             throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
 
@@ -91,6 +92,28 @@ public class GraphLoader {
             throw new DisJException(IConstants.ERROR_8, e.toString());
         }
         return entity;
+    }
+    
+    /**
+     * Create a client agent object by reflection with empty constructor
+     * 
+     * @param client
+     *            a client class object that need to be created
+     * @return
+     * @throws Exception
+     *             All the exception that caused by reflection processes
+     */
+    public static BoardAgent createBoardAgentObject(Class<IBoardModel> client) throws Exception {
+        if (client == null)
+            throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
+
+        BoardAgent agent = null;
+        try {
+        	agent = (BoardAgent) client.newInstance();
+        } catch (InstantiationException e) {
+            throw new DisJException(IConstants.ERROR_8, e.toString());
+        }
+        return agent;
     }
 
     /**

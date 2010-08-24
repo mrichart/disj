@@ -51,16 +51,17 @@ public class SimulatorEngine {
     }
 
     /**
-     * Create the process with a given graphId and client Class
+     * Create Message Passing Model processor with a given graphId and client Class
      * 
      * @param graphId
      * @param client
+     * @param clienRandom
      */
-    public void execute(Graph graph, Class<Entity> client, Class<IRandom> clientRandom) {
+    public void executeMsgPassing(Graph graph, Class<Entity> client, Class<IRandom> clientRandom) {
         try {
 
            this.origin = graph;
-            Runnable proc = new Processor(ge, graph, client, clientRandom, this.getOutputLocation());
+            Runnable proc = new MsgPassingProcessor(ge, graph, client, clientRandom, this.getOutputLocation());
             this.engine.put(origin.getId(), proc);
 
             // FIXME risk of non atomic for next 2 lines
@@ -91,7 +92,7 @@ public class SimulatorEngine {
         if (this.origin == null)
             throw new DisJException(IConstants.ERROR_18);
 
-        Processor proc = (Processor) this.engine.get(this.origin.getId());
+        MsgPassingProcessor proc = (MsgPassingProcessor) this.engine.get(this.origin.getId());
         if (proc != null)
             proc.setStop(true);
         
@@ -115,7 +116,7 @@ public class SimulatorEngine {
         if (this.origin == null)
             throw new DisJException(IConstants.ERROR_18);
 
-        Processor proc = (Processor) this.engine.get(this.origin.getId());
+        MsgPassingProcessor proc = (MsgPassingProcessor) this.engine.get(this.origin.getId());
         if (proc == null)
             throw new DisJException(IConstants.ERROR_19);
         proc.setPause(false);
@@ -128,7 +129,7 @@ public class SimulatorEngine {
         if (this.origin == null)
             throw new DisJException(IConstants.ERROR_18);
 
-        Processor proc = (Processor) this.engine.get(this.origin.getId());
+        MsgPassingProcessor proc = (MsgPassingProcessor) this.engine.get(this.origin.getId());
         if (proc == null)
             throw new DisJException(IConstants.ERROR_19);
         
@@ -139,7 +140,7 @@ public class SimulatorEngine {
         if (this.origin == null)
             throw new DisJException(IConstants.ERROR_18);
 
-        Processor proc = (Processor) this.engine.get(this.origin.getId());
+        MsgPassingProcessor proc = (MsgPassingProcessor) this.engine.get(this.origin.getId());
         if (proc == null)
             throw new DisJException(IConstants.ERROR_19);
 
@@ -150,7 +151,7 @@ public class SimulatorEngine {
         if (this.origin == null)
             throw new DisJException(IConstants.ERROR_18);
 
-        Processor proc = (Processor) this.engine.get(this.origin.getId());
+        MsgPassingProcessor proc = (MsgPassingProcessor) this.engine.get(this.origin.getId());
         if (proc == null)
             throw new DisJException(IConstants.ERROR_19);
 
@@ -162,7 +163,7 @@ public class SimulatorEngine {
         if (this.origin == null)
             throw new DisJException(IConstants.ERROR_18);
 
-        Processor proc = (Processor) this.engine.get(this.origin.getId());
+        MsgPassingProcessor proc = (MsgPassingProcessor) this.engine.get(this.origin.getId());
         if (proc == null)
             throw new DisJException(IConstants.ERROR_19);
 
@@ -180,7 +181,7 @@ public class SimulatorEngine {
         this.speed = speed;
         if (this.origin == null)
             return;
-        Processor proc = (Processor) this.engine.get(this.origin.getId());
+        MsgPassingProcessor proc = (MsgPassingProcessor) this.engine.get(this.origin.getId());
         if (proc != null)           
             proc.setSpeed(speed);
     }

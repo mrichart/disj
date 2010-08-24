@@ -171,7 +171,7 @@ public class NodeElement extends AdapterElement {
 	public void resetNode() {		
 		// FIXME why is 99 ???
 		this.node.setCurState((short)99);
-		this.node.setEntity(null);
+		this.node.clearEntities();
 		
 		for (int i = 0; i <  NUM_PROPERTIES; i++) {
 			this.resetPropertyValue(propertyArray[i]);
