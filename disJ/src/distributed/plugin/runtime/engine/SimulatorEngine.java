@@ -14,6 +14,11 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleManager;
+import org.eclipse.ui.console.MessageConsole;
+
 import distributed.plugin.core.DisJException;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.random.IRandom;
@@ -50,6 +55,28 @@ public class SimulatorEngine {
         this.holder = null;
     }
 
+    /**
+	 * Get Eclipse plug-in console
+	 * 
+	 * @param name A unique name of plug-in that uses console
+	 * @return
+	 */
+	public static MessageConsole findConsole(String name) {
+		ConsolePlugin plugin = ConsolePlugin.getDefault();
+		IConsoleManager conMgr = plugin.getConsoleManager();
+		IConsole[] existing = conMgr.getConsoles();
+		for (int i = 0; i < existing.length; i++){
+			if (name.equals(existing[i].getName())){
+				return (MessageConsole) existing[i];
+			}
+		}
+		// no console found, so create a new one
+		MessageConsole myConsole = new MessageConsole(name, null);
+		conMgr.addConsoles(new IConsole[] { myConsole });
+		return myConsole;
+	}
+
+	
     /**
      * Create Message Passing Model processor with a given graphId and client Class
      * 

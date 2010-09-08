@@ -194,7 +194,7 @@ public class MsgPassingProcessor implements IProcesses {
 	/**
      * 
      */
-	public void processMessage(String sender, List<String> receivers, IMessage message)
+	public void processReqeust(String sender, List<String> receivers, IMessage message)
 			throws DisJException {
 
 		Random ran = new Random(System.currentTimeMillis());
@@ -253,7 +253,7 @@ public class MsgPassingProcessor implements IProcesses {
 
 	public void internalNotify(String owner, IMessage message)
 			throws DisJException {
-		if (message.getLabel().equals(IConstants.SET_ALARM_CLOCK)) {
+		if (message.getLabel().equals(IConstants.MESSAGE_SET_ALARM_CLOCK)) {
 			int eventId = this.timeGen.getLastestId(graph.getId() + "");
 			int delay = ((Integer) message.getContent()).intValue();
 			int execTime = this.timeGen.getCurrentTime(graph.getId() + "")
@@ -269,7 +269,7 @@ public class MsgPassingProcessor implements IProcesses {
 			this.timeGen.setCurrentTime(graph.getId() + "", this.queue
 					.topEvent().getExecTime());
 
-		} else if (message.getLabel().equals(IConstants.SET_BLOCK_MSG)) {
+		} else if (message.getLabel().equals(IConstants.MESSAGE_SET_BLOCK_MSG)) {
 			// set blocked/unblocked message
 			Object[] msg = (Object[]) message.getContent();
 			String port = (String) msg[0];
@@ -388,7 +388,7 @@ public class MsgPassingProcessor implements IProcesses {
 			System.out.println("@Processor.Cleanup() Message: " + msgType + " = " + count + " messages");
 		}
 		
-		Map<Integer, Integer> count = this.graph.getStateCount();
+		Map<Integer, Integer> count = this.graph.getNodeStateCount();
 		for (int s : count.keySet()) {
 			int c = count.get(s);
 			//this.appendToRecFile("\n State " + s + " = " + c);
@@ -480,8 +480,12 @@ public class MsgPassingProcessor implements IProcesses {
 				Node init = initNodes.get(i);
 				int eventId = timeGen.getLastestId(graph.getId() + "");
 				int execTime = 0;
-				if (!init.isStarter())
+				
+				// it is not a starter, set the starting time to random
+				// OR TODO get a start time from user input
+				if (!init.isStartHost()){
 					execTime = r.nextInt(IConstants.MAX_RANDOM_RANGE);
+				}
 
 				// add an event into a queue
 				IMessage msg = new Message("Initialized", new Integer(execTime));
@@ -584,7 +588,7 @@ public class MsgPassingProcessor implements IProcesses {
 			Node node = this.graph.getNode(e.getHostId());
 
 			// Will NOT execute a Fail node
-			if (node.isStarter()) {
+			if (node.isStartHost()) {
 				Entity entity = this.loadEntity(node);
 				node.setInitExec(true);
 				entity.init();
@@ -612,7 +616,7 @@ public class MsgPassingProcessor implements IProcesses {
 			String port = recv.getPortLabel(link);
 
 			// Will NOT execute a Fail node
-			if (!recv.isStarter())
+			if (!recv.isStartHost())
 				continue;
 
 			// check if the port is blocked
@@ -623,7 +627,7 @@ public class MsgPassingProcessor implements IProcesses {
 
 				// not allow to execute receive msg if it is init node and
 				// it has not yet execute init()
-			} else if ((recv.isInitializer() == false)
+			} else if ((recv.hasInitializer() == false)
 					|| (recv.isInitExec() == true)) {
 				
 				// update log
@@ -673,7 +677,7 @@ public class MsgPassingProcessor implements IProcesses {
 			Node node = this.graph.getNode(e.getHostId());
 
 			// Will NOT execute a Fail node
-			if (node.isStarter()) {
+			if (node.isStartHost()) {
 				Entity entity = this.loadEntity(node);
 				entity.alarmRing();
 			}

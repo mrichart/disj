@@ -146,8 +146,8 @@ public class ProcessActions extends WorkbenchPartAction {
 			this.executeSpeed();
 			
 		} else if (this.execType.equals(IGraphEditorConstants.LOAD_RECORD_ID)) {
-			editor.setController(new PlaybackController(this, editor));
-			String fileName=openFileDialog();
+			editor.setController(new ReplayController(this, editor));
+			String fileName = openFileDialog();
 			if (editor.setRecFile(fileName)){
 				showMessageBox(null,"Record Loading Completed");
 			}else{

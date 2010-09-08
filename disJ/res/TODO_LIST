@@ -14,3 +14,4 @@ TODO
 	function inside it constructor coz of reflection !!
 12.Creating new graph after reopen a .gph file from I/O need to track the 
 	node and link ID properly
+13. Add logger instead of using system.out

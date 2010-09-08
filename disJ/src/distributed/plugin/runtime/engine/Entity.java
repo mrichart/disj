@@ -251,15 +251,13 @@ public abstract class Entity implements IMessagePassingModel {
 		try {
 			if (time > 0) {
 				this.processor.internalNotify(this.nodeOwner.getNodeId(),
-						new Message(IConstants.SET_ALARM_CLOCK, new Integer(
+						new Message(IConstants.MESSAGE_SET_ALARM_CLOCK, new Integer(
 								time)));
 			}
-		} catch (DisJException e) {
+		}catch (Exception e) {
 			e.printStackTrace();
-			this.printToConsole(e);
-		} catch (RuntimeException e) {
-			e.printStackTrace();
-			this.printToConsole(e);
+			this.out.println(e.toString());
+			//this.printToConsole(e);
 		}
 	}
 
@@ -274,7 +272,7 @@ public abstract class Entity implements IMessagePassingModel {
 		try {
 			Object[] msg = new Object[] { label, new Boolean(state) };
 			this.processor.internalNotify(this.nodeOwner.getNodeId(),
-					new Message(IConstants.SET_BLOCK_MSG, msg));
+					new Message(IConstants.MESSAGE_SET_BLOCK_MSG, msg));
 		} catch (DisJException e) {
 			e.printStackTrace();
 			this.printToConsole(e);
@@ -489,15 +487,13 @@ public abstract class Entity implements IMessagePassingModel {
 			List<String> recv = new ArrayList<String>();
 			recv.add(portLabel);
 			
-			this.processor.processMessage(this.nodeOwner.getNodeId(), recv,
+			this.processor.processReqeust(this.nodeOwner.getNodeId(), recv,
 					new Message(msgLabel, message));
 			
-		} catch (DisJException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-			this.printToConsole(e);
-		} catch (RuntimeException e) {
-			e.printStackTrace();
-			this.printToConsole(e);
+			//this.printToConsole(e);
+			out.println(e.toString());
 		}
 	}
 
@@ -726,7 +722,7 @@ public abstract class Entity implements IMessagePassingModel {
 				}
 			}
 			if (!recv.isEmpty()) {
-				this.processor.processMessage(this.nodeOwner.getNodeId(), recv,
+				this.processor.processReqeust(this.nodeOwner.getNodeId(), recv,
 						new Message(msgLabel, message));
 			}
 		} catch (DisJException e) {
@@ -899,7 +895,7 @@ public abstract class Entity implements IMessagePassingModel {
 			
 			List<String> recv = this.getOutgoingPorts();
 			
-			this.processor.processMessage(this.nodeOwner.getNodeId(), recv,
+			this.processor.processReqeust(this.nodeOwner.getNodeId(), recv,
 					new Message(msgLabel, message));
 
 		} catch (DisJException e) {
@@ -1180,7 +1176,7 @@ public abstract class Entity implements IMessagePassingModel {
 			}
 			
 			if (!recv.isEmpty()) {
-				this.processor.processMessage(this.nodeOwner.getNodeId(), recv,
+				this.processor.processReqeust(this.nodeOwner.getNodeId(), recv,
 						new Message(msgLabel, message));
 			}
 

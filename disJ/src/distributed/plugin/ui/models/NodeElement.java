@@ -273,13 +273,13 @@ public class NodeElement extends AdapterElement {
 
 		} else if (propName.equals(PROPERTY_IS_INIT)) {
 			int i = 0;
-			if (this.node.isInitializer())
-				i = 1;
+			if (this.node.hasInitializer())
+				i = this.node.getNumInit();
 			return new Integer(i);
 
 		} else if (propName.equals(PROPERTY_IS_STARTER)) {
 			int i = 0;
-			if (this.node.isStarter())
+			if (this.node.isStartHost())
 				i = 1;
 			return new Integer(i);
 
@@ -326,10 +326,7 @@ public class NodeElement extends AdapterElement {
 
 		} else if (id.equals(PROPERTY_IS_INIT)) {
 			if (value instanceof Integer) {
-				boolean bool = false;
-				if (((Integer) value).intValue() == 1)
-					bool = true;
-				this.node.setInit(bool);
+				this.node.setNumInit(((Integer) value).intValue());
 			}
 
 		} else if (id.equals(PROPERTY_IS_STARTER)) {
@@ -337,7 +334,7 @@ public class NodeElement extends AdapterElement {
 				boolean bool = false;
 				if (((Integer) value).intValue() == 1)
 					bool = true;
-				this.node.setStarter(bool);
+				this.node.setStarHost(bool);
 			}
 
 		} else if (id.equals(PROPERTY_BREAKPOINT)) {

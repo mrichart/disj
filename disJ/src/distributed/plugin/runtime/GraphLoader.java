@@ -55,7 +55,7 @@ public class GraphLoader {
             Map<String, Node> nodes = graph.getNodes();
             for (String id : nodes.keySet()) {
             	Node initNode = nodes.get(id);
-                if (initNode.isInitializer()) {
+                if (initNode.hasInitializer()) {
                     initList.add(initNode);
                 }
 			}          

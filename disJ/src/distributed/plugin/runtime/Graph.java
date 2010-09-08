@@ -17,6 +17,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import distributed.plugin.core.Agent;
 import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
 import distributed.plugin.core.IConstants;
@@ -48,6 +49,8 @@ public class Graph implements Serializable {
 	private Map<String, Node> nodes;
 
 	private Map<String, Edge> edges;
+	
+	private Map<String, Agent> agents;
 
 	private Map<String, Integer> numMsgSent;
 	
@@ -72,6 +75,7 @@ public class Graph implements Serializable {
 		this.numMsgRecv = new HashMap<String, Integer>();
 		this.nodes = new HashMap<String, Node>();
 		this.edges = new HashMap<String, Edge>();
+		this.agents = new HashMap<String, Agent>();
 	}
 
 	/**
@@ -104,6 +108,12 @@ public class Graph implements Serializable {
 			throw new DisJException(IConstants.ERROR_3, id);
 	}
 
+	public void addAgent(String id, Agent agent) throws DisJException {
+		if (!this.agents.containsKey(id)){
+			this.agents.put(id, agent);
+		}
+	}
+	
 	/**
 	 * Remove a node with a given id
 	 * 
@@ -130,6 +140,12 @@ public class Graph implements Serializable {
 		edges.remove(id);
 	}
 
+	public void removeAgent(String id) throws DisJException {
+		if (!this.agents.containsKey(id))
+			throw new DisJException(IConstants.ERROR_0, id);
+
+		this.agents.remove(id);
+	}
 	/**
 	 * Get an edge with a given id
 	 * 
@@ -167,7 +183,19 @@ public class Graph implements Serializable {
 			return null;
 		}
 	}
-
+	
+	public Agent getAgent(String id) {
+		try {
+			if (!this.agents.containsKey(id))
+				throw new DisJException(IConstants.ERROR_0, id);
+			else
+				return this.agents.get(id);
+		} catch (DisJException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	/**
 	 * @return Returns all the edges in this graph
 	 */
@@ -223,6 +251,10 @@ public class Graph implements Serializable {
 		return nodes;
 	}
 
+	public Map<String, Agent> getAgents(){
+		return this.agents;
+	}
+	
 	public int getCurrentEdgeId() {
 		return currentEdgeId++;
 	}
@@ -297,7 +329,7 @@ public class Graph implements Serializable {
 	 * Get a statistic of current state vs number of node
 	 * @return
 	 */
-	public Map<Integer, Integer> getStateCount(){
+	public Map<Integer, Integer> getNodeStateCount(){
 		int s, c;
 		Map<Integer, Integer> count = new HashMap<Integer, Integer>();
 		for (String id : this.nodes.keySet()) {

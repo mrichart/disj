@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringReader;
 import java.util.Map;
-import java.util.Scanner;
 
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
@@ -15,13 +14,11 @@ import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
 import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.engine.Entity;
-import distributed.plugin.runtime.engine.MsgPassingProcessor;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.editor.GraphEditor;
 import distributed.plugin.ui.models.GraphElement;
-import distributed.plugin.ui.models.LinkElement;
 
-public class PlaybackController implements IController {
+public class ReplayController implements IController {
 
 	ProcessActions pa;
 	GraphEditor editor;
@@ -31,7 +28,7 @@ public class PlaybackController implements IController {
 	private boolean stepNext;
 	private boolean stop;
 
-	public PlaybackController(ProcessActions pa, GraphEditor editor) {
+	public ReplayController(ProcessActions pa, GraphEditor editor) {
 		super();
 		this.pa = pa;
 		this.editor = editor;
@@ -160,12 +157,18 @@ public class PlaybackController implements IController {
 							// System.out.println(InitLine);
 							String Init = InitLine.substring(6);
 							System.out.println("Init=" + Init);
-							node.setInit(new Boolean(Init));
+							// FIXME init should be integer number
+							boolean b = new Boolean(Init);
+							if(b){
+								node.setNumInit(1);
+							}else{
+								node.setNumInit(0);
+							}
 							String StarterLine = bsr.readLine();
 							// System.out.println(StarterLine);
 							String Starter = StarterLine.substring(9);
 							System.out.println("Starter=" + Starter);
-							node.setStarter(new Boolean(Starter));
+							node.setStarHost(new Boolean(Starter));
 							String MsgReceivedLine = bsr.readLine();
 							// System.out.println(MsgReceivedLine);
 							String MsgReceived = MsgReceivedLine.substring(18);

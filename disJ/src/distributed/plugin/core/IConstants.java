@@ -47,7 +47,6 @@ public interface IConstants {
 	public static final short EVENT_INITIATE_TYPE = 0;
 	public static final short EVENT_ALARM_RING_TYPE = 1;
 	public static final short EVENT_ARRIVAL_TYPE = 2;
-	public static final short EVENT_ACTION_TYPE = 3;
 		
 	// Catched exception messages
 	public static final short ERROR_0 = 0;
@@ -91,8 +90,13 @@ public interface IConstants {
 	public static final String DELIMETER = "[=]";
 	public static final String MAIN_DELIMETER = "{%}";
 	public static final String SUB_DELIMETER = "(#)";
-	public static final String SET_ALARM_CLOCK = "ALARM_CLOCK";
-	public static final String SET_BLOCK_MSG = "BLOCK_MSG";
+	
+	// Event message label
+	public static final String MESSAGE_SET_ALARM_CLOCK = "ALARM_CLOCK";
+	public static final String MESSAGE_SET_BLOCK_MSG = "BLOCK_MSG";
+	public static final String MESSAGE_EVENT_MOVE_TO = "MOVE_TO";
+	public static final String MESSAGE_EVENT_ARRIVE_AT = "ARRIVE_AT";
+	
 	public static final String SEND_TAG = "<send>";
 	public static final String RECV_TAG = "<recv>";
 	public static final String EDGE_TAG = "<edge>";

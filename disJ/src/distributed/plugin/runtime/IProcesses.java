@@ -23,22 +23,13 @@ import distributed.plugin.core.DisJException;
 public interface IProcesses extends Runnable {
 	
 	/**
-	 * Process transmitting object
+	 * Process a request from a sender and distributed the result to given receives
 	 * 
-	 * @param sender
-	 * @param receivers A list of outgoing edge's name of the sender that leads to the receivers
-	 * @param message An object that need to be processed e.g. message, agent
+	 * @param sender A request node
+	 * @param receivers A list of outgoing port of the sender that leads to the receivers
+	 * @param message A parameters and data that need to be processed
 	 * @throws DisJException
 	 */
-	public void processMessage(String sender, List<String> receivers, IMessage message) throws DisJException;
-		
-	/**
-	 * An internal notification
-	 * 
-	 * @param owner 
-	 * @param message An information provided for this this notification
-	 * @throws DisJException
-	 */
-	public void internalNotify(String owner, IMessage message) throws DisJException;
+	public void processReqeust(String sender, List<String> receivers, IMessage message) throws DisJException;
 	
 }

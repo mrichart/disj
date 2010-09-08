@@ -38,44 +38,29 @@ public interface IBoardModel extends IDistributedModel{
 	public void moveTo(String port);
 	
 	/**
-	 * Retrieve data stored in an agent with respect to a given index of slot 
-	 * that stores data
+	 * Retrieve a memory storage for this agent with a max length set
+	 * by user in GraphEditor before an execution of the simulator
 	 * 
-	 * @param index a slot index
-	 * @return A data contains in a slot if exist otherwise null
-	 * @throws IndexOutOfBoundsException if the slot index does not exist
+	 * TODO not yet implemented for input max length
 	 * 
-	 */
-	public String getInfo(int index);
-	
-	/**
-	 * Retrieve all data that currently stored in an agent memory slots 
-	 * 
-	 * @return A list of data if exist, otherwise an empty list returned 
-	 * @throws IndexOutOfBoundsException if the slot index does not exist
+	 * @return An array of String object
 	 * 
 	 */
-	public List<String> getAllInfo();
+	public String[] getMemorySuitcase();
 	
 	/**
-	 * Write data, in String format, into a slot with respect to a given slot index
-	 * 
-	 * Note: if there exist data in a given slot index, a new data will override
-	 * the old data.
-	 * 
-	 * @param index a slot index
-	 * @param data info to store in a slot
-	 * @throws IndexOutOfBoundsException if the slot index does not exist
-	 * 
-	 */
-	public void recordInfo(int index, String data);
-	
-	/**
-	 * Get a maximum number of slot that agent can have
+	 * Get a maximum number of memory slot that agent can carry
 	 * 
 	 * @return a positive integer
 	 */
-	public int getMaxSlot();
+	public int getMaxMemorySlot();
+	
+	/**
+	 * Get agent ID
+	 * 
+	 * @return agent ID in String format
+	 */
+	public String getAgentId();
 	
 	/**
 	 * Get a node ID that agent currently resides
@@ -83,6 +68,13 @@ public interface IBoardModel extends IDistributedModel{
 	 * @return node ID in String format
 	 */
 	public String getNodeId();
+	
+	/**
+	 * Get a home node ID that agent has been initiated
+	 * 
+	 * @return node Id in String format
+	 */
+	public String getHomeId();
 	
 	/**
 	 * Read info that posted on a board of current host
@@ -101,7 +93,7 @@ public interface IBoardModel extends IDistributedModel{
 	 * 
 	 * @param info a String of data that will be posted on a board
 	 */
-	public void writeTo(String info);
+	public void appendTo(String info);
 	
 	/**
 	 * Delete a given record from a board
@@ -109,14 +101,21 @@ public interface IBoardModel extends IDistributedModel{
 	 * @param info a data record that written on a board and would like
 	 * to be removed
 	 *  
-	 * @return true if the data successfully remove otherwise false
+	 * @return true if the data found and successfully remove otherwise false
 	 */
 	public boolean remove(String info);
 	
 	/**
-	 * Set a state of the host
+	 * Get a state of a node that agent currently resides
+	 * 
+	 * @return A state of a node at current time
+	 */
+	public int getNodeState();
+	
+	/**
+	 * Set a state of current host node
 	 * 
 	 * @param state A new state of this host
 	 */
-	public void setHostState(int state);
+	public void setNodeState(int state);
 }

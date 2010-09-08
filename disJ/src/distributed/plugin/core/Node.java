@@ -51,15 +51,10 @@ public class Node implements Serializable {
 	private int curState;
 
 	/*
-	 * This node is set to be init/host node
-	 */
-	private boolean isInitializer;
-	
-	/*
 	 * Number of agent to be started at this node
 	 * TODO add this to GUI (follow isInitializer ref)
 	 */
-	private int numInitAgentHost;
+	private int numInitPerHost;
 	
 	private String userInput;
 
@@ -67,7 +62,7 @@ public class Node implements Serializable {
 	/**
 	 * specify as a starter for init node
 	 */
-	private boolean isStarter;
+	private boolean isStartHost;
 
 	private boolean breakpoint;
 
@@ -121,6 +116,10 @@ public class Node implements Serializable {
 	 */
 	transient private Map<Integer, String> stateNames;
 	
+	transient private List<Agent> curAgents;
+	
+	transient private List<String> whiteboard;
+	
 	/**
 	 * X, Y coordinate in graph editor
 	 */
@@ -133,29 +132,32 @@ public class Node implements Serializable {
 	private int maxY;
 	
 	
-
 	protected PropertyChangeSupport listeners = new PropertyChangeSupport(this);
-
+	
+	/**
+	 * Constructor
+	 * @param nodeId
+	 */
 	public Node(String nodeId) {
-		this("unknown", nodeId, "", false, true);
+		this("unknown", nodeId, "", 0, true);
 	}
 
 	public Node(String graphId, String nodeId) {
-		this(graphId, nodeId, "", false, true);
+		this(graphId, nodeId, "", 0, true);
 	}
 
 	public Node(String graphId, String nodeId, int x, int y) {
-		this(graphId, nodeId, "", false, true, x, y);
+		this(graphId, nodeId, "", 0, true, x, y);
 	}
 
-	public Node(String graphId, String nodeId, String name, boolean isInit,
+	public Node(String graphId, String nodeId, String name, int numInit,
 			boolean isStarter) {
-		this(graphId, nodeId, name, isInit, isStarter, 0, 0);
+		this(graphId, nodeId, name, numInit, isStarter, 0, 0);
 
 	}
 
-	public Node(String graphId, String nodeId, String name, boolean isInit,
-			boolean isStarter, int x, int y) {
+	public Node(String graphId, String nodeId, String name, int numInit,
+			boolean isStartHost, int x, int y) {
 		this.x = x;
 		this.y = y;
 		this.maxX = 0;
@@ -164,10 +166,9 @@ public class Node implements Serializable {
 		this.graphId = graphId;
 		this.name = name;
 		this.breakpoint = false;
-		this.isInitializer = isInit;
-		this.numInitAgentHost = 0;
+		this.numInitPerHost = numInit;		
 		this.initExec = false;
-		this.isStarter = isStarter;
+		this.isStartHost = isStartHost;
 		this.numMsgRecv = 0;
 		this.numMsgSend = 0;
 		this.latestRecvPort = null;
@@ -180,6 +181,8 @@ public class Node implements Serializable {
 		this.blockPort = new HashMap<String, Boolean>(4);
 		this.holdEvents = new ArrayList<Event>(4);
 		this.stateNames = new HashMap<Integer, String>();
+		this.curAgents = new ArrayList<Agent>();
+		this.whiteboard = new ArrayList<String>();
 
 	}
 
@@ -224,6 +227,34 @@ public class Node implements Serializable {
 		} else {
 			return IConstants.STATE_NOT_FOUND;
 		}
+	}
+	
+	/**
+	 * Add agent who currently visiting this node
+	 * @param agent
+	 */
+	public void addAgent(Agent agent){
+		if(!curAgents.contains(agent)){
+			this.curAgents.add(agent);
+		}
+	}
+	
+	/**
+	 * Remove agent who leaving this node
+	 * @param agent
+	 */
+	public void removeAgent(Agent agent){
+		if(curAgents.contains(agent)){
+			this.curAgents.remove(agent);
+		}
+	}
+	
+	/**
+	 * Get a list of all agent currently reside at this node
+	 * @return
+	 */
+	public List<Agent> getAllAgents(){
+		return this.curAgents;
 	}
 
 	/**
@@ -282,6 +313,14 @@ public class Node implements Serializable {
 			return (Edge) this.edges.get(label);
 		else
 			throw new DisJException(IConstants.ERROR_1, label);
+	}
+
+	public List<String> getWhiteboard() {
+		return whiteboard;
+	}
+
+	public void setWhiteboard(List<String> whiteboard) {
+		this.whiteboard = whiteboard;
 	}
 
 	/**
@@ -455,8 +494,8 @@ public class Node implements Serializable {
 	 */
 	public String toString() {
 		return ("\n\nNode: " + this.name + "\nState: " + this.curState
-				+ "\nInit: " + this.isInitializer + "\nStarter: "
-				+ this.isStarter);
+				+ "\nInit: " + this.hasInitializer() + "\nStarter: "
+				+ this.isStartHost);
 	}
 
 	/**
@@ -481,26 +520,28 @@ public class Node implements Serializable {
 	}
 
 	/**
+	 * Check whether a node contains any initializer
 	 * @return Returns the isInit.
 	 */
-	public boolean isInitializer() {
-		return isInitializer;
+	public boolean hasInitializer() {
+		return this.numInitPerHost > 0;		
 	}	
 	
-	public int getNumInitAgentHost() {
-		return numInitAgentHost;
-	}
-
-	public void setNumInitAgentHost(int numInitAgentHost) {
-		this.numInitAgentHost = numInitAgentHost;
-	}
-
 	/**
-	 * @param isInit
-	 *            The isInit to set.
+	 * Get number of initializer of this node
+	 * @return
 	 */
-	public void setInit(boolean isInit) {
-		this.isInitializer = isInit;
+	public int getNumInit() {
+		return numInitPerHost;
+	}
+	
+	/**
+	 * Set number of initializer to this node
+	 * @param numInit
+	 *            
+	 */
+	public void setNumInit(int numInit) {
+		this.numInitPerHost = numInit;
 	}
 
 	public void setGraphId(String id) {
@@ -590,10 +631,11 @@ public class Node implements Serializable {
 	}
 
 	/**
-	 * @return Returns the isStarter.
+	 * Check whether this node is a host
+	 * @return 
 	 */
-	public boolean isStarter() {
-		return isStarter;
+	public boolean isStartHost() {
+		return isStartHost;
 	}
 
 	/**
@@ -660,11 +702,12 @@ public class Node implements Serializable {
 	}
 
 	/**
+	 * Set this node to be a host
 	 * @param isStarter
-	 *            The isStarter to set.
+	 *            
 	 */
-	public void setStarter(boolean isStarter) {
-		this.isStarter = isStarter;
+	public void setStarHost(boolean isStarter) {
+		this.isStartHost = isStarter;
 	}
 
 	/**
