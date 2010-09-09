@@ -2,13 +2,10 @@ package distributed.plugin.ui.actions;
 
 import java.util.List;
 
-import org.eclipse.ui.console.MessageConsoleStream;
-
 import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
 import distributed.plugin.core.Node;
 import distributed.plugin.runtime.Graph;
-import distributed.plugin.runtime.engine.Entity;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.editor.GraphEditor;
 import distributed.plugin.ui.models.GraphElement;
@@ -86,9 +83,6 @@ public class ProtocolExecutionController implements IController {
 
 	
 	public void executeStepNext() {
-		MessageConsoleStream out = Entity.findConsole(IGraphEditorConstants.DISJ_CONSOLE)
-				.newMessageStream();
-		out.println();
 		try {
 			if (procAct.getEngine().isSuspend()) {
 				procAct.getEngine().stepForward();

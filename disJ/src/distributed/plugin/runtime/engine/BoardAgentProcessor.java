@@ -79,11 +79,6 @@ public class BoardAgentProcessor implements IProcesses {
 	private GraphEditor ge;
 
 	/*
-	 * An instance of Eclipse plug-in console
-	 */
-	private MessageConsole console;
-
-	/*
 	 * System out delegate to Eclipse plug-in console
 	 */
 	private MessageConsoleStream systemOut;
@@ -123,8 +118,8 @@ public class BoardAgentProcessor implements IProcesses {
 	 * Configure system output to Eclipse Plug-in console
 	 */
 	private void setSystemOutConsole(){
-		this.console = SimulatorEngine.findConsole(IGraphEditorConstants.DISJ_CONSOLE);
-		this.systemOut = this.console.newMessageStream();
+		MessageConsole console = SimulatorEngine.findConsole(IGraphEditorConstants.DISJ_CONSOLE);
+		this.systemOut = console.newMessageStream();
 		System.setOut(new PrintStream(this.systemOut));
 		System.setErr(new PrintStream(this.systemOut));
 	}
@@ -497,7 +492,7 @@ public class BoardAgentProcessor implements IProcesses {
 			String port = node.getPortLabel(link);
 
 			// Will NOT execute a Fail node
-			if (!node.isStartHost())
+			if (!node.isAlive())
 				continue;
 
 			// check if the port is blocked

@@ -10,13 +10,10 @@
 
 package distributed.plugin.runtime.engine;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -29,6 +26,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.StringTokenizer;
 
+import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
+
 import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
 import distributed.plugin.core.IConstants;
@@ -38,15 +38,16 @@ import distributed.plugin.runtime.Event;
 import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.GraphFactory;
 import distributed.plugin.runtime.GraphLoader;
-import distributed.plugin.runtime.IDistributedModel;
 import distributed.plugin.runtime.IMessage;
 import distributed.plugin.runtime.IProcesses;
 import distributed.plugin.runtime.MsgPassingEvent;
+import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.editor.GraphEditor;
 
 /**
- * @author npiyasin An core processor that executes an event for a given graph.
- *         The relation between a Processor and a Graph is bijection mapping
+ * An core processor that executes message passing model event for 
+ * a given graph. The relation between a processor and a Graph is 
+ * one-to-one mapping
  */
 public class MsgPassingProcessor implements IProcesses {
 
@@ -86,21 +87,33 @@ public class MsgPassingProcessor implements IProcesses {
 
 	// private SystemLog sysLog;
 
+	/*
+	 * System out delegate to Eclipse plug-in console
+	 */
+	private MessageConsoleStream systemOut;
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param ge An instance of GraphEditor that control the processor
+	 * @param graph A graph model that used by the processor
+	 * @param client A client Entity object that hold algorithm
+	 * @param clientRandom A client IRandom object the hold algorithm
+	 * @param out A URL to a location of log files directory
+	 * @throws IOException
+	 */
 	MsgPassingProcessor(GraphEditor ge, Graph graph, Class<Entity> client, Class<IRandom> clientRandom,
 			URL out) throws IOException {
-		this.ge = ge;
+		if (graph == null || client == null || ge == null){
+			throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
+		}
+	
 		this.callingChain = 0;
 		this.speed = IConstants.SPEED_DEFAULT_RATE;
 		this.stop = false;
-		this.pause = false;
+		this.pause = false;		
 		
-		if (graph == null){
-			throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
-		}
-		if (client == null){
-			throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
-		}
-
+		this.ge = ge;
 		this.graph = graph;
 		this.procName = graph.getId();
 		this.client = client;
@@ -110,13 +123,29 @@ public class MsgPassingProcessor implements IProcesses {
 		this.timeGen.addGraph(graph.getId() + "");
 		this.stateFields = new HashMap<Integer, String>();
 
+		this.setSystemOutConsole();
+		
+		this.initLogFile(out);
 		this.initClientStateVariables();
 		if (this.clientRandom != null) {
 			this.initClientRandomStateVariables();
-		}
-		this.initLogFile(out);
+		}		
 	}
 
+	/*
+	 * Configure system output to Eclipse Plug-in console
+	 */
+	private void setSystemOutConsole(){
+		MessageConsole console = SimulatorEngine.findConsole(IGraphEditorConstants.DISJ_CONSOLE);
+		this.systemOut = console.newMessageStream();
+		System.setOut(new PrintStream(this.systemOut));
+		System.setErr(new PrintStream(this.systemOut));
+	}
+	
+	public MessageConsoleStream getSystemOut() {
+		return systemOut;
+	}
+	
 	private void initClientStateVariables() {
 
 		try {
@@ -137,25 +166,19 @@ public class MsgPassingProcessor implements IProcesses {
 				}
 			}
 		} catch (Exception e){
-			this.appendConsoleOutput(e.toString());
+			this.systemOut.println(e.toString());
 		}
-
 	}
 
 	// FIXME need to do something here!!!
 	private void initClientRandomStateVariables() {
-
 		try {
-			Field[] states = this.clientRandom.getFields();
 			IRandom ran = (IRandom) this.clientRandom.newInstance();
 			this.graph.setClientRandom(ran);
-
 			GraphFactory.addGraph(this.graph);
-
-		} catch (DisJException e) {
-			this.appendConsoleOutput("ERROR add graph into map " + e);
 		} catch (Exception e) {
-			this.appendConsoleOutput(e.toString());
+			e.printStackTrace();
+			this.systemOut.println(e.toString());
 		}
 	}
 
@@ -186,8 +209,9 @@ public class MsgPassingProcessor implements IProcesses {
 		File r = new File(path);
 		try {
 			this.RecFile = new PrintWriter(new FileWriter(r));
+			
 		} catch (Exception e) {
-			this.appendConsoleOutput(e.toString());
+			this.systemOut.println(e.toString());
 		}
 	}
 
@@ -202,14 +226,7 @@ public class MsgPassingProcessor implements IProcesses {
 		Node sNode = graph.getNode(sender);
 		String msgLabel = message.getLabel();
 		Serializable data = message.getContent();
-		
-		try{
-			data.getClass();
-			
-		}catch(Exception e){
-			
-		}
-		
+	
 		// sending message
 		for (int i = 0; i < receivers.size(); i++) {
 			Edge recv = sNode.getEdge(receivers.get(i));
@@ -231,29 +248,34 @@ public class MsgPassingProcessor implements IProcesses {
 			// tracking message sent to each target
 			this.graph.countMsgSent(msgLabel);
 			 try {
-				 IMessage msg = new Message(message.getLabel(), deepClone(data));
+				 IMessage msg = new Message(message.getLabel(), SimulatorEngine.deepClone(data));
 				 
 				 newEvents.add(new MsgPassingEvent(sender, IConstants.EVENT_ARRIVAL_TYPE,
 						 execTime, eventId, recv.getEdgeId(), msg));
 			 } catch (Exception ie) {
 				 throw new DisJException(ie);
 			 }
-			
-//		    newEvents.add(new Event(sender, IConstants.RECEIVE_MSG_TYPE,
-//		   		execTime, eventId, recv.getEdgeId(), message));			
 		}
+		
 		// add new events into the queue
 		this.queue.pushEvents(newEvents);
+		
 		// update time's lower bound
 		this.timeGen.setCurrentTime(graph.getId() + "", this.queue.topEvent()
 				.getExecTime());
+		
 		// update log
 		this.updateSentLog(sNode, receivers, message.getLabel());
 	}
 
-	public void internalNotify(String owner, IMessage message)
+	/*
+	 * 
+	 */
+	protected void internalNotify(String owner, IMessage message)
 			throws DisJException {
+		
 		if (message.getLabel().equals(IConstants.MESSAGE_SET_ALARM_CLOCK)) {
+			
 			int eventId = this.timeGen.getLastestId(graph.getId() + "");
 			int delay = ((Integer) message.getContent()).intValue();
 			int execTime = this.timeGen.getCurrentTime(graph.getId() + "")
@@ -270,6 +292,7 @@ public class MsgPassingProcessor implements IProcesses {
 					.topEvent().getExecTime());
 
 		} else if (message.getLabel().equals(IConstants.MESSAGE_SET_BLOCK_MSG)) {
+			
 			// set blocked/unblocked message
 			Object[] msg = (Object[]) message.getContent();
 			String port = (String) msg[0];
@@ -385,14 +408,14 @@ public class MsgPassingProcessor implements IProcesses {
 				msgType = "Others";
 			}
 			//this.appendToRecFile("\n" + msgType + " = " + count);
-			System.out.println("@Processor.Cleanup() Message: " + msgType + " = " + count + " messages");
+			System.out.println("@MsgPassingProcessor.Cleanup() Message: " + msgType + " = " + count + " messages");
 		}
 		
 		Map<Integer, Integer> count = this.graph.getNodeStateCount();
 		for (int s : count.keySet()) {
 			int c = count.get(s);
 			//this.appendToRecFile("\n State " + s + " = " + c);
-			System.out.println("@Processor.Cleanup() State: " + s + " = " + c + " nodes");
+			System.out.println("@MsgPassingProcessor.Cleanup() State: " + s + " = " + c + " nodes");
 		}
 		
 		// clean up the memory
@@ -435,26 +458,22 @@ public class MsgPassingProcessor implements IProcesses {
 	 */
 	public void run() {
 		try {
-			// load and init any neccessary data
+			// load and init any necessary data
 			this.loadInitNodes();
 
 			// start execute events
 			this.executeEvents();
 
-			System.out.println("\n*****Simulation for " + this.procName
+			this.systemOut.println("\n*****Simulation for " + this.procName
 					+ " is successfully over.*****");
-
-		} catch (DisJException e) {
-			// system log here
-			e.printStackTrace();
-			System.err.println(e);
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.err.println(e);
+			this.systemOut.println(e.toString());
+			
 		} finally {
 			this.cleanUp();
-			System.out.println("\n*****The simulation of " + this.procName
+			this.systemOut.println("\n*****The simulation of " + this.procName
 					+ " is terminated.*****");
 		}
 	}
@@ -478,21 +497,23 @@ public class MsgPassingProcessor implements IProcesses {
 			// create a set of init events
 			for (int i = 0; i < initNodes.size(); i++) {
 				Node init = initNodes.get(i);
-				int eventId = timeGen.getLastestId(graph.getId() + "");
-				int execTime = 0;
-				
-				// it is not a starter, set the starting time to random
-				// OR TODO get a start time from user input
-				if (!init.isStartHost()){
-					execTime = r.nextInt(IConstants.MAX_RANDOM_RANGE);
+				if(init.isAlive()){
+					int eventId = timeGen.getLastestId(graph.getId() + "");
+					int execTime = 0;
+					
+					// it has delay initialize, set active time to random
+					// OR TODO get a delay initialize time from user input
+					//if (!init.hasDelayInit()){
+					//	execTime = r.nextInt(IConstants.MAX_RANDOM_RANGE);
+					//}
+	
+					// add an event into a queue
+					IMessage msg = new Message("Initialized", new Integer(execTime));
+					Event e = new MsgPassingEvent(init.getNodeId(), IConstants.EVENT_INITIATE_TYPE,
+							execTime, eventId, init.getNodeId(), msg);
+	
+					events.add(e);
 				}
-
-				// add an event into a queue
-				IMessage msg = new Message("Initialized", new Integer(execTime));
-				Event e = new MsgPassingEvent(init.getNodeId(), IConstants.EVENT_INITIATE_TYPE,
-						execTime, eventId, init.getNodeId(), msg);
-
-				events.add(e);
 			}
 
 			// add to the queue
@@ -520,7 +541,7 @@ public class MsgPassingProcessor implements IProcesses {
 			try {
 				Thread.sleep(this.speed);
 			} catch (InterruptedException ignore) {
-				System.out.println("@[Processor].executeEvent() Slow down process with speed: "
+				System.out.println("@MsgPassingProcessor.executeEvent() Slow down process with speed: "
 						+ this.speed + " =>" + ignore);
 			}
 
@@ -571,7 +592,7 @@ public class MsgPassingProcessor implements IProcesses {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException ignore) {
-					System.out.println("@Processor.executeEvent() pause=true: "
+					System.out.println("@MsgPassingProcessor.executeEvent() pause=true: "
 							+ ignore);
 				}
 			}
@@ -588,7 +609,7 @@ public class MsgPassingProcessor implements IProcesses {
 			Node node = this.graph.getNode(e.getHostId());
 
 			// Will NOT execute a Fail node
-			if (node.isStartHost()) {
+			if (node.isAlive()) {
 				Entity entity = this.loadEntity(node);
 				node.setInitExec(true);
 				entity.init();
@@ -596,8 +617,11 @@ public class MsgPassingProcessor implements IProcesses {
 				// catching up the holding events
 				// this can happen only to recvMsg
 				// since setAlarm will not be able to
-				// occured until initNode is initailized
-				this.invokeReceive(node.getHoldEvents());
+				// occurred until initNode is initialized
+				List<Event> list = node.getHoldEvents();
+				if(!list.isEmpty()){
+					this.invokeReceive(list);
+				}
 			}
 		}
 	}
@@ -606,6 +630,7 @@ public class MsgPassingProcessor implements IProcesses {
 	 * Invoke client's receive() w.r.t the target node
 	 */
 	private void invokeReceive(List<Event> events) throws DisJException {
+		
 		List<Object[]> invokeList = new ArrayList<Object[]>();
 		for (int i = 0; i < events.size(); i++) {
 			MsgPassingEvent e = (MsgPassingEvent)events.get(i);
@@ -616,7 +641,7 @@ public class MsgPassingProcessor implements IProcesses {
 			String port = recv.getPortLabel(link);
 
 			// Will NOT execute a Fail node
-			if (!recv.isStartHost())
+			if (!recv.isAlive())
 				continue;
 
 			// check if the port is blocked
@@ -638,12 +663,12 @@ public class MsgPassingProcessor implements IProcesses {
 				
 				Entity entity = this.loadEntity(recv);
 				String recvPort = GraphLoader.getEdgeLabel(recv, link);
-				Object[] params = new Object[] { e, entity, recvPort };
+				Object[] params = new Object[] {e, entity, recvPort };
 				invokeList.add(params);
 
 			} else {
 				throw new DisJException(IConstants.ERROR_23,
-						"@Processor.invokeReceiver() ");
+						"@MsgPassingProcessor.invokeReceiver() ");
 			}
 		}
 
@@ -658,13 +683,8 @@ public class MsgPassingProcessor implements IProcesses {
 				entity.getNodeOwner().setLatestRecvPort(portLabel);
 				entity.receive(portLabel, e.getMessage());
 			}
-		}catch(RuntimeException e){		
-			if(entity != null){
-				this.appendConsoleOutput("ERROR @Processor.invokeReceive() node " + entity.getNodeOwner().getName() + e);
-			}else {
-				this.appendConsoleOutput("ERROR @Processor.invokeReceive() entity is null " + e);
-			}
-			throw e;
+		}catch(Exception e){					
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -677,7 +697,7 @@ public class MsgPassingProcessor implements IProcesses {
 			Node node = this.graph.getNode(e.getHostId());
 
 			// Will NOT execute a Fail node
-			if (node.isStartHost()) {
+			if (node.isAlive()) {
 				Entity entity = this.loadEntity(node);
 				entity.alarmRing();
 			}
@@ -688,19 +708,21 @@ public class MsgPassingProcessor implements IProcesses {
 	 * Lazy initialize entity
 	 */
 	private Entity loadEntity(Node node) throws DisJException {
-		// get client who is at a given node
-		List<IDistributedModel> entities = node.getAllEntities();
-		if(entities.isEmpty()){
+		// get client at a given node
+		Entity clientObj = node.getEntity();
+		
+		// lazy init: If there is no client at the node yet	
+		if(clientObj == null){
 			try {
-				// lazy init				
-				Entity clientObj = GraphLoader.createEntityObject(this.client);
+				// create and assign it to the node
+				clientObj = GraphLoader.createEntityObject(this.client);
 				clientObj.initEntity(this, node, this.stateFields);
 				node.addEntity(clientObj);
 			} catch (Exception ex) {
 				throw new DisJException(IConstants.ERROR_8, ex.toString());
 			}
 		}
-		return (Entity)entities.get(0);
+		return clientObj;
 	}
 
 	/**
@@ -757,39 +779,5 @@ public class MsgPassingProcessor implements IProcesses {
 	public void appendToRecFile(String string) {
 		this.RecFile.println(string);
 	}
-
-	 private static Serializable deepClone(Serializable object) throws DisJException, IOException {
-		if (object == null)
-			return null;
-
-		Serializable obj;
-		ObjectOutputStream oos = null;
-		ObjectInputStream ois = null;
-		try {			
-			ClassLoader ld = object.getClass().getClassLoader();
-			
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			oos = new ObjectOutputStream(bos);
-			oos.writeObject(object);
-			oos.flush();
-			
-			ByteArrayInputStream bin = new ByteArrayInputStream(bos
-					.toByteArray());
-			ois = new CustomObjectInputStream(bin, ld);				
-			obj = (Serializable)ois.readObject();
-			
-			return obj;
-			
-		} catch (Exception ie) {
-			System.err.println("@Processor.deepClone() " + ie);
-			throw new DisJException(ie);
-			
-		} finally {
-			if (oos != null)
-				oos.close();
-			if (ois != null)
-				ois.close();
-		}
-}
 	 
 }

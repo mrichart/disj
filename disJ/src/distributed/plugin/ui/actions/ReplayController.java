@@ -2,19 +2,13 @@ package distributed.plugin.ui.actions;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.StringReader;
 import java.util.Map;
-
-import org.eclipse.ui.console.MessageConsole;
-import org.eclipse.ui.console.MessageConsoleStream;
 
 import distributed.plugin.core.Edge;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
 import distributed.plugin.runtime.Graph;
-import distributed.plugin.runtime.engine.Entity;
-import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.editor.GraphEditor;
 import distributed.plugin.ui.models.GraphElement;
 
@@ -37,9 +31,6 @@ public class ReplayController implements IController {
 
 	public void executeRun() {
 
-		MessageConsole mc = Entity.findConsole(IGraphEditorConstants.DISJ_CONSOLE);
-		MessageConsoleStream out = mc.newMessageStream();
-		System.setOut(new PrintStream(out));
 		StringBuffer sb = editor.getRecFile();
 		if (stop == true) {
 			proc = new PlaybackProcessor(sb);
@@ -86,8 +77,8 @@ public class ReplayController implements IController {
 
 		String line;
 		Graph graph = editor.getGraphElement().getGraph();
-		Map nodes = graph.getNodes();
-		Map edges = graph.getEdges();
+		Map<String, Node> nodes = graph.getNodes();
+		Map<String, Edge> edges = graph.getEdges();
 
 		int state;
 		String NodeId;
@@ -168,7 +159,7 @@ public class ReplayController implements IController {
 							// System.out.println(StarterLine);
 							String Starter = StarterLine.substring(9);
 							System.out.println("Starter=" + Starter);
-							node.setStarHost(new Boolean(Starter));
+							node.setAlive(new Boolean(Starter));
 							String MsgReceivedLine = bsr.readLine();
 							// System.out.println(MsgReceivedLine);
 							String MsgReceived = MsgReceivedLine.substring(18);

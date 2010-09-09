@@ -10,6 +10,12 @@
 
 package distributed.plugin.runtime.engine;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -220,5 +226,38 @@ public class SimulatorEngine {
     public URL getOutputLocation(){
         return this.outLocation;
     }
+
+	static Serializable deepClone(Serializable object) throws DisJException, IOException {
+			if (object == null)
+				return null;
+	
+			Serializable obj;
+			ObjectOutputStream oos = null;
+			ObjectInputStream ois = null;
+			try {			
+				ClassLoader ld = object.getClass().getClassLoader();
+				
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				oos = new ObjectOutputStream(bos);
+				oos.writeObject(object);
+				oos.flush();
+				
+				ByteArrayInputStream bin = new ByteArrayInputStream(bos
+						.toByteArray());
+				ois = new CustomObjectInputStream(bin, ld);				
+				obj = (Serializable)ois.readObject();
+				
+				return obj;
+				
+			} catch (Exception ie) {			
+				throw new DisJException(ie);
+				
+			} finally {
+				if (oos != null)
+					oos.close();
+				if (ois != null)
+					ois.close();
+			}
+	}
 
 }

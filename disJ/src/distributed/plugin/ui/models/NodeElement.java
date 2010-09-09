@@ -38,24 +38,24 @@ public class NodeElement extends AdapterElement {
 
 	static final long serialVersionUID = IConstants.SERIALIZE_VERSION;
 
-	// editable properties
+	// modifiable properties
 	private static final String PROPERTY_USER = "N0 User Input";
 	private static final String PROPERTY_NAME = "N1 Node Name";
 	private static final String PROPERTY_IS_INIT = "N2 Initiator";
-	private static final String PROPERTY_IS_STARTER = "N3 Starter";
+	private static final String PROPERTY_IS_ALIVE = "N3 Alive";
 	private static final String PROPERTY_BREAKPOINT = "N4 Breakpoint";
 
-	// uneditable properties
+	// unmodifiable properties
 	private static final String PROPERTY_MSG_RECV = "N5 Number of Received Message";
 	private static final String PROPERTY_MSG_SENT = "N6 Number of Sent Message";
 	
-	// uneditable properties with multi values
+	// unmodifiable properties with multiple values
 	private static final String PROPERTY_OUT_PORTS = "N7 Outgoing Ports";
 	private static final String PROPERTY_IN_PORTS = "N8 Incoming Ports";
 	private static final String PROPERTY_STATES = "N9 State List";
 	
 	private static final String[] propertyArray = {PROPERTY_USER, PROPERTY_NAME,
-			PROPERTY_IS_INIT, PROPERTY_IS_STARTER, PROPERTY_BREAKPOINT,
+			PROPERTY_IS_INIT, PROPERTY_IS_ALIVE, PROPERTY_BREAKPOINT,
 			PROPERTY_MSG_RECV, PROPERTY_MSG_SENT, PROPERTY_OUT_PORTS,
 			PROPERTY_IN_PORTS,PROPERTY_STATES};
 	
@@ -73,8 +73,8 @@ public class NodeElement extends AdapterElement {
 				.setValidator(EmptyCellEditorValidator.instance());
 		descriptors[2] = new ComboBoxPropertyDescriptor(PROPERTY_IS_INIT,
 				PROPERTY_IS_INIT, new String[] { "False", "True" });
-		descriptors[3] = new ComboBoxPropertyDescriptor(PROPERTY_IS_STARTER,
-				PROPERTY_IS_STARTER, new String[] { "False", "True" });
+		descriptors[3] = new ComboBoxPropertyDescriptor(PROPERTY_IS_ALIVE,
+				PROPERTY_IS_ALIVE, new String[] { "False", "True" });
 		descriptors[4] = new ComboBoxPropertyDescriptor(PROPERTY_BREAKPOINT,
 				PROPERTY_BREAKPOINT, new String[] { "Disable", "Enable" });
 		descriptors[5] = new PropertyDescriptor(PROPERTY_MSG_RECV,
@@ -171,7 +171,7 @@ public class NodeElement extends AdapterElement {
 	public void resetNode() {		
 		// FIXME why is 99 ???
 		this.node.setCurState((short)99);
-		this.node.clearEntities();
+		this.node.removeEntity();
 		
 		for (int i = 0; i <  NUM_PROPERTIES; i++) {
 			this.resetPropertyValue(propertyArray[i]);
@@ -277,9 +277,9 @@ public class NodeElement extends AdapterElement {
 				i = this.node.getNumInit();
 			return new Integer(i);
 
-		} else if (propName.equals(PROPERTY_IS_STARTER)) {
+		} else if (propName.equals(PROPERTY_IS_ALIVE)) {
 			int i = 0;
-			if (this.node.isStartHost())
+			if (this.node.isAlive())
 				i = 1;
 			return new Integer(i);
 
@@ -329,12 +329,12 @@ public class NodeElement extends AdapterElement {
 				this.node.setNumInit(((Integer) value).intValue());
 			}
 
-		} else if (id.equals(PROPERTY_IS_STARTER)) {
+		} else if (id.equals(PROPERTY_IS_ALIVE)) {
 			if (value instanceof Integer) {
 				boolean bool = false;
 				if (((Integer) value).intValue() == 1)
 					bool = true;
-				this.node.setStarHost(bool);
+				this.node.setAlive(bool);
 			}
 
 		} else if (id.equals(PROPERTY_BREAKPOINT)) {

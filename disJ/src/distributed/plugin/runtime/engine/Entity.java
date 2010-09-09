@@ -10,16 +10,11 @@
 
 package distributed.plugin.runtime.engine;
 
-import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.ui.console.ConsolePlugin;
-import org.eclipse.ui.console.IConsole;
-import org.eclipse.ui.console.IConsoleManager;
-import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 import distributed.plugin.core.DisJException;
@@ -27,7 +22,6 @@ import distributed.plugin.core.Edge;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
 import distributed.plugin.runtime.IMessagePassingModel;
-import distributed.plugin.ui.IGraphEditorConstants;
 
 /**
  * @author Me
@@ -44,20 +38,16 @@ public abstract class Entity implements IMessagePassingModel {
 
 	private Node nodeOwner;
 
-	private MessageConsole console;
-
-	private MessageConsoleStream out;
+	private MessageConsoleStream systemOut;
 
 	protected Entity(int state) {
+		
 		this.startState = state;
 		this.processor = null;
 		this.nodeOwner = null;
-		this.console = Entity.findConsole(IGraphEditorConstants.DISJ_CONSOLE);
-		this.out = this.console.newMessageStream();
-		System.setOut(new PrintStream(this.out));
-		System.setErr(new PrintStream(this.out));
 	}
 
+	
 	/**
 	 * Assign processor and the corresponding node to this entity
 	 * 
@@ -65,8 +55,10 @@ public abstract class Entity implements IMessagePassingModel {
 	 * @param owner
 	 */
 	void initEntity(MsgPassingProcessor processor, Node owner, Map<Integer, String> states) {
-		if (this.processor == null)
+		if (this.processor == null){
 			this.processor = processor;
+			this.systemOut = this.processor.getSystemOut();
+		}
 
 		if (this.nodeOwner == null)
 			this.nodeOwner = owner;
@@ -101,15 +93,9 @@ public abstract class Entity implements IMessagePassingModel {
 			if (this.nodeOwner == null)
 				throw new DisJException(IConstants.ERROR_7);
 
-		} catch (DisJException e) {
-			e.printStackTrace();
-			this.printToConsole(e);
-
-		} catch (RuntimeException e) {
-			e.printStackTrace();
-			this.printToConsole(e);
+		}catch (Exception e) {
+			this.systemOut.println(e.toString());
 		}
-
 		return this.nodeOwner.getCurState();
 	}
 
@@ -123,20 +109,15 @@ public abstract class Entity implements IMessagePassingModel {
 			if (this.nodeOwner == null)
 				throw new DisJException(IConstants.ERROR_7);
 
-		} catch (DisJException e) {
-			e.printStackTrace();
-			this.printToConsole(e);
-
-		} catch (RuntimeException e) {
-			e.printStackTrace();
-			this.printToConsole(e);
+		} catch (Exception e) {
+			this.systemOut.println(e.toString());
 		}
 		return this.nodeOwner.getUserInput();
 	}
 	
 	/**
 	 * Get all local in and out port labels of this entity. If a port of
-	 * bi-directoin link it will consider as one port.
+	 * bi-directional link it will consider as one port.
 	 * 
 	 * @return A list of String of all local port labels
 	 */
@@ -188,20 +169,11 @@ public abstract class Entity implements IMessagePassingModel {
 			//		+ IGraphEditorConstants.STATE_CHANGE + state);
 			
 
-		} catch (DisJException e) {
-			e.printStackTrace();
-			this.printToConsole(e);
-
-		} catch (RuntimeException e) {
-			e.printStackTrace();
-			this.printToConsole(e);
+		} catch (Exception e) {
+			this.systemOut.println(e.toString());
 		}
 	}
-
-	private String getNodeId() {
-		return this.nodeOwner.getNodeId();
-	}
-
+	
 	// FIXME what is lvc ?????
 	public final void setLinkVisibility(String port, boolean visible) {
 //		try {
@@ -233,8 +205,9 @@ public abstract class Entity implements IMessagePassingModel {
 			} else {
 				return returnValue = name1;
 			}
-		} catch (DisJException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			this.systemOut.println(e.toString());
 		}
 		return returnValue;
 	}
@@ -256,7 +229,7 @@ public abstract class Entity implements IMessagePassingModel {
 			}
 		}catch (Exception e) {
 			e.printStackTrace();
-			this.out.println(e.toString());
+			this.systemOut.println(e.toString());
 			//this.printToConsole(e);
 		}
 	}
@@ -273,13 +246,10 @@ public abstract class Entity implements IMessagePassingModel {
 			Object[] msg = new Object[] { label, new Boolean(state) };
 			this.processor.internalNotify(this.nodeOwner.getNodeId(),
 					new Message(IConstants.MESSAGE_SET_BLOCK_MSG, msg));
-		} catch (DisJException e) {
+			
+		}  catch (Exception e) {
 			e.printStackTrace();
-			this.printToConsole(e);
-
-		} catch (RuntimeException e) {
-			e.printStackTrace();
-			this.printToConsole(e);
+			this.systemOut.println(e.toString());
 		}
 	}
 
@@ -493,7 +463,7 @@ public abstract class Entity implements IMessagePassingModel {
 		} catch (Exception e) {
 			e.printStackTrace();
 			//this.printToConsole(e);
-			out.println(e.toString());
+			systemOut.println(e.toString());
 		}
 	}
 
@@ -725,12 +695,9 @@ public abstract class Entity implements IMessagePassingModel {
 				this.processor.processReqeust(this.nodeOwner.getNodeId(), recv,
 						new Message(msgLabel, message));
 			}
-		} catch (DisJException e) {
+		}  catch (Exception e) {
 			e.printStackTrace();
-			this.printToConsole(e);
-		} catch (RuntimeException e) {
-			e.printStackTrace();
-			this.printToConsole(e);
+			this.systemOut.println(e.toString());
 		}
 
 	}
@@ -898,12 +865,9 @@ public abstract class Entity implements IMessagePassingModel {
 			this.processor.processReqeust(this.nodeOwner.getNodeId(), recv,
 					new Message(msgLabel, message));
 
-		} catch (DisJException e) {
+		}  catch (Exception e) {
 			e.printStackTrace();
-			this.printToConsole(e);
-		} catch (RuntimeException e) {
-			e.printStackTrace();
-			this.printToConsole(e);
+			this.systemOut.println(e.toString());
 		}
 	}
 
@@ -929,7 +893,7 @@ public abstract class Entity implements IMessagePassingModel {
 	 * Send a message to all out going ports, except a port that it just
 	 * received.
 	 * 
-	 * NOTE: This will work only for Bidirectional link. For Uni-directional
+	 * NOTE: This will work only for Bidirectional link. For uni-directional
 	 * link, it will work only if a label of incoming port is the same as out
 	 * going port label. Otherwise, all out going ports will be sent.
 	 * 
@@ -944,7 +908,7 @@ public abstract class Entity implements IMessagePassingModel {
 	 * Send a message to all out going ports, except a port that it just
 	 * received.
 	 * 
-	 * NOTE: This will work only for Bidirectional link. For Uni-directional
+	 * NOTE: This will work only for Bidirectional link. For uni-directional
 	 * link, it will work only if a label of incoming port is the same as out
 	 * going port label. Otherwise, all out going ports will be sent.
 	 * 
@@ -956,11 +920,11 @@ public abstract class Entity implements IMessagePassingModel {
 	}
 
 	/**
-	 * Send a message to all out going ports, execept a port that it just
+	 * Send a message to all out going ports, except a port that it just
 	 * received.
 	 * 
-	 * NOTE: This will work only for Bidirectional link. For Uni-directional
-	 * link, it will work only if a lable of incomming port is the same as out
+	 * NOTE: This will work only for Bidirectional link. For uni-directional
+	 * link, it will work only if a label of incoming port is the same as out
 	 * going port label. Otherwise, all out going ports will be sent.
 	 * 
 	 * @param message
@@ -971,11 +935,11 @@ public abstract class Entity implements IMessagePassingModel {
 	}
 
 	/**
-	 * Send a message to all out going ports execept a port that it received
+	 * Send a message to all out going ports except a port that it received
 	 * latest.
 	 * 
-	 * NOTE: This will work only for Bidirectional link. For Uni-directional
-	 * link, it will work only if a lable of incomming port is the same as out
+	 * NOTE: This will work only for Bidirectional link. For uni-directional
+	 * link, it will work only if a label of incoming port is the same as out
 	 * going port label. Otherwise, all out going ports will be sent.
 	 * 
 	 * @param message
@@ -986,11 +950,11 @@ public abstract class Entity implements IMessagePassingModel {
 	}
 
 	/**
-	 * Send a message to all out going ports, execept a port that it just
+	 * Send a message to all out going ports, except a port that it just
 	 * received.
 	 * 
-	 * NOTE: This will work only for Bidirectional link. For Uni-directional
-	 * link, it will work only if a lable of incomming port is the same as out
+	 * NOTE: This will work only for Bidirectional link. For uni-directional
+	 * link, it will work only if a label of incoming port is the same as out
 	 * going port label. Otherwise, all out going ports will be sent.
 	 * 
 	 * @param message
@@ -1001,11 +965,11 @@ public abstract class Entity implements IMessagePassingModel {
 	}
 
 	/**
-	 * Send a message to all out going ports, execept a port that it just
+	 * Send a message to all out going ports, except a port that it just
 	 * received.
 	 * 
-	 * NOTE: This will work only for Bidirectional link. For Uni-directional
-	 * link, it will work only if a lable of incomming port is the same as out
+	 * NOTE: This will work only for Bidirectional link. For uni-directional
+	 * link, it will work only if a label of incoming port is the same as out
 	 * going port label. Otherwise, all out going ports will be sent.
 	 * 
 	 * @param message
@@ -1016,11 +980,11 @@ public abstract class Entity implements IMessagePassingModel {
 	}
 
 	/**
-	 * Send a message to all out going ports, execept a port that it just
+	 * Send a message to all out going ports, except a port that it just
 	 * received.
 	 * 
-	 * NOTE: This will work only for Bidirectional link. For Uni-directional
-	 * link, it will work only if a lable of incomming port is the same as out
+	 * NOTE: This will work only for Bidirectional link. For uni-directional
+	 * link, it will work only if a label of incoming port is the same as out
 	 * going port label. Otherwise, all out going ports will be sent.
 	 * 
 	 * @param message
@@ -1031,11 +995,11 @@ public abstract class Entity implements IMessagePassingModel {
 	}
 
 	/**
-	 * Send a message to all out going ports, execept a port that it just
+	 * Send a message to all out going ports, except a port that it just
 	 * received.
 	 * 
-	 * NOTE: This will work only for Bidirectional link. For Uni-directional
-	 * link, it will work only if a lable of incomming port is the same as out
+	 * NOTE: This will work only for Bidirectional link. For uni-directional
+	 * link, it will work only if a label of incoming port is the same as out
 	 * going port label. Otherwise, all out going ports will be sent.
 	 * 
 	 * @param message
@@ -1046,12 +1010,12 @@ public abstract class Entity implements IMessagePassingModel {
 	}
 
 	/**
-	 * Send a message with a given message label to all out going ports execept
+	 * Send a message with a given message label to all out going ports except
 	 * a port that it just received.
 	 * 
 	 * 
-	 * NOTE: This will work only for Bidirectional link. For Uni-directional
-	 * link, it will work only if a lable of incomming port is the same as out
+	 * NOTE: This will work only for Bidirectional link. For uni-directional
+	 * link, it will work only if a label of incoming port is the same as out
 	 * going port label. Otherwise, all out going ports will be sent.
 	 * 
 	 * @param msgLabel
@@ -1064,12 +1028,12 @@ public abstract class Entity implements IMessagePassingModel {
 	}
 
 	/**
-	 * Send a message with a given message label to all out going ports execept
+	 * Send a message with a given message label to all out going ports except
 	 * a port that it just received.
 	 * 
 	 * 
-	 * NOTE: This will work only for Bidirectional link. For Uni-directional
-	 * link, it will work only if a lable of incomming port is the same as out
+	 * NOTE: This will work only for Bidirectional link. For uni-directional
+	 * link, it will work only if a label of incoming port is the same as out
 	 * going port label. Otherwise, all out going ports will be sent.
 	 * 
 	 * @param msgLabel
@@ -1082,12 +1046,12 @@ public abstract class Entity implements IMessagePassingModel {
 	}
 
 	/**
-	 * Send a message with a given message label to all out going ports execept
+	 * Send a message with a given message label to all out going ports except
 	 * a port that it just received.
 	 * 
 	 * 
-	 * NOTE: This will work only for Bidirectional link. For Uni-directional
-	 * link, it will work only if a lable of incomming port is the same as out
+	 * NOTE: This will work only for Bidirectional link. For uni-directional
+	 * link, it will work only if a label of incoming port is the same as out
 	 * going port label. Otherwise, all out going ports will be sent.
 	 * 
 	 * @param msgLabel
@@ -1100,12 +1064,12 @@ public abstract class Entity implements IMessagePassingModel {
 	}
 
 	/**
-	 * Send a message with a given message label to all out going ports execept
+	 * Send a message with a given message label to all out going ports except
 	 * a port that it just received.
 	 * 
 	 * 
-	 * NOTE: This will work only for Bidirectional link. For Uni-directional
-	 * link, it will work only if a lable of incomming port is the same as out
+	 * NOTE: This will work only for Bidirectional link. For uni-directional
+	 * link, it will work only if a label of incoming port is the same as out
 	 * going port label. Otherwise, all out going ports will be sent.
 	 * 
 	 * @param msgLabel
@@ -1118,12 +1082,12 @@ public abstract class Entity implements IMessagePassingModel {
 	}
 
 	/**
-	 * Send a message with a given message label to all out going ports execept
+	 * Send a message with a given message label to all out going ports except
 	 * a port that it received latest.
 	 * 
 	 * 
-	 * NOTE: This will work only for Bidirectional link. For Uni-directional
-	 * link, it will work only if a lable of incomming port is the same as out
+	 * NOTE: This will work only for Bidirectional link. For uni-directional
+	 * link, it will work only if a label of incoming port is the same as out
 	 * going port label. Otherwise, all out going ports will be sent.
 	 * 
 	 * @param msgLabel
@@ -1136,12 +1100,12 @@ public abstract class Entity implements IMessagePassingModel {
 	}
 
 	/**
-	 * Send a message with a given message label to all out going ports, execept
+	 * Send a message with a given message label to all out going ports, except
 	 * a port that it just received.
 	 * 
 	 * 
-	 * NOTE: This will work only for Bidirectional link. For Uni-directional
-	 * link, it will work only if a lable of incomming port is the same as out
+	 * NOTE: This will work only for Bidirectional link. For uni-directional
+	 * link, it will work only if a label of incoming port is the same as out
 	 * going port label. Otherwise, all out going ports will be sent.
 	 * 
 	 * @param msgLabel
@@ -1180,52 +1144,28 @@ public abstract class Entity implements IMessagePassingModel {
 						new Message(msgLabel, message));
 			}
 
-		} catch (DisJException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-			this.printToConsole(e);
-		} catch (RuntimeException e) {
-			e.printStackTrace();
-			this.printToConsole(e);
+			this.systemOut.println(e.toString());
 		}
-	}
-
-	public static MessageConsole findConsole(String name) {
-		ConsolePlugin plugin = ConsolePlugin.getDefault();
-		IConsoleManager conMgr = plugin.getConsoleManager();
-		IConsole[] existing = conMgr.getConsoles();
-		for (int i = 0; i < existing.length; i++){
-			if (name.equals(existing[i].getName())){
-				return (MessageConsole) existing[i];
-			}
-		}
-		// no console found, so create a new one
-		MessageConsole myConsole = new MessageConsole(name, null);
-		conMgr.addConsoles(new IConsole[] { myConsole });
-		return myConsole;
 	}
 
 	/**
 	 * Print out a text String into an Eclipse Console
+	 * and logging to file system
 	 * 
-	 * Note: This work only with eclipse plugin
+	 * Note: This work only with eclipse plug-in
 	 * 
 	 * @param text
 	 */
 	public void printToConsole(Object text) {
 		if (text != null) {
-			this.out.println(text.toString());
+			this.systemOut.println(text.toString());
 			this.processor.appendConsoleOutput(text.toString());
 		} else {
-			this.out.println("null");
+			this.systemOut.println("null");
+			this.processor.appendConsoleOutput("null");
 		}
-	}
-
-	protected MessageConsole getConsole() {
-		return this.console;
-	}
-
-	protected MessageConsoleStream getConsoleStream() {
-		return this.out;
 	}
 
 	/**

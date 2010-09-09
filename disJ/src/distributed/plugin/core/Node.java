@@ -24,6 +24,7 @@ import java.util.Map;
 
 import distributed.plugin.runtime.Event;
 import distributed.plugin.runtime.IDistributedModel;
+import distributed.plugin.runtime.engine.Entity;
 
 /**
  * @author Me
@@ -62,7 +63,7 @@ public class Node implements Serializable {
 	/**
 	 * specify as a starter for init node
 	 */
-	private boolean isStartHost;
+	private boolean isAlive;
 
 	private boolean breakpoint;
 
@@ -102,7 +103,7 @@ public class Node implements Serializable {
 	 * keeping track of user internal data that stay at this node
 	 * 
 	 */
-	transient private List<IDistributedModel> entity;
+	transient private IDistributedModel entity;
 
 	/**
 	 * hold the events if initializer host has other actions before it has been
@@ -168,11 +169,11 @@ public class Node implements Serializable {
 		this.breakpoint = false;
 		this.numInitPerHost = numInit;		
 		this.initExec = false;
-		this.isStartHost = isStartHost;
+		this.isAlive = isStartHost;
 		this.numMsgRecv = 0;
 		this.numMsgSend = 0;
 		this.latestRecvPort = null;
-		this.entity = new ArrayList<IDistributedModel>();
+		this.entity = null;
 		this.userInput = "";
 		this.log = new NodeLog(graphId);
 		this.edges = new HashMap<String, Edge>();
@@ -467,11 +468,11 @@ public class Node implements Serializable {
 	 * @param entity A user algorithm object
 	 * @throws DisJException
 	 */
-	public void addEntity(IDistributedModel entity) throws DisJException {
+	public void addEntity(Entity entity) throws DisJException {
 		if (entity == null)
 			throw new DisJException(IConstants.ERROR_22);
 
-		this.entity.add(entity);
+		this.entity = entity;
 	}
 
 	/**
@@ -495,7 +496,7 @@ public class Node implements Serializable {
 	public String toString() {
 		return ("\n\nNode: " + this.name + "\nState: " + this.curState
 				+ "\nInit: " + this.hasInitializer() + "\nStarter: "
-				+ this.isStartHost);
+				+ this.isAlive);
 	}
 
 	/**
@@ -515,8 +516,8 @@ public class Node implements Serializable {
 	/**
 	 * @return Returns the entity.
 	 */
-	public List<IDistributedModel> getAllEntities() {
-		return entity;
+	public Entity getEntity() {
+		return (Entity) this.entity;
 	}
 
 	/**
@@ -631,11 +632,11 @@ public class Node implements Serializable {
 	}
 
 	/**
-	 * Check whether this node is a host
+	 * Check whether this node is alive
 	 * @return 
 	 */
-	public boolean isStartHost() {
-		return isStartHost;
+	public boolean isAlive() {
+		return isAlive;
 	}
 
 	/**
@@ -702,12 +703,12 @@ public class Node implements Serializable {
 	}
 
 	/**
-	 * Set this node to be a host
-	 * @param isStarter
+	 * Set this node to be alive (not a failure node)
+	 * @param alive
 	 *            
 	 */
-	public void setStarHost(boolean isStarter) {
-		this.isStartHost = isStarter;
+	public void setAlive(boolean alive) {
+		this.isAlive = alive;
 	}
 
 	/**
@@ -735,18 +736,11 @@ public class Node implements Serializable {
 	}
 
 	/**
-	 * Clear all entities that stay at this node
-	 */
-	public void clearEntities() {
-		this.entity.clear();
-	}
-	
-	/**
 	 * remove a given entity from this node
 	 * @param entity
 	 */
-	public boolean removeEntity(IDistributedModel entity){
-		return this.entity.remove(entity);
+	public void removeEntity(){
+		this.entity = null;
 	}
 
 	public Map<String, Boolean> getBlockPort() {
