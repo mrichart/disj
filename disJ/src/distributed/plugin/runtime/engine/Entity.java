@@ -1161,10 +1161,9 @@ public abstract class Entity implements IMessagePassingModel {
 	public void printToConsole(Object text) {
 		if (text != null) {
 			this.systemOut.println(text.toString());
-			this.processor.appendConsoleOutput(text.toString());
+			
 		} else {
 			this.systemOut.println("null");
-			this.processor.appendConsoleOutput("null");
 		}
 	}
 

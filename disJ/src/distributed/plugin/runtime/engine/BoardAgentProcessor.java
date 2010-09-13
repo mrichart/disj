@@ -219,7 +219,7 @@ public class BoardAgentProcessor implements IProcesses {
 				int eventId;
 				for(int j = 0; j < list.size(); j++){
 					Agent agent = list.get(j);					
-					eventId = timeGen.getLastestId(graph.getId() + "");
+					eventId = timeGen.getNextNewId(graph.getId() + "");
 					msg = new Message("Initialized", new Integer(execTime));
 					
 					// it is not a starter, set the starting time to random
@@ -305,7 +305,7 @@ public class BoardAgentProcessor implements IProcesses {
 			
 			int execTime = link.getDelayTime(sNode, this.timeGen
 					.getCurrentTime(graph.getId() + ""));
-			int eventId = this.timeGen.getLastestId(graph.getId() + "");
+			int eventId = this.timeGen.getNextNewId(graph.getId() + "");
 			
 			IMessage msg = new Message(IConstants.MESSAGE_EVENT_ARRIVE_AT, link.getEdgeId());
 			 
@@ -321,7 +321,7 @@ public class BoardAgentProcessor implements IProcesses {
 
 	private void processAlarmClock(String nodeId, String agentId, int delay){
 		try{
-			int eventId = this.timeGen.getLastestId(graph.getId() + "");
+			int eventId = this.timeGen.getNextNewId(graph.getId() + "");
 			int execTime = this.timeGen.getCurrentTime(graph.getId() + "")
 					+ delay;
 	

@@ -87,13 +87,13 @@ public class TimeGenerator {
 	}
 
 	/**
-	 * Get a next and new unique id
+	 * Get a next and new unique ID w.r.t a given graph
 	 * 
-	 * @param graphId
+	 * @param graphId A given graph ID
 	 * @return @throws
 	 *         DistJException
 	 */
-	public int getLastestId(String graphId) throws DisJException {
+	public int getNextNewId(String graphId) throws DisJException {
 		if (!this.lastestId.containsKey(graphId))
 			throw new DisJException(IConstants.ERROR_5, graphId);
 

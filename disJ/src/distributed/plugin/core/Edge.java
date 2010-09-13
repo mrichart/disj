@@ -51,8 +51,6 @@ public class Edge implements Serializable {
 
 	private short direction;
 
-	private EdgeLog log;
-
 	transient private Node start;
 
 	transient private Node end;
@@ -109,7 +107,6 @@ public class Edge implements Serializable {
 
 		this.start = start;
 		this.end = end;
-		this.log = new EdgeLog(graphId);
 	}
 
 	/**
@@ -266,7 +263,7 @@ public class Edge implements Serializable {
 	 * @param sender
 	 */
 	public void logMsgPassed(String msgLabel, String sender) {
-		this.log.logMsgPassed(msgLabel, sender);
+		//this.log.logMsgPassed(msgLabel, sender);
 	}
 
 	/**
@@ -461,11 +458,7 @@ public class Edge implements Serializable {
      */
     private void readObject(ObjectInputStream os) throws IOException, ClassNotFoundException  {
     	// rebuild this object
-    	os.defaultReadObject();
-
-     	// clean up log 
-     	this.log.clear();
-     	
+    	os.defaultReadObject();  	
     }
 
 }

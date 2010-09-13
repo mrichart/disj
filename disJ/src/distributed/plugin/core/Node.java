@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.runtime.Event;
 import distributed.plugin.runtime.IDistributedModel;
 import distributed.plugin.runtime.engine.Entity;
@@ -73,11 +74,6 @@ public class Node implements Serializable {
 	private boolean initExec;
 
 	/**
-	 * re-ref after assigned
-	 */
-	private NodeLog log;
-
-	/**
 	 * Edges that connected to node{port label, edge}
 	 */
 	private Map<String, Edge> edges;
@@ -92,6 +88,11 @@ public class Node implements Serializable {
 	 * {portA, BI_DIRECTION} {portB, OUT_DIRECTION} {portC, IN_DIRECTION}
 	 */
 	private Map<String, Short> ports;
+	
+	/**
+	 * Logger that will log the node acitivities
+	 */
+	transient private Logger log;
 
 	/**
 	 * a list of msg queue for blocking message {localport label, list of
@@ -116,6 +117,11 @@ public class Node implements Serializable {
 	 * A mapping table of every possible state name and value defined by user
 	 */
 	transient private Map<Integer, String> stateNames;
+	
+	/*
+	 * Tracking every state that node has been through in orderly
+	 */
+	transient private List<String> pastStates;
 	
 	transient private List<Agent> curAgents;
 	
@@ -174,14 +180,15 @@ public class Node implements Serializable {
 		this.numMsgSend = 0;
 		this.latestRecvPort = null;
 		this.entity = null;
+		this.log = null;
 		this.userInput = "";
-		this.log = new NodeLog(graphId);
 		this.edges = new HashMap<String, Edge>();
-		this.ports = new HashMap<String, Short>(4);
-		this.blockMsg = new HashMap<String, List<Event>>(4);
-		this.blockPort = new HashMap<String, Boolean>(4);
-		this.holdEvents = new ArrayList<Event>(4);
+		this.ports = new HashMap<String, Short>();
+		this.blockMsg = new HashMap<String, List<Event>>();
+		this.blockPort = new HashMap<String, Boolean>();
+		this.holdEvents = new ArrayList<Event>();
 		this.stateNames = new HashMap<Integer, String>();
+		this.pastStates = new ArrayList<String>();
 		this.curAgents = new ArrayList<Agent>();
 		this.whiteboard = new ArrayList<String>();
 
@@ -226,7 +233,7 @@ public class Node implements Serializable {
 		if (this.stateNames.containsKey(state)) {
 			return (String) this.stateNames.get(state);
 		} else {
-			return IConstants.STATE_NOT_FOUND;
+			return IConstants.STATE_NOT_FOUND + " " + state;
 		}
 	}
 	
@@ -372,7 +379,6 @@ public class Node implements Serializable {
 		Short portType = this.ports.get(old);
 		this.ports.remove(old);
 		this.ports.put(port, portType);
-
 	}
 
 	/**
@@ -426,24 +432,6 @@ public class Node implements Serializable {
 	}
 
 	/**
-	 * Log a message that this node received
-	 * 
-	 * @param log
-	 */
-	public void logMsgRecv(String log) {
-		this.log.logMsgRecv(log);
-	}
-
-	/**
-	 * Log messages that sent by this node
-	 * 
-	 * @param log
-	 */
-	public void logMsgSent(String log) {
-		this.log.logMsgSent(log);
-	}
-
-	/**
 	 * Get all event that has been blocked on a given port
 	 * 
 	 * @param portLabel
@@ -475,6 +463,15 @@ public class Node implements Serializable {
 		this.entity = entity;
 	}
 
+	/**
+	 * Set logger
+	 * 
+	 * @param log
+	 */
+	public void setLogger(Logger log){
+		this.log = log;
+	}
+	
 	/**
 	 * Increment number of message receive and log the receiver
 	 */
@@ -564,8 +561,7 @@ public class Node implements Serializable {
 	 * @param state
 	 */
 	public void initStartState(int state) {
-		this.curState = state;
-		this.log.logState(this.getStateName(this.curState));
+		this.setCurState(state);		
 	}
 
 	/**
@@ -576,18 +572,19 @@ public class Node implements Serializable {
 	 */
 	public void setCurState(int state) {
 		this.curState = state;
+		this.pastStates.add(this.getStateName(state));
+		
 		this.firePropertyChange(IConstants.PROPERTY_CHANGE_NODE_STATE, null,
 				new Integer(this.curState));
-		try {
-			String newState = this.getStateName(this.curState);
-			this.log.logState(newState);
-		} catch (Exception e) {
-			// do nothing
-		}
+
+		// it is not a reset action
+		if(this.curState != -1){
+			this.log.logNode(logTag.NODE_STATE, this.nodeId, this.getStateName(this.curState));	
+		}			
 	}
 
-	public void resetState(int state) {
-		this.curState = state;
+	public void resetState() {		
+		this.setCurState(-1);
 	}
 
 	/**
@@ -598,11 +595,15 @@ public class Node implements Serializable {
 	}
 
 	public List<String> getStateList() {
-		return this.log.getStates();
+		return this.pastStates;
 	}
 
-	public void setStateList(List<String> list) {
-		this.log.setStates(list);
+	public void resetStateList() {
+		if(this.pastStates != null){
+			this.pastStates.clear();
+		}else{
+			this.pastStates = new ArrayList<String>();
+		}
 	}
 
 	/**
@@ -805,11 +806,8 @@ public class Node implements Serializable {
     	 os.defaultReadObject();
     	 this.blockMsg = new HashMap<String, List<Event>>();
     	 this.holdEvents = new ArrayList<Event>();
-    	 this.stateNames = new HashMap<Integer, String>();
-    	
-    	 // clean up log
-    	 this.log.clear();
-    	 	
+    	 this.stateNames = new HashMap<Integer, String>();	 
+    	 this.pastStates = new ArrayList<String>();
     }
 
 

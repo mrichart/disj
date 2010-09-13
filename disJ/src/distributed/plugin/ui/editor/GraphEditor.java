@@ -106,7 +106,7 @@ import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 
 import distributed.plugin.random.IRandom;
-import distributed.plugin.runtime.engine.Entity;
+import distributed.plugin.runtime.IDistributedModel;
 import distributed.plugin.runtime.engine.SimulatorEngine;
 import distributed.plugin.ui.GraphEditorPlugin;
 import distributed.plugin.ui.IGraphEditorConstants;
@@ -138,7 +138,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 	private SimulatorEngine engine;
 
-	transient private Class<Entity> client;
+	transient private Class<IDistributedModel> client;
 
 	transient private Class<IRandom> clientRandom;
 
@@ -424,7 +424,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	 * 
 	 * @return
 	 */
-	public Class<Entity> getClientObject() {
+	public Class<IDistributedModel> getClientObject() {
 		return this.client;
 	}
 
@@ -437,7 +437,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	 * 
 	 * @param client
 	 */
-	public void setClientObject(Class<Entity> client) {
+	public void setClientObject(Class<IDistributedModel> client) {
 		this.client = client;
 	}
 
@@ -906,7 +906,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 		this.addAction(new CopyTemplateAction(this));
 
-		procAct = new ProcessActions(this, IGraphEditorConstants.LOAD_ID);
+		procAct = new ProcessActions(this, IGraphEditorConstants.LOAD_ENTITY_ID);
 		this.addAction(procAct);
 
 		procAct = new ProcessActions(this, IGraphEditorConstants.LOAD_RANDOM_ID);

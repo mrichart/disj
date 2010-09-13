@@ -6,6 +6,8 @@ import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
 import distributed.plugin.core.Node;
 import distributed.plugin.runtime.Graph;
+import distributed.plugin.runtime.IDistributedModel;
+import distributed.plugin.runtime.engine.Entity;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.editor.GraphEditor;
 import distributed.plugin.ui.models.GraphElement;
@@ -24,7 +26,7 @@ public class ProtocolExecutionController implements IController {
 	}
 
 	public void executeRun() {
-		System.out.println("--- executeRun/Resume");
+		System.out.println("@ProtocolExecuteController()--- executeRun/Resume");
 
 		// first run
 		if (procAct.getEngine().isStarted() == false) {
@@ -40,7 +42,7 @@ public class ProtocolExecutionController implements IController {
 			for (NodeElement n : nList) {
 				try {
 					node = n.getNode();
-					node.resetState(node.getCurState());
+					//node.resetState((node.getCurState());
 					graph.addNode(n.getNodeId(), node);
 				} catch (DisJException e) {}
 			}
@@ -64,8 +66,11 @@ public class ProtocolExecutionController implements IController {
 			
 			// FIXME why we need this copy???
 			editor.getGraphElement().copyGraphElement();
-			procAct.getEngine().executeMsgPassing(graph, editor.getClientObject(),
-					editor.getClientRandomObject());
+			Class client = editor.getClientObject();			
+			if(Entity.class.isAssignableFrom(client)){
+				procAct.getEngine().executeMsgPassing(graph, client,
+						editor.getClientRandomObject());
+			}
 		} else {
 			try {
 				if ((!procAct.getEngine().isRunning()) && procAct.getEngine().isStarted()
@@ -74,8 +79,8 @@ public class ProtocolExecutionController implements IController {
 				} else {
 					procAct.missUseActionMsg("Engine is not suspened or stoped.");
 				}
-			} catch (DisJException e) {
-				System.err.println(e);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 
@@ -97,7 +102,7 @@ public class ProtocolExecutionController implements IController {
 		if (!procAct.validateAction(IGraphEditorConstants.STOP_ID))
 			return;
 
-		System.out.println("--- executeStop");
+		System.out.println("@ProtocolExecuteController()--- executeStop");
 		try {
 			if (procAct.getEngine().isStarted())
 				procAct.getEngine().terminate();
@@ -109,9 +114,8 @@ public class ProtocolExecutionController implements IController {
 				procAct.missUseActionMsg("Engine is not running");
 			}
 
-		} catch (DisJException e) {
-			// e.printStackTrace();
-			// System.err.println(e);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 	}
@@ -121,7 +125,7 @@ public class ProtocolExecutionController implements IController {
 		if (!procAct.validateAction(IGraphEditorConstants.SUSPEND_ID))
 			return;
 
-		System.out.println("--- executeSuspend");
+		System.out.println("@ProtocolExecuteController()--- executeSuspend");
 		try {
 			// if(!this.getEngine().isRunning())
 			// this.missUseActionMsg("Engine is not running");
@@ -131,9 +135,8 @@ public class ProtocolExecutionController implements IController {
 			else {
 				procAct.missUseActionMsg("Engine already suspended");
 			}
-		} catch (DisJException e) {
-			e.printStackTrace();
-			// System.err.println(e);
+		} catch (Exception e) {
+			e.printStackTrace();			
 		}
 
 	}

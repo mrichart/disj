@@ -94,7 +94,7 @@ public class SimulatorEngine {
         try {
 
            this.origin = graph;
-            Runnable proc = new MsgPassingProcessor(ge, graph, client, clientRandom, this.getOutputLocation());
+            Runnable proc = new MsgPassingProcessor(graph, client, clientRandom, this.getOutputLocation());
             this.engine.put(origin.getId(), proc);
 
             // FIXME risk of non atomic for next 2 lines

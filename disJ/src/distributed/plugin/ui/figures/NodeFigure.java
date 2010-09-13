@@ -13,8 +13,6 @@ package distributed.plugin.ui.figures;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.RoundedRectangle;
 import org.eclipse.draw2d.ToolbarLayout;
-import org.eclipse.draw2d.geometry.Dimension;
-import org.eclipse.swt.graphics.Color;
 
 import distributed.plugin.ui.IGraphEditorConstants;
 
@@ -24,9 +22,7 @@ import distributed.plugin.ui.IGraphEditorConstants;
  * TODO To change the template for this generated type comment go to Window -
  * Preferences - Java - Code Style - Code Templates
  */
-public class NodeFigure extends RoundedRectangle {
-
-    private static Color bgcolor = new Color(null, 100, 150, 50);
+public class NodeFigure extends RoundedRectangle {    
 
     /** The figure's anchor. */
     // private ChopboxAnchor anchor;
@@ -44,7 +40,7 @@ public class NodeFigure extends RoundedRectangle {
         ToolbarLayout layout = new ToolbarLayout();
         setLayoutManager(layout);
         // setBorder(new RaisedBorder());
-        setBackgroundColor(bgcolor);
+        setBackgroundColor(IGraphEditorConstants.DEFAULT_NODE_COLOR);
         setOpaque(true);
         setSize(IGraphEditorConstants.NODE_SIZE, IGraphEditorConstants.NODE_SIZE);
     }

@@ -120,15 +120,13 @@ public class ProcessActions extends WorkbenchPartAction {
 		
 		if (editor.getController() == null){
 			editor.setController(new ProtocolExecutionController(this, editor));
-		}
-		
+		}		
 		
 		if (this.execType.equals(IGraphEditorConstants.RESUME_ID)) {
 			this.executeRun();
 			
-		} else if (this.execType.equals(IGraphEditorConstants.LOAD_ID)) {
-			this.executeLoad();
-			//editor.setController(new ProtocolExecutionController(this, editor));
+		} else if (this.execType.equals(IGraphEditorConstants.LOAD_ENTITY_ID)) {
+			this.executeLoadEntity();
 			
 		} else if (this.execType.equals(IGraphEditorConstants.LOAD_RANDOM_ID)) {
 			this.executeRandomLoad();
@@ -224,12 +222,9 @@ public class ProcessActions extends WorkbenchPartAction {
 	/*
 	 * Load client's algorithm into the engine action
 	 */
-	private void executeLoad(String protocol) {
-
-		String className = protocol;
+	private void loadEntity(String protocol) {
 
 		GraphEditor editor = (GraphEditor) getWorkbenchPart();		
-
 		if (loader == null){
 			this.loader = this.getClassLoader(this.getClientProject());
 			if(loader == null){
@@ -238,19 +233,21 @@ public class ProcessActions extends WorkbenchPartAction {
 		}
 		// open Dialog
 		Shell parent = getWorkbenchPart().getSite().getShell();
-
 		try {
 			// kill current running or pending process if exist
 			this.getEngine().terminate();
-
 		} catch (DisJException ignore) {
 		}
 
 		try {
-			Class<Entity> client = this.loadClientClass(parent, className);
+			// load class
+			Class client = this.loader.loadClass(protocol);
 
-			if (client == null)
+			if (!Entity.class.isAssignableFrom(client)) {
+				MessageDialog.openError(parent, "Cannot load Client Class Error",
+						"Class must extends Entity");
 				return;
+			}				
 
 			// load client's class into editor
 			editor.setClientObject(client);
@@ -269,7 +266,7 @@ public class ProcessActions extends WorkbenchPartAction {
 
 	}
 
-	private void executeLoad() {
+	private void executeLoadEntity() {
 		System.out.println("--- executeLoad");
 
 		Shell parent = getWorkbenchPart().getSite().getShell();
@@ -287,8 +284,9 @@ public class ProcessActions extends WorkbenchPartAction {
 		// user pressed OK
 		if (classNameDialog.getReturnCode() == 0) {
 			className = classNameDialog.getValue();
-			executeLoad(className);
+			this.loadEntity(className);
 			editor.getGraphElement().getGraph().setProtocol(className);
+			
 		} else {
 			// user press cancel
 			return;
@@ -362,7 +360,6 @@ public class ProcessActions extends WorkbenchPartAction {
 	private ClassLoader getClassLoader(IJavaProject javaProject) {
 		ClassLoader loader = null;
 		try {
-			//System.out.println("[ProcessActions].getClassLoader()");
 			IClasspathEntry[] entries = javaProject.getRawClasspath();
 			List<URL> urls = new ArrayList<URL>(entries.length);
 			for (int i = 0; i < entries.length; i++) {
@@ -395,9 +392,7 @@ public class ProcessActions extends WorkbenchPartAction {
 					// client source code
 				}
 			}
-			//System.out.println("[ProcessActions].getClassLoader()" + urls);
-
-			// set the output file location w.r.t 1st urser src code location
+			// set the output file location w.r.t 1st user src code location
 			this.getEngine().setOutputLocation((URL) urls.get(0));
 			
 			// create class loader
@@ -414,31 +409,14 @@ public class ProcessActions extends WorkbenchPartAction {
 		return loader;
 	}
 
-	/**
-	 * @param parent
-	 * @param className
-	 * @return
-	 * @throws ClassNotFoundException
-	 */
-	private Class<Entity> loadClientClass(Shell parent,
-			String className) throws ClassNotFoundException {
-		Class client = this.loader.loadClass(className);
-
-		if (!Entity.class.isAssignableFrom(client)) {
-			MessageDialog.openError(parent, "Load Client Class Error",
-					"Class must extends Entity");
-			client = null;
-		}
-		return client;
-	}
-
 	private Class<IRandom> loadClientRandomClass(Shell parent,
 			String className) throws ClassNotFoundException {
+		
+		// load class
 		Class clientRandom = this.loader.loadClass(className);
-
 		if (!IRandom.class.isAssignableFrom(clientRandom)) {
 			MessageDialog.openError(parent,
-					"Load Random number generator Class Error",
+					"Cannot load user random generator Class ",
 					"Class must extends IRandom");
 			clientRandom = null;
 		}
@@ -447,13 +425,13 @@ public class ProcessActions extends WorkbenchPartAction {
 
 	private void executeStop() {
 		GraphEditor editor = (GraphEditor) this.getWorkbenchPart();
-		IController controller=editor.getController();
+		IController controller = editor.getController();
 		controller.executeStop();
 	}
 
 	private void executeSuspend() {
 		GraphEditor editor = (GraphEditor) this.getWorkbenchPart();
-		IController controller=editor.getController();
+		IController controller = editor.getController();
 		controller.executeSuspend();
 	}
 
@@ -462,7 +440,7 @@ public class ProcessActions extends WorkbenchPartAction {
 		// "Step Next", "This feature is not yet supported");
 		// implemented by Russell Dec 2008
 		GraphEditor editor = (GraphEditor) this.getWorkbenchPart();
-		IController controller=editor.getController();
+		IController controller = editor.getController();
 		controller.executeStepNext();
 	}
 
@@ -501,7 +479,7 @@ public class ProcessActions extends WorkbenchPartAction {
 				return false;
 			} else {
 				if (!graph.getProtocol().equals("")) {
-					executeLoad(graph.getProtocol());
+					loadEntity(graph.getProtocol());
 				}
 			}
 		}

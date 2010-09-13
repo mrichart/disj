@@ -31,6 +31,7 @@ import distributed.plugin.core.Edge;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.GraphFactory;
+import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.validators.NumberCellEditorValidator;
 
 /**
@@ -175,8 +176,7 @@ public class GraphElement extends AdapterElement {
 		}
         for(int i =0; i < this.nodeElements.size(); i++){
             NodeElement e = this.nodeElements.get(i);
-            e.resetNode();
-            //e.getNode().setEntity(null);           
+            e.resetNode();          
         }      
         for(int i =0; i < this.linkElements.size(); i++){
             LinkElement e = this.linkElements.get(i);
@@ -257,10 +257,12 @@ public class GraphElement extends AdapterElement {
     
     public Color getColor(Short state){
         RGB rgb = this.stateColors.get(state);
-        if(rgb != null)
+        if(rgb != null){
             return  new Color(this.shell.getDisplay(), rgb);
-        else
-            return null;
+        } else {
+    		// user default color if state has no color given
+    		return IGraphEditorConstants.DEFAULT_NODE_COLOR;
+        }
     }
     
     public int getNumStateColor(){

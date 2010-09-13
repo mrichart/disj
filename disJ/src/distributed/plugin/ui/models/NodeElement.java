@@ -168,9 +168,8 @@ public class NodeElement extends AdapterElement {
 	 * Set all states of this node back to where is was, when method
 	 * <code>copyNode</code> is called last.
 	 */
-	public void resetNode() {		
-		// FIXME why is 99 ???
-		this.node.setCurState((short)99);
+	public void resetNode() {				
+		this.node.resetState();
 		this.node.removeEntity();
 		
 		for (int i = 0; i <  NUM_PROPERTIES; i++) {
@@ -383,7 +382,7 @@ public class NodeElement extends AdapterElement {
 			return;
 
 		} else if (propName.equals(PROPERTY_STATES)) {
-			this.node.setStateList(new ArrayList<String>());
+			this.node.resetStateList();
 			return;
 		}
 

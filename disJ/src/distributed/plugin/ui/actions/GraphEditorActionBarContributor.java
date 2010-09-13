@@ -46,7 +46,7 @@ public class GraphEditorActionBarContributor extends ActionBarContributor {
 		addRetargetAction(new RedoRetargetAction());
 		addRetargetAction(new DeleteRetargetAction());
 		
-		addRetargetAction(new LoadRetargetAction(IGraphEditorConstants.LOAD_ID, IGraphEditorConstants.LOAD));
+		addRetargetAction(new LoadRetargetAction(IGraphEditorConstants.LOAD_ENTITY_ID, IGraphEditorConstants.LOAD));
 		addRetargetAction(new LoadRandomRetargetAction(IGraphEditorConstants.LOAD_RANDOM_ID, IGraphEditorConstants.LOAD_RANDOM));
 		addRetargetAction(new StepNextRetargetAction(IGraphEditorConstants.NEXT_ID, IGraphEditorConstants.NEXT));
 		addRetargetAction(new ResumeRetargetAction(IGraphEditorConstants.RESUME_ID, IGraphEditorConstants.RESUME));
@@ -79,7 +79,7 @@ public class GraphEditorActionBarContributor extends ActionBarContributor {
 		tbm.add(getAction(IGraphEditorConstants.ADD_STATE_ID));
 		tbm.add(getAction(IGraphEditorConstants.REMOVE_STATE_ID));
 		tbm.add(new Separator());
-		tbm.add(getAction(IGraphEditorConstants.LOAD_ID));
+		tbm.add(getAction(IGraphEditorConstants.LOAD_ENTITY_ID));
 		tbm.add(getAction(IGraphEditorConstants.LOAD_RANDOM_ID));
 		tbm.add(new Separator());
 		tbm.add(getAction(IGraphEditorConstants.RESUME_ID));
@@ -102,7 +102,7 @@ public class GraphEditorActionBarContributor extends ActionBarContributor {
 		MenuManager viewMenu = new MenuManager(IGraphEditorConstants.EXECUTE_MENU, IGraphEditorConstants.EXECUTE_MENU_ID);	
 		viewMenu.add(getAction(IGraphEditorConstants.ADD_STATE_ID));
 		viewMenu.add(getAction(IGraphEditorConstants.REMOVE_STATE_ID));
-		viewMenu.add(getAction(IGraphEditorConstants.LOAD_ID));
+		viewMenu.add(getAction(IGraphEditorConstants.LOAD_ENTITY_ID));
 		viewMenu.add(getAction(IGraphEditorConstants.LOAD_RANDOM_ID));
 		
 		viewMenu.add(new Separator("execute group"));		

@@ -10,11 +10,8 @@
 
 package distributed.plugin.runtime.engine;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -24,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.StringTokenizer;
 
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
@@ -32,7 +28,9 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
 import distributed.plugin.core.IConstants;
+import distributed.plugin.core.Logger;
 import distributed.plugin.core.Node;
+import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.Event;
 import distributed.plugin.runtime.Graph;
@@ -42,7 +40,6 @@ import distributed.plugin.runtime.IMessage;
 import distributed.plugin.runtime.IProcesses;
 import distributed.plugin.runtime.MsgPassingEvent;
 import distributed.plugin.ui.IGraphEditorConstants;
-import distributed.plugin.ui.editor.GraphEditor;
 
 /**
  * An core processor that executes message passing model event for 
@@ -57,19 +54,17 @@ public class MsgPassingProcessor implements IProcesses {
 
 	private boolean pause;
 
+	private boolean stepForward;
+
 	private int speed;
 
 	private String procName;
 
-	private PrintWriter nodeFile;
-
-	private PrintWriter edgeFile;
-
-	private PrintWriter ConsoleOutputFile;
-
 	private Class<Entity> client;
 
 	private Class<IRandom> clientRandom;
+
+	private Map<Integer, String> stateFields;
 
 	private EventQueue queue;
 
@@ -77,34 +72,30 @@ public class MsgPassingProcessor implements IProcesses {
 
 	private TimeGenerator timeGen;
 
-	private Map<Integer, String> stateFields;
-
-	private boolean stepForward;
-
-	private PrintWriter RecFile;
-
-	private GraphEditor ge;
-
-	// private SystemLog sysLog;
-
+	/*
+	 * Logger to log every activities of this process
+	 * for replay action
+	 */
+	private Logger log;
+		
 	/*
 	 * System out delegate to Eclipse plug-in console
 	 */
 	private MessageConsoleStream systemOut;
 	
+	
 	/**
 	 * Constructor
 	 * 
-	 * @param ge An instance of GraphEditor that control the processor
 	 * @param graph A graph model that used by the processor
 	 * @param client A client Entity object that hold algorithm
 	 * @param clientRandom A client IRandom object the hold algorithm
 	 * @param out A URL to a location of log files directory
 	 * @throws IOException
 	 */
-	MsgPassingProcessor(GraphEditor ge, Graph graph, Class<Entity> client, Class<IRandom> clientRandom,
+	MsgPassingProcessor(Graph graph, Class<Entity> client, Class<IRandom> clientRandom,
 			URL out) throws IOException {
-		if (graph == null || client == null || ge == null){
+		if (graph == null || client == null){
 			throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
 		}
 	
@@ -113,19 +104,20 @@ public class MsgPassingProcessor implements IProcesses {
 		this.stop = false;
 		this.pause = false;		
 		
-		this.ge = ge;
 		this.graph = graph;
 		this.procName = graph.getId();
 		this.client = client;
 		this.clientRandom = clientRandom;
 		this.queue = new EventQueue();
-		this.timeGen = TimeGenerator.getTimeGenerator();
-		this.timeGen.addGraph(graph.getId() + "");
 		this.stateFields = new HashMap<Integer, String>();
+		
+		this.timeGen = TimeGenerator.getTimeGenerator();
+		this.timeGen.addGraph(this.graph.getId());		
+		
+		this.log = new Logger(this.graph.getId(), out, this.timeGen);		
 
 		this.setSystemOutConsole();
 		
-		this.initLogFile(out);
 		this.initClientStateVariables();
 		if (this.clientRandom != null) {
 			this.initClientRandomStateVariables();
@@ -181,40 +173,7 @@ public class MsgPassingProcessor implements IProcesses {
 			this.systemOut.println(e.toString());
 		}
 	}
-
-	/*
-	 * FIXME LOG file does not work!!!
-	 * Initialize the log's files
-	 */
-	private void initLogFile(URL url) throws IOException {
-		File dir = new File(url.getPath());
-		StringTokenizer tok = new StringTokenizer(this.graph.getId(), ".");
-		String name = tok.nextToken();
-		File n = new File(dir, name + "_Node" + ".log");
-		File e = new File(dir, name + "_Edge" + ".log");
-		File c = new File(dir, "ConsoleOutput" + ".log");
-		File r = new File(dir, name + ".rec");
-
-		if (ge.getRecFileNameForSaving() != null) {
-			r = new File(ge.getRecFileNameForSaving());
-		}
-
-		this.nodeFile = new PrintWriter(new FileWriter(n));
-		this.edgeFile = new PrintWriter(new FileWriter(e));
-		this.ConsoleOutputFile = new PrintWriter(new FileWriter(c));
-		this.RecFile = new PrintWriter(new FileWriter(r));
-	}
-
-	public void setRecFilename(String path) {
-		File r = new File(path);
-		try {
-			this.RecFile = new PrintWriter(new FileWriter(r));
-			
-		} catch (Exception e) {
-			this.systemOut.println(e.toString());
-		}
-	}
-
+	
 	/**
      * 
      */
@@ -229,24 +188,26 @@ public class MsgPassingProcessor implements IProcesses {
 	
 		// sending message
 		for (int i = 0; i < receivers.size(); i++) {
-			Edge recv = sNode.getEdge(receivers.get(i));
-			this.updateEdgeLog(recv, msgLabel, sender);
-
+			String port = receivers.get(i);
+			Edge recv = sNode.getEdge(port);
+					
+			// tracking message sent to each target
+			this.updateEdgeLog(recv, sender, message);
+			this.updateSentLog(sNode, port, message);
+			this.graph.countMsgSent(msgLabel);
+			
 			// validate the probability of failure
 			if (!recv.isReliable()) {
 				int prob = ran.nextInt(100) + 1;
 				if (prob <= recv.getProbOfFailure()) {
-					this.logEdgeFailurMsg(recv, message.getLabel(), sender);
+					// log for losing msg
+					this.logEdgeFailurMsg(recv, sender, message);
 					continue;
 				}
 			}
 			
-			int execTime = recv.getDelayTime(sNode, this.timeGen
-					.getCurrentTime(graph.getId() + ""));
-			int eventId = this.timeGen.getLastestId(graph.getId() + "");
-			
-			// tracking message sent to each target
-			this.graph.countMsgSent(msgLabel);
+			int execTime = recv.getDelayTime(sNode, this.getCurrentTime());
+			int eventId = this.getNextId();		
 			 try {
 				 IMessage msg = new Message(message.getLabel(), SimulatorEngine.deepClone(data));
 				 
@@ -261,11 +222,7 @@ public class MsgPassingProcessor implements IProcesses {
 		this.queue.pushEvents(newEvents);
 		
 		// update time's lower bound
-		this.timeGen.setCurrentTime(graph.getId() + "", this.queue.topEvent()
-				.getExecTime());
-		
-		// update log
-		this.updateSentLog(sNode, receivers, message.getLabel());
+		this.setCurrentTime(this.queue.topEvent().getExecTime());
 	}
 
 	/*
@@ -276,10 +233,9 @@ public class MsgPassingProcessor implements IProcesses {
 		
 		if (message.getLabel().equals(IConstants.MESSAGE_SET_ALARM_CLOCK)) {
 			
-			int eventId = this.timeGen.getLastestId(graph.getId() + "");
+			int eventId = this.getNextId();
 			int delay = ((Integer) message.getContent()).intValue();
-			int execTime = this.timeGen.getCurrentTime(graph.getId() + "")
-					+ delay;
+			int execTime = this.getCurrentTime()+ delay;
 
 			// add an event into a queue
 			Event e = new MsgPassingEvent(owner, IConstants.EVENT_ALARM_RING_TYPE, execTime,
@@ -288,8 +244,7 @@ public class MsgPassingProcessor implements IProcesses {
 
 			// update time's lower bound, which may be the alarm ringing is
 			// a smallest
-			this.timeGen.setCurrentTime(graph.getId() + "", this.queue
-					.topEvent().getExecTime());
+			this.setCurrentTime(this.queue.topEvent().getExecTime());
 
 		} else if (message.getLabel().equals(IConstants.MESSAGE_SET_BLOCK_MSG)) {
 			
@@ -303,7 +258,7 @@ public class MsgPassingProcessor implements IProcesses {
 				List<Event> events = node.getBlockedEvents(port);
 				if (events != null) {
 					// put them in a queue with the current execution time
-					int time = timeGen.getCurrentTime(graph.getId() + "");
+					int time = this.getCurrentTime();
 					for (int i = 0; i < events.size(); i++) {
 						MsgPassingEvent e = (MsgPassingEvent) events.get(i);
 						e.setExecTime(time);
@@ -319,62 +274,52 @@ public class MsgPassingProcessor implements IProcesses {
 	/*
 	 * Update node's log after sent message
 	 */
-	private void updateSentLog(Node sender, List<String> recvPorts, String msgLabel) {
-		/*
-		StringBuffer buff = new StringBuffer();
-		buff.append(msgLabel);
-		buff.append(IConstants.MAIN_DELIMETER);
-		*/
-		for (int i = 0; i < recvPorts.size(); i++) {
-//			if (i > 0)
-//				buff.append(IConstants.SUB_DELIMETER);
-//			buff.append(recvPorts.get(i));
-			sender.incMsgSend();
-		}
-		/*
-		sender.logMsgSent(buff.toString());
-		this.nodeFile.println(IConstants.SEND_TAG + sender.getNodeId()
-				+ IConstants.DELIMETER + buff.toString());
-		*/
+	private void updateInitLog(Node node) {			
+		this.log.logNode(logTag.NODE_INIT, node.getNodeId(), null);			
+	}
+
+	
+	/*
+	 * Update node's log after sent message
+	 */
+	private void updateSentLog(Node sender, String port, IMessage msg) {
+		sender.incMsgSend();
+		Object[] value = new Object[2];
+		value[0] = port;
+		value[1] = msg;			
+		this.log.logNode(logTag.NODE_SEND, sender.getNodeId(), value);			
 	}
 
 	/*
 	 * Update node's log after received message
 	 */
-	private void updateRecvLog(Node receiver, String port, String msgLabel) {
+	private void updateRecvLog(Node receiver, String port, IMessage msg) {
 		receiver.incMsgRecv();
-		/*
-		receiver.logMsgRecv(msgLabel + IConstants.MAIN_DELIMETER + port);
-		this.nodeFile.println(IConstants.RECV_TAG + receiver.getNodeId()
-				+ IConstants.DELIMETER + msgLabel + IConstants.MAIN_DELIMETER
-				+ port);
-		*/
+		Object[] value = new Object[2];
+		value[0] = port;
+		value[1] = msg;			
+		this.log.logNode(logTag.NODE_RECV, receiver.getNodeId(), value);	
 	}
 
 	/*
-	 * Update edge's log
+	 * Update edge's log for entering message
 	 */
-	private void updateEdgeLog(Edge edge, String msgLabel, String sender) {
+	private void updateEdgeLog(Edge edge, String nodeId, IMessage msg) {
 		edge.incNumMsg();
-		/*
-		edge.logMsgPassed(msgLabel, sender);
-		this.edgeFile.println(IConstants.EDGE_TAG + edge.getEdgeId()
-				+ IConstants.DELIMETER + msgLabel + IConstants.MAIN_DELIMETER
-				+ sender);
-		*/
+		Object[] value = new Object[2];
+		value[0] = nodeId;
+		value[1] = msg;	
+		this.log.logEdge(logTag.EDGE_MSG, edge.getEdgeId(), value);
 	}
 
 	/*
-	 * Update edge's log
+	 * Update edge's log for losing message
 	 */
-	private void logEdgeFailurMsg(Edge edge, String msgLabel, String sender) {
-		edge.incNumMsg();
-		/*
-		edge.logMsgPassed(msgLabel, sender);
-		this.edgeFile.println("Lost message @ " + IConstants.EDGE_TAG
-				+ edge.getEdgeId() + IConstants.DELIMETER + msgLabel
-				+ IConstants.MAIN_DELIMETER + sender);
-		*/
+	private void logEdgeFailurMsg(Edge edge, String nodeId, IMessage msg) {
+		Object[] value = new Object[2];
+		value[0] = nodeId;
+		value[1] = msg;	
+		this.log.logEdge(logTag.EDGE_LOST, edge.getEdgeId(), value);
 	}
 
 	/**
@@ -384,8 +329,9 @@ public class MsgPassingProcessor implements IProcesses {
 	 */
 	public void cleanUp() {
 
-		String title = "*****Statistics report of the simulation in text format*****";
 /*
+		String title = "*****Statistics report of the simulation in text format*****";
+
 		//System.out.println(title);
 		appendToRecFile(title);
 
@@ -421,30 +367,6 @@ public class MsgPassingProcessor implements IProcesses {
 		// clean up the memory
 		this.graph = null;
 
-		if(this.nodeFile != null){
-			this.nodeFile.flush();
-			this.nodeFile.close();
-			this.nodeFile = null;
-		}
-		
-		if(this.edgeFile != null){
-			this.edgeFile.flush();
-			this.edgeFile.close();
-			this.edgeFile = null;
-		}
-		
-		if(this.ConsoleOutputFile != null){
-			this.ConsoleOutputFile.flush();
-			this.ConsoleOutputFile.close();
-			this.ConsoleOutputFile = null;
-		}
-		
-		if(this.RecFile != null){
-			this.RecFile.flush();
-			this.RecFile.close();
-			this.RecFile = null;
-		}
-
 		// reset the flag the process is terminated
 		this.stop = true;
 		this.pause = false;
@@ -458,6 +380,9 @@ public class MsgPassingProcessor implements IProcesses {
 	 */
 	public void run() {
 		try {
+			// init logger
+			this.log.initLog();
+			
 			// load and init any necessary data
 			this.loadInitNodes();
 
@@ -471,7 +396,10 @@ public class MsgPassingProcessor implements IProcesses {
 			e.printStackTrace();
 			this.systemOut.println(e.toString());
 			
-		} finally {
+		} finally {			
+			// clean up logger
+			this.log.cleanUp();
+
 			this.cleanUp();
 			this.systemOut.println("\n*****The simulation of " + this.procName
 					+ " is terminated.*****");
@@ -487,18 +415,21 @@ public class MsgPassingProcessor implements IProcesses {
 		try {
 			for (int i = 0; i < initNodes.size(); i++) {
 				Node init = initNodes.get(i);
+				init.setLogger(this.log);
+				
 				Entity clientObj = GraphLoader.createEntityObject(client);
 				clientObj.initEntity(this, init, this.stateFields);
 				init.addEntity(clientObj);
+				
 			}
 
-			Random r = new Random(System.currentTimeMillis());
+			//Random r = new Random(System.currentTimeMillis());
 			List<Event> events = new ArrayList<Event> ();
 			// create a set of init events
 			for (int i = 0; i < initNodes.size(); i++) {
 				Node init = initNodes.get(i);
 				if(init.isAlive()){
-					int eventId = timeGen.getLastestId(graph.getId() + "");
+					int eventId = this.getNextId();
 					int execTime = 0;
 					
 					// it has delay initialize, set active time to random
@@ -515,13 +446,11 @@ public class MsgPassingProcessor implements IProcesses {
 					events.add(e);
 				}
 			}
-
 			// add to the queue
 			this.queue.pushEvents(events);
 
 			// update time's lower bound
-			this.timeGen.setCurrentTime(graph.getId() + "", this.queue
-					.topEvent().getExecTime());
+			this.setCurrentTime(this.queue.topEvent().getExecTime());
 
 		} catch (Exception e) {
 			throw new DisJException(IConstants.ERROR_8, e.toString());
@@ -559,7 +488,7 @@ public class MsgPassingProcessor implements IProcesses {
 							Thread.sleep(1000);
 						} catch (InterruptedException ignore) {
 							System.out
-									.println("@[Processor].executeEvent() breakpoint=true: "
+									.println("@MsgPassingProcessor.executeEvent() breakpoint=true: "
 											+ ignore);
 						}
 					}
@@ -611,9 +540,14 @@ public class MsgPassingProcessor implements IProcesses {
 			// Will NOT execute a Fail node
 			if (node.isAlive()) {
 				Entity entity = this.loadEntity(node);
+							
+				// update log
+				this.updateInitLog(node);
+				
+				// execute client code
 				node.setInitExec(true);
 				entity.init();
-
+				
 				// catching up the holding events
 				// this can happen only to recvMsg
 				// since setAlarm will not be able to
@@ -655,10 +589,8 @@ public class MsgPassingProcessor implements IProcesses {
 			} else if ((recv.hasInitializer() == false)
 					|| (recv.isInitExec() == true)) {
 				
-				// update log
-				this.updateRecvLog(recv, port, e.getMessage().getLabel());
-				
-				// track number of msg received
+				// update receive log
+				this.updateRecvLog(recv, port, e.getMessage());
 				this.graph.countMsgRecv(e.getMessage().getLabel());
 				
 				Entity entity = this.loadEntity(recv);
@@ -709,15 +641,19 @@ public class MsgPassingProcessor implements IProcesses {
 	 */
 	private Entity loadEntity(Node node) throws DisJException {
 		// get client at a given node
-		Entity clientObj = node.getEntity();
+		Entity clientObj = node.getEntity();		
 		
 		// lazy init: If there is no client at the node yet	
 		if(clientObj == null){
 			try {
+				// setup logger
+				node.setLogger(this.log);
+				
 				// create and assign it to the node
 				clientObj = GraphLoader.createEntityObject(this.client);
 				clientObj.initEntity(this, node, this.stateFields);
 				node.addEntity(clientObj);
+				
 			} catch (Exception ex) {
 				throw new DisJException(IConstants.ERROR_8, ex.toString());
 			}
@@ -757,9 +693,23 @@ public class MsgPassingProcessor implements IProcesses {
 	}
 
 	public int getCurrentTime() {
-		return timeGen.getCurrentTime(graph.getId() + "");
+		return this.timeGen.getCurrentTime(graph.getId());
 	}
 
+	public void setCurrentTime(int time) {
+		this.timeGen.setCurrentTime(graph.getId(), time);
+	}
+	
+	public int getNextId(){
+		int id = -1;
+		try{ 
+			id = this.timeGen.getNextNewId(this.graph.getId());
+		}catch (DisJException e){
+			this.systemOut.println("@MsgPassingProcessor.getNextId() [critical]  " + e.toString());
+		}
+		return id;
+	}
+	
 	public int getCallingChain() {
 		return this.callingChain;
 	}
@@ -770,14 +720,6 @@ public class MsgPassingProcessor implements IProcesses {
 
 	public void setStepForward(boolean stepForward) {
 		this.stepForward = stepForward;
-	}
-
-	public void appendConsoleOutput(String string) {
-		this.ConsoleOutputFile.println(string);
-	}
-
-	public void appendToRecFile(String string) {
-		this.RecFile.println(string);
 	}
 	 
 }

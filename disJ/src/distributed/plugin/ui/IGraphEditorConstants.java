@@ -10,6 +10,8 @@
 
 package distributed.plugin.ui;
 
+import org.eclipse.swt.graphics.Color;
+
 
 /**
  * @author Me
@@ -32,7 +34,8 @@ public interface IGraphEditorConstants {
 	public String GraphicalEditor_CLOSE_BUTTON_UI = GraphEditorPlugin
 			.getResourceString("%GraphicalEditor.CLOSE_BUTTON_UI_"); //$NON-NLS-1$
 
-
+	// Default node background color
+	public static Color DEFAULT_NODE_COLOR = new Color(null, 100, 150, 50);
 
 
 
@@ -97,7 +100,7 @@ public interface IGraphEditorConstants {
 	public static final String RESUME_ID = "IGraphEditorConstants.Resume";
 	public static final String SUSPEND_ID = "IGraphEditorConstants.Suspend";
 	public static final String STOP_ID = "IGraphEditorConstants.Stop";
-	public static final String LOAD_ID = "IGraphEditorConstants.Load Class";
+	public static final String LOAD_ENTITY_ID = "IGraphEditorConstants.Load Class";
 	public static final String LOAD_RANDOM_ID = "IGraphEditorConstants.Load Random Number Generator";
 	public static final String NEXT_ID = "IGraphEditorConstants.Step Next";
 	public static final String ADD_STATE_ID = "IGraphEditorConstants.Add State";
