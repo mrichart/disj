@@ -46,6 +46,8 @@ public class Graph implements Serializable {
 
 	private String protocol;
 	
+	private int modelId;
+	
 	private Map<String, Node> nodes;
 
 	private Map<String, Edge> edges;
@@ -70,6 +72,7 @@ public class Graph implements Serializable {
 		this.currentNodeId = 0;
 		this.currentEdgeId = 0;
 		this.protocol = "";
+		this.modelId = -1;
 		
 		this.numMsgSent = new HashMap<String, Integer>();
 		this.numMsgRecv = new HashMap<String, Integer>();
@@ -208,6 +211,14 @@ public class Graph implements Serializable {
 	 */
 	public String getId() {
 		return this.id;
+	}
+
+	public int getModelId() {
+		return modelId;
+	}
+
+	public void setModelId(int modelId) {
+		this.modelId = modelId;
 	}
 
 	public int getGlobalDelayType() {

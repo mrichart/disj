@@ -156,7 +156,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 	private OverviewOutlinePage overviewOutlinePage;
 
-	private List commandStackActionIDs;
+	private List<String> commandStackActionIDs;
 
 	private List editorActionIDs;
 
@@ -289,7 +289,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	 * Constructor
 	 */
 	public GraphEditor() {
-		this.engine = new SimulatorEngine(this);
+		this.engine = new SimulatorEngine();
 		this.commandStackActionIDs = new ArrayList();
 		this.editorActionIDs = new ArrayList();
 		this.graphFactories = new HashMap();
@@ -906,31 +906,31 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 		this.addAction(new CopyTemplateAction(this));
 
-		procAct = new ProcessActions(this, IGraphEditorConstants.LOAD_ENTITY_ID);
+		procAct = new ProcessActions(this, IGraphEditorConstants.ACTION_LOAD);
 		this.addAction(procAct);
 
-		procAct = new ProcessActions(this, IGraphEditorConstants.LOAD_RANDOM_ID);
+		procAct = new ProcessActions(this, IGraphEditorConstants.ACTION_LOAD_RANDOM);
 		this.addAction(procAct);
 
-		procAct = new ProcessActions(this, IGraphEditorConstants.RESUME_ID);
+		procAct = new ProcessActions(this, IGraphEditorConstants.ACTION_RESUME);
 		this.addAction(procAct);
 
-		procAct = new ProcessActions(this, IGraphEditorConstants.STOP_ID);
+		procAct = new ProcessActions(this, IGraphEditorConstants.ACTION_STOP);
 		this.addAction(procAct);
 
-		procAct = new ProcessActions(this, IGraphEditorConstants.SUSPEND_ID);
+		procAct = new ProcessActions(this, IGraphEditorConstants.ACTION_SUSPEND);
 		this.addAction(procAct);
 
-		procAct = new ProcessActions(this, IGraphEditorConstants.NEXT_ID);
+		procAct = new ProcessActions(this, IGraphEditorConstants.ACTION_STEP_NEXT);
 		this.addAction(procAct);
 
-		procAct = new ProcessActions(this, IGraphEditorConstants.SPEED_ID);
+		procAct = new ProcessActions(this, IGraphEditorConstants.ACTION_SET_SPEED);
 		this.addAction(procAct);
 
-		procAct = new ProcessActions(this, IGraphEditorConstants.LOAD_RECORD_ID);
+		procAct = new ProcessActions(this, IGraphEditorConstants.ACTION_LOAD_RECORD);
 		this.addAction(procAct);
 
-		procAct = new ProcessActions(this, IGraphEditorConstants.SAVE_RECORD_ID);
+		procAct = new ProcessActions(this, IGraphEditorConstants.ACTION_SAVE_RECORD);
 		this.addAction(procAct);
 
 		this.addAction(new StateSettingAction(this,
@@ -1213,6 +1213,11 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		return controller;
 	}
 
+	/**
+	 * Read a give record file
+	 * @param fileName
+	 * @return true if sucess otherwise false
+	 */
 	public boolean setRecFile(String fileName) {
 		boolean returnValue = true;
 		try {
@@ -1227,8 +1232,6 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 			sc.close();
 			returnValue = true;
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
 			returnValue = false;
 		}
 		return returnValue;

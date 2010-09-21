@@ -2,6 +2,9 @@ package distributed.plugin.core;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -54,6 +57,10 @@ public class Agent implements Serializable{
 	 */
 	private String lastPortEnter;
 	
+	/*
+	 * A memory suitcase for agent to carry while traveling
+	 * in a network
+	 */
 	transient private String[] info;
 
 	/*
@@ -200,4 +207,38 @@ public class Agent implements Serializable{
 		List<String> board = this.curNode.getWhiteboard();
 		return board.remove(msg);
 	}
+	
+	/**
+	 * Get all outgoing port label of current node
+	 * 
+	 * @return A list of String all out going port labels
+	 */
+	public List<String> getOutPorts() {
+		return this.curNode.getOutgoingPorts();
+	}
+
+	/**
+	 * Get all incoming port labels of current node
+	 * 
+	 * @return A list of String of all incoming port labels
+	 */
+	public List<String> getInPorts() {
+		return this.curNode.getIncomingPorts();
+	}
+
+	/*
+     * Overriding serialize object due to Java Bug4152790
+     */
+    private void writeObject(ObjectOutputStream os) throws IOException{    	
+   	 	// write the object
+		os.defaultWriteObject();
+	}
+    /*
+     * Overriding serialize object due to Java Bug4152790
+     */
+    private void readObject(ObjectInputStream os) throws IOException, ClassNotFoundException  {
+    	 // rebuild this object
+    	 os.defaultReadObject();
+    }
+
 }

@@ -18,18 +18,35 @@ import distributed.plugin.core.DisJException;
 /**
  * @author npiyasin
  * 
- * The processing step that has to be done
+ * A processor that processing requests
  */
-public interface IProcesses extends Runnable {
+public interface IProcessor extends Runnable {
 	
 	/**
-	 * Process a request from a sender and distributed the result to given receives
+	 * Process a request that comes from a sender node and distributed 
+	 * the result to given outgoing ports of the sender
 	 * 
 	 * @param sender A request node
 	 * @param receivers A list of outgoing port of the sender that leads to the receivers
 	 * @param message A parameters and data that need to be processed
-	 * @throws DisJException
+	 * @throws DisJException If there exist an invalid receiver 
 	 */
 	public void processReqeust(String sender, List<String> receivers, IMessage message) throws DisJException;
+	
+	public void setStop(boolean stop);
+
+	public boolean isStop();
+	
+	public void setPause(boolean pause);
+	
+	public boolean isPause();
+	
+	public void setSpeed(int speed);
+	
+	public int getSpeed();
+	
+	public void cleanUp();
+	
+	
 	
 }

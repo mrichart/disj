@@ -97,17 +97,17 @@ public interface IGraphEditorConstants {
 	
 	public static final String EXECUTE_MENU_ID = "IGraphEditorConstants.Simulator";
 	public static final String SUB_MENU_ID = "IGraphEditorConstants.Debug Menu";
-	public static final String RESUME_ID = "IGraphEditorConstants.Resume";
-	public static final String SUSPEND_ID = "IGraphEditorConstants.Suspend";
-	public static final String STOP_ID = "IGraphEditorConstants.Stop";
-	public static final String LOAD_ENTITY_ID = "IGraphEditorConstants.Load Class";
-	public static final String LOAD_RANDOM_ID = "IGraphEditorConstants.Load Random Number Generator";
-	public static final String NEXT_ID = "IGraphEditorConstants.Step Next";
+	public static final String ACTION_RESUME = "IGraphEditorConstants.Resume";
+	public static final String ACTION_SUSPEND = "IGraphEditorConstants.Suspend";
+	public static final String ACTION_STOP = "IGraphEditorConstants.Stop";
+	public static final String ACTION_LOAD = "IGraphEditorConstants.Load Class";
+	public static final String ACTION_LOAD_RANDOM = "IGraphEditorConstants.Load Random Number Generator";
+	public static final String ACTION_STEP_NEXT = "IGraphEditorConstants.Step Next";
 	public static final String ADD_STATE_ID = "IGraphEditorConstants.Add State";
 	public static final String REMOVE_STATE_ID = "IGraphEditorConstants.Remove State";
-	public static final String SPEED_ID = "IGraphEditorConstants.Process Speed";
-	public static final String LOAD_RECORD_ID="IGraphEditorConstants.LoadRecord Load_Recording";
-	public static final String SAVE_RECORD_ID="IGraphEditorConstants.SAVE_RECORD_ID Save_Recording";
+	public static final String ACTION_SET_SPEED = "IGraphEditorConstants.Process Speed";
+	public static final String ACTION_LOAD_RECORD="IGraphEditorConstants.LoadRecord Load_Recording";
+	public static final String ACTION_SAVE_RECORD="IGraphEditorConstants.SAVE_RECORD_ID Save_Recording";
 	
 	// command template
 	public static final String TEMPLATE_NODE = "0";
@@ -159,6 +159,10 @@ public interface IGraphEditorConstants {
     public static final String STATE_CHANGE=" changes_its_state_to ";
 	public static final String LINK_VISIBILITY_CHANGE = " changes_its_visibility_to ";
 	
+	// Model code
+	public static final int MODEL_MESSAGE_PASSING = 0;
+	public static final int MODEL_AGENT_WHITEBOARD = 1;
+	public static final int MODEL_AGENT_TOKEN = 2;
 	
 	
 	

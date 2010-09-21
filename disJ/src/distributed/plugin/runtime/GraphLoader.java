@@ -103,7 +103,7 @@ public class GraphLoader {
      * @throws Exception
      *             All the exception that caused by reflection processes
      */
-    public static BoardAgent createBoardAgentObject(Class<IBoardModel> client) throws Exception {
+    public static BoardAgent createBoardAgentObject(Class<BoardAgent> client) throws Exception {
         if (client == null)
             throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
 

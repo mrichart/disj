@@ -34,10 +34,9 @@ import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.Event;
 import distributed.plugin.runtime.Graph;
-import distributed.plugin.runtime.GraphFactory;
 import distributed.plugin.runtime.GraphLoader;
 import distributed.plugin.runtime.IMessage;
-import distributed.plugin.runtime.IProcesses;
+import distributed.plugin.runtime.IProcessor;
 import distributed.plugin.runtime.MsgPassingEvent;
 import distributed.plugin.ui.IGraphEditorConstants;
 
@@ -46,7 +45,7 @@ import distributed.plugin.ui.IGraphEditorConstants;
  * a given graph. The relation between a processor and a Graph is 
  * one-to-one mapping
  */
-public class MsgPassingProcessor implements IProcesses {
+public class MsgPassingProcessor implements IProcessor {
 
 	private int callingChain;
 
@@ -95,6 +94,7 @@ public class MsgPassingProcessor implements IProcesses {
 	 */
 	MsgPassingProcessor(Graph graph, Class<Entity> client, Class<IRandom> clientRandom,
 			URL out) throws IOException {
+		
 		if (graph == null || client == null){
 			throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
 		}
@@ -164,14 +164,7 @@ public class MsgPassingProcessor implements IProcesses {
 
 	// FIXME need to do something here!!!
 	private void initClientRandomStateVariables() {
-		try {
-			IRandom ran = (IRandom) this.clientRandom.newInstance();
-			this.graph.setClientRandom(ran);
-			GraphFactory.addGraph(this.graph);
-		} catch (Exception e) {
-			e.printStackTrace();
-			this.systemOut.println(e.toString());
-		}
+		
 	}
 	
 	/**

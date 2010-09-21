@@ -5,6 +5,7 @@ import java.util.List;
 
 import distributed.plugin.core.Agent;
 import distributed.plugin.core.IConstants;
+import distributed.plugin.core.Node;
 import distributed.plugin.runtime.IBoardModel;
 
 public abstract class BoardAgent implements IBoardModel {
@@ -100,7 +101,8 @@ public abstract class BoardAgent implements IBoardModel {
 	
 	@Override
 	public final void setNodeState(int state){
-		this.agentOwner.getCurNode().setCurState(state);
+		Node node = this.agentOwner.getCurNode();
+		node.setCurState(state);
 	}
 	
 	@Override
@@ -125,4 +127,21 @@ public abstract class BoardAgent implements IBoardModel {
 		return this.agentOwner.getHomeId();
 	}
 
+	/**
+	 * Get all outgoing port label of current node
+	 * 
+	 * @return A list of String all out going port labels
+	 */
+	public final List<String> getOutPorts() {
+		return this.agentOwner.getOutPorts();
+	}
+
+	/**
+	 * Get all incoming port labels of current node
+	 * 
+	 * @return A list of String of all incoming port labels
+	 */
+	public final List<String> getInPorts() {
+		return this.agentOwner.getInPorts();
+	}
 }

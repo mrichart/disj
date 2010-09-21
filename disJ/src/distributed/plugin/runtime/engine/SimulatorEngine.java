@@ -17,8 +17,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
@@ -29,35 +27,30 @@ import distributed.plugin.core.DisJException;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.Graph;
-import distributed.plugin.ui.editor.GraphEditor;
+import distributed.plugin.runtime.IProcessor;
 
 /**
  * @author npiyasin
  * 
  * Simulation loader and starter, a bridge between UI and core engine
+ * It is one-to-one mapping to a graph in GraphEditor and IProcessor
  */
 public class SimulatorEngine {
-
-	private URL outLocation;
     
     private boolean started;
+    
+	private URL outLocation;
+  
+    private IProcessor proc;
 
-    private int speed;
-
-    private Map<String, Runnable> engine;
-
-    private Graph origin;
+    private String graphId;
 
     private Thread holder;
 
-	private GraphEditor ge;
-
-    public SimulatorEngine(GraphEditor ge) {
-    	this.ge = ge;
-        this.speed = IConstants.SPEED_DEFAULT_RATE;
+    public SimulatorEngine() {
         this.started = false;
-        this.engine = new HashMap<String, Runnable>(4);
-        this.origin = null;
+        this.proc = null;
+        this.graphId = null;
         this.holder = null;
     }
 
@@ -90,19 +83,28 @@ public class SimulatorEngine {
      * @param client
      * @param clienRandom
      */
-    public void executeMsgPassing(Graph graph, Class<Entity> client, Class<IRandom> clientRandom) {
+    public void execute(Graph graph, Class client, Class<IRandom> clientRandom) {
         try {
 
-           this.origin = graph;
-            Runnable proc = new MsgPassingProcessor(graph, client, clientRandom, this.getOutputLocation());
-            this.engine.put(origin.getId(), proc);
+           this.graphId = graph.getId();
+           if(Entity.class.isAssignableFrom(client)){
+        	   Class<Entity> c = (Class<Entity>) client;
+        	   this.proc = new MsgPassingProcessor(graph, c, clientRandom, this.outLocation);
+        	   
+           }else if(BoardAgent.class.isAssignableFrom(client)){
+        	   Class<BoardAgent> c = (Class<BoardAgent>) client;
+        	   this.proc = new BoardAgentProcessor(graph, c, clientRandom, this.outLocation);
+        	   
+           }else {
+        	   System.out.println("No support for class " + client);
+        	   return;
+           }
 
             // FIXME risk of non atomic for next 2 lines
             this.started = true;
-            this.setSpeed(this.speed);
-            holder = new Thread(proc, "DisJ Simulator Engine: " + graph.getId());
-            holder.start();
-            System.out.println("*****[SimulatorEngine] DisJ processors are started*****");
+            this.holder = new Thread(proc, "DisJ Simulator Engine: " + this.graphId);
+            this.holder.start();
+            System.out.println("*****[SimulatorEngine] DisJ processor is started*****");
 
            
         } catch (Exception e) {
@@ -110,26 +112,30 @@ public class SimulatorEngine {
         }
     }
 
-    public Graph getOriginGraph() {
-        return this.origin;
+    /**
+     * Get a graphId that is currently under process of execution by 
+     * this engine
+     * 
+     * @return ID of a graph, NULL if there is no graph has not been 
+     * assigned for execution to this engine
+     */
+    public String getCurGraphId(){
+    	return this.graphId;
     }
-
+    
     public boolean isStarted() {
-        return started;
+        return this.started;
     }
 
     public void terminate() throws DisJException {
         
         this.started = false;
         
-        if (this.origin == null)
+        if (this.graphId == null)
             throw new DisJException(IConstants.ERROR_18);
 
-        MsgPassingProcessor proc = (MsgPassingProcessor) this.engine.get(this.origin.getId());
-        if (proc != null)
-            proc.setStop(true);
-        
-        this.engine.clear();
+        if (this.proc != null)
+            this.proc.setStop(true);
         
         if(this.holder == null)
             return;
@@ -140,93 +146,84 @@ public class SimulatorEngine {
             } catch (SecurityException ignore) {
             }
         }
-        this.holder = null;
-       
+        this.holder = null;      
     }
     
     public void stepForward() throws DisJException {
         
-        if (this.origin == null)
+        if (this.graphId == null)
             throw new DisJException(IConstants.ERROR_18);
 
-        MsgPassingProcessor proc = (MsgPassingProcessor) this.engine.get(this.origin.getId());
-        if (proc == null)
+        if (this.proc == null)
             throw new DisJException(IConstants.ERROR_19);
-        proc.setPause(false);
-        proc.setStepForward(true);
+        
+        this.proc.setPause(false);
+        //this.proc.setStepForward(true);
     }
     
 
-    public void suspend() throws DisJException {
-        
-        if (this.origin == null)
+    public void suspend() throws DisJException {        
+        if (this.graphId == null)
             throw new DisJException(IConstants.ERROR_18);
 
-        MsgPassingProcessor proc = (MsgPassingProcessor) this.engine.get(this.origin.getId());
-        if (proc == null)
+        if (this.proc == null)
             throw new DisJException(IConstants.ERROR_19);
         
         proc.setPause(true);
     }
 
     public boolean isSuspend() throws DisJException {
-        if (this.origin == null)
+        if (this.graphId == null)
             throw new DisJException(IConstants.ERROR_18);
-
-        MsgPassingProcessor proc = (MsgPassingProcessor) this.engine.get(this.origin.getId());
-        if (proc == null)
+      
+        if (this.proc == null)
             throw new DisJException(IConstants.ERROR_19);
 
         return proc.isPause();
     }
 
     public void resume() throws DisJException {
-        if (this.origin == null)
+        if (this.graphId == null)
             throw new DisJException(IConstants.ERROR_18);
 
-        MsgPassingProcessor proc = (MsgPassingProcessor) this.engine.get(this.origin.getId());
-        if (proc == null)
+        if (this.proc == null)
             throw new DisJException(IConstants.ERROR_19);
 
-        proc.setPause(false);
-        proc.setStepForward(false);
+        this.proc.setPause(false);
+        //this.proc.setStepForward(false);
     }
 
     public boolean isRunning() throws DisJException {
-        if (this.origin == null)
+        if (this.graphId == null)
             throw new DisJException(IConstants.ERROR_18);
-
-        MsgPassingProcessor proc = (MsgPassingProcessor) this.engine.get(this.origin.getId());
-        if (proc == null)
+       
+        if (this.proc == null)
             throw new DisJException(IConstants.ERROR_19);
 
-        if(proc.isStop())
+        if(this.proc.isStop())
             this.terminate();
         
-        return (this.started && !proc.isPause());
+        return (this.started && !this.proc.isPause());
     }
 
-    public int getSpeed() {
-        return this.speed;
+    public int getSpeed() throws DisJException{
+    	 if (this.proc == null)
+             throw new DisJException(IConstants.ERROR_19);
+
+        return this.proc.getSpeed();
     }
 
-    public void setSpeed(int speed) {
-        this.speed = speed;
-        if (this.origin == null)
-            return;
-        MsgPassingProcessor proc = (MsgPassingProcessor) this.engine.get(this.origin.getId());
-        if (proc != null)           
-            proc.setSpeed(speed);
+    public void setSpeed(int speed)throws DisJException {
+    	 if (this.proc == null)
+             throw new DisJException(IConstants.ERROR_19);
+
+    	this.proc.setSpeed(speed);
     }
     
     public void setOutputLocation(URL location){
         this.outLocation = location;
     }
-    
-    public URL getOutputLocation(){
-        return this.outLocation;
-    }
-
+ 
 	static Serializable deepClone(Serializable object) throws DisJException, IOException {
 			if (object == null)
 				return null;

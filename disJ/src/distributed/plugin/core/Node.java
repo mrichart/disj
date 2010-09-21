@@ -36,12 +36,16 @@ public class Node implements Serializable {
 
 	static final long serialVersionUID = IConstants.SERIALIZE_VERSION;
 
-	/** a unique id of this node for system use */
+	/*
+	 * a unique id of this node for system use 
+	 */
 	private String nodeId;
 
 	private String graphId;
 
-	/** a name of this node for user use */
+	/* 
+	 * a name of this node for user use 
+	 */
 	private String name;
 
 	private int numMsgRecv;
@@ -61,59 +65,59 @@ public class Node implements Serializable {
 	private String userInput;
 
 
-	/**
+	/*
 	 * specify as a starter for init node
 	 */
 	private boolean isAlive;
 
 	private boolean breakpoint;
 
-	/**
+	/*
 	 * keeping track whether if this is init node has executed init()
 	 */
 	private boolean initExec;
 
-	/**
+	/*
 	 * Edges that connected to node{port label, edge}
 	 */
 	private Map<String, Edge> edges;
 	
-	/**
-	 * a list of blocking state of each port{port label,boolean}
-	 */
-	private Map<String, Boolean> blockPort;
-
-	/**
+	/*
 	 * mapping between port's name and port's type {portlabel, type (Short)} i.e
 	 * {portA, BI_DIRECTION} {portB, OUT_DIRECTION} {portC, IN_DIRECTION}
 	 */
 	private Map<String, Short> ports;
 	
-	/**
-	 * Logger that will log the node acitivities
+	/*
+	 * Logger that will log the node activities
 	 */
 	transient private Logger log;
 
-	/**
-	 * a list of msg queue for blocking message {localport label, list of
-	 * events}
-	 */
-	transient private Map<String, List<Event>> blockMsg;
-
-	/**
+	/*
 	 * keeping track of user internal data that stay at this node
 	 * 
 	 */
 	transient private IDistributedModel entity;
 
-	/**
+	/*
+	 * a list of msg queue for blocking message {localport label, list of
+	 * events}
+	 */
+	transient private Map<String, List<Event>> blockMsg;
+	
+	/*
+	 * a list of blocking state of each port{port label,boolean}
+	 */
+	transient private Map<String, Boolean> blockPort;
+
+	/*
 	 * hold the events if initializer host has other actions before it has been
 	 * initialized to notify the change of state a list of state-name pair of
 	 * the corresponding entity
 	 */
 	transient private List<Event> holdEvents;
 
-	/**
+	/*
 	 * A mapping table of every possible state name and value defined by user
 	 */
 	transient private Map<Integer, String> stateNames;
@@ -123,11 +127,17 @@ public class Node implements Serializable {
 	 */
 	transient private List<String> pastStates;
 	
+	/*
+	 * A list of agent that currently resides in this node
+	 */
 	transient private List<Agent> curAgents;
 	
+	/*
+	 * A whiteboard belong to this node
+	 */
 	transient private List<String> whiteboard;
 	
-	/**
+	/*
 	 * X, Y coordinate in graph editor
 	 */
 	private int x;
@@ -184,7 +194,8 @@ public class Node implements Serializable {
 		this.userInput = "";
 		this.edges = new HashMap<String, Edge>();
 		this.ports = new HashMap<String, Short>();
-		this.blockMsg = new HashMap<String, List<Event>>();
+		
+		this.blockMsg = new HashMap<String, List<Event>>();		
 		this.blockPort = new HashMap<String, Boolean>();
 		this.holdEvents = new ArrayList<Event>();
 		this.stateNames = new HashMap<Integer, String>();
@@ -284,8 +295,8 @@ public class Node implements Serializable {
 		}
 		if (!this.edges.containsKey(label) && !this.edges.containsValue(edge)) {
 			this.edges.put(label, edge);
-			this.ports.put(label, new Short(type));
-			this.blockPort.put(label, new Boolean(false));
+			this.ports.put(label, type);
+			this.blockPort.put(label, false);
 
 		} else {
 			throw new DisJException(IConstants.ERROR_2, label);
@@ -389,8 +400,9 @@ public class Node implements Serializable {
 	 * @throws DisJException
 	 */
 	public boolean isBlocked(String label) throws DisJException {
-		if (!this.blockPort.containsKey(label))
+		if (!this.blockPort.containsKey(label)){
 			throw new DisJException(IConstants.ERROR_1, label);
+		}
 		return ((Boolean) this.blockPort.get(label)).booleanValue();
 	}
 
@@ -805,9 +817,19 @@ public class Node implements Serializable {
     	 // rebuild this object
     	 os.defaultReadObject();
     	 this.blockMsg = new HashMap<String, List<Event>>();
+    	 this.blockPort = new HashMap<String, Boolean>();
     	 this.holdEvents = new ArrayList<Event>();
     	 this.stateNames = new HashMap<Integer, String>();	 
     	 this.pastStates = new ArrayList<String>();
+    	 this.curAgents = new ArrayList<Agent>();
+    	 this.whiteboard = new ArrayList<String>();
+    	 
+    	 // re-initialize all ports label to blocked port map
+    	 Iterator<String> it = this.ports.keySet().iterator();
+    	 for(;it.hasNext();){
+    		 String port = it.next();
+    		 this.blockPort.put(port, false);
+    	 }
     }
 
 

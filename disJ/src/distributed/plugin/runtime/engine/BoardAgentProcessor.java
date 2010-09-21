@@ -2,12 +2,12 @@ package distributed.plugin.runtime.engine;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -19,19 +19,18 @@ import distributed.plugin.core.Agent;
 import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
 import distributed.plugin.core.IConstants;
+import distributed.plugin.core.Logger;
 import distributed.plugin.core.Node;
 import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.BoardAgentEvent;
 import distributed.plugin.runtime.Event;
 import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.GraphLoader;
-import distributed.plugin.runtime.IBoardModel;
 import distributed.plugin.runtime.IMessage;
-import distributed.plugin.runtime.IProcesses;
+import distributed.plugin.runtime.IProcessor;
 import distributed.plugin.ui.IGraphEditorConstants;
-import distributed.plugin.ui.editor.GraphEditor;
 
-public class BoardAgentProcessor implements IProcesses {
+public class BoardAgentProcessor implements IProcessor {
 
 	private boolean stop;
 
@@ -43,16 +42,22 @@ public class BoardAgentProcessor implements IProcesses {
 
 	private String procName;
 
-	private PrintWriter nodeFile;
+	private EventQueue queue;
 
-	private PrintWriter edgeFile;
+	private Graph graph;
 
-	private PrintWriter RecFile;
+	private TimeGenerator timeGen;
 
+	/*
+	 * Logger to log every activities of this process
+	 * for replay action
+	 */
+	private Logger log;
+	
 	/*
 	 * Client agent Class file (blueprint)
 	 */
-	private Class<IBoardModel> client;
+	private Class<BoardAgent> client;
 
 	/*
 	 * Client random Class file (blueprint)
@@ -68,50 +73,51 @@ public class BoardAgentProcessor implements IProcesses {
 	/*
 	 * Global tracking list of all created agents
 	 */
-	private Map<String, Agent> allAgents;
-	
-	private EventQueue queue;
-
-	private Graph graph;
-
-	private TimeGenerator timeGen;
-
-	private GraphEditor ge;
+	private Map<String, Agent> allAgents;	
 
 	/*
 	 * System out delegate to Eclipse plug-in console
 	 */
 	private MessageConsoleStream systemOut;
 
-	
-	BoardAgentProcessor(GraphEditor ge, Graph graph, Class<IBoardModel> client, Class<IRandom> clientRandom,
+	/**
+	 * Constructor
+	 * 
+	 * @param graph A graph model that used by the processor
+	 * @param client A client BoardAgent object that hold algorithm
+	 * @param clientRandom A client IRandom object the hold algorithm
+	 * @param out A URL to a location of log files directory
+	 * @throws IOException
+	 */
+	BoardAgentProcessor(Graph graph, Class<BoardAgent> client, Class<IRandom> clientRandom,
 			URL out) throws IOException {
-		this.ge = ge;
+		
+		if (graph == null || client == null){
+			throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
+		}
+	
 		this.speed = IConstants.SPEED_DEFAULT_RATE;
 		this.stop = false;
-		this.pause = false;
+		this.pause = false;		
 		
-		if (graph == null){
-			throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
-		}
-		if (client == null){
-			throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
-		}
-
 		this.graph = graph;
 		this.procName = graph.getId();
 		this.client = client;
 		this.clientRandom = clientRandom;
 		this.queue = new EventQueue();
-		this.timeGen = TimeGenerator.getTimeGenerator();
-		this.timeGen.addGraph(graph.getId() + "");
 		this.stateFields = new HashMap<Integer, String>();
 		this.allAgents = new HashMap<String, Agent>();
+		
+		this.timeGen = TimeGenerator.getTimeGenerator();
+		this.timeGen.addGraph(this.graph.getId());		
+		
+		this.log = new Logger(this.graph.getId(), out, this.timeGen);		
 
 		this.setSystemOutConsole();
 		this.initClientStateVariables();
-		
-		//this.initLogFile(out);
+		if (this.clientRandom != null) {
+			this.initClientRandomStateVariables();
+		}
 	}
 	
 	/*
@@ -122,6 +128,11 @@ public class BoardAgentProcessor implements IProcesses {
 		this.systemOut = console.newMessageStream();
 		System.setOut(new PrintStream(this.systemOut));
 		System.setErr(new PrintStream(this.systemOut));
+	}
+	
+	// FIXME need to do something here!!!
+	private void initClientRandomStateVariables() {
+		
 	}
 	
 	/**
@@ -172,6 +183,21 @@ public class BoardAgentProcessor implements IProcesses {
 	}
 
 	/*
+	 * Load and initialize nodes in the network
+	 */
+	private void loadNode() throws DisJException {
+		Map<String, Node> nodes = this.graph.getNodes();
+		
+		Iterator<String> it = nodes.keySet().iterator();
+		for(String id = null; it.hasNext();){
+			id = it.next();
+			Node node = nodes.get(id);
+			node.setLogger(this.log);
+			nodes.put(id, node);
+		}
+	}
+	
+	/*
 	 * Load every agent(s) into a host node and initialize event(s)
 	 */
 	private void loadAgent() throws DisJException {
@@ -205,6 +231,7 @@ public class BoardAgentProcessor implements IProcesses {
 					this.allAgents.put(agentId+"", agent);
 					
 					agentId++;
+					this.systemOut.println("@loadAgent() " + agent.getAgentId());
 				}
 			}
 			
@@ -287,6 +314,8 @@ public class BoardAgentProcessor implements IProcesses {
 			Agent agent = this.allAgents.get(agentId);
 			sNode.removeAgent(agent);
 			
+			this.systemOut.println("@processMove() " + agent.getAgentId() + " from " + fromNodeId + " to " + target.getNodeId());
+			
 			// validate the probability of failure
 			if (!link.isReliable()) {
 				int prob = ran.nextInt(100) + 1;
@@ -358,28 +387,49 @@ public class BoardAgentProcessor implements IProcesses {
 		this.stop = stop;
 	}
 
+	public int getSpeed() {
+		return this.speed;
+	}
+
+	public void setSpeed(int speed) {
+		this.speed = speed;
+	}
+
 	public void cleanUp() {
 		
+		// clean up the memory
+		this.graph = null;
+
+		// reset the flag the process is terminated
+		this.stop = true;
+		this.pause = false;
 	}
 	
 	
 	@Override
 	public void run() {
 		try {
-			// load and initialize any necessary data
+			// init logger
+			this.log.initLog();
+		
+			// load and init any necessary data
+			this.loadNode();
 			this.loadAgent();
 
 			// start execute events
 			this.executeEvents();
 
 			this.systemOut.println("\n*****Simulation for " + this.procName
-					+ " is successfully and peacefully over.*****");
+					+ " is successfully over.*****");
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			this.throwException(e);
+			this.systemOut.println(e.toString());
 			
-		} finally {
+		} finally {			
+			// clean up logger
+			this.log.cleanUp();
+
 			this.cleanUp();
 			this.systemOut.println("\n*****The simulation of " + this.procName
 					+ " is terminated.*****");
@@ -395,12 +445,11 @@ public class BoardAgentProcessor implements IProcesses {
 			if (this.stop){
 				break;
 			}
-
 			// To slow down the simulation speed
 			try {
 				Thread.sleep(this.speed);
 			} catch (InterruptedException ignore) {
-				System.out.println("@[Processor].executeEvent() Slow down process with speed: "
+				System.out.println("@BoardAgentProcessor.executeEvent() Slow down process with speed: "
 						+ this.speed + " =>" + ignore);
 			}
 
@@ -418,7 +467,7 @@ public class BoardAgentProcessor implements IProcesses {
 							Thread.sleep(1000);
 						} catch (InterruptedException ignore) {
 							System.out
-									.println("@[Processor].executeEvent() breakpoint=true: "
+									.println("@BoardAgentProcessor.executeEvent() breakpoint=true: "
 											+ ignore);
 						}
 					}
@@ -443,7 +492,7 @@ public class BoardAgentProcessor implements IProcesses {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException ignore) {
-					System.out.println("@Processor.executeEvent() pause=true: "
+					System.out.println("@BoardAgentProcessor.executeEvent() pause=true: "
 							+ ignore);
 				}
 			}
@@ -458,9 +507,12 @@ public class BoardAgentProcessor implements IProcesses {
 			BoardAgentEvent e = (BoardAgentEvent)events.get(i);
 			Agent agent = this.allAgents.get(e.getAgentId());
 			
-			BoardAgent entity = (BoardAgent)agent.getClientEntity();
-			agent.setHasInitExec(true);
-			entity.init();			
+			if(agent.isAlive()){
+				BoardAgent entity = (BoardAgent)agent.getClientEntity();
+				agent.setHasInitExec(true);
+				entity.init();	
+			}
+			this.systemOut.println("@invokeInit() " + agent.getAgentId());
 		}
 	}
 	
@@ -472,10 +524,13 @@ public class BoardAgentProcessor implements IProcesses {
 			BoardAgentEvent e = (BoardAgentEvent)events.get(i);
 			Agent agent = this.allAgents.get(e.getAgentId());
 
-			BoardAgent entity = (BoardAgent)agent.getClientEntity();
-			if(agent.isHasInitExec()){
-				entity.alarmRing();
+			if(agent.isAlive()){
+				BoardAgent entity = (BoardAgent)agent.getClientEntity();
+				if(agent.isHasInitExec()){
+					entity.alarmRing();
+				}
 			}
+			this.systemOut.println("@invokeAlarmRing() " + agent.getAgentId());
 		}
 	}
 	
@@ -523,6 +578,7 @@ public class BoardAgentProcessor implements IProcesses {
 				if(agent.isHasInitExec()){
 					entity.arrive(port);
 				}
+				this.systemOut.println("@invokeArrival()" + agent.getAgentId() + " arrives " + node.getNodeId());
 			}
 		}
 	}
