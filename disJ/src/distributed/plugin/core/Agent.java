@@ -7,9 +7,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.runtime.IDistributedModel;
 
 @SuppressWarnings("serial")
@@ -30,6 +33,11 @@ public class Agent implements Serializable{
 	 * Flag for checking whether it has been initialized
 	 */
 	private boolean hasInitExec;
+	
+	/*
+	 * Current state of this agent
+	 */
+	private int curState;
 	
 	/*
 	 * Max number of memory slot that agent can carry
@@ -58,12 +66,6 @@ public class Agent implements Serializable{
 	private String lastPortEnter;
 	
 	/*
-	 * A memory suitcase for agent to carry while traveling
-	 * in a network
-	 */
-	transient private String[] info;
-
-	/*
 	 * A node that agent currently resided 
 	 */
 	transient private Node curNode;
@@ -72,26 +74,135 @@ public class Agent implements Serializable{
 	 * A client entity that own this agent
 	 */
 	transient private IDistributedModel entity;
+
+	/*
+	 * Logger that will log the node activities
+	 */
+	transient private Logger log;
+
+	/*
+	 * A memory suitcase for agent to carry while traveling
+	 * in a network
+	 */
+	transient private String[] info;
+
+	/*
+	 * Tracking every state that node has been through in orderly
+	 */
+	transient private List<String> pastStates;
+	
+	/*
+	 * A mapping table of every possible state name and value defined by user
+	 */
+	transient private Map<Integer, String> stateNames;
+	
 	
 	protected PropertyChangeSupport listeners = new PropertyChangeSupport(this);
 	
-	public void addPropertyChangeListener(PropertyChangeListener l) {
-		// System.out.println("[Node] addPropertyChangeListener: " + l);
-		listeners.addPropertyChangeListener(l);
-	}
 
-	public void firePropertyChange(String prop, Object old, Object newValue) {
-		// System.out.println("[Node] firePropertyChange: " + prop);
-		listeners.firePropertyChange(prop, old, newValue);
-	}
-
-	
+	/**
+	 * Constructor 
+	 * 
+	 * @param agentId
+	 * @param hostId
+	 */
 	public Agent(String agentId, String hostId){
 		this.starter = true;
 		this.hasInitExec = false;
 		this.alive = true;
 		this.agentId = agentId;
 		this.homeId = hostId;
+		this.log = null;
+		
+		this.pastStates = new ArrayList<String>();
+		this.stateNames = new HashMap<Integer, String>();
+	}
+	
+	
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+		listeners.addPropertyChangeListener(l);
+	}
+
+	public void firePropertyChange(String prop, Object old, Object newValue) {
+		listeners.firePropertyChange(prop, old, newValue);
+	}
+
+	/**
+	 * Set a state-name pairs list of this node
+	 * 
+	 * @param states
+	 */
+	public void setStateNames(Map<Integer, String> states) {
+		this.stateNames = states;
+	}
+
+	/*
+	 * Return a state's name corresponding to a given state if the state's name
+	 * does not find it will return "state not found"
+	 * 
+	 * @param state
+	 * @return
+	 */
+	private String getStateName(int state) {
+		if (this.stateNames.containsKey(state)) {
+			return this.stateNames.get(state);
+		} else {
+			return IConstants.STATE_NOT_FOUND + " " + state;
+		}
+	}
+	
+	/**
+	 * Get a current state, which is the last element in the list
+	 * 
+	 * @return Returns the state.
+	 */
+	public int getCurState() {
+		return this.curState;
+	}
+
+	/**
+	 * Add a new state into the last element of the list
+	 * 
+	 * @param state
+	 *            The state to set.
+	 */
+	public void setCurState(int state) {
+		this.curState = state;
+		this.pastStates.add(this.getStateName(state));
+		
+		// FIXME
+		//this.firePropertyChange(IConstants.PROPERTY_CHANGE_NODE_STATE, null,
+		//		new Integer(this.curState));
+	
+		// it is not a reset action
+		if(this.curState != -1){
+			this.log.logAgent(logTag.AGENT_STATE, this.agentId, this.getStateName(this.curState));	
+		}			
+	}
+	
+	public void resetState() {		
+		this.setCurState(-1);
+	}
+
+	public List<String> getStateList() {
+		return this.pastStates;
+	}
+
+	public void resetStateList() {
+		if(this.pastStates != null){
+			this.pastStates.clear();
+		}else{
+			this.pastStates = new ArrayList<String>();
+		}
+	}
+
+	/**
+	 * Set logger
+	 * 
+	 * @param log
+	 */
+	public void setLogger(Logger log){
+		this.log = log;
 	}
 	
 	public boolean isAlive() {

@@ -12,7 +12,7 @@ import distributed.plugin.runtime.engine.TimeGenerator;
 public class Logger {
 	
 	public enum logTag{ 
-		NODE_STATE, NODE_SEND, NODE_INIT, NODE_RECV, EDGE_MSG, EDGE_LOST
+		NODE_STATE, NODE_SEND, NODE_INIT, NODE_RECV, EDGE_MSG, EDGE_LOST, AGENT_STATE, AGENT_DIE
 	}
 	
 	private String graphId;
@@ -63,6 +63,9 @@ public class Logger {
 		this.out.println(this.getCurrentTime()+ "," + tag + "," + edgeId + "," + value);
 	}
 	
+	public void logAgent(logTag tag, String agentId, Object value){
+		this.out.println(this.getCurrentTime() + "," + tag + ","+ agentId + "," + value);
+	}
 	
 	
 
