@@ -35,7 +35,7 @@ public interface IConstants {
 	public static final short MSGDELAY_GLOBAL_RANDOM_CUSTOMS= 3;
 	public static final short MSGDELAY_GLOBAL_CUSTOMS = 4;
 	
-	public static final short MSGDELAY_DEFAULT_SEED = 1;
+	public static final short DEFAULT_MSGDELAY_SEED = 1;
 	public static final short MSGFAILURE_DEFAULT_PROB = 5;
 	
 	public static final short MSGDELAY_LOCAL_FIXED = 0;
@@ -82,6 +82,7 @@ public interface IConstants {
 	public static final String RUNTIME_ERROR_0 = "Parameter cannot be null";
 
 	// general constants
+	public static final int DEFAULT_MAX_NUM_TOKEN = 20;
 	public static final int SPEED_MAX_RATE = 100;
 	public static final int SPEED_MIN_RATE = 10000;
 	public static final int SPEED_DEFAULT_RATE = 1000;

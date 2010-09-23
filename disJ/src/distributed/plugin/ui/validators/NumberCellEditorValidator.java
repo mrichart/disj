@@ -36,8 +36,12 @@ public class NumberCellEditorValidator implements ICellEditorValidator {
 	 */
 	public String isValid(Object value) {
 		try {
-			new Integer((String)value);
-			return null;
+			Integer num = new Integer((String)value);
+			if(num.intValue() >= 0){
+				return null;
+			}else {
+				return IGraphEditorConstants.ERROR_NEGATIVE;
+			}
 		} catch (Exception e) {
 			return IGraphEditorConstants.ERROR_NAN;
 		}

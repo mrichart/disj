@@ -146,6 +146,7 @@ public interface IGraphEditorConstants {
 	public static final int NODE_SIZE = 30;
 	public static final String CONTEXT_MENU = "distributed.plugin.ui.actions";
 	public static final String ERROR_NAN = "It has to be an integer number";
+	public static final String ERROR_NEGATIVE = "It has to be positive integer number";
 	public static final String ERROR_EMPTY_TEXT = "It cannot be an empty string";
 	public static final String ERROR_OUTOF_RAND = "The range must be between 0 - 100";
 	public static final String DISJ_CONSOLE = "DisJ Console";

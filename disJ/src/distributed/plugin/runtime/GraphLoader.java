@@ -26,6 +26,7 @@ import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
 import distributed.plugin.runtime.engine.BoardAgent;
 import distributed.plugin.runtime.engine.Entity;
+import distributed.plugin.runtime.engine.TokenAgent;
 
 /**
  * @author Me
@@ -55,7 +56,7 @@ public class GraphLoader {
             Map<String, Node> nodes = graph.getNodes();
             for (String id : nodes.keySet()) {
             	Node initNode = nodes.get(id);
-                if (initNode.hasInitializer()) {
+                if (initNode.isInitializer()) {
                     initList.add(initNode);
                 }
 			}          
@@ -95,7 +96,7 @@ public class GraphLoader {
     }
     
     /**
-     * Create a client agent object by reflection with empty constructor
+     * Create a client Board agent object by reflection with empty constructor
      * 
      * @param client
      *            a client class object that need to be created
@@ -110,6 +111,28 @@ public class GraphLoader {
         BoardAgent agent = null;
         try {
         	agent = (BoardAgent) client.newInstance();
+        } catch (InstantiationException e) {
+            throw new DisJException(IConstants.ERROR_8, e.toString());
+        }
+        return agent;
+    }
+    
+    /**
+     * Create a client Token agent object by reflection with empty constructor
+     * 
+     * @param client
+     *            a client class object that need to be created
+     * @return
+     * @throws Exception
+     *             All the exception that caused by reflection processes
+     */
+    public static TokenAgent createTokenAgentObject(Class<TokenAgent> client) throws Exception {
+        if (client == null)
+            throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
+
+        TokenAgent agent = null;
+        try {
+        	agent = (TokenAgent) client.newInstance();
         } catch (InstantiationException e) {
             throw new DisJException(IConstants.ERROR_8, e.toString());
         }

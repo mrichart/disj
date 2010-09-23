@@ -30,6 +30,7 @@ import distributed.plugin.core.Node;
 import distributed.plugin.ui.GraphEditorPluginException;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.validators.EmptyCellEditorValidator;
+import distributed.plugin.ui.validators.NumberCellEditorValidator;
 
 /**
  *
@@ -39,25 +40,28 @@ public class NodeElement extends AdapterElement {
 	static final long serialVersionUID = IConstants.SERIALIZE_VERSION;
 
 	// modifiable properties
-	private static final String PROPERTY_USER = "N0 User Input";
-	private static final String PROPERTY_NAME = "N1 Node Name";
-	private static final String PROPERTY_IS_INIT = "N2 Initiator";
-	private static final String PROPERTY_IS_ALIVE = "N3 Alive";
-	private static final String PROPERTY_BREAKPOINT = "N4 Breakpoint";
+	private static final String PROPERTY_NAME = "N00 Node Name";
+	private static final String PROPERTY_USER = "N01 User Input";	
+	private static final String PROPERTY_IS_INIT = "N02 Initiator";
+	private static final String PROPERTY_IS_ALIVE = "N03 Alive";
+	private static final String PROPERTY_BREAKPOINT = "N04 Breakpoint";
 
 	// unmodifiable properties
-	private static final String PROPERTY_MSG_RECV = "N5 Number of Received Message";
-	private static final String PROPERTY_MSG_SENT = "N6 Number of Sent Message";
+	private static final String PROPERTY_MSG_RECV = "N05 Number of Received Message";
+	private static final String PROPERTY_MSG_SENT = "N06 Number of Sent Message";
 	
 	// unmodifiable properties with multiple values
-	private static final String PROPERTY_OUT_PORTS = "N7 Outgoing Ports";
-	private static final String PROPERTY_IN_PORTS = "N8 Incoming Ports";
-	private static final String PROPERTY_STATES = "N9 State List";
+	private static final String PROPERTY_OUT_PORTS = "N07 Outgoing Ports";
+	private static final String PROPERTY_IN_PORTS = "N08 Incoming Ports";
+	private static final String PROPERTY_STATES = "N09 State List";
+	private static final String PROPERTY_NUM_INIT_AGENT = "N10 Number of Agent Hosted";
+	private static final String PROPERTY_NUM_AGENT = "N11 Current Number of Agent";
+	private static final String PROPERTY_NUM_TOKEN = "N12 Current Number of Token";
 	
 	private static final String[] propertyArray = {PROPERTY_USER, PROPERTY_NAME,
 			PROPERTY_IS_INIT, PROPERTY_IS_ALIVE, PROPERTY_BREAKPOINT,
 			PROPERTY_MSG_RECV, PROPERTY_MSG_SENT, PROPERTY_OUT_PORTS,
-			PROPERTY_IN_PORTS,PROPERTY_STATES};
+			PROPERTY_IN_PORTS,PROPERTY_STATES, PROPERTY_NUM_AGENT, PROPERTY_NUM_TOKEN, PROPERTY_NUM_INIT_AGENT};
 	
 	private static final int NUM_PROPERTIES = propertyArray.length;
 
@@ -65,18 +69,23 @@ public class NodeElement extends AdapterElement {
 	static {
 		descriptors = new IPropertyDescriptor[NUM_PROPERTIES];
 
-		descriptors[0] =  new TextPropertyDescriptor(PROPERTY_USER,
-				PROPERTY_USER);
-		descriptors[1] = new TextPropertyDescriptor(PROPERTY_NAME,
+		descriptors[0] = new TextPropertyDescriptor(PROPERTY_NAME,
 				PROPERTY_NAME);
 		((PropertyDescriptor) descriptors[0])
 				.setValidator(EmptyCellEditorValidator.instance());
+		
+		descriptors[1] =  new TextPropertyDescriptor(PROPERTY_USER,
+				PROPERTY_USER);
+				
 		descriptors[2] = new ComboBoxPropertyDescriptor(PROPERTY_IS_INIT,
 				PROPERTY_IS_INIT, new String[] { "False", "True" });
+		
 		descriptors[3] = new ComboBoxPropertyDescriptor(PROPERTY_IS_ALIVE,
 				PROPERTY_IS_ALIVE, new String[] { "False", "True" });
+		
 		descriptors[4] = new ComboBoxPropertyDescriptor(PROPERTY_BREAKPOINT,
 				PROPERTY_BREAKPOINT, new String[] { "Disable", "Enable" });
+		
 		descriptors[5] = new PropertyDescriptor(PROPERTY_MSG_RECV,
 				PROPERTY_MSG_RECV);
 		descriptors[6] = new PropertyDescriptor(PROPERTY_MSG_SENT,
@@ -87,6 +96,17 @@ public class NodeElement extends AdapterElement {
 				PROPERTY_IN_PORTS);
 		descriptors[9] = new PropertyDescriptor(PROPERTY_STATES,
 				PROPERTY_STATES);
+		
+		descriptors[10] = new TextPropertyDescriptor(PROPERTY_NUM_INIT_AGENT,
+				PROPERTY_NUM_INIT_AGENT);
+		((PropertyDescriptor) descriptors[10])
+				.setValidator(NumberCellEditorValidator.instance());
+		
+		descriptors[11] = new PropertyDescriptor(PROPERTY_NUM_AGENT,
+				PROPERTY_NUM_AGENT);
+		
+		descriptors[12] = new PropertyDescriptor(PROPERTY_NUM_TOKEN,
+				PROPERTY_NUM_TOKEN);
 		
 	}
 
@@ -264,6 +284,7 @@ public class NodeElement extends AdapterElement {
 	 * @return Object which is the value of the property.
 	 */
 	public Object getPropertyValue(Object propName) {
+		
 		if (propName.equals(PROPERTY_NAME)) {
 			return this.node.getName();
 
@@ -272,8 +293,9 @@ public class NodeElement extends AdapterElement {
 
 		} else if (propName.equals(PROPERTY_IS_INIT)) {
 			int i = 0;
-			if (this.node.hasInitializer())
-				i = this.node.getNumInit();
+			if (this.node.isInitializer()){
+				i = 1;
+			}				
 			return new Integer(i);
 
 		} else if (propName.equals(PROPERTY_IS_ALIVE)) {
@@ -304,7 +326,16 @@ public class NodeElement extends AdapterElement {
 		} else if (propName.equals(PROPERTY_STATES)) {
 			return this.node.getStateList();
 
-		} else {
+		} else if (propName.equals(PROPERTY_NUM_INIT_AGENT)) {
+			return "" + this.node.getNumInitAgent();
+
+		} else if (propName.equals(PROPERTY_NUM_AGENT)) {
+			return "" + this.node.getAllAgents().size();
+
+		} else if (propName.equals(PROPERTY_NUM_TOKEN)) {
+			return "" + this.node.getNumToken();
+
+		}else {
 			return "unknown property id";
 		}
 	}
@@ -319,37 +350,54 @@ public class NodeElement extends AdapterElement {
 	 *            Value to be set to the given parameter.
 	 */
 	public void setPropertyValue(Object id, Object value) {
+		
 		if (id.equals(PROPERTY_NAME)) {
 			this.node.setName((String) value);
 			this.firePropertyChange(IConstants.PROPERTY_CHANGE_NAME, "", value);
 
 		} else if (id.equals(PROPERTY_IS_INIT)) {
 			if (value instanceof Integer) {
-				this.node.setNumInit(((Integer) value).intValue());
+				boolean bool = true;
+				if (((Integer) value).intValue() <= 0){
+					bool = false;
+				}
+				this.node.setInit(bool);
 			}
-
 		} else if (id.equals(PROPERTY_IS_ALIVE)) {
 			if (value instanceof Integer) {
-				boolean bool = false;
-				if (((Integer) value).intValue() == 1)
-					bool = true;
+				boolean bool = true;
+				if (((Integer) value).intValue() <= 0){
+					bool = false;
+				}
 				this.node.setAlive(bool);
 			}
-
 		} else if (id.equals(PROPERTY_BREAKPOINT)) {
 			if (value instanceof Integer) {
-				boolean bool = false;
-				if (((Integer) value).intValue() == 1)
-					bool = true;
+				boolean bool = true;
+				if (((Integer) value).intValue() <= 0){
+					bool = false;
+				}
 				this.node.setBreakpoint(bool);
 			}
-
 		} else if (id.equals(PROPERTY_USER)) {
 			if(value == null){		
 				value = "user input";
 			}
 			this.node.setUserInput(value.toString());
-		}else {
+			
+		} else if (id.equals(PROPERTY_NUM_INIT_AGENT)) {
+			// allow to set iff it is an initializer node 
+			// and the simulation hasn't been started
+			if(this.node.isInitializer()){
+				if(this.node.getStateList().isEmpty()){
+					try {					
+						int numAgent = Integer.valueOf(value.toString());
+						this.node.setNumInitAgent(numAgent);
+					}catch(NumberFormatException e){
+					}
+				}
+			}			
+		} else {
 			return;
 		}
 	}
@@ -383,6 +431,13 @@ public class NodeElement extends AdapterElement {
 
 		} else if (propName.equals(PROPERTY_STATES)) {
 			this.node.resetStateList();
+			return;
+			
+		} else if (propName.equals(PROPERTY_NUM_TOKEN)) {
+			this.node.clearToken();
+			return;
+		} else if (propName.equals(PROPERTY_NUM_AGENT)) {
+			this.node.getAllAgents().size();
 			return;
 		}
 

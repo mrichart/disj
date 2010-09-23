@@ -151,9 +151,9 @@ public class ReplayController implements IController {
 							// FIXME init should be integer number
 							boolean b = new Boolean(Init);
 							if(b){
-								node.setNumInit(1);
+								node.setInit(true);
 							}else{
-								node.setNumInit(0);
+								node.setInit(false);
 							}
 							String StarterLine = bsr.readLine();
 							// System.out.println(StarterLine);

@@ -95,8 +95,12 @@ public class SimulatorEngine {
         	   Class<BoardAgent> c = (Class<BoardAgent>) client;
         	   this.proc = new BoardAgentProcessor(graph, c, clientRandom, this.outLocation);
         	   
+           }else if(TokenAgent.class.isAssignableFrom(client)){
+        	   Class<TokenAgent> c = (Class<TokenAgent>) client;
+        	   this.proc = new TokenAgentProcessor(graph, c, clientRandom, this.outLocation);
+        	   
            }else {
-        	   System.out.println("No support for class " + client);
+        	   System.err.println("[Warning] @SimultorEngine.execute() No support for class " + client);
         	   return;
            }
 
@@ -108,7 +112,7 @@ public class SimulatorEngine {
 
            
         } catch (Exception e) {
-        	System.err.println("ERROR @SimultorEngine.execute() " + e);
+        	System.err.println("[Critical] @SimultorEngine.execute() " + e);
         }
     }
 

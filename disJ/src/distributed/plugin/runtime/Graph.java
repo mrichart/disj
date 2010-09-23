@@ -46,7 +46,9 @@ public class Graph implements Serializable {
 
 	private String protocol;
 	
-	private int modelId;
+	private int modelId; // a type of protocol
+	
+	private int maxToken; // a max number of token for token model
 	
 	private Map<String, Node> nodes;
 
@@ -68,11 +70,12 @@ public class Graph implements Serializable {
 		this.id = id;
 		this.globalFlowType = IConstants.MSGFLOW_FIFO_TYPE;
 		this.globalDelayType = IConstants.MSGDELAY_GLOBAL_SYNCHRONOUS;
-		this.globalDelaySeed = IConstants.MSGDELAY_DEFAULT_SEED;
+		this.globalDelaySeed = IConstants.DEFAULT_MSGDELAY_SEED;
 		this.currentNodeId = 0;
 		this.currentEdgeId = 0;
 		this.protocol = "";
 		this.modelId = -1;
+		this.maxToken = IConstants.DEFAULT_MAX_NUM_TOKEN;
 		
 		this.numMsgSent = new HashMap<String, Integer>();
 		this.numMsgRecv = new HashMap<String, Integer>();
@@ -219,6 +222,14 @@ public class Graph implements Serializable {
 
 	public void setModelId(int modelId) {
 		this.modelId = modelId;
+	}
+
+	public int getMaxToken() {
+		return maxToken;
+	}
+
+	public void setMaxToken(int maxToken) {
+		this.maxToken = maxToken;
 	}
 
 	public int getGlobalDelayType() {

@@ -31,7 +31,7 @@ import distributed.plugin.runtime.IMessage;
 import distributed.plugin.runtime.IProcessor;
 import distributed.plugin.ui.IGraphEditorConstants;
 
-public class BoardAgentProcessor implements IProcessor {
+public class TokenAgentProcessor implements IProcessor {
 
 	private boolean stop;
 
@@ -58,7 +58,7 @@ public class BoardAgentProcessor implements IProcessor {
 	/*
 	 * Client agent Class file (blueprint)
 	 */
-	private Class<BoardAgent> client;
+	private Class<TokenAgent> client;
 
 	/*
 	 * Client random Class file (blueprint)
@@ -90,7 +90,7 @@ public class BoardAgentProcessor implements IProcessor {
 	 * @param out A URL to a location of log files directory
 	 * @throws IOException
 	 */
-	BoardAgentProcessor(Graph graph, Class<BoardAgent> client, Class<IRandom> clientRandom,
+	TokenAgentProcessor(Graph graph, Class<TokenAgent> client, Class<IRandom> clientRandom,
 			URL out) throws IOException {
 		
 		if (graph == null || client == null){
@@ -135,7 +135,7 @@ public class BoardAgentProcessor implements IProcessor {
 	/*
 	 * Get client (agent) states defined by user
 	 */
-	private void initClientStateVariables() {
+	private void initClientStateVariables() {	
 		try {
 			Field[] states = this.client.getFields();
 			Object obj = this.client.newInstance();
@@ -154,7 +154,7 @@ public class BoardAgentProcessor implements IProcessor {
 				}
 			}
 		} catch (Exception e){
-			this.systemOut.println("@initClientStateVariables() " + e.toString());
+			this.throwException(e);
 		}
 	}
 
@@ -178,13 +178,13 @@ public class BoardAgentProcessor implements IProcessor {
 	 * 
 	 * @param e an exception that has been thrown
 	 */
-	private void throwException(Throwable e, String msg){		
-		this.systemOut.println(msg + " [Critical] " + e.toString());
+	private void throwException(Throwable e){		
+		this.systemOut.println(e.toString());
 		throw new RuntimeException(e);
 	}
 	
 	/*
-	 * Load and initialize all nodes in the network
+	 * Load and initialize nodes in the network
 	 */
 	private void loadNode() throws DisJException {
 		Map<String, Node> nodes = this.graph.getNodes();
@@ -200,11 +200,12 @@ public class BoardAgentProcessor implements IProcessor {
 	}
 	
 	/*
-	 * Load every agent(s) into host nodes and initialize event(s)
+	 * Load every agent(s) into a host node and initialize event(s)
 	 */
 	private void loadAgent() throws DisJException {
 
 		int agentId = 0;
+		int maxTok = this.graph.getMaxToken();
 		String[] suitcase;
 		List<Node> hosts = GraphLoader.getInitNodes(this.graph);
 		try {
@@ -217,24 +218,22 @@ public class BoardAgentProcessor implements IProcessor {
 					// each host
 					Agent agent = new Agent(agentId +"", host.getNodeId());
 					agent.setCurNode(host);
-					agent.setLogger(this.log);
-					agent.setStateNames(this.stateFields);
 					
 					// initialize memory suitcase for agent
 					suitcase = new String[agent.getMaxSlot()];
 					agent.setInfo(suitcase);
+					agent.setStateNames(this.stateFields);
 					
-					BoardAgent clientAgent = GraphLoader.createBoardAgentObject(client);				
-					agent.setClientEntity(clientAgent);					
+					TokenAgent clientAgent = GraphLoader.createTokenAgentObject(client);				
+					agent.setClientEntity(clientAgent);
+					clientAgent.setMaxToken(maxTok);
 					clientAgent.initAgent(agent, this);
-					
 					
 					// add to home host
 					host.addAgent(agent);
 					
-					// add to global/graphUI tracking list
+					// add to global tracking list
 					this.allAgents.put(agentId+"", agent);
-					this.graph.addAgent(agentId+"", agent);
 					
 					agentId++;
 					this.systemOut.println("@loadAgent() " + agent.getAgentId());
@@ -353,7 +352,7 @@ public class BoardAgentProcessor implements IProcessor {
 			this.queue.pushEvent(e);
 			
 		}catch(Exception e){
-			this.throwException(e, "@processMove()");
+			this.throwException(e);
 		}
 	}
 
@@ -374,14 +373,10 @@ public class BoardAgentProcessor implements IProcessor {
 			this.setCurrentTime(this.queue.topEvent().getExecTime());
 			
 		}catch(Exception e){
-			this.throwException(e, "@processAlarmClock()");
+			this.throwException(e);
 		}
 	}
 	
-	public Map<Integer, String> getStateFields() {
-		return stateFields;
-	}
-
 	public boolean isPause() {
 		return pause;
 	}
@@ -611,6 +606,11 @@ public class BoardAgentProcessor implements IProcessor {
 			this.systemOut.println("@BoardAgentProcessor.getNextId() [critical]  " + e.toString());
 		}
 		return id;
+	}
+
+	@Override
+	public Map<Integer, String> getStateFields() {
+		return this.stateFields;
 	}
 
 }

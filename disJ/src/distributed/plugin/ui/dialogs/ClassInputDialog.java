@@ -48,7 +48,7 @@ public class ClassInputDialog extends Dialog {
 		
 		this.className = new Text(composite, SWT.BORDER);
 		this.className.setText("Fully Qualified Java Class Name");
-		this.className.setSize(50, 25);
+		this.className.setSize(70, 25);
 		
 		return composite;
 	}

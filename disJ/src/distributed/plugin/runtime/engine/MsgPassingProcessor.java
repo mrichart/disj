@@ -138,8 +138,10 @@ public class MsgPassingProcessor implements IProcessor {
 		return systemOut;
 	}
 	
+	/*
+	 * Get client (node) states defined by user
+	 */
 	private void initClientStateVariables() {
-
 		try {
 			Field[] states = this.client.getFields();
 			Object obj = this.client.newInstance();
@@ -175,7 +177,7 @@ public class MsgPassingProcessor implements IProcessor {
 
 		Random ran = new Random(System.currentTimeMillis());
 		List<Event> newEvents = new ArrayList<Event>();
-		Node sNode = graph.getNode(sender);
+		Node sNode = this.graph.getNode(sender);
 		String msgLabel = message.getLabel();
 		Serializable data = message.getContent();
 	
@@ -408,12 +410,14 @@ public class MsgPassingProcessor implements IProcessor {
 		try {
 			for (int i = 0; i < initNodes.size(); i++) {
 				Node init = initNodes.get(i);
+				
+				// set up logger and state list
 				init.setLogger(this.log);
+				init.setStateNames(this.stateFields);
 				
 				Entity clientObj = GraphLoader.createEntityObject(client);
-				clientObj.initEntity(this, init, this.stateFields);
-				init.addEntity(clientObj);
-				
+				clientObj.initEntity(this, init);
+				init.addEntity(clientObj);								
 			}
 
 			//Random r = new Random(System.currentTimeMillis());
@@ -579,7 +583,7 @@ public class MsgPassingProcessor implements IProcessor {
 
 				// not allow to execute receive msg if it is init node and
 				// it has not yet execute init()
-			} else if ((recv.hasInitializer() == false)
+			} else if ((recv.isInitializer() == false)
 					|| (recv.isInitExec() == true)) {
 				
 				// update receive log
@@ -639,13 +643,15 @@ public class MsgPassingProcessor implements IProcessor {
 		// lazy init: If there is no client at the node yet	
 		if(clientObj == null){
 			try {
-				// setup logger
+				// setup logger and state list
 				node.setLogger(this.log);
+				node.setStateNames(this.stateFields);
 				
 				// create and assign it to the node
 				clientObj = GraphLoader.createEntityObject(this.client);
-				clientObj.initEntity(this, node, this.stateFields);
+				clientObj.initEntity(this, node);
 				node.addEntity(clientObj);
+				
 				
 			} catch (Exception ex) {
 				throw new DisJException(IConstants.ERROR_8, ex.toString());
@@ -713,6 +719,11 @@ public class MsgPassingProcessor implements IProcessor {
 
 	public void setStepForward(boolean stepForward) {
 		this.stepForward = stepForward;
+	}
+
+	@Override
+	public Map<Integer, String> getStateFields() {
+		return this.stateFields;
 	}
 	 
 }

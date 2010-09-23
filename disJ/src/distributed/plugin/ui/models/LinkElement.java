@@ -44,15 +44,15 @@ public abstract class LinkElement extends AdapterElement {
 
 	static final long serialVersionUID = IConstants.SERIALIZE_VERSION;
 		
-	private static final String PROPERTY_DIRECTION_TYPE = "L1 Type of Direction";   
-	private static final String PROPERTY_START_PORT = "L2 Source Port Name";   
-	private static final String PROPERTY_END_PORT = "L3 Target Port Name";
-	private static final String PROPERTY_MSG_FLOW_TYPE = "L4 Message Flow Type";
-	private static final String PROPERTY_DELAY_TYPE = "L5 Delay Type";   
-	private static final String PROPERTY_DELAY_SEED = "L6 Delay Seed";   
-	private static final String PROPERTY_RELIABLE = "L7 Reliable";   
-	private static final String PROPERTY_PROB_FAILURE = "L8 Probability of Failure";
-	private static final String PROPERTY_TOTAL_MSG = "L9 Total Traffic";
+	private static final String PROPERTY_DIRECTION_TYPE = "L00 Type of Direction";   
+	private static final String PROPERTY_START_PORT = "L01 Source Port Name";   
+	private static final String PROPERTY_END_PORT = "L02 Target Port Name";
+	private static final String PROPERTY_MSG_FLOW_TYPE = "L03 Message Flow Type";
+	private static final String PROPERTY_DELAY_TYPE = "L04 Delay Type";   
+	private static final String PROPERTY_DELAY_SEED = "L05 Delay Seed";   
+	private static final String PROPERTY_RELIABLE = "L06 Reliable";   
+	private static final String PROPERTY_PROB_FAILURE = "L07 Probability of Failure";
+	private static final String PROPERTY_TOTAL_MSG = "L08 Total Traffic";
 
 	private static final String[] propertyArray = {PROPERTY_DIRECTION_TYPE, 
 		PROPERTY_START_PORT, PROPERTY_END_PORT, PROPERTY_MSG_FLOW_TYPE, 
@@ -294,7 +294,7 @@ public abstract class LinkElement extends AdapterElement {
         	int val = ((Integer)value).intValue();
         	if(val > 255 || val < 1){
         		// default value
-        		this.edge.setDelaySeed(IConstants.MSGDELAY_DEFAULT_SEED);
+        		this.edge.setDelaySeed(IConstants.DEFAULT_MSGDELAY_SEED);
         	} else {
         		this.edge.setDelaySeed(val);
         	}           

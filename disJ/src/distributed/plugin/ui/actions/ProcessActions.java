@@ -44,6 +44,7 @@ import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.engine.BoardAgent;
 import distributed.plugin.runtime.engine.Entity;
 import distributed.plugin.runtime.engine.SimulatorEngine;
+import distributed.plugin.runtime.engine.TokenAgent;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.dialogs.ClassInputDialog;
 import distributed.plugin.ui.dialogs.SpeedDialog;
@@ -303,13 +304,16 @@ public class ProcessActions extends WorkbenchPartAction {
 			GraphElement ge = editor.getGraphElement();
 			List<NodeElement> nList = ge.getNodeElements();
 			Graph graph = ge.getGraph();
+			
+			/*
 			Node node;
 			for (NodeElement n : nList) {
 				try {
 					node = n.getNode();
-					//node.resetState((node.getCurState());
 					graph.addNode(n.getNodeId(), node);
-				} catch (DisJException e) {}
+				} catch (DisJException e) {
+					System.err.println("ERROR !!!executeRun() add duplicate node");
+				}
 			}
 			List <LinkElement> eList = ge.getLinkElements();
 			Edge edge;
@@ -317,9 +321,11 @@ public class ProcessActions extends WorkbenchPartAction {
 				try {
 					edge = le.getEdge();
 					graph.addEdge(le.getEdgeId(), edge);
-				} catch (DisJException e) {}
+				} catch (DisJException e) {
+					System.err.println("ERROR !!! executeRun()add duplicate edge");
+				}
 			}
-			
+			*/
 			// FIXME a cheated way to refresh the node color
 			// to user setting state
 //			Map<String, Node> nodes = graph.getNodes();
@@ -396,7 +402,7 @@ public class ProcessActions extends WorkbenchPartAction {
 					return;
 				}
 			}else {
-				if (!BoardAgent.class.isAssignableFrom(client)) {
+				if (!TokenAgent.class.isAssignableFrom(client)) {
 					MessageDialog.openError(parent, "Cannot load Client Class Error",
 							"Class must extends TokenAgent");
 					return;

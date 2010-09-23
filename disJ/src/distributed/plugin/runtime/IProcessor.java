@@ -11,12 +11,14 @@
 package distributed.plugin.runtime;
 
 import java.util.List;
+import java.util.Map;
+
+import org.eclipse.ui.console.MessageConsoleStream;
 
 import distributed.plugin.core.DisJException;
 
 
 /**
- * @author npiyasin
  * 
  * A processor that processing requests
  */
@@ -32,6 +34,18 @@ public interface IProcessor extends Runnable {
 	 * @throws DisJException If there exist an invalid receiver 
 	 */
 	public void processReqeust(String sender, List<String> receivers, IMessage message) throws DisJException;
+	
+	/**
+	 * Get client state public fields of algorithm
+	 * @return A map of state value and a variable name
+	 */
+	public Map<Integer, String> getStateFields();
+	
+	/**
+	 * Get standard output of client plug-in
+	 * @return
+	 */
+	public MessageConsoleStream getSystemOut();
 	
 	public void setStop(boolean stop);
 

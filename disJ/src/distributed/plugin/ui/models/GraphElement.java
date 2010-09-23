@@ -43,20 +43,22 @@ public class GraphElement extends AdapterElement {
 
 	static final long serialVersionUID = IConstants.SERIALIZE_VERSION;
 	
-	private static final String PROPERTY_NAME = "G1 Graph Name";
-	private static final String PROPERTY_TOTAL_NODE = "G2 Total Node";
-	private static final String PROPERTY_TOTAL_LINK = "G3 Total Link";
-	private static final String PROPERTY_TOTAL_MSG_RECV = "G4 Total Received Messages";
-	private static final String PROPERTY_TOTAL_MSG_SENT = "G5 Total Sent Messages";
-	private static final String PROPERTY_GLOBAL_MSG_FLOW_TYPE = "G6 Global Message Flow Type";
-	private static final String PROPERTY_GLOBAL_DELAY_TYPE = "G7 Global Delay Type";
-	private static final String PROPERTY_GLOBAL_DELAY_SEED = "G8 Global Delay Seed";
-	private static final String PROPERTY_PROTOCOL = "G9 Protocol";
+	private static final String PROPERTY_NAME = "G00 Graph Name";
+	private static final String PROPERTY_TOTAL_NODE = "G01 Total Node";
+	private static final String PROPERTY_TOTAL_LINK = "G02 Total Link";
+	private static final String PROPERTY_TOTAL_MSG_RECV = "G03 Total Messages Received";
+	private static final String PROPERTY_TOTAL_MSG_SENT = "G04 Total Messages Sent";
+	private static final String PROPERTY_GLOBAL_MSG_FLOW_TYPE = "G05 Global Message Flow Type";
+	private static final String PROPERTY_GLOBAL_DELAY_TYPE = "G06 Global Delay Type";
+	private static final String PROPERTY_GLOBAL_DELAY_SEED = "G07 Global Delay Seed";
+	private static final String PROPERTY_PROTOCOL = "G08 Protocol";
+	private static final String PROPERTY_MAX_TOKEN = "G09 Maximum Token Agent can Carry";
+	private static final String PROPERTY_TOTAL_AGENT = "G10 Total Agent in Network";
     
 	private static final String[] propertyArray = {PROPERTY_NAME, PROPERTY_TOTAL_NODE,
 		PROPERTY_TOTAL_LINK, PROPERTY_TOTAL_MSG_RECV, PROPERTY_TOTAL_MSG_SENT,
 		PROPERTY_GLOBAL_MSG_FLOW_TYPE, PROPERTY_GLOBAL_DELAY_TYPE, PROPERTY_GLOBAL_DELAY_SEED, 
-		PROPERTY_PROTOCOL};
+		PROPERTY_PROTOCOL, PROPERTY_MAX_TOKEN, PROPERTY_TOTAL_AGENT};
 	
 	private static final int NUM_PROPERTIES = propertyArray.length;
 	
@@ -85,19 +87,29 @@ public class GraphElement extends AdapterElement {
                 PROPERTY_TOTAL_MSG_RECV);
         descriptors[4] = new PropertyDescriptor(PROPERTY_TOTAL_MSG_SENT,
                 PROPERTY_TOTAL_MSG_SENT);
+        
         descriptors[5] = new ComboBoxPropertyDescriptor(PROPERTY_GLOBAL_MSG_FLOW_TYPE,
                 PROPERTY_GLOBAL_MSG_FLOW_TYPE,
                 // FIXME the index order must corresponding to value in IConstance
                 new String[] {FIFO_TYPE, NO_ORDER_TYPE, MIX_TYPE});
+        
         descriptors[6] = new ComboBoxPropertyDescriptor(PROPERTY_GLOBAL_DELAY_TYPE,
                 PROPERTY_GLOBAL_DELAY_TYPE, 
                 // FIXME the index order must corresponding to value in IConstance
                 new String[] {SYNCHRONOUS, RANDOM_UNIFORM, RANDOM_POISSON, RANDOM_CUSTOMS, CUSTOMS });
+        
         descriptors[7] = new TextPropertyDescriptor(PROPERTY_GLOBAL_DELAY_SEED,
                 PROPERTY_GLOBAL_DELAY_SEED);
         ((PropertyDescriptor) descriptors[7])
                 .setValidator(NumberCellEditorValidator.instance());
-        descriptors[8] = new TextPropertyDescriptor(PROPERTY_PROTOCOL,PROPERTY_PROTOCOL);
+        
+        descriptors[8] = new PropertyDescriptor(PROPERTY_PROTOCOL,PROPERTY_PROTOCOL);
+        
+        descriptors[9] = new TextPropertyDescriptor(PROPERTY_MAX_TOKEN,PROPERTY_MAX_TOKEN);
+        ((PropertyDescriptor) descriptors[9])
+        		.setValidator(NumberCellEditorValidator.instance());
+        
+        descriptors[10] = new PropertyDescriptor(PROPERTY_TOTAL_AGENT,PROPERTY_TOTAL_AGENT);
     }
     
     private String graphId;
@@ -125,7 +137,7 @@ public class GraphElement extends AdapterElement {
         this.linkElements = new ArrayList<LinkElement> ();
         
         // FIXME what is 99 state???
-		this.stateColors.put((short)99, new RGB(100, 150, 50));		
+		//this.stateColors.put((short)99, new RGB(100, 150, 50));		
         //System.out.println("[GraphElement] created "   + this.graph);
     }
     
@@ -323,12 +335,18 @@ public class GraphElement extends AdapterElement {
             return this.mapGlobalDelayType(this.graph.getGlobalDelayType());
            
         } else if (propName.equals(PROPERTY_GLOBAL_DELAY_SEED)) {
-            return this.graph.getGlobalDelaySeed();
-        } 
-        else if (propName.equals(PROPERTY_PROTOCOL)) {
+            return "" + this.graph.getGlobalDelaySeed();
+            
+        } else if (propName.equals(PROPERTY_PROTOCOL)) {
             return this.graph.getProtocol();
-        } 
-        else {
+            
+        } else if (propName.equals(PROPERTY_MAX_TOKEN)) {
+            return "" + this.graph.getMaxToken();
+            
+        } else if (propName.equals(PROPERTY_TOTAL_AGENT)) {
+            return "" + graph.getAgents().size();
+            
+        } else {
             return  propName;
         }
     }
@@ -343,7 +361,7 @@ public class GraphElement extends AdapterElement {
      *            Value to be set to the given parameter.
      */
     public void setPropertyValue(Object id, Object value) {   	
-    	
+    	   	
         if(id.equals(PROPERTY_PROTOCOL)){
         	// nothing to set here
         	this.graph.setProtocol((String)value);
@@ -395,10 +413,17 @@ public class GraphElement extends AdapterElement {
 				}
         	}
         } else if (id.equals(PROPERTY_GLOBAL_DELAY_SEED)) {
-        	int val = ((Integer)value).intValue();
+        	int val;
+        	try{
+        		Integer i = Integer.valueOf(value.toString());
+        		val = i.intValue();
+        		
+        	}catch(NumberFormatException e){
+        		val = IConstants.DEFAULT_MSGDELAY_SEED;
+        	}
         	if(val > 255 || val < 1){
         		// default value
-        		val = IConstants.MSGDELAY_DEFAULT_SEED;       		
+        		val = IConstants.DEFAULT_MSGDELAY_SEED;       		
         	} else {
         		this.graph.setGlobalDelaySeed(val);
         		
@@ -408,7 +433,28 @@ public class GraphElement extends AdapterElement {
             		ed.setDelaySeed(val);
 				}
         	}       	
-        }else {
+        } else if (id.equals(PROPERTY_MAX_TOKEN)) {
+        	// allow to set max token only before the start
+        	// of the simulation
+        	if(this.graph.getAgents().isEmpty() &&
+        			this.graph.getMsgRecvCounter().isEmpty() && 
+        			this.graph.getMsgSentCounter().isEmpty()){
+        		
+	        	int val;
+	        	try{
+	        		Integer i = Integer.valueOf(value.toString());
+	        		val = i.intValue();
+	        		
+	        	}catch(NumberFormatException e){
+	        		val = IConstants.DEFAULT_MAX_NUM_TOKEN;
+	        	}
+	        	if(val < 1){
+	        		// default value
+	        		val = IConstants.DEFAULT_MAX_NUM_TOKEN;       		
+	        	}
+	        	this.graph.setMaxToken(val);
+        	}
+        } else {
         	// unknown prop do nothing
             return;
         }

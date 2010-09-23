@@ -58,9 +58,19 @@ public class Node implements Serializable {
 
 	/*
 	 * Number of agent to be started at this node
-	 * TODO add this to GUI (follow isInitializer ref)
 	 */
-	private int numInitPerHost;
+	private int numInitAgent;
+	
+	/*
+	 * State indicates whether this node is a host/initializer
+	 * node
+	 */
+	private boolean isInit;
+	
+	/*
+	 * Number of token currently located in this node
+	 */
+	private int numToken;
 	
 	private String userInput;
 
@@ -156,24 +166,24 @@ public class Node implements Serializable {
 	 * @param nodeId
 	 */
 	public Node(String nodeId) {
-		this("unknown", nodeId, "", 0, true);
+		this("unknown", nodeId, "", false, true);
 	}
 
 	public Node(String graphId, String nodeId) {
-		this(graphId, nodeId, "", 0, true);
+		this(graphId, nodeId, "", false, true);
 	}
 
 	public Node(String graphId, String nodeId, int x, int y) {
-		this(graphId, nodeId, "", 0, true, x, y);
+		this(graphId, nodeId, "", false, true, x, y);
 	}
 
-	public Node(String graphId, String nodeId, String name, int numInit,
+	public Node(String graphId, String nodeId, String name, boolean isInit,
 			boolean isStarter) {
-		this(graphId, nodeId, name, numInit, isStarter, 0, 0);
+		this(graphId, nodeId, name, isInit, isStarter, 0, 0);
 
 	}
 
-	public Node(String graphId, String nodeId, String name, int numInit,
+	public Node(String graphId, String nodeId, String name, boolean isInit,
 			boolean isStartHost, int x, int y) {
 		this.x = x;
 		this.y = y;
@@ -183,11 +193,13 @@ public class Node implements Serializable {
 		this.graphId = graphId;
 		this.name = name;
 		this.breakpoint = false;
-		this.numInitPerHost = numInit;		
+		this.isInit = isInit;
+		this.numInitAgent = 0;		
 		this.initExec = false;
 		this.isAlive = isStartHost;
 		this.numMsgRecv = 0;
 		this.numMsgSend = 0;
+		this.numToken = 0;
 		this.latestRecvPort = null;
 		this.entity = null;
 		this.log = null;
@@ -206,12 +218,10 @@ public class Node implements Serializable {
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener l) {
-		// System.out.println("[Node] addPropertyChangeListener: " + l);
 		listeners.addPropertyChangeListener(l);
 	}
 
 	public void firePropertyChange(String prop, Object old, Object newValue) {
-		// System.out.println("[Node] firePropertyChange: " + prop);
 		listeners.firePropertyChange(prop, old, newValue);
 	}
 
@@ -233,16 +243,16 @@ public class Node implements Serializable {
 		this.stateNames = states;
 	}
 
-	/**
+	/*
 	 * Return a state's name corresponding to a given state if the state's name
 	 * does not find it will return "state not found"
 	 * 
 	 * @param state
 	 * @return
 	 */
-	public String getStateName(int state) {
+	private String getStateName(int state) {
 		if (this.stateNames.containsKey(state)) {
-			return (String) this.stateNames.get(state);
+			return this.stateNames.get(state);
 		} else {
 			return IConstants.STATE_NOT_FOUND + " " + state;
 		}
@@ -504,7 +514,7 @@ public class Node implements Serializable {
 	 */
 	public String toString() {
 		return ("\n\nNode: " + this.name + "\nState: " + this.curState
-				+ "\nInit: " + this.hasInitializer() + "\nStarter: "
+				+ "\nInit: " + this.isInitializer() + "\nStarter: "
 				+ this.isAlive);
 	}
 
@@ -528,34 +538,71 @@ public class Node implements Serializable {
 	public Entity getEntity() {
 		return (Entity) this.entity;
 	}
-
+	
 	/**
 	 * Check whether a node contains any initializer
 	 * @return Returns the isInit.
 	 */
-	public boolean hasInitializer() {
-		return this.numInitPerHost > 0;		
-	}	
+	public boolean isInitializer() {
+		return isInit;
+	}
+
+	/**
+	 * Set this node to be OR not to be an initializer
+	 * @param isInit True is to be an initializer,
+	 * otherwise false
+	 */
+	public void setInit(boolean isInit) {
+		this.isInit = isInit;
+	}
 	
 	/**
 	 * Get number of initializer of this node
 	 * @return
 	 */
-	public int getNumInit() {
-		return numInitPerHost;
+	public int getNumInitAgent() {
+		return numInitAgent;
 	}
 	
 	/**
 	 * Set number of initializer to this node
-	 * @param numInit
+	 * @param numInit number of init agent to
+	 * be started at this node
 	 *            
 	 */
-	public void setNumInit(int numInit) {
-		this.numInitPerHost = numInit;
+	public void setNumInitAgent(int numInit) {
+		this.numInitAgent = numInit;
 	}
 
 	public void setGraphId(String id) {
 		this.graphId = id;
+	}
+
+	public int getNumToken() {
+		return numToken;
+	}
+
+	public void clearToken() {
+		this.numToken = 0;
+	}
+	
+	public void decrementToken(int numDecrease) {
+		if(this.numToken < numDecrease){
+			throw new IllegalArgumentException("@Node.decrementToken()"
+					+ " Number of decrease token " + numDecrease 
+					+ " is more than available token "
+					+ this.numToken);
+		}
+		this.numToken = numDecrease;
+	}
+
+	public void incrementToken(int numIncrease) {
+		if(numIncrease < 1){
+			throw new IllegalArgumentException("@Node.incrementToken()"
+					+ " Number of increase token " + numIncrease 
+					+ " must be more than 0");
+		}
+		this.numToken += numIncrease;
 	}
 
 	/**
@@ -565,15 +612,6 @@ public class Node implements Serializable {
 	 */
 	public int getCurState() {
 		return this.curState;
-	}
-
-	/**
-	 * Initialize a start state of this node
-	 * 
-	 * @param state
-	 */
-	public void initStartState(int state) {
-		this.setCurState(state);		
 	}
 
 	/**
@@ -588,22 +626,24 @@ public class Node implements Serializable {
 		
 		this.firePropertyChange(IConstants.PROPERTY_CHANGE_NODE_STATE, null,
 				new Integer(this.curState));
-
+	
 		// it is not a reset action
 		if(this.curState != -1){
 			this.log.logNode(logTag.NODE_STATE, this.nodeId, this.getStateName(this.curState));	
-		}			
+		}
+	}
+
+	/**
+	 * Initialize a start state of this node
+	 * 
+	 * @param state
+	 */
+	public void initStartState(int state) {
+		this.setCurState(state);		
 	}
 
 	public void resetState() {		
 		this.setCurState(-1);
-	}
-
-	/**
-	 * @return Returns the edges.
-	 */
-	public Map<String, Edge> getEdges() {
-		return edges;
 	}
 
 	public List<String> getStateList() {
@@ -616,6 +656,13 @@ public class Node implements Serializable {
 		}else{
 			this.pastStates = new ArrayList<String>();
 		}
+	}
+
+	/**
+	 * @return Returns the edges.
+	 */
+	public Map<String, Edge> getEdges() {
+		return edges;
 	}
 
 	/**
@@ -816,6 +863,7 @@ public class Node implements Serializable {
     private void readObject(ObjectInputStream os) throws IOException, ClassNotFoundException  {
     	 // rebuild this object
     	 os.defaultReadObject();
+    	 this.clearToken();
     	 this.blockMsg = new HashMap<String, List<Event>>();
     	 this.blockPort = new HashMap<String, Boolean>();
     	 this.holdEvents = new ArrayList<Event>();

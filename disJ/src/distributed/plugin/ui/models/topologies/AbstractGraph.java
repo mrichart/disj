@@ -61,11 +61,11 @@ public abstract class AbstractGraph implements ITopology {
 		double min = this.numNode * 0.6;
 		if(this.numInit >= this.numNode){
 			for (NodeElement node : this.nodes) {
-				node.getNode().setNumInit(1);
+				node.getNode().setInit(true);
 			}
 		}else if( this.numInit >= min){
 			for (NodeElement node : this.nodes) {
-				node.getNode().setNumInit(1);
+				node.getNode().setInit(true);
 			}
 			
 			Node n;
@@ -79,7 +79,7 @@ public abstract class AbstractGraph implements ITopology {
 				}
 				temp.add(nId);
 				n = this.nodes.get(nId).getNode();
-				n.setNumInit(0);
+				n.setInit(false);
 			}
 		}else{
 			Node n;
@@ -93,7 +93,7 @@ public abstract class AbstractGraph implements ITopology {
 				}
 				temp.add(nId);
 				n = this.nodes.get(nId).getNode();
-				n.setNumInit(1);
+				n.setInit(true);
 			}
 		}
 	}

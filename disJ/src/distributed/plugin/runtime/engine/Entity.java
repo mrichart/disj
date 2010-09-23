@@ -30,9 +30,7 @@ import distributed.plugin.runtime.IMessagePassingModel;
  */
 public abstract class Entity implements IMessagePassingModel {
 
-	private int startState;
-
-	private int lastState = -1;
+	private int curState;
 	
 	private MsgPassingProcessor processor;
 
@@ -40,9 +38,8 @@ public abstract class Entity implements IMessagePassingModel {
 
 	private MessageConsoleStream systemOut;
 
-	protected Entity(int state) {
-		
-		this.startState = state;
+	protected Entity(int state) {		
+		this.curState = state;
 		this.processor = null;
 		this.nodeOwner = null;
 	}
@@ -54,17 +51,16 @@ public abstract class Entity implements IMessagePassingModel {
 	 * @param processor
 	 * @param owner
 	 */
-	void initEntity(MsgPassingProcessor processor, Node owner, Map<Integer, String> states) {
+	void initEntity(MsgPassingProcessor processor, Node owner) {
 		if (this.processor == null){
 			this.processor = processor;
 			this.systemOut = this.processor.getSystemOut();
 		}
 
-		if (this.nodeOwner == null)
+		if (this.nodeOwner == null){
 			this.nodeOwner = owner;
-
-		this.nodeOwner.setStateNames(states);
-		this.nodeOwner.initStartState(this.startState);
+		}
+		this.nodeOwner.initStartState(this.curState);
 	}
 
 	/**
@@ -81,22 +77,6 @@ public abstract class Entity implements IMessagePassingModel {
 	 */
 	public final String getName() {
 		return this.nodeOwner.getName();
-	}
-
-	/**
-	 * Get a current state of this entity
-	 * 
-	 * @return a state of this entity
-	 */
-	public final int getState() {
-		try {
-			if (this.nodeOwner == null)
-				throw new DisJException(IConstants.ERROR_7);
-
-		}catch (Exception e) {
-			this.systemOut.println(e.toString());
-		}
-		return this.nodeOwner.getCurState();
 	}
 
 	/**
@@ -148,27 +128,37 @@ public abstract class Entity implements IMessagePassingModel {
 	}
 
 	/**
+	 * Get a current state of this entity
+	 * 
+	 * @return a state of this entity
+	 */
+	public final int getState() {
+		try {
+			if (this.nodeOwner == null)
+				throw new DisJException(IConstants.ERROR_7);
+		} catch (Exception e) {
+			this.systemOut.println(e.toString());
+		}
+		return this.curState;
+	}
+
+
+	/**
 	 * Set state of this entity to be at a given state
 	 * 
 	 * @param state
 	 *            A state that need to be set
 	 */
 	public final void become(int state) {
-		if (lastState==state) {return;}
-		else{
-			lastState=state;
+		if (curState == state) {
+			return;
 		}
 		try {
 			if (this.nodeOwner == null)
 				throw new DisJException(IConstants.ERROR_7);
 
-			this.nodeOwner.setCurState(state);
-			
-			//state change record
-			//this.processor.appendToRecFile("sc:"+this.getId()
-			//		+ IGraphEditorConstants.STATE_CHANGE + state);
-			
-
+			this.curState = state;
+			this.nodeOwner.setCurState(this.curState);
 		} catch (Exception e) {
 			this.systemOut.println(e.toString());
 		}
@@ -206,7 +196,6 @@ public abstract class Entity implements IMessagePassingModel {
 				return returnValue = name1;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 			this.systemOut.println(e.toString());
 		}
 		return returnValue;
