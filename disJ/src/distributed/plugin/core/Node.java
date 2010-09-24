@@ -26,6 +26,7 @@ import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.runtime.Event;
 import distributed.plugin.runtime.IDistributedModel;
 import distributed.plugin.runtime.engine.Entity;
+import distributed.plugin.runtime.engine.AgentModel.NotifyType;
 
 /**
  * @author Me
@@ -148,6 +149,11 @@ public class Node implements Serializable {
 	transient private List<String> whiteboard;
 	
 	/*
+	 * An event registration list of agent
+	 */
+	transient private Map<String, List<NotifyType>> registees;
+	
+	/*
 	 * X, Y coordinate in graph editor
 	 */
 	private int x;
@@ -214,6 +220,7 @@ public class Node implements Serializable {
 		this.pastStates = new ArrayList<String>();
 		this.curAgents = new ArrayList<Agent>();
 		this.whiteboard = new ArrayList<String>();
+		this.registees = new HashMap<String, List<NotifyType>>();
 
 	}
 
@@ -275,6 +282,7 @@ public class Node implements Serializable {
 	public void removeAgent(Agent agent){
 		if(curAgents.contains(agent)){
 			this.curAgents.remove(agent);
+			this.removeRegistee(agent.getAgentId());
 		}
 	}
 	
@@ -352,6 +360,65 @@ public class Node implements Serializable {
 		this.whiteboard = whiteboard;
 	}
 
+	/**
+	 * Get a list of all registred agent to this node
+	 * 
+	 * @return
+	 */
+	public Map<String, List<NotifyType>> getRegistees() {
+		return registees;
+	}
+
+	/**
+	 * Add an agent with type of notification for this node event
+	 * 
+	 * @param agentId
+	 * @param type
+	 */
+	public void addRegistee(String agentId, NotifyType type){
+		if(this.registees.containsKey(agentId)){
+			List<NotifyType> types = this.registees.get(agentId);
+			if(!types.contains(type)){
+				types.add(type);
+				this.registees.put(agentId, types);
+			}
+		}else{
+			List<NotifyType> types = new ArrayList<NotifyType>();
+			types.add(type);
+			this.registees.put(agentId, types);
+		}
+	}
+
+	/**
+	 * Remove a notification of an agent from this node event
+	 * 
+	 * @param agentId
+	 * @param type
+	 */
+	public void removeRegistee(String agentId, NotifyType type){
+		if(this.registees.containsKey(agentId)){
+			List<NotifyType> types = this.registees.get(agentId);
+			if(types.contains(type)){
+				types.remove(type);
+				if(types.isEmpty()){
+					this.registees.remove(agentId);
+				}else{
+					this.registees.put(agentId, types);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Remove agent and all of it's notification types
+	 * @param agentId
+	 */
+	public void removeRegistee(String agentId){
+		if(this.registees.containsKey(agentId)){
+			this.registees.remove(agentId);			
+		}
+	}
+	
 	/**
 	 * Get a port label of this node that connected to a given edge
 	 * 
@@ -871,6 +938,7 @@ public class Node implements Serializable {
     	 this.pastStates = new ArrayList<String>();
     	 this.curAgents = new ArrayList<Agent>();
     	 this.whiteboard = new ArrayList<String>();
+    	 this.registees = new HashMap<String, List<NotifyType>>();
     	 
     	 // re-initialize all ports label to blocked port map
     	 Iterator<String> it = this.ports.keySet().iterator();

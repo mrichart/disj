@@ -27,6 +27,13 @@ import distributed.plugin.runtime.IProcessor;
  *
  */
 public abstract class AgentModel implements IAgentModel {
+
+	/**
+	 * A notification type for client to register event that may
+	 * occur on a current host node
+	 */
+	public enum NotifyType{TOKEN_UPDATE, BOARD_UPDATE, 
+		AGENT_ARRIVAL, AGENT_DEPARTURE};
 	
 	int curState;
 
@@ -174,5 +181,47 @@ public abstract class AgentModel implements IAgentModel {
 	 */
 	public final List<String> getInPorts() {
 		return this.agentOwner.getInPorts();
+	}
+	
+	/**
+	 * Register a given event type for this agent
+	 * at current node
+	 * @param type
+	 */
+	public final void registerHostEvent(NotifyType type){
+		Node node = this.agentOwner.getCurNode();
+		node.addRegistee(this.getAgentId(), type);
+	}
+	
+	/**
+	 * Remove a given event type done by this agent
+	 * at current node
+	 * @param type
+	 */
+	public final void unregisterHostEvent(NotifyType type){
+		Node node = this.agentOwner.getCurNode();
+		node.removeRegistee(this.getAgentId(), type);
+	}
+	
+	/**
+	 * Remove all registered events done by this agent
+	 * at current node
+	 */
+	public final void unregisterHostAllEvents(){
+		Node node = this.agentOwner.getCurNode();
+		node.removeRegistee(this.getAgentId());
+	}
+	
+	/*
+	 * Generate notify event for agents
+	 */
+	void notifyEvent(NotifyType type){
+		// notify updated event
+		try{
+			this.processor.processReqeust(this.getNodeId(), new ArrayList<String>()
+					, new Message(IConstants.MESSAGE_EVENT_NOTIFY, type));
+		}catch(Exception e){
+			throw new IllegalStateException("@notifyEvent() " + e.toString());
+		}
 	}
 }

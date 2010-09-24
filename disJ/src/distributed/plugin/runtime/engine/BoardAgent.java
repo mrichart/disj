@@ -22,12 +22,16 @@ public abstract class BoardAgent extends AgentModel implements IBoardModel{
 	}
 
 	@Override
-	public final boolean removeRecord(String info) {		
-		return this.agentOwner.removeFromBoard(info);
+	public final boolean removeRecord(String info) {
+		boolean b = this.agentOwner.removeFromBoard(info);
+		this.notifyEvent(NotifyType.BOARD_UPDATE);
+		return b;
 	}
 
 	@Override
 	public final void appendToBoard(String info) {
 		this.agentOwner.appendToBoard(info);
+		this.notifyEvent(NotifyType.BOARD_UPDATE);
 	}
+	
 }

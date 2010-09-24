@@ -47,6 +47,7 @@ public interface IConstants {
 	public static final short EVENT_INITIATE_TYPE = 0;
 	public static final short EVENT_ALARM_RING_TYPE = 1;
 	public static final short EVENT_ARRIVAL_TYPE = 2;
+	public static final short EVENT_NOTIFY_TYPE = 3;
 		
 	// Catched exception messages
 	public static final short ERROR_0 = 0;
@@ -97,6 +98,7 @@ public interface IConstants {
 	public static final String MESSAGE_SET_BLOCK_MSG = "BLOCK_MSG";
 	public static final String MESSAGE_EVENT_MOVE_TO = "MOVE_TO";
 	public static final String MESSAGE_EVENT_ARRIVE_AT = "ARRIVE_AT";
+	public static final String MESSAGE_EVENT_NOTIFY = "NOTIFY_AGENT";
 	
 	public static final String SEND_TAG = "<send>";
 	public static final String RECV_TAG = "<recv>";
@@ -115,7 +117,6 @@ public interface IConstants {
     public static final String PROPERTY_CHANGE__LINK_INVISIBLE = "link_invisible";
     public static final String PROPERTY_CHANGE_NAME = "name";
     public static final String PROPERTY_CHANGE_USER_INPUT = "user_input";
-	
 	
 	
 	

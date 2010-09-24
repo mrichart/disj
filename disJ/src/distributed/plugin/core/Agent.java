@@ -298,7 +298,7 @@ public class Agent implements Serializable{
 	}
 	
 	/**
-	 * Append a message into the end of whitboard of this node
+	 * Append a message into the end of whiteboard of this node
 	 * 
 	 * @param msg
 	 */
@@ -306,17 +306,27 @@ public class Agent implements Serializable{
 		List<String> board = this.curNode.getWhiteboard();
 		board.add(msg);
 		this.curNode.setWhiteboard(board);
+		
+		// update log
+		String[] value = {this.curNode.getNodeId(), msg};
+		this.log.logAgent(logTag.AGENT_WRITE_TO_BOARD, this.getAgentId(), value);
 	}
 	
 	/**
 	 * Remove a given message from whiteboard of this node if exist
 	 * 
 	 * @param msg A message that want to be removed
-	 * @return Ture if the message found and removed, otherwise false
+	 * @return True if the message found and removed, otherwise false
 	 */
 	public boolean removeFromBoard(String msg){
 		List<String> board = this.curNode.getWhiteboard();
-		return board.remove(msg);
+		boolean b = board.remove(msg);
+		
+		// update log
+		String[] value = {this.curNode.getNodeId(), msg};
+		this.log.logAgent(logTag.AGENT_DELETE_FROM_BOARD, this.getAgentId(), value);
+		
+		return b; 
 	}
 	
 	/**

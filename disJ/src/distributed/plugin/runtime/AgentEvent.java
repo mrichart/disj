@@ -2,9 +2,11 @@ package distributed.plugin.runtime;
 
 import distributed.plugin.core.IConstants;
 
-public class BoardAgentEvent extends Event {
+public class AgentEvent extends Event {
 
-	enum actionType {WRITE_TO_BOARD, READ_FROM_BOARD, REMOVE_FROM_BOARD};
+	enum actionType {WRITE_TO_BOARD, READ_FROM_BOARD, REMOVE_FROM_BOARD, 
+		DROP_TOKEN, PICK_TOKEN;
+	}
 	
 	private String nodeId;
 	
@@ -13,6 +15,7 @@ public class BoardAgentEvent extends Event {
 	/*
 	 * Holding event info of {action_type : data require for action}
 	 * e.g. write to board {write_board: "A was here"}
+	 * 		drop token {numToken: location}
 	 *      move to port {move_out: port_label}
 	 *      init {init: execTime}
 	 *      set alarm {alarm: alarm Time}
@@ -20,7 +23,7 @@ public class BoardAgentEvent extends Event {
 	private IMessage info;
 	
 	
-	public BoardAgentEvent(short eventType, int eventId, int execTime, 
+	public AgentEvent(short eventType, int eventId, int execTime, 
 			String nodeId, String agentId, IMessage info) {
 		super(eventType, eventId, execTime);
 
@@ -43,10 +46,10 @@ public class BoardAgentEvent extends Event {
 	}
 
 	public boolean equals(Object obj) {
-		if (!(obj instanceof BoardAgentEvent))
+		if (!(obj instanceof AgentEvent))
 			return false;
 
-		BoardAgentEvent e = (BoardAgentEvent) obj;
+		AgentEvent e = (AgentEvent) obj;
 		return (e.getNodeId().equals(this.nodeId) 
 				&& e.getAgentId() == this.agentId
 				&& e.getExecTime() == this.getExecTime() 

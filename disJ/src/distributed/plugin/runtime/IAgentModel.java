@@ -1,5 +1,7 @@
 package distributed.plugin.runtime;
 
+import distributed.plugin.runtime.engine.AgentModel.NotifyType;
+
 public interface IAgentModel extends IDistributedModel {
 	
 	/**
@@ -71,5 +73,13 @@ public interface IAgentModel extends IDistributedModel {
 	 */
 	public void setNodeState(int state);
 
-	
+	/**
+	 * An agent that register to a host node event will get 
+	 * notified when a registered NotifyType has been occurred 
+	 * while the agent still resides at the host node or the
+	 * NotifyType has not yet been unregistered
+	 * 
+	 * @param type
+	 */
+	public void notified(NotifyType type);
 }

@@ -37,6 +37,7 @@ public abstract class TokenAgent extends AgentModel implements ITokenModel {
 			Node node = this.agentOwner.getCurNode();
 			node.incrementToken(1);
 			this.curToken--;
+			this.notifyEvent(NotifyType.TOKEN_UPDATE);
 		}	
 	}
 
@@ -63,11 +64,17 @@ public abstract class TokenAgent extends AgentModel implements ITokenModel {
 		Node node = this.agentOwner.getCurNode();
 		node.decrementToken(amount);
 		this.curToken += amount;
+		this.notifyEvent(NotifyType.TOKEN_UPDATE);
 			
 	}
 	
+	/*
+	 * Set limit and current number of token at the 
+	 * beginning of initiation.
+	 */
 	final void setMaxToken(int maxNum){
 		this.maxToken = maxNum;
+		this.curToken = this.maxToken;
 	}
 
 	@Override
