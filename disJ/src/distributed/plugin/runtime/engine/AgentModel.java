@@ -190,7 +190,9 @@ public abstract class AgentModel implements IAgentModel {
 	 */
 	public final void registerHostEvent(NotifyType type){
 		Node node = this.agentOwner.getCurNode();
-		node.addRegistee(this.getAgentId(), type);
+		if(node.isAlive()){
+			node.addRegistee(this.getAgentId(), type);
+		}
 	}
 	
 	/**
@@ -200,7 +202,9 @@ public abstract class AgentModel implements IAgentModel {
 	 */
 	public final void unregisterHostEvent(NotifyType type){
 		Node node = this.agentOwner.getCurNode();
-		node.removeRegistee(this.getAgentId(), type);
+		if(node.isAlive()){
+			node.removeRegistee(this.getAgentId(), type);
+		}
 	}
 	
 	/**
@@ -209,7 +213,9 @@ public abstract class AgentModel implements IAgentModel {
 	 */
 	public final void unregisterHostAllEvents(){
 		Node node = this.agentOwner.getCurNode();
-		node.removeRegistee(this.getAgentId());
+		if(node.isAlive()){
+			node.removeRegistee(this.getAgentId());
+		}
 	}
 	
 	/*

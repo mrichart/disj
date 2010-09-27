@@ -305,14 +305,15 @@ public class ProcessActions extends WorkbenchPartAction {
 			List<NodeElement> nList = ge.getNodeElements();
 			Graph graph = ge.getGraph();
 			
-			/*
+			// FIXME Double assignment: some time graph is empty
+			// it should not happen !!
 			Node node;
 			for (NodeElement n : nList) {
 				try {
 					node = n.getNode();
 					graph.addNode(n.getNodeId(), node);
 				} catch (DisJException e) {
-					System.err.println("ERROR !!!executeRun() add duplicate node");
+					System.err.println("@executeRun()[WARNING] try to add duplicated node");
 				}
 			}
 			List <LinkElement> eList = ge.getLinkElements();
@@ -322,10 +323,10 @@ public class ProcessActions extends WorkbenchPartAction {
 					edge = le.getEdge();
 					graph.addEdge(le.getEdgeId(), edge);
 				} catch (DisJException e) {
-					System.err.println("ERROR !!! executeRun()add duplicate edge");
+					System.err.println("executeRun()[WARNING] try to add duplicated edge");
 				}
 			}
-			*/
+			
 			// FIXME a cheated way to refresh the node color
 			// to user setting state
 //			Map<String, Node> nodes = graph.getNodes();
@@ -337,7 +338,7 @@ public class ProcessActions extends WorkbenchPartAction {
 			
 			// FIXME why we need this copy???
 			// editor.getGraphElement().copyGraphElement();
-			Class client = editor.getClientObject();						
+			Class client = editor.getClientObject();					
 			this.engine.execute(graph, client, editor.getClientRandomObject());
 			
 		} else {
@@ -359,7 +360,7 @@ public class ProcessActions extends WorkbenchPartAction {
 		Shell parent = this.editor.getSite().getShell();
 		String className = null;
 
-		// open up dialog
+		// open up class name input dialog
 		ClassInputDialog classNameDialog = new ClassInputDialog(parent);
 		classNameDialog.open();
 		

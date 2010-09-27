@@ -28,11 +28,14 @@ public class BoardAgentProcessor extends AgentProcessor {
 	 */
 	BoardAgentProcessor(Graph graph, Class<BoardAgent> client, 
 			Class<IRandom> clientRandom, URL out) {
+		
 		super(graph, clientRandom, out);
 		
 		if (client == null){
 			throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
-		}		
+		}
+		
+		this.client = client;
 		this.initClientStateVariables();
 	}
 	
@@ -64,7 +67,7 @@ public class BoardAgentProcessor extends AgentProcessor {
 	}
 	
 	protected AgentModel createClientAgent() throws Exception{
-		BoardAgent clientAgent = GraphLoader.createBoardAgentObject(client);
+		BoardAgent clientAgent = GraphLoader.createBoardAgentObject(this.client);
 		return clientAgent;
 	}
 

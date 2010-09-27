@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import distributed.plugin.core.Logger.logTag;
-import distributed.plugin.runtime.IDistributedModel;
+import distributed.plugin.runtime.engine.AgentModel;
 
 @SuppressWarnings("serial")
 public class Agent implements Serializable{
@@ -73,7 +73,7 @@ public class Agent implements Serializable{
 	/*
 	 * A client entity that own this agent
 	 */
-	transient private IDistributedModel entity;
+	transient private AgentModel entity;
 
 	/*
 	 * Logger that will log the node activities
@@ -221,7 +221,7 @@ public class Agent implements Serializable{
 		this.starter = starter;
 	}
 
-	public boolean isHasInitExec() {
+	public boolean hasInitExec() {
 		return hasInitExec;
 	}
 
@@ -262,11 +262,11 @@ public class Agent implements Serializable{
 	 * 
 	 * @param entity
 	 */
-	public void setClientEntity(IDistributedModel entity){
+	public void setClientEntity(AgentModel entity){
 		this.entity = entity;
 	}
 	
-	public IDistributedModel getClientEntity(){
+	public AgentModel getClientEntity(){
 		return this.entity;
 	}
 	

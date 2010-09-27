@@ -21,18 +21,18 @@ public abstract class TokenAgent extends AgentModel implements ITokenModel {
 	}	
 
 	@Override
-	public int countHostToken() {		
+	public final int countHostToken() {		
 		Node node = this.agentOwner.getCurNode();
 		return node.getNumToken();
 	}
 
 	@Override
-	public int countMyToken() {
+	public final int countMyToken() {
 		return this.curToken;
 	}
 
 	@Override
-	public void dropToken() {
+	public final void dropToken() {
 		if(this.curToken > 0){
 			Node node = this.agentOwner.getCurNode();
 			node.incrementToken(1);
@@ -42,7 +42,7 @@ public abstract class TokenAgent extends AgentModel implements ITokenModel {
 	}
 
 	@Override
-	public void pickupToken(int amount) {
+	public final void pickupToken(int amount) {
 		int temp = this.countHostToken();
 		if(amount > temp){
 			throw new IllegalArgumentException("@TokenAgent.pickupToken()" 
@@ -78,7 +78,7 @@ public abstract class TokenAgent extends AgentModel implements ITokenModel {
 	}
 
 	@Override
-	public int getMaxToken() {
+	public final int getMaxToken() {
 		return this.maxToken;
 	}
 

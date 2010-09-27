@@ -188,11 +188,10 @@ public abstract class AgentProcessor implements IProcessor {
 					suitcase = new String[agent.getMaxSlot()];
 					agent.setInfo(suitcase);
 					
-					BoardAgent clientAgent = (BoardAgent) this.createClientAgent();				
+					AgentModel clientAgent = this.createClientAgent();				
 					agent.setClientEntity(clientAgent);					
 					clientAgent.initAgent(agent, this);
-					
-					
+										
 					// add to home host
 					host.addAgent(agent);
 					
@@ -273,6 +272,8 @@ public abstract class AgentProcessor implements IProcessor {
 		Map<String, List<NotifyType>> list = sNode.getRegistees();
 		Iterator<String> its = list.keySet().iterator();
 		String agentId;
+		// create notify event to every agent who registered
+		// a give type to a given node
 		for(List<NotifyType> tmp = null;its.hasNext();){
 			agentId = its.next();
 			tmp = list.get(agentId);
@@ -306,8 +307,9 @@ public abstract class AgentProcessor implements IProcessor {
 			// remove agent from a node			
 			sNode.removeAgent(agent);
 			
-			// notify of my departure
-			BoardAgent entity = (BoardAgent)agent.getClientEntity();
+			AgentModel entity = agent.getClientEntity();
+			
+			// notify node of departure
 			entity.notifyEvent(NotifyType.AGENT_DEPARTURE);
 			
 			this.systemOut.println("@processMove() " + agent.getAgentId() + " from " 
@@ -469,8 +471,9 @@ public abstract class AgentProcessor implements IProcessor {
 			// suspend the process and/or hit breakpoint
 			if (!this.pause) {
 				AgentEvent e = (AgentEvent) this.queue.topEvent();
+				
+/*			
 				Node thisNode = this.graph.getNode(e.getNodeId());
-
 				if (thisNode.getBreakpoint() == true) {
 					this.pause = true;
 					while (this.pause) {
@@ -484,6 +487,8 @@ public abstract class AgentProcessor implements IProcessor {
 						}
 					}
 				}
+*/
+				
 				if (this.stop){
 					break;
 				}
@@ -506,10 +511,7 @@ public abstract class AgentProcessor implements IProcessor {
 			} else {
 				try {
 					Thread.sleep(1000);
-				} catch (InterruptedException ignore) {
-					this.systemOut.println("@AgentProcessor.executeEvent()" +
-							" pause=true: "	+ ignore);
-				}
+				} catch (InterruptedException ignore) {}
 			}
 		}
 	}
@@ -521,12 +523,17 @@ public abstract class AgentProcessor implements IProcessor {
 		for (int i = 0; i < events.size(); i++) {
 			AgentEvent e = (AgentEvent)events.get(i);
 			Agent agent = this.allAgents.get(e.getAgentId());
+			Node n = agent.getCurNode();
 			
-			if(agent.isAlive()){
-				BoardAgent entity = (BoardAgent)agent.getClientEntity();
-				agent.setHasInitExec(true);
-				entity.init();	
+			// Will NOT execute a Fail node or agent
+			if (!n.isAlive() || !agent.isAlive()){
+				// node dies agent must die as well
+				agent.setAlive(false);
+				continue;
 			}
+			AgentModel entity = agent.getClientEntity();
+			agent.setHasInitExec(true);
+			entity.init();	
 			this.systemOut.println("@invokeInit() " + agent.getAgentId());
 		}
 	}
@@ -538,18 +545,23 @@ public abstract class AgentProcessor implements IProcessor {
 		for (int i = 0; i < events.size(); i++) {
 			AgentEvent e = (AgentEvent)events.get(i);
 			Agent agent = this.allAgents.get(e.getAgentId());
+			Node n = agent.getCurNode();
+			
+			// Will NOT execute a Fail node or agent
+			if(!agent.isAlive() || !n.isAlive()){
+				// node dies agent must die as well
+				agent.setAlive(false);
+				continue;
+			}
 
-			if(agent.isAlive()){
-				BoardAgent entity = (BoardAgent)agent.getClientEntity();
-				if(agent.isHasInitExec()){
-					// update log
-					Node n = agent.getCurNode();
-					String[] value = {n.getNodeId(), null};
-					this.log.logAgent(logTag.AGENT_AWAKE, agent.getAgentId(), value);
-					
-					// execute action
-					entity.alarmRing();
-				}
+			AgentModel entity = agent.getClientEntity();
+			if(agent.hasInitExec()){
+				// update log
+				String[] value = {n.getNodeId(), null};
+				this.log.logAgent(logTag.AGENT_AWAKE, agent.getAgentId(), value);
+				
+				// execute action
+				entity.alarmRing();
 			}
 			this.systemOut.println("@invokeAlarmRing() " + agent.getAgentId());						
 		}
@@ -561,15 +573,19 @@ public abstract class AgentProcessor implements IProcessor {
 			AgentEvent e = (AgentEvent)events.get(i);
 			IMessage info = e.getInfo();
 			String linkId = (String)info.getContent();
+			Agent agent = this.allAgents.get(e.getAgentId());
 			
 			// retrieve node and port of arrival
 			Edge link = this.graph.getEdge(linkId);
 			Node node = this.graph.getNode(e.getNodeId());
 			String port = node.getPortLabel(link);
 
-			// Will NOT execute a Fail node
-			if (!node.isAlive())
+			// Will NOT execute a Fail node or agent
+			if (!node.isAlive() || !agent.isAlive()){
+				// node dies agent must die as well
+				agent.setAlive(false);
 				continue;
+			}
 
 			// check if the port is blocked
 			if (node.isBlocked(port) == true) {
@@ -589,21 +605,20 @@ public abstract class AgentProcessor implements IProcessor {
 				// track number of agent visit
 				//this.graph.countMsgRecv(e.getMessage().getLabel());
 				
-				// add new arrival agent to a node
-				Agent agent = this.allAgents.get(e.getAgentId());
+				// add new arrival agent to a node				
 				node.addAgent(agent);
 				
 				// set this node to be current residence of agent
 				agent.setCurNode(node);
 				agent.setLastPortEnter(port);
 				
-				BoardAgent entity = (BoardAgent)agent.getClientEntity();	
+				AgentModel entity = agent.getClientEntity();	
 
-				// notify node of my arrival							
+				// notify node of arrival							
 				entity.notifyEvent(NotifyType.AGENT_ARRIVAL);
 				
 				// execute client code
-				if(agent.isHasInitExec()){
+				if(agent.hasInitExec()){
 					entity.arrive(port);
 				}
 				
@@ -614,8 +629,7 @@ public abstract class AgentProcessor implements IProcessor {
 	}
 
 	private void invokeNotify(List<Event> events){
-		for (int i = 0; i < events.size(); i++) {
-			
+		for (int i = 0; i < events.size(); i++) {			
 			// get each event
 			AgentEvent e = (AgentEvent)events.get(i);
 			
@@ -630,14 +644,20 @@ public abstract class AgentProcessor implements IProcessor {
 			Agent agent = this.graph.getAgent(e.getAgentId());
 
 			// Will NOT execute a Fail agent or node
-			if (!agent.isAlive() || node.isAlive()){
+			if (!agent.isAlive() || !node.isAlive()){
+				// node dies agent must die as well
+				agent.setAlive(false);
 				continue;
 			}
 			
-			BoardAgent entity = (BoardAgent)agent.getClientEntity();
-			if(agent.isHasInitExec()){
+			AgentModel entity = agent.getClientEntity();
+			if(agent.hasInitExec()){
 				entity.notified(type);
 			}
+			
+			// update log
+			String[] value = {node.getNodeId(), type.toString()};
+			this.log.logAgent(logTag.AGENT_NOTIFY, agent.getAgentId(), value);
 		}
 	}
 

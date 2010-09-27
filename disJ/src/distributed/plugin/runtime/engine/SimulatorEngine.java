@@ -100,15 +100,17 @@ public class SimulatorEngine {
         	   this.proc = new TokenAgentProcessor(graph, c, clientRandom, this.outLocation);
         	   
            }else {
-        	   System.err.println("[Warning] @SimultorEngine.execute() No support for class " + client);
+        	   System.err.println("[Warning] @SimultorEngine.execute() No support for class " 
+        			   + client);
         	   return;
            }
 
-            // FIXME risk of non atomic for next 2 lines
+            // FIXME holder needs to be a pool of processors
             this.started = true;
             this.holder = new Thread(proc, "DisJ Simulator Engine: " + this.graphId);
             this.holder.start();
-            System.out.println("*****[SimulatorEngine] DisJ processor is started*****");
+            System.out.println("*****[SimulatorEngine] DisJ processor is started for " 
+            		+ this.graphId + " *****");
 
            
         } catch (Exception e) {

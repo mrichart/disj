@@ -110,8 +110,9 @@ public class GraphLoader {
 
         BoardAgent agent = null;
         try {
-        	agent = (BoardAgent) client.newInstance();
-        } catch (InstantiationException e) {
+        	Object obj = client.newInstance();
+        	agent = (BoardAgent) obj;
+        } catch (Exception e) {
             throw new DisJException(IConstants.ERROR_8, e.toString());
         }
         return agent;

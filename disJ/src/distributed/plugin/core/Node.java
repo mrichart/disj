@@ -395,7 +395,7 @@ public class Node implements Serializable {
 	 * @param agentId
 	 * @param type
 	 */
-	public void removeRegistee(String agentId, NotifyType type){
+	public void removeRegistee(String agentId, NotifyType type){		
 		if(this.registees.containsKey(agentId)){
 			List<NotifyType> types = this.registees.get(agentId);
 			if(types.contains(type)){
