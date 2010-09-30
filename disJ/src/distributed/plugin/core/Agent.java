@@ -18,7 +18,6 @@ import distributed.plugin.runtime.engine.AgentModel;
 @SuppressWarnings("serial")
 public class Agent implements Serializable{
 
-
 	/*
 	 * Flag checking whether agent is alive
 	 */
@@ -43,7 +42,7 @@ public class Agent implements Serializable{
 	 * Max number of memory slot that agent can carry
 	 * TODO currently is very large but finite
 	 */
-	private int maxSlot = 128;
+	private int maxSlot;
 	
 	/*
 	 * An ID of this agent
@@ -107,12 +106,18 @@ public class Agent implements Serializable{
 	 * @param hostId
 	 */
 	public Agent(String agentId, String hostId){
+		this.curState = -1;
 		this.starter = true;
 		this.hasInitExec = false;
 		this.alive = true;
 		this.agentId = agentId;
 		this.homeId = hostId;
+		this.maxSlot = 128;
+		this.lastPortEnter = null;
+		this.curNode = null;
 		this.log = null;
+		this.info = null;
+		this.entity = null;
 		
 		this.pastStates = new ArrayList<String>();
 		this.stateNames = new HashMap<Integer, String>();
@@ -167,33 +172,24 @@ public class Agent implements Serializable{
 	 *            The state to set.
 	 */
 	public void setCurState(int state) {
-		this.curState = state;
-		this.pastStates.add(this.getStateName(state));
+		if(this.curState == state){
+			return;
+		}else{
+			this.curState = state;								
+			// FIXME
+			//this.firePropertyChange(IConstants.PROPERTY_CHANGE_NODE_STATE, null,
+			//		new Integer(this.curState));
 		
-		// FIXME
-		//this.firePropertyChange(IConstants.PROPERTY_CHANGE_NODE_STATE, null,
-		//		new Integer(this.curState));
-	
-		// it is not a reset action
-		if(this.curState != -1){
-			this.log.logAgent(logTag.AGENT_STATE, this.agentId, this.getStateName(this.curState));	
-		}			
-	}
-	
-	public void resetState() {		
-		this.setCurState(-1);
+			// it is not a reset action
+			if(this.curState != -1){
+				this.pastStates.add(this.getStateName(state));
+				this.log.logAgent(logTag.AGENT_STATE, this.agentId, this.getStateName(this.curState));	
+			}
+		}
 	}
 
 	public List<String> getStateList() {
 		return this.pastStates;
-	}
-
-	public void resetStateList() {
-		if(this.pastStates != null){
-			this.pastStates.clear();
-		}else{
-			this.pastStates = new ArrayList<String>();
-		}
 	}
 
 	/**
@@ -272,6 +268,10 @@ public class Agent implements Serializable{
 	
 	public int getMaxSlot(){
 		return this.maxSlot;
+	}
+	
+	public void setMaxSlot(int maxSlot){
+		this.maxSlot = maxSlot;
 	}
 
 	public String[] getInfo() {
@@ -352,8 +352,9 @@ public class Agent implements Serializable{
      */
     private void writeObject(ObjectOutputStream os) throws IOException{    	
    	 	// write the object
-		os.defaultWriteObject();
+		os.defaultWriteObject();		
 	}
+    
     /*
      * Overriding serialize object due to Java Bug4152790
      */

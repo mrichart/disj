@@ -497,8 +497,9 @@ public class ProcessActions extends WorkbenchPartAction {
 			return;
 		}
 		try {
-			if (this.engine.isStarted())
+			if (this.engine.isStarted()){
 				this.engine.terminate();
+			}
 
 			if (this.engine.getCurGraphId() != null) {
 				// reset the states and data of a graph

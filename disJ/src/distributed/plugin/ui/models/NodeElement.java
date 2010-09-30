@@ -190,6 +190,7 @@ public class NodeElement extends AdapterElement {
 	 */
 	public void resetNode() {				
 		this.node.resetState();
+		this.node.resetStateList();
 		this.node.removeEntity();
 		
 		for (int i = 0; i <  NUM_PROPERTIES; i++) {

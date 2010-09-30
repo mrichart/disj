@@ -688,14 +688,18 @@ public class Node implements Serializable {
 	 *            The state to set.
 	 */
 	public void setCurState(int state) {
-		this.curState = state;
-		this.pastStates.add(this.getStateName(state));
-		
+		if(this.curState == state){
+			return;
+		}else{
+			this.curState = state;
+		}
+				
 		this.firePropertyChange(IConstants.PROPERTY_CHANGE_NODE_STATE, null,
 				new Integer(this.curState));
 	
 		// it is not a reset action
 		if(this.curState != -1){
+			this.pastStates.add(this.getStateName(state));
 			this.log.logNode(logTag.NODE_STATE, this.nodeId, this.getStateName(this.curState));	
 		}
 	}

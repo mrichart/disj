@@ -137,14 +137,17 @@ public class SimulatorEngine {
         
         this.started = false;
         
-        if (this.graphId == null)
+        if (this.graphId == null){
             throw new DisJException(IConstants.ERROR_18);
+        }
 
-        if (this.proc != null)
+        if (this.proc != null){
             this.proc.setStop(true);
+        }
         
-        if(this.holder == null)
+        if(this.holder == null){
             return;
+        }
         
         if(this.holder.isAlive()){          
             try {

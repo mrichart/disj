@@ -177,8 +177,8 @@ public abstract class AgentProcessor implements IProcessor {
 				Node host = hosts.get(i);
 				int numAgent = host.getNumInitAgent();
 				for(int j = 0; j < numAgent; j++){
-					// create and initialize agent instance that belong to
-					// each host
+					// create and initialize new agent instance that 
+					// belong to each host
 					Agent agent = new Agent(agentId +"", host.getNodeId());
 					agent.setCurNode(host);
 					agent.setLogger(this.log);
@@ -410,13 +410,18 @@ public abstract class AgentProcessor implements IProcessor {
 	}
 
 	public void cleanUp() {
-		
-		// clean up the memory
-		this.graph = null;
-
+			
 		// reset the flag the process is terminated
 		this.stop = true;
 		this.pause = false;
+		
+		// clear agents
+		this.allAgents.clear();
+		
+		// clean up the memory
+		this.graph.removeAllAgents();
+		this.graph = null;
+
 	}
 	
 	
@@ -444,7 +449,9 @@ public abstract class AgentProcessor implements IProcessor {
 			// clean up logger
 			this.log.cleanUp();
 
+			// clean up necessary data
 			this.cleanUp();
+			
 			this.systemOut.println("\n*****The simulation of " + this.procName
 					+ " is terminated.*****");
 		}

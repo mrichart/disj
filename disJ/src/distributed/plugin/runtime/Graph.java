@@ -54,11 +54,11 @@ public class Graph implements Serializable {
 
 	private Map<String, Edge> edges;
 	
-	private Map<String, Agent> agents;
+	transient private Map<String, Agent> agents;
 
-	private Map<String, Integer> numMsgSent;
+	transient private Map<String, Integer> numMsgSent;
 	
-	private Map<String, Integer> numMsgRecv;	
+	transient private Map<String, Integer> numMsgRecv;	
 	
 	transient private IRandom clientRandom;
 
@@ -152,6 +152,11 @@ public class Graph implements Serializable {
 
 		this.agents.remove(id);
 	}
+	
+	public void removeAllAgents(){
+		this.agents.clear();
+	}
+	
 	/**
 	 * Get an edge with a given id
 	 * 
@@ -382,6 +387,9 @@ public class Graph implements Serializable {
     private void readObject(ObjectInputStream os) throws IOException, ClassNotFoundException  {
     	 // rebuild this object
     	 os.defaultReadObject(); 
+    	 this.agents = new HashMap<String, Agent>();
+    	 this.numMsgRecv = new HashMap<String, Integer>();
+    	 this.numMsgSent = new HashMap<String, Integer>();
     	 this.clientRandom = null;
     }
 
