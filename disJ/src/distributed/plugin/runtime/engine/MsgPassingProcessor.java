@@ -214,10 +214,7 @@ public class MsgPassingProcessor implements IProcessor {
 		}
 		
 		// add new events into the queue
-		this.queue.pushEvents(newEvents);
-		
-		// update time's lower bound
-		this.setCurrentTime(this.queue.getSmallestTime());
+		this.queue.pushEvents(newEvents);		
 	}
 
 	/*
@@ -236,10 +233,6 @@ public class MsgPassingProcessor implements IProcessor {
 			Event e = new MsgPassingEvent(owner, IConstants.EVENT_ALARM_RING_TYPE, execTime,
 					eventId, owner, message);
 			this.queue.pushEvent(e);
-
-			// update time's lower bound, which may be the alarm ringing is
-			// a smallest
-			this.setCurrentTime(this.queue.getSmallestTime());
 
 		} else if (message.getLabel().equals(IConstants.MESSAGE_SET_BLOCK_MSG)) {
 			
@@ -452,9 +445,6 @@ public class MsgPassingProcessor implements IProcessor {
 			// add to the queue
 			this.queue.pushEvents(events);
 
-			// update time's lower bound
-			this.setCurrentTime(this.queue.getSmallestTime());
-
 		} catch (Exception e) {
 			throw new DisJException(IConstants.ERROR_8, e.toString());
 		}
@@ -510,6 +500,13 @@ public class MsgPassingProcessor implements IProcessor {
 				} else if( e.getEventType() == IConstants.EVENT_INITIATE_TYPE){
 					this.invokeInit(e);
 				}
+			}			
+			// set a current time to be a smallest of existing events
+			int time = this.queue.getSmallestTime();
+			if(time > -1){
+				this.setCurrentTime(time);
+			}else{
+				// the queue is empty
 			}
 		}
 	}

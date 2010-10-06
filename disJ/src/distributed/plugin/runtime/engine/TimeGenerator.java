@@ -46,9 +46,9 @@ public class TimeGenerator {
 	 */
 	static TimeGenerator getTimeGenerator() {
 		synchronized (lock) {
-			if (timeGen == null)
+			if (timeGen == null){
 				timeGen = new TimeGenerator();
-
+			}
 			return timeGen;
 		}
 	}
@@ -58,7 +58,7 @@ public class TimeGenerator {
 	 * 
 	 * @param graphId
 	 */
-	public void addGraph(String graphId) {
+	protected void addGraph(String graphId) {
 		if (!this.execTimes.containsKey(graphId)) {
 			this.execTimes.put(graphId, new Integer(0));
 			this.latestId.put(graphId, new Integer(0));
@@ -68,12 +68,18 @@ public class TimeGenerator {
 	/**
 	 * Get a current execution time (a top value on stack)
 	 * 
-	 * @param graphId
-	 * @return A time period
+	 * @param graphId A graph ID of the simulation
+	 * @return A current simulation time unit if the graph ID exists, 
+	 * otherwise -1 is returned
 	 * 
 	 */
 	public int getCurrentTime(String graphId){
-		return this.execTimes.get(graphId);
+		Integer time = this.execTimes.get(graphId);
+		if(time == null){
+			return -1;
+		}else{
+			return time.intValue();
+		}
 	}
 
 	/**
@@ -82,7 +88,7 @@ public class TimeGenerator {
 	 * @param graphId
 	 * @param time
 	 */
-	public void setCurrentTime(String graphId, int time) {
+	protected void setCurrentTime(String graphId, int time) {
 		this.execTimes.put(graphId, time);
 	}
 
@@ -90,7 +96,7 @@ public class TimeGenerator {
 	 * Reset time and unique ID of a given graph ID
 	 * @param graphId
 	 */
-	public void reset(String graphId){
+	protected void reset(String graphId){
 		this.execTimes.remove(graphId);
 		this.latestId.remove(graphId);
 		
@@ -104,7 +110,7 @@ public class TimeGenerator {
 	 * @return @throws
 	 *         DistJException
 	 */
-	public int getNextNewId(String graphId) throws DisJException {
+	protected int getNextNewId(String graphId) throws DisJException {
 		if (!this.latestId.containsKey(graphId))
 			throw new DisJException(IConstants.ERROR_5, graphId);
 

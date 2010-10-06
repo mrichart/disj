@@ -11,15 +11,12 @@
 package distributed.plugin.ui.actions;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -264,8 +261,8 @@ public class ProcessActions extends WorkbenchPartAction {
 		} else if (actionType.equals(IGraphEditorConstants.ACTION_SET_SPEED)) {
 			this.executeSpeed();
 			
-		} else if (actionType.equals(IGraphEditorConstants.ACTION_LOAD_RECORD)) {
-			this.executeLoadRecord();
+		} else if (actionType.equals(IGraphEditorConstants.ACTION_REPLAY_RECORD)) {
+			this.executeReplay();
 			
 		} else if (actionType.equals(IGraphEditorConstants.ACTION_SAVE_RECORD)) {
 			this.executeSaveRecord();
@@ -276,7 +273,7 @@ public class ProcessActions extends WorkbenchPartAction {
 	/*
 	 * Run replay record
 	 */
-	private void executeLoadRecord(){
+	private void executeReplay(){
 		
 		// Open replay dialog that contains
 		// file record input dialog
@@ -284,24 +281,20 @@ public class ProcessActions extends WorkbenchPartAction {
 		FileDialog dialog = new FileDialog(shell, SWT.OPEN);
 		dialog.setFilterExtensions(new String[]{"*.rec"});		
 		String fileName = dialog.open();	
-		
-/*		
-		if (editor.setRecFile(fileName)){
-			MessageDialog.openInformation(shell, "Load Record Message","Record Loading Completed");
-		}else{
-			MessageDialog.openInformation(shell, "Load Record Message","File not found");
-		}
-	*/	
+
+		// double check graph instance
 		Graph graph = this.doubleCheck();
 		this.engine.replay(graph, fileName);
 	
 	}
 	
 	private void executeSaveRecord(){
+/*
 		Shell shell = this.editor.getSite().getShell();		
 		FileDialog dialog = new FileDialog(shell, SWT.SAVE);
 		String filename = dialog.open();
 		editor.setRecFileNameForSaving(filename);
+		*/
 	}
 	
 	/*

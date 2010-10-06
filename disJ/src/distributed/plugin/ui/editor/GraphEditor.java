@@ -12,8 +12,6 @@ package distributed.plugin.ui.editor;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -27,7 +25,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -110,7 +107,6 @@ import distributed.plugin.runtime.IDistributedModel;
 import distributed.plugin.runtime.engine.SimulatorEngine;
 import distributed.plugin.ui.GraphEditorPlugin;
 import distributed.plugin.ui.IGraphEditorConstants;
-import distributed.plugin.ui.actions.IController;
 import distributed.plugin.ui.actions.ProcessActions;
 import distributed.plugin.ui.actions.StateSettingAction;
 import distributed.plugin.ui.models.GraphElement;
@@ -144,7 +140,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 	transient private ClassLoader loader;
 
-	private Map graphFactories;
+	private Map<String, GraphElementFactory> graphFactories;
 
 	private GraphElement graphElement;
 
@@ -158,7 +154,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 	private List<String> commandStackActionIDs;
 
-	private List editorActionIDs;
+	private List<String> editorActionIDs;
 
 	private boolean isDirty = false;
 
@@ -167,7 +163,8 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	private GraphEditPartFactory editPartFactory;
 
 	private ResourceTracker resourceListener = new ResourceTracker();
-
+	
+	
 	private IPartListener partListener = new IPartListener() {
 		// If an open, unsaved file was deleted, query the user to either do a
 		// "Save As"
@@ -212,12 +209,6 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 			setDirty(getCommandStack().isDirty());
 		}
 	};
-
-	private IController controller;
-
-	private StringBuffer bs_file;
-
-	private String recFileNameForSaving;
 
 	// This class listens to changes to the file system in the workspace, and
 	// makes changes accordingly.
@@ -290,9 +281,9 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	 */
 	public GraphEditor() {
 		this.engine = new SimulatorEngine();
-		this.commandStackActionIDs = new ArrayList();
-		this.editorActionIDs = new ArrayList();
-		this.graphFactories = new HashMap();
+		this.commandStackActionIDs = new ArrayList<String>();
+		this.editorActionIDs = new ArrayList<String>();
+		this.graphFactories = new HashMap<String, GraphElementFactory>();
 		this.createGraphFactories();
 		this.setEditDomain(new DefaultEditDomain(this));
 	}
@@ -596,18 +587,17 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	}
 
 	private void setFactory(GraphElement element) {
-		Iterator facts = this.graphFactories.keySet().iterator();
+		Iterator<String> facts = this.graphFactories.keySet().iterator();
 		for (String template = null; facts.hasNext();) {
-			template = (String) facts.next();
+			template = facts.next();
 			GraphElementFactory fac = (GraphElementFactory) this
 					.getFactory(template);
 			fac.setGraphElement(element);
 		}
 	}
 
-	private List createCategories(PaletteRoot root) {
-		List categories = new ArrayList();
-
+	private List<PaletteContainer> createCategories(PaletteRoot root) {
+		List<PaletteContainer> categories = new ArrayList<PaletteContainer>();
 		categories.add(this.createControlGroup(root));
 		categories.add(this.createDrawerComponents());
 		categories.add(this.createGraphComponents());
@@ -619,7 +609,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		PaletteGroup controlGroup = new PaletteGroup(
 				IGraphEditorConstants.CONTROL_GROUP_LABEL);
 
-		List entries = new ArrayList();
+		List<PaletteEntry> entries = new ArrayList<PaletteEntry>();
 		ToolEntry tool = new PanningSelectionToolEntry();
 		entries.add(tool);
 		root.setDefaultEntry(tool);
@@ -629,8 +619,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 		PaletteSeparator sep = new PaletteSeparator(
 				IGraphEditorConstants.SEPARATOR_ONE);
-		sep
-				.setUserModificationPermission(PaletteEntry.PERMISSION_NO_MODIFICATION);
+		sep.setUserModificationPermission(PaletteEntry.PERMISSION_NO_MODIFICATION);
 		entries.add(sep);
 		controlGroup.addAll(entries);
 		return controlGroup;
@@ -651,7 +640,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 				IGraphEditorConstants.DRAW_COMPONENTS, ImageDescriptor
 						.createFromURL(imageUrl));
 
-		List entries = new ArrayList();
+		List<ToolEntry> entries = new ArrayList<ToolEntry>();
 
 		try {
 			imageUrl = new URL(installUrl, "icons/node.gif");
@@ -711,7 +700,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 				IGraphEditorConstants.TOPOLOGY_TYPES,
 				ImageDescriptor.createFromURL(imageUrl));
 
-		List entries = new ArrayList();
+		List<PaletteEntry> entries = new ArrayList<PaletteEntry>();
 
 		try {
 			imageUrl = new URL(installUrl, "icons/temp.gif");
@@ -902,7 +891,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 		Action action = new DirectEditAction((IWorkbenchPart) this);
 		this.addAction(action);
-		getSelectionActions().add(action.getId());
+		this.getSelectionActions().add(action.getId());
 
 		this.addAction(new CopyTemplateAction(this));
 
@@ -927,7 +916,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		procAct = new ProcessActions(this, IGraphEditorConstants.ACTION_SET_SPEED);
 		this.addAction(procAct);
 
-		procAct = new ProcessActions(this, IGraphEditorConstants.ACTION_LOAD_RECORD);
+		procAct = new ProcessActions(this, IGraphEditorConstants.ACTION_REPLAY_RECORD);
 		this.addAction(procAct);
 
 		procAct = new ProcessActions(this, IGraphEditorConstants.ACTION_SAVE_RECORD);
@@ -1204,50 +1193,5 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		return true;
 	}
 
-	public void setController(IController controller) {
-		this.controller = controller;
-
-	}
-
-	public IController getController() {
-		return controller;
-	}
-
-	/**
-	 * Read a give record file
-	 * @param fileName
-	 * @return true if sucess otherwise false
-	 */
-	public boolean setRecFile(String fileName) {
-		boolean returnValue = true;
-		try {
-			Scanner sc = new Scanner(new FileReader(fileName));
-			bs_file = new StringBuffer();
-			String k;
-			while (sc.hasNextLine()) {
-				k = sc.nextLine();
-				bs_file.append(k);
-				bs_file.append(System.getProperty("line.separator"));
-			}
-			sc.close();
-			returnValue = true;
-		} catch (FileNotFoundException e) {
-			returnValue = false;
-		}
-		return returnValue;
-	}
-
-	public StringBuffer getRecFile() {
-		return bs_file;
-	}
-
-	public void setRecFileNameForSaving(String fileName) {
-		this.recFileNameForSaving = fileName;
-
-	}
-
-	public String getRecFileNameForSaving() {
-		return recFileNameForSaving;
-	}
 
 }

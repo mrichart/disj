@@ -8,14 +8,14 @@ import org.eclipse.ui.actions.RetargetAction;
 
 import distributed.plugin.ui.GraphEditorPlugin;
 
-public class LoadRecordRegargetAction extends RetargetAction {
+public class ReplayRegargetAction extends RetargetAction {
 
-    public LoadRecordRegargetAction(String actionID, String text) {
+    public ReplayRegargetAction(String actionID, String text) {
         super(actionID, text);
     	try {
 			final URL installUrl = GraphEditorPlugin.getDefault().getBundle().getEntry("/");
 			//TODO : change the icon
-			final URL imageUrl = new URL(installUrl, "icons/openRec.png");
+			final URL imageUrl = new URL(installUrl, "icons/replay.png");
 			setImageDescriptor(ImageDescriptor.createFromURL(imageUrl));
 			
 		} catch (MalformedURLException e) {					

@@ -161,7 +161,20 @@ public abstract class AgentProcessor implements IProcessor {
 	
 	protected abstract AgentModel createClientAgent() throws Exception;
 	
-	protected abstract void actionSpecific();
+	/**
+	 * Log agents info
+	 */
+	protected void logAgentInfo(){
+		Iterator<String> its = this.allAgents.keySet().iterator();
+		Agent agent = null;
+		Map<String, String> aList = new HashMap<String, String>();
+		for(String agentId = null; its.hasNext(); ){
+			agentId = its.next();
+			agent = this.allAgents.get(agentId);
+			aList.put(agentId, agent.getHomeId());
+		}
+		this.log.logAgentList(logTag.AGENT_LIST, aList);
+	}
 	
 	/*
 	 * Load every agent(s) into host nodes and initialize event(s)
@@ -198,18 +211,14 @@ public abstract class AgentProcessor implements IProcessor {
 					// add to global/graph for UI tracking list
 					this.allAgents.put(agentId+"", agent);
 					this.graph.addAgent(agentId+"", agent);
-					
-					// update agent log
-					String value = host.getNodeId();
-					this.log.logAgent(logTag.AGENT_INIT, agentId+"", value);
-					
+										
 					agentId++;
 					this.systemOut.println("@loadAgent() " + agent.getAgentId());
 				}
 			}
 			
 			// create a set of init events
-			int execTime = 0;
+			int execTime;
 			IMessage msg;
 			Random r = new Random(System.currentTimeMillis());
 			List<Event> events = new ArrayList<Event>();			
@@ -218,6 +227,7 @@ public abstract class AgentProcessor implements IProcessor {
 				List<Agent> list = host.getAllAgents();
 				int eventId;
 				for(int j = 0; j < list.size(); j++){
+					execTime = 0;
 					Agent agent = list.get(j);					
 					eventId = this.getNextId();
 					msg = new Message("Initialized", new Integer(execTime));
@@ -236,9 +246,6 @@ public abstract class AgentProcessor implements IProcessor {
 			}
 			// add to the queue
 			this.queue.pushEvents(events);
-
-			// set a current time to be a smallest of init events generated
-			this.setCurrentTime(this.queue.getSmallestTime());
 			
 		} catch (Exception e) {
 			throw new DisJException(IConstants.ERROR_8, e.toString());
@@ -346,9 +353,6 @@ public abstract class AgentProcessor implements IProcessor {
 			
 			this.queue.pushEvent(e);
 			
-			// set a current time to be a smallest of existing events
-			this.setCurrentTime(this.queue.getSmallestTime());
-			
 		}catch(Exception e){
 			this.throwException(e, "@processMove()");
 			
@@ -372,9 +376,6 @@ public abstract class AgentProcessor implements IProcessor {
 			
 			// add to event queue
 			this.queue.pushEvent(e);
-	
-			// set a current time to be a smallest of existing events
-			this.setCurrentTime(this.queue.getSmallestTime());
 			
 		}catch(Exception e){
 			this.throwException(e, "@processAlarmClock()");
@@ -446,13 +447,13 @@ public abstract class AgentProcessor implements IProcessor {
 		
 			// log state name list
 			this.log.logStates(logTag.STATE_FIELD, this.stateFields);
-			
-			// log a model and class name that is simulating
-			this.actionSpecific();
-			
+						
 			// load and init any necessary data
 			this.loadNode();
 			this.loadAgent();
+
+			// log a agent model and class name that is simulating
+			this.logAgentInfo();
 
 			// start execute events
 			this.executeEvents();
@@ -527,6 +528,13 @@ public abstract class AgentProcessor implements IProcessor {
 					this.invokeInit(e);
 				}					
 			}			
+			// set a current time to be a smallest of existing events
+			int time = this.queue.getSmallestTime();
+			if(time > -1){
+				this.setCurrentTime(time);
+			}else{
+				// the queue is empty
+			}
 		}
 	}
 	
@@ -547,7 +555,14 @@ public abstract class AgentProcessor implements IProcessor {
 		}else{
 			AgentModel entity = agent.getClientEntity();
 			agent.setHasInitExec(true);
-			entity.init();	
+			
+			// update agent log
+			String value = node.getNodeId();
+			this.log.logAgent(logTag.AGENT_INIT, agent.getAgentId()+"", value);
+			
+			// execute user code
+			entity.init();
+						
 			this.systemOut.println("@invokeInit() " + agent.getAgentId());
 		}		
 	}
@@ -574,7 +589,7 @@ public abstract class AgentProcessor implements IProcessor {
 				String value = node.getNodeId();
 				this.log.logAgent(logTag.AGENT_AWAKE, agent.getAgentId(), value);
 				
-				// execute action
+				// execute user code
 				entity.alarmRing();
 			}
 		}
@@ -660,13 +675,15 @@ public abstract class AgentProcessor implements IProcessor {
 			this.graph.removeAgent(agent.getAgentId());	
 			
 		}else{			
-			AgentModel entity = agent.getClientEntity();
+			AgentModel entity = agent.getClientEntity();		
 			if(agent.hasInitExec()){
+				// update log
+				String[] value = {node.getNodeId(), type.toString()};
+				this.log.logAgent(logTag.AGENT_NOTIFIED, agent.getAgentId(), value);
+				
+				// execute user code
 				entity.notified(type);
-			}		
-			// update log
-			String[] value = {node.getNodeId(), type.toString()};
-			this.log.logAgent(logTag.AGENT_NOTIFY, agent.getAgentId(), value);
+			}			
 		}
 	}
 

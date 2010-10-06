@@ -18,9 +18,9 @@ public class Logger {
 		NODE_STATE, NODE_SEND, NODE_INIT, NODE_RECV, NODE_DIE, EDGE_MSG, 
 		EDGE_LOST, AGENT_STATE, AGENT_DIE, AGENT_LEAVE, AGENT_ARRIVE,
 		AGENT_WRITE_TO_BOARD, AGENT_DELETE_FROM_BOARD, AGENT_DROP_TOKEN,
-		AGENT_PICK_TOKEN, AGENT_AWAKE, AGENT_SLEEP, AGENT_NOTIFY,
+		AGENT_PICK_TOKEN, AGENT_AWAKE, AGENT_SLEEP, AGENT_NOTIFIED,
 		AGENT_INIT, STATE_FIELD, MODEL_MSG_PASS, MODEL_AGENT_TOKEN, 
-		MODEL_AGENT_BOARD
+		MODEL_AGENT_BOARD, AGENT_LIST
 	}
 	
 	private String graphId;
@@ -145,7 +145,7 @@ public class Logger {
 			this.out.println(this.getCurrentTime() + "," + tag + ","+ agentId + "," 
 					+ stateId);
 			
-		} else if (tag == logTag.AGENT_NOTIFY){
+		} else if (tag == logTag.AGENT_NOTIFIED){
 			String[] tmp = (String[]) value; // {nodeId, notify_type}			
 			this.out.println(this.getCurrentTime() + "," + tag + ","+ agentId + "," 
 					+ tmp[0] + "," + tmp[1]);
@@ -204,6 +204,27 @@ public class Logger {
 	}
 	
 	/**
+	 * Log a list of location of agent ID w.r.t it's host ID
+	 * 
+	 * @param tag A log tag for ID_LIST
+	 * @param aList A map of agentID corresponding to a host ID
+	 */
+	public void logAgentList(logTag tag, Map<String, String> aList){
+		StringBuffer buff = new StringBuffer(1024);
+		buff.append(0); // an initial time
+		buff.append("," + tag);
+		Iterator<String> its = aList.keySet().iterator();
+		String nodeId = null;
+		for(String agentId = null; its.hasNext(); ){
+			agentId = its.next();
+			nodeId = aList.get(agentId);
+			buff.append("," + agentId + ":" + nodeId);
+		}
+		this.out.println(buff.toString());
+		this.out.flush();
+	}
+	
+	/**
 	 * Read state list from a line of log string
 	 * 
 	 * @param line First line of log record
@@ -218,6 +239,33 @@ public class Logger {
 			for(int i = 1; i < value.length; i++){
 				pair = value[i].split(":");
 				tmp.put(Integer.parseInt(pair[0]), pair[1]);				
+			}
+		}
+		return tmp;
+	}
+	
+	/**
+	 * Read a list of agent IDs from a log line and construct a map
+	 * of agents with ID is a key
+	 * 
+	 * @param line A log line with an ID_LIST tag
+	 * @return
+	 */
+	public static Map<String, Agent> readAgentList(String[] value){
+		String[] pair = null;
+		Map<String, Agent> tmp = new HashMap<String, Agent>();
+		Integer.parseInt(value[0]); // ignore initial time
+		logTag tag = logTag.valueOf(value[1]);
+		if(tag == logTag.AGENT_LIST){
+			String agentId = null;
+			String nodeId = null;
+			Agent agent = null;
+			for(int i = 2; i < value.length; i++){
+				pair = value[i].split(":");
+				agentId = pair[0];
+				nodeId = pair[1];
+				agent = new Agent(agentId, nodeId);				
+				tmp.put(agentId, agent);
 			}
 		}
 		return tmp;

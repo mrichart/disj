@@ -92,7 +92,7 @@ public interface IGraphEditorConstants {
 	public static final String ADD_STATE = "Add State";
 	public static final String REMOVE_STATE = "View/Remove States";
 	public static final String SPEED = "Process Speed";
-	public static final String LOAD_RECORD = "Load Recording";
+	public static final String REPLAY = "Replay Record";
 	public static final String SAVE_RECORD = "Save the last run";
 	
 	public static final String EXECUTE_MENU_ID = "IGraphEditorConstants.Simulator";
@@ -106,7 +106,7 @@ public interface IGraphEditorConstants {
 	public static final String ADD_STATE_ID = "IGraphEditorConstants.Add State";
 	public static final String REMOVE_STATE_ID = "IGraphEditorConstants.Remove State";
 	public static final String ACTION_SET_SPEED = "IGraphEditorConstants.Process Speed";
-	public static final String ACTION_LOAD_RECORD="IGraphEditorConstants.LoadRecord Load_Recording";
+	public static final String ACTION_REPLAY_RECORD ="IGraphEditorConstants.ReplayRecord Replay";
 	public static final String ACTION_SAVE_RECORD="IGraphEditorConstants.SAVE_RECORD_ID Save_Recording";
 	
 	// command template

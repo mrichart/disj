@@ -74,9 +74,12 @@ public class BoardAgentProcessor extends AgentProcessor {
 
 
 	@Override
-	protected void actionSpecific() {		
+	protected void logAgentInfo() {		
 		// log the model and user class name
 		this.log.logModel(logTag.MODEL_AGENT_BOARD, this.client.getName());
+		
+		// log agent list
+		super.logAgentInfo();
 
 	}
 

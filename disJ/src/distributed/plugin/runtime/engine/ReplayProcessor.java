@@ -146,12 +146,14 @@ public class ReplayProcessor implements IProcessor {
 	@Override
 	public void run() {
 		try{
-			this.systemOut.println("\n Start REPLAY protocol " + this.userClassName 
-					+ " on graph " + this.graph.getId());
+			this.systemOut.println("\n Start REPLAY on graph " 
+					+ this.graph.getId());
 			
+			this.stop = false;
 			this.executeReplay();
 			
-			this.systemOut.println("\n*****Replay for " + this.userClassName
+			this.systemOut.println("\n*****Replay protocol " 
+					+ this.userClassName
 					+ " on graph " + this.graph.getId() 
 					+ " is successfully over.*****");
 			
@@ -160,8 +162,8 @@ public class ReplayProcessor implements IProcessor {
 			this.systemOut.println(e.toString());
 			
 		}finally{
-			this.systemOut.println("\n*****Replay for " + this.userClassName
-					+ " on graph " + this.graph.getId() 
+			this.systemOut.println("\n*****Replay on graph " 
+					+ this.graph.getId() 
 					+ " is terminated*****");
 		}	
 	}
@@ -214,6 +216,7 @@ public class ReplayProcessor implements IProcessor {
 					int time = Integer.parseInt(value[0]);
 					this.modelType = logTag.valueOf(value[1]);
 					this.userClassName = value[2];
+					this.graph.setProtocol(this.userClassName);
 					
 					second = false;
 					
@@ -250,6 +253,7 @@ public class ReplayProcessor implements IProcessor {
 			id = it.next();
 			Node node = nodes.get(id);
 			node.setStateNames(this.stateFields);
+			node.setLogger(null); // no logging while replay
 			nodes.put(id, node);
 		}
 	}
@@ -326,7 +330,7 @@ public class ReplayProcessor implements IProcessor {
 			int state = Integer.parseInt(value[3]);
 			agent.setCurState(state);
 			
-		} else if (tag == logTag.AGENT_NOTIFY){
+		} else if (tag == logTag.AGENT_NOTIFIED){
 			String nodeId = value[3];
 			NotifyType type = NotifyType.valueOf(value[4]);
 			this.systemOut.println("@ReplayProcessor() Agent " + agentId
@@ -395,22 +399,30 @@ public class ReplayProcessor implements IProcessor {
 		} else if (tag == logTag.AGENT_INIT){
 			String hostId = value[3];
 			Node host = this.nodes.get(hostId);
-			agent = new Agent(agentId, hostId);
+			agent = this.allAgents.get(agentId);
 			agent.setCurNode(host);
 			agent.setStateNames(this.stateFields);
 			
 			if(this.modelType == logTag.MODEL_AGENT_TOKEN){
 				int maxToken = this.graph.getMaxToken();
 				agent.setData(maxToken);
-			}
-			
+			}			
 			// add to home host
-			host.addAgent(agent);
+			host.addAgent(agent);						
 			
-			// add to global/graph for UI tracking list
-			this.allAgents.put(agentId, agent);
-			this.graph.addAgent(agentId, agent);
-		}
+		} else if (tag == logTag.AGENT_LIST){
+			// construct a list of all agent
+			this.allAgents = Logger.readAgentList(value);
+			
+			Iterator<String> its = this.allAgents.keySet().iterator();
+			for(agentId = null; its.hasNext();){
+				agentId = its.next();
+				agent = this.allAgents.get(agentId);
+				
+				// add to global/graph for UI tracking list
+				this.graph.addAgent(agentId, agent);
+			}	
+		}		
 	}
 	
 

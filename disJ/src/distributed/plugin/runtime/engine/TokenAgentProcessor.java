@@ -63,10 +63,12 @@ public class TokenAgentProcessor extends AgentProcessor {
 	}
 	
 	@Override
-	protected void actionSpecific() {		
+	protected void logAgentInfo() {		
 		// log the model and user class name
 		this.log.logModel(logTag.MODEL_AGENT_TOKEN, this.client.getName());
 
+		// log agent list
+		super.logAgentInfo();
 	}
 
 }

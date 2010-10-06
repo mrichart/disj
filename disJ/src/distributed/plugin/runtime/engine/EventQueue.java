@@ -35,8 +35,15 @@ public class EventQueue {
 		return this.queue.isEmpty();
 	}
 
-	protected synchronized int getSmallestTime() throws DisJException {
-		return this.topEvent().getExecTime();
+	protected synchronized int getSmallestTime(){
+		
+		try {
+			Event e =  this.topEvent();
+			return e.getExecTime();
+		} catch (DisJException ignore) {
+			// no event left in the queue
+			return -1;
+		}		
 	}
 	
 	protected synchronized void pushEvent(Event event) {
