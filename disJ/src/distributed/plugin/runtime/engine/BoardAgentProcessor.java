@@ -6,6 +6,7 @@ import java.lang.reflect.Modifier;
 import java.net.URL;
 
 import distributed.plugin.core.IConstants;
+import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.GraphLoader;
@@ -67,8 +68,16 @@ public class BoardAgentProcessor extends AgentProcessor {
 	}
 	
 	protected AgentModel createClientAgent() throws Exception{
-		BoardAgent clientAgent = GraphLoader.createBoardAgentObject(this.client);
+		BoardAgent clientAgent = GraphLoader.createBoardAgentObject(this.client);		
 		return clientAgent;
+	}
+
+
+	@Override
+	protected void actionSpecific() {		
+		// log the model and user class name
+		this.log.logModel(logTag.MODEL_AGENT_BOARD, this.client.getName());
+
 	}
 
 }

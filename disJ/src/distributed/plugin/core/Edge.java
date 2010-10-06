@@ -257,13 +257,14 @@ public class Edge implements Serializable {
 	}
 
 	/**
-	 * Log a message passing through this edge
+	 * FIXME record a message passing through this edge
+	 * This is for user GUI viewing only
 	 * 
-	 * @param msgLabel
-	 * @param sender
+	 * @param msgLabel message label
+	 * @param sender A node ID
 	 */
-	public void logMsgPassed(String msgLabel, String sender) {
-		//this.log.logMsgPassed(msgLabel, sender);
+	public void recMsgPassed(String msgLabel, String sender) {
+		
 	}
 
 	/**
@@ -404,6 +405,9 @@ public class Edge implements Serializable {
 	}
 
 	/**
+	 * Set reliability of the link to be 
+	 * true if the link is totally reliable
+	 * false if the link is NOT totally reliable
 	 * @param isReliable
 	 *            The isReliable to set.
 	 */
@@ -424,11 +428,29 @@ public class Edge implements Serializable {
     public void setStart(Node start) {
         this.start = start;
     }
+    
+    /**
+     * 
+     * Get probability of failure
+     * 0 = NO failure
+     * 100 = Link is downed
+     * 
+     * @return An integer between [0 - 100] inclusive
+     */
     public int getProbOfFailure() {
         return this.probOfFailure;
     }
-    public void setProbOfFailure(int probOfFailure) {
-        this.probOfFailure = probOfFailure;
+    /**
+     * Set probability of failure from 0 - 100
+     * 0 = NO failure
+     * 100 = Link is downed
+     * 
+     * @param prob
+     */
+    public void setProbOfFailure(int prob) {
+    	if( prob <= 100 || prob >= 0){
+    		this.probOfFailure = prob;
+    	}
     }
 /*
 	public void setLinkElement(LinkElement linkElement) {

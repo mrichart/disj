@@ -1,6 +1,7 @@
 package distributed.plugin.runtime.engine;
 
 import distributed.plugin.core.Node;
+import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.runtime.ITokenModel;
 
 /**
@@ -15,10 +16,17 @@ public abstract class TokenAgent extends AgentModel implements ITokenModel {
 	
 	private int maxToken;
 	
+	/**
+	 * A token model agent constructor	  
+	 * 
+	 * @param state A start up state of agent
+	 * @throws NullPointerException when user call any API provided
+	 * by TokenAgent inside the constructor
+	 */
 	protected TokenAgent(int state){
 		super(state);
 		this.curToken = 0;
-	}	
+	}
 
 	@Override
 	public final int countHostToken() {		
@@ -28,15 +36,26 @@ public abstract class TokenAgent extends AgentModel implements ITokenModel {
 
 	@Override
 	public final int countMyToken() {
+		// This is just to make sure that NullPointerException is thrown
+		// when user calls it in constructor
+		this.agentOwner.getCurNode();
+		
 		return this.curToken;
 	}
 
 	@Override
 	public final void dropToken() {
-		if(this.curToken > 0){
-			Node node = this.agentOwner.getCurNode();
+		Node node = this.agentOwner.getCurNode();
+		if(this.curToken > 0){			
 			node.incrementToken(1);
-			this.curToken--;
+			this.remToken(1);
+			
+			// update log
+			String value = this.agentOwner.getCurNode().getNodeId();
+			this.agentOwner.getLogger().logAgent(logTag.AGENT_DROP_TOKEN, 
+					this.getAgentId(), value);
+			
+			// notify
 			this.notifyEvent(NotifyType.TOKEN_UPDATE);
 		}	
 	}
@@ -63,7 +82,14 @@ public abstract class TokenAgent extends AgentModel implements ITokenModel {
 		}
 		Node node = this.agentOwner.getCurNode();
 		node.decrementToken(amount);
-		this.curToken += amount;
+		this.addToken(amount);		
+		
+		// update log
+		String[] value = {this.agentOwner.getCurNode().getNodeId(), amount+""};
+		this.agentOwner.getLogger().logAgent(logTag.AGENT_PICK_TOKEN, 
+				this.getAgentId(), value);
+		
+		// notify
 		this.notifyEvent(NotifyType.TOKEN_UPDATE);
 			
 	}
@@ -82,4 +108,11 @@ public abstract class TokenAgent extends AgentModel implements ITokenModel {
 		return this.maxToken;
 	}
 
+	final void addToken(int numTok){
+		this.curToken += numTok;
+	}
+	
+	final void remToken(int numTok){
+		this.curToken -= numTok;
+	}
 }

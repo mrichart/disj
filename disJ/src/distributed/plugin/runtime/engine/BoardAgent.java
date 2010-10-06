@@ -1,7 +1,10 @@
 package distributed.plugin.runtime.engine;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.runtime.IBoardModel;
 
 /**
@@ -15,23 +18,44 @@ public abstract class BoardAgent extends AgentModel implements IBoardModel{
 	protected BoardAgent(int state){
 		super(state);
 	}
+
+	@Override
+	public final List<String> readFromBoard(){
+		List<String> board = this.agentOwner.getCurNode().getWhiteboard();
+		List<String> temp = new ArrayList<String>();
+		for (Iterator<String> iterator = board.iterator(); iterator.hasNext();) {
+			String msg = iterator.next();
+			temp.add(msg);
+		}
+		return temp;
+	}
 	
 	@Override
-	public final List<String> readFromBoard() {
-		return this.agentOwner.readFromBoard();
-	}
-
-	@Override
-	public final boolean removeRecord(String info) {
-		boolean b = this.agentOwner.removeFromBoard(info);
+	public boolean removeRecord(String info){
+		List<String> board = this.agentOwner.getCurNode().getWhiteboard();
+		boolean b = board.remove(info);
+		
+		// update log
+		String[] value = {this.agentOwner.getCurNode().getNodeId(), info};
+		this.agentOwner.getLogger().logAgent(logTag.AGENT_DELETE_FROM_BOARD, this.getAgentId(), value);
+		
+		// notify
 		this.notifyEvent(NotifyType.BOARD_UPDATE);
-		return b;
+		
+		return b; 
 	}
-
-	@Override
-	public final void appendToBoard(String info) {
-		this.agentOwner.appendToBoard(info);
+	
+	public void appendToBoard(String info){
+		List<String> board = this.agentOwner.getCurNode().getWhiteboard();
+		board.add(info);
+		this.agentOwner.getCurNode().setWhiteboard(board);
+		
+		// update log
+		String[] value = {this.agentOwner.getCurNode().getNodeId(), info};
+		this.agentOwner.getLogger().logAgent(logTag.AGENT_WRITE_TO_BOARD, this.getAgentId(), value);
+		
+		// notify
 		this.notifyEvent(NotifyType.BOARD_UPDATE);
-	}
+	}	
 	
 }

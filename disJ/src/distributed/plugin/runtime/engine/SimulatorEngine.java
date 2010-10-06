@@ -117,6 +117,21 @@ public class SimulatorEngine {
         	System.err.println("[Critical] @SimultorEngine.execute() " + e);
         }
     }
+    
+    public void replay(Graph graph, String fileName){
+    	try{
+	    	this.proc = new ReplayProcessor(graph, fileName);
+	    	
+	    	// FIXME holder needs to be a pool of processors
+	        this.started = true;
+	        this.holder = new Thread(proc, "DisJ Replaying Engine: " + this.graphId);
+	        this.holder.start();
+	        System.out.println("*****[SimulatorEngine] DisJ replaying for " 
+	        		+ this.graphId + " *****");
+    	}catch (Exception e){
+    		System.err.println("[Critical] @SimultorEngine.replay() " + e);
+    	}
+    }
 
     /**
      * Get a graphId that is currently under process of execution by 

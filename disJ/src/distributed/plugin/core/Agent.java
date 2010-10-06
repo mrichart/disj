@@ -8,7 +8,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -65,6 +64,11 @@ public class Agent implements Serializable{
 	private String lastPortEnter;
 	
 	/*
+	 * Utility record for replay
+	 */
+	private Object data;
+	
+	/*
 	 * A node that agent currently resided 
 	 */
 	transient private Node curNode;
@@ -114,6 +118,7 @@ public class Agent implements Serializable{
 		this.homeId = hostId;
 		this.maxSlot = 128;
 		this.lastPortEnter = null;
+		this.data = null;
 		this.curNode = null;
 		this.log = null;
 		this.info = null;
@@ -183,7 +188,10 @@ public class Agent implements Serializable{
 			// it is not a reset action
 			if(this.curState != -1){
 				this.pastStates.add(this.getStateName(state));
-				this.log.logAgent(logTag.AGENT_STATE, this.agentId, this.getStateName(this.curState));	
+				if(log != null){
+					this.log.logAgent(logTag.AGENT_STATE, this.agentId, 
+							this.curState+"");
+				}
 			}
 		}
 	}
@@ -192,6 +200,15 @@ public class Agent implements Serializable{
 		return this.pastStates;
 	}
 
+	/**
+	 * Get logger
+	 * 
+	 * @return logger
+	 */
+	public Logger getLogger(){
+		return this.log;
+	}
+	
 	/**
 	 * Set logger
 	 * 
@@ -207,6 +224,12 @@ public class Agent implements Serializable{
 
 	public void setAlive(boolean alive) {
 		this.alive = alive;
+		if(alive == false){
+			String value = this.getCurNode().getNodeId();
+			if(log != null){
+				this.log.logAgent(logTag.AGENT_DIE, this.agentId, value);
+			}
+		}
 	}
 
 	public boolean isStarter() {
@@ -282,53 +305,15 @@ public class Agent implements Serializable{
 		this.info = info;
 	}
 	
-	/**
-	 * Get a copy of current snapshot of whiteboard of this node
-	 * 
-	 * @return A copy list of data written on the whiteboard
-	 */
-	public List<String> readFromBoard(){
-		List<String> board = this.curNode.getWhiteboard();
-		List<String> temp = new ArrayList<String>();
-		for (Iterator<String> iterator = board.iterator(); iterator.hasNext();) {
-			String msg = iterator.next();
-			temp.add(msg);
-		}
-		return temp;
-	}
 	
-	/**
-	 * Append a message into the end of whiteboard of this node
-	 * 
-	 * @param msg
-	 */
-	public void appendToBoard(String msg){
-		List<String> board = this.curNode.getWhiteboard();
-		board.add(msg);
-		this.curNode.setWhiteboard(board);
-		
-		// update log
-		String[] value = {this.curNode.getNodeId(), msg};
-		this.log.logAgent(logTag.AGENT_WRITE_TO_BOARD, this.getAgentId(), value);
+	public Object getData() {
+		return data;
 	}
-	
-	/**
-	 * Remove a given message from whiteboard of this node if exist
-	 * 
-	 * @param msg A message that want to be removed
-	 * @return True if the message found and removed, otherwise false
-	 */
-	public boolean removeFromBoard(String msg){
-		List<String> board = this.curNode.getWhiteboard();
-		boolean b = board.remove(msg);
-		
-		// update log
-		String[] value = {this.curNode.getNodeId(), msg};
-		this.log.logAgent(logTag.AGENT_DELETE_FROM_BOARD, this.getAgentId(), value);
-		
-		return b; 
+
+	public void setData(Object data) {
+		this.data = data;
 	}
-	
+
 	/**
 	 * Get all outgoing port label of current node
 	 * 

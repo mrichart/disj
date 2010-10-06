@@ -35,8 +35,6 @@ public abstract class AgentProcessor implements IProcessor {
 
 	private boolean pause;
 
-	private boolean stepForward;
-
 	private int speed;
 
 	private String procName;
@@ -51,7 +49,7 @@ public abstract class AgentProcessor implements IProcessor {
 	 * Logger to log every activities of this process
 	 * for replay action
 	 */
-	private Logger log;
+	Logger log;
 	
 	/*
 	 * Client random Class file (blueprint)
@@ -163,6 +161,8 @@ public abstract class AgentProcessor implements IProcessor {
 	
 	protected abstract AgentModel createClientAgent() throws Exception;
 	
+	protected abstract void actionSpecific();
+	
 	/*
 	 * Load every agent(s) into host nodes and initialize event(s)
 	 */
@@ -195,9 +195,13 @@ public abstract class AgentProcessor implements IProcessor {
 					// add to home host
 					host.addAgent(agent);
 					
-					// add to global/graphUI tracking list
+					// add to global/graph for UI tracking list
 					this.allAgents.put(agentId+"", agent);
 					this.graph.addAgent(agentId+"", agent);
+					
+					// update agent log
+					String value = host.getNodeId();
+					this.log.logAgent(logTag.AGENT_INIT, agentId+"", value);
 					
 					agentId++;
 					this.systemOut.println("@loadAgent() " + agent.getAgentId());
@@ -230,12 +234,11 @@ public abstract class AgentProcessor implements IProcessor {
 					events.add(e);
 				}
 			}
-
 			// add to the queue
 			this.queue.pushEvents(events);
 
-			// update time's lower bound
-			this.setCurrentTime(this.queue.topEvent().getExecTime());
+			// set a current time to be a smallest of init events generated
+			this.setCurrentTime(this.queue.getSmallestTime());
 			
 		} catch (Exception e) {
 			throw new DisJException(IConstants.ERROR_8, e.toString());
@@ -284,9 +287,9 @@ public abstract class AgentProcessor implements IProcessor {
 				Event e = new AgentEvent(IConstants.EVENT_NOTIFY_TYPE, eventId,
 						this.getCurrentTime(), nodeId, agentId, msg);
 				
-				this.queue.pushEvent(e);
+				this.queue.pushEvent(e);				
 			}
-		}		
+		}
 	}
 	
 	private void processMove(String fromNodeId, String toPort, String agentId){
@@ -328,15 +331,9 @@ public abstract class AgentProcessor implements IProcessor {
 							+ " while travelling from " + fromNodeId);
 					
 					// flag that agent is dead on a link
-					Agent g = this.allAgents.get(agentId);
-					g.setAlive(false);
-					
-					this.allAgents.put(agentId, g);
-					this.graph.removeAgent(agentId);
-					value = new String[2];
-					value[0] = fromNodeId;
-					value[1] = toPort;
-					this.log.logAgent(logTag.AGENT_DIE, agentId, value);
+					agent.setAlive(false);					
+					this.allAgents.put(agentId, agent);
+					this.graph.removeAgent(agentId);					
 					return;
 				}
 			}
@@ -348,6 +345,9 @@ public abstract class AgentProcessor implements IProcessor {
 					 execTime, target.getNodeId(), agentId, msg);
 			
 			this.queue.pushEvent(e);
+			
+			// set a current time to be a smallest of existing events
+			this.setCurrentTime(this.queue.getSmallestTime());
 			
 		}catch(Exception e){
 			this.throwException(e, "@processMove()");
@@ -373,8 +373,8 @@ public abstract class AgentProcessor implements IProcessor {
 			// add to event queue
 			this.queue.pushEvent(e);
 	
-			// update time's lower bound, the alarm ringing may be is a smallest
-			this.setCurrentTime(this.queue.topEvent().getExecTime());
+			// set a current time to be a smallest of existing events
+			this.setCurrentTime(this.queue.getSmallestTime());
 			
 		}catch(Exception e){
 			this.throwException(e, "@processAlarmClock()");
@@ -415,11 +415,24 @@ public abstract class AgentProcessor implements IProcessor {
 		this.stop = true;
 		this.pause = false;
 		
-		// clear agents
+		// clear agents at processor
 		this.allAgents.clear();
 		
-		// clean up the memory
+		// clear agents at each node
+		Map<String, Node> nodes = this.graph.getNodes();
+		Iterator<String> its = nodes.keySet().iterator();
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			n.clearAllAgents();
+		}
+		
+		// clean agent at graph
 		this.graph.removeAllAgents();
+		
+		// reset time generator
+		this.timeGen.reset(this.graph.getId());
+		
+		// clear cache memory
 		this.graph = null;
 
 	}
@@ -431,6 +444,12 @@ public abstract class AgentProcessor implements IProcessor {
 			// init logger
 			this.log.initLog();
 		
+			// log state name list
+			this.log.logStates(logTag.STATE_FIELD, this.stateFields);
+			
+			// log a model and class name that is simulating
+			this.actionSpecific();
+			
 			// load and init any necessary data
 			this.loadNode();
 			this.loadAgent();
@@ -441,11 +460,17 @@ public abstract class AgentProcessor implements IProcessor {
 			this.systemOut.println("\n*****Simulation for " + this.procName
 					+ " is successfully over.*****");
 
+			while(stop == false){
+				try{
+					Thread.sleep(3000);
+				}catch(Exception e){}
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			this.systemOut.println(e.toString());
 			
-		} finally {			
+		} finally {
 			// clean up logger
 			this.log.cleanUp();
 
@@ -462,206 +487,183 @@ public abstract class AgentProcessor implements IProcessor {
 	 */
 	private void executeEvents() throws DisJException {
 
-		while (!this.queue.isEmpty()) {
-			if (this.stop){
-				break;
-			}
-			// To slow down the simulation speed
+		while (!this.queue.isEmpty() && this.stop == false) {
+		
+			// Slow down the simulation speed
 			try {
 				Thread.sleep(this.speed);
 			} catch (InterruptedException ignore) {
-				this.systemOut.println("@AgentProcessor.executeEvent() " +
-						"Slow down process with speed: "
-						+ this.speed + " =>" + ignore);
+				//this.systemOut.println("@AgentProcessor.executeEvent() " +
+				//		"Slow down process with speed: " + this.speed);
 			}
-
-			// suspend the process and/or hit breakpoint
-			if (!this.pause) {
-				AgentEvent e = (AgentEvent) this.queue.topEvent();
-				
-/*			
-				Node thisNode = this.graph.getNode(e.getNodeId());
-				if (thisNode.getBreakpoint() == true) {
-					this.pause = true;
-					while (this.pause) {
-						if (this.stop)
-							break;
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException ignore) {
-							this.systemOut.println("@AgentProcessor.executeEvent()" +
-									" breakpoint=true: " + ignore);
-						}
-					}
-				}
-*/
-				
-				if (this.stop){
-					break;
-				}
-				if (e.getEventType() == IConstants.EVENT_ARRIVAL_TYPE) {
-					this.invokeArrival(this.queue.popEvents());					
-
-				} else if (e.getEventType() == IConstants.EVENT_ALARM_RING_TYPE) {
-					this.invokeAlarmRing(this.queue.popEvents());
-
-				} else if (e.getEventType() == IConstants.EVENT_NOTIFY_TYPE) {
-					this.invokeNotify(this.queue.popEvents());
-
-				} else {
-					this.invokeInit(this.queue.popEvents());
-				}
-
-				if (this.stepForward) {
-					this.pause = true;
-				}
-			} else {
+			
+			while (this.pause && this.stop == false) {				
 				try {
 					Thread.sleep(1000);
-				} catch (InterruptedException ignore) {}
+				} catch (InterruptedException ignore) {
+					this.systemOut.println("@AgentProcessor.executeEvent()" +
+							" pause = true");
+				}
+			}				
+			if (this.stop){
+				break;
 			}
+			
+			// Get all events with smallest time
+			List<Event> list = this.queue.popEvents();
+			AgentEvent e = null;
+			for(int i =0; i < list.size(); i++){
+				e = (AgentEvent)list.get(i);				
+				if (e.getEventType() == IConstants.EVENT_ARRIVAL_TYPE) {
+					this.invokeArrival(e);					
+
+				} else if (e.getEventType() == IConstants.EVENT_ALARM_RING_TYPE) {
+					this.invokeAlarmRing(e);
+
+				} else if (e.getEventType() == IConstants.EVENT_NOTIFY_TYPE) {
+					this.invokeNotify(e);
+
+				} else if(e.getEventType() == IConstants.EVENT_INITIATE_TYPE){
+					this.invokeInit(e);
+				}					
+			}			
 		}
 	}
 	
 	/*
 	 * Invoke client's init()
 	 */
-	private void invokeInit(List<Event> events) throws DisJException {
-		for (int i = 0; i < events.size(); i++) {
-			AgentEvent e = (AgentEvent)events.get(i);
-			Agent agent = this.allAgents.get(e.getAgentId());
-			Node n = agent.getCurNode();
-			
-			// Will NOT execute a Fail node or agent
-			if (!n.isAlive() || !agent.isAlive()){
-				// node dies agent must die as well
-				agent.setAlive(false);
-				continue;
-			}
+	private void invokeInit(AgentEvent event) {	
+		Agent agent = this.allAgents.get(event.getAgentId());
+		Node node = agent.getCurNode();
+		
+		// Will NOT execute a Fail node or agent
+		if (!node.isAlive() || !agent.isAlive()){
+			// node dies agent must die as well
+			agent.setAlive(false);
+			this.allAgents.put(agent.getAgentId(), agent);
+			this.graph.removeAgent(agent.getAgentId());	
+
+		}else{
 			AgentModel entity = agent.getClientEntity();
 			agent.setHasInitExec(true);
 			entity.init();	
 			this.systemOut.println("@invokeInit() " + agent.getAgentId());
-		}
+		}		
 	}
 	
 	/*
 	 * Internal clock ring, invoke client's alarmRing()
 	 */
-	private void invokeAlarmRing(List<Event> events) throws DisJException {
-		for (int i = 0; i < events.size(); i++) {
-			AgentEvent e = (AgentEvent)events.get(i);
-			Agent agent = this.allAgents.get(e.getAgentId());
-			Node n = agent.getCurNode();
-			
-			// Will NOT execute a Fail node or agent
-			if(!agent.isAlive() || !n.isAlive()){
-				// node dies agent must die as well
-				agent.setAlive(false);
-				continue;
-			}
+	private void invokeAlarmRing(AgentEvent event){
 
+		Agent agent = this.allAgents.get(event.getAgentId());
+		Node node = agent.getCurNode();
+		
+		// Will NOT execute a Fail node or agent
+		if(!agent.isAlive() || !node.isAlive()){
+			// node dies agent must die as well
+			agent.setAlive(false);
+			this.allAgents.put(agent.getAgentId(), agent);
+			this.graph.removeAgent(agent.getAgentId());
+			
+		}else {
 			AgentModel entity = agent.getClientEntity();
 			if(agent.hasInitExec()){
 				// update log
-				String[] value = {n.getNodeId(), null};
+				String value = node.getNodeId();
 				this.log.logAgent(logTag.AGENT_AWAKE, agent.getAgentId(), value);
 				
 				// execute action
 				entity.alarmRing();
 			}
-			this.systemOut.println("@invokeAlarmRing() " + agent.getAgentId());						
 		}
+		//this.systemOut.println("@invokeAlarmRing() " + agent.getAgentId());		
 	}
 	
-	private void invokeArrival(List<Event> events)throws DisJException {
-		
-		for (int i = 0; i < events.size(); i++) {
-			AgentEvent e = (AgentEvent)events.get(i);
-			IMessage info = e.getInfo();
-			String linkId = (String)info.getContent();
-			Agent agent = this.allAgents.get(e.getAgentId());
-			
-			// retrieve node and port of arrival
-			Edge link = this.graph.getEdge(linkId);
-			Node node = this.graph.getNode(e.getNodeId());
-			String port = node.getPortLabel(link);
+	private void invokeArrival(AgentEvent event) throws DisJException {
 
-			// Will NOT execute a Fail node or agent
-			if (!node.isAlive() || !agent.isAlive()){
-				// node dies agent must die as well
-				agent.setAlive(false);
-				continue;
+		IMessage info = event.getInfo();
+		String linkId = (String) info.getContent();
+		Agent agent = this.allAgents.get(event.getAgentId());
+
+		// retrieve node and port of arrival
+		Edge link = this.graph.getEdge(linkId);
+		Node node = this.graph.getNode(event.getNodeId());
+		String port = node.getPortLabel(link);
+
+		// Will NOT execute a Fail node or agent
+		if (!node.isAlive() || !agent.isAlive()) {
+			// node dies agent must die as well
+			agent.setAlive(false);
+			this.allAgents.put(agent.getAgentId(), agent);
+			this.graph.removeAgent(agent.getAgentId());
+		}
+
+		// check if the port is blocked
+		if (node.isBlocked(port) == true) {
+			// add event to a block queue
+			node.addEventToBlockedList(port, event);
+			// this.updateBlockedLog(recv, port, e.getMessage().getLabel());
+
+			// not allow to execute receive msg if it is init node and
+			// it has not yet execute init()
+		} else {
+			// update log
+			String[] value = new String[2];
+			value[0] = node.getNodeId();
+			value[1] = port;
+			this.log.logAgent(logTag.AGENT_ARRIVE, event.getAgentId(), value);
+
+			// track number of agent visit
+			// this.graph.countMsgRecv(e.getMessage().getLabel());
+
+			// add new arrival agent to a node
+			node.addAgent(agent);
+
+			// set this node to be current residence of agent
+			agent.setCurNode(node);
+			agent.setLastPortEnter(port);
+
+			AgentModel entity = agent.getClientEntity();
+
+			// notify node of arrival
+			entity.notifyEvent(NotifyType.AGENT_ARRIVAL);
+
+			// execute client code
+			if (agent.hasInitExec()) {
+				entity.arrive(port);
 			}
 
-			// check if the port is blocked
-			if (node.isBlocked(port) == true) {
-				// add event to a block queue
-				node.addEventToBlockedList(port, e);
-				// this.updateBlockedLog(recv, port, e.getMessage().getLabel());
-
-				// not allow to execute receive msg if it is init node and
-				// it has not yet execute init()
-			} else {
-				// update log
-				String[] value = new String[2];
-				value[0] = node.getNodeId();
-				value[1] = port;
-				this.log.logAgent(logTag.AGENT_ARRIVE, e.getAgentId(), value);
-				
-				// track number of agent visit
-				//this.graph.countMsgRecv(e.getMessage().getLabel());
-				
-				// add new arrival agent to a node				
-				node.addAgent(agent);
-				
-				// set this node to be current residence of agent
-				agent.setCurNode(node);
-				agent.setLastPortEnter(port);
-				
-				AgentModel entity = agent.getClientEntity();	
-
-				// notify node of arrival							
-				entity.notifyEvent(NotifyType.AGENT_ARRIVAL);
-				
-				// execute client code
-				if(agent.hasInitExec()){
-					entity.arrive(port);
-				}
-				
-				this.systemOut.println("@invokeArrival()" + agent.getAgentId() 
-						+ " arrives " + node.getNodeId());				
-			}
+			this.systemOut.println("@invokeArrival()" + agent.getAgentId()
+					+ " arrives " + node.getNodeId());
 		}
 	}
 
-	private void invokeNotify(List<Event> events){
-		for (int i = 0; i < events.size(); i++) {			
-			// get each event
-			AgentEvent e = (AgentEvent)events.get(i);
+	private void invokeNotify(AgentEvent event) {
 			
-			// get notify type
-			IMessage info = e.getInfo();
-			NotifyType type = (NotifyType)info.getContent();
+		// get notify type
+		IMessage info = event.getInfo();
+		NotifyType type = (NotifyType)info.getContent();
 
-			// get a node
-			Node node = this.graph.getNode(e.getNodeId());
-			
-			// get agent
-			Agent agent = this.graph.getAgent(e.getAgentId());
+		// get a node
+		Node node = this.graph.getNode(event.getNodeId());
+		
+		// get agent
+		Agent agent = this.graph.getAgent(event.getAgentId());
 
-			// Will NOT execute a Fail agent or node
-			if (!agent.isAlive() || !node.isAlive()){
-				// node dies agent must die as well
-				agent.setAlive(false);
-				continue;
-			}
+		// Will NOT execute a Fail agent or node
+		if (!agent.isAlive() || !node.isAlive()){
+			// node dies agent must die as well
+			agent.setAlive(false);
+			this.allAgents.put(agent.getAgentId(), agent);
+			this.graph.removeAgent(agent.getAgentId());	
 			
+		}else{			
 			AgentModel entity = agent.getClientEntity();
 			if(agent.hasInitExec()){
 				entity.notified(type);
-			}
-			
+			}		
 			// update log
 			String[] value = {node.getNodeId(), type.toString()};
 			this.log.logAgent(logTag.AGENT_NOTIFY, agent.getAgentId(), value);

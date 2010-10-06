@@ -35,6 +35,10 @@ public class EventQueue {
 		return this.queue.isEmpty();
 	}
 
+	protected synchronized int getSmallestTime() throws DisJException {
+		return this.topEvent().getExecTime();
+	}
+	
 	protected synchronized void pushEvent(Event event) {
 		this.queue.add(event);
 		this.orderQueue();
@@ -44,14 +48,12 @@ public class EventQueue {
 	 * Add an Event into a queue
 	 */
 	protected synchronized void pushEvents(List<Event> events) {
-		for (int i = 0; i < events.size(); i++) {
-			this.queue.add(events.get(i));
-		}
+		this.queue.addAll(events);
 		this.orderQueue();
 	}
 
 	/*
-	 * Get a next event that has a smallest timeId and highest priority 
+	 * Look at a next event that has a smallest timeId and highest priority 
 	 * order of execution in the queue without remove
 	 */
 	protected synchronized Event topEvent() throws DisJException{
@@ -67,16 +69,16 @@ public class EventQueue {
 	 */
 	protected synchronized List<Event> popEvents() {
 		int t = -1;
-		int s = -1;
 		List<Event> eList = new ArrayList<Event>();
 		for (int i = 0; i < this.queue.size(); i++) {
 			Event e = this.queue.get(i);
 			if (t == -1) {
-				t = e.getExecTime();
-				s = e.getEventType();
+				t = e.getExecTime();				
 				eList.add(e);
-			} else if (t == e.getExecTime() && s == e.getEventType()) {
+				
+			} else if (t == e.getExecTime()) {
 				eList.add(e);
+				
 			} else {
 				break;
 			}

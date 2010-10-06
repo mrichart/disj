@@ -1215,10 +1215,22 @@ public abstract class Entity implements IMessagePassingModel {
 		return this.nodeOwner.getY();
 	}
 	
+	/**
+	 * Get an X coordinate of a node that has a highest X coordinate 
+	 * value in a graph
+	 * FIXME need to apply to every topology
+	 * @return
+	 */
 	public final int getMaxXLocation(){
 		return this.nodeOwner.getMaxX();
 	}
 	
+	/**
+	 * Get a Y coordinate of a node that has a highest Y coordinate 
+	 * value in a graph
+	 * FIXME need to apply to every topology
+	 * @return
+	 */
 	public final int getMaxYLocation(){
 		return this.nodeOwner.getMaxY();
 	}

@@ -5,6 +5,7 @@ import java.lang.reflect.Modifier;
 import java.net.URL;
 
 import distributed.plugin.core.IConstants;
+import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.GraphLoader;
@@ -56,9 +57,16 @@ public class TokenAgentProcessor extends AgentProcessor {
 	
 	protected AgentModel createClientAgent() throws Exception{
 		int maxTok = this.graph.getMaxToken();
-		TokenAgent clientAgent = GraphLoader.createTokenAgentObject(client);
-		clientAgent.setMaxToken(maxTok);
+		TokenAgent clientAgent = GraphLoader.createTokenAgentObject(this.client);
+		clientAgent.setMaxToken(maxTok);	
 		return clientAgent;
+	}
+	
+	@Override
+	protected void actionSpecific() {		
+		// log the model and user class name
+		this.log.logModel(logTag.MODEL_AGENT_TOKEN, this.client.getName());
+
 	}
 
 }

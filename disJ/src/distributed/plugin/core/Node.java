@@ -294,6 +294,10 @@ public class Node implements Serializable {
 		return this.curAgents;
 	}
 
+	public void clearAllAgents(){
+		this.curAgents.clear();
+	}
+	
 	/**
 	 * Add more link out of this node
 	 * 
@@ -700,7 +704,9 @@ public class Node implements Serializable {
 		// it is not a reset action
 		if(this.curState != -1){
 			this.pastStates.add(this.getStateName(state));
-			this.log.logNode(logTag.NODE_STATE, this.nodeId, this.getStateName(this.curState));	
+			if(log != null){
+				this.log.logNode(logTag.NODE_STATE, this.nodeId, this.curState+"");	
+			}
 		}
 	}
 
@@ -791,6 +797,10 @@ public class Node implements Serializable {
 	public List<Event> getHoldEvents() {
 		return this.holdEvents;
 	}
+	
+	public void clearHoldEvents(){
+		this.holdEvents.clear();
+	}
 
 	/**
 	 * @return Returns the ports.
@@ -840,6 +850,18 @@ public class Node implements Serializable {
 	 */
 	public void setAlive(boolean alive) {
 		this.isAlive = alive;
+		if(alive = false){
+			if(log != null){
+				this.log.logNode(logTag.NODE_DIE, this.nodeId, null);
+			}
+			
+			// every agent resides in the node must die as well
+			for(int i = 0; i < this.curAgents.size(); i++){
+				Agent agent = this.curAgents.get(i);
+				agent.setAlive(false);
+				this.removeAgent(agent);
+			}
+		}
 	}
 
 	/**

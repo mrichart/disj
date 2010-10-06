@@ -278,6 +278,7 @@ public class Spatial extends AbstractGraph {
 			List<Integer> xList = new ArrayList<Integer>();
 			List<Integer> yList = new ArrayList<Integer>();
 	
+			// Generate node from left to right, and top to bottom
 			for (int i = 0; i < this.numNode; i++) {
 				tx = mx + IGraphEditorConstants.NODE_SIZE + GAP;
 				xList.add(tx);
@@ -303,6 +304,8 @@ public class Spatial extends AbstractGraph {
 				node = this.nodes.get(i);
 				point = pList.get(i);
 				node.setLocation(point);
+				
+				// assign max X and Y coordinate
 				node.setMaxX(mx);
 				node.setMaxY(my);
 			}

@@ -60,6 +60,8 @@ public class Graph implements Serializable {
 	
 	transient private Map<String, Integer> numMsgRecv;	
 	
+	transient private Map<String, Integer> numMsgLost;
+	
 	transient private IRandom clientRandom;
 
 	protected Graph() {
@@ -79,6 +81,7 @@ public class Graph implements Serializable {
 		
 		this.numMsgSent = new HashMap<String, Integer>();
 		this.numMsgRecv = new HashMap<String, Integer>();
+		this.numMsgLost = new HashMap<String, Integer>();
 		this.nodes = new HashMap<String, Node>();
 		this.edges = new HashMap<String, Edge>();
 		this.agents = new HashMap<String, Agent>();
@@ -114,7 +117,7 @@ public class Graph implements Serializable {
 			throw new DisJException(IConstants.ERROR_3, id);
 	}
 
-	public void addAgent(String id, Agent agent) throws DisJException {
+	public void addAgent(String id, Agent agent) {
 		if (!this.agents.containsKey(id)){
 			this.agents.put(id, agent);
 		}
@@ -124,33 +127,38 @@ public class Graph implements Serializable {
 	 * Remove a node with a given id
 	 * 
 	 * @param id
-	 * @throws DisJException
+	 * @return True if node exists and has been removed,
+	 * otherwise false
 	 */
-	public void removeNode(String id) throws DisJException {
-		if (!nodes.containsKey(id))
-			throw new DisJException(IConstants.ERROR_0, id);
-
-		nodes.remove(id);
+	public boolean removeNode(String id) {
+		if (nodes.containsKey(id)){		
+			Node n = nodes.remove(id);
+			return (n != null);
+		}
+		return false;
 	}
 
 	/**
 	 * Remove an edge with a given id
 	 * 
 	 * @param id
-	 * @throws DisJException
+	 * @return True if edge exists and has been removed,
+	 * otherwise false
 	 */
-	public void removeEdge(String id) throws DisJException {
-		if (!this.edges.containsKey(id))
-			throw new DisJException(IConstants.ERROR_1, id);
-
-		edges.remove(id);
+	public boolean removeEdge(String id) {
+		if (!this.edges.containsKey(id)){
+			Edge e = edges.remove(id);
+			return (e != null);
+		}
+		return false;
 	}
 
-	public void removeAgent(String id) throws DisJException {
-		if (!this.agents.containsKey(id))
-			throw new DisJException(IConstants.ERROR_0, id);
-
-		this.agents.remove(id);
+	public boolean removeAgent(String id)  {
+		if (this.agents.containsKey(id)){
+			Agent a = this.agents.remove(id);
+			return (a != null);
+		}
+		return false;
 	}
 	
 	public void removeAllAgents(){
@@ -161,8 +169,7 @@ public class Graph implements Serializable {
 	 * Get an edge with a given id
 	 * 
 	 * @param id
-	 * @return
-	 * @throws DisJException
+	 * @return Edge if exists otherwise null
 	 */
 	public Edge getEdge(String id) {
 		try {
@@ -171,7 +178,6 @@ public class Graph implements Serializable {
 			else
 				return (Edge) edges.get(id);
 		} catch (DisJException e) {
-			e.printStackTrace();
 			return null;
 		}
 	}
@@ -180,8 +186,7 @@ public class Graph implements Serializable {
 	 * Get a node with a given id
 	 * 
 	 * @param id
-	 * @return
-	 * @throws DisJException
+	 * @return Node if exists otherwise null
 	 */
 	public Node getNode(String id) {
 		try {
@@ -195,6 +200,12 @@ public class Graph implements Serializable {
 		}
 	}
 	
+	/**
+	 * Get an agent with a given id
+	 * 
+	 * @param id An agent ID
+	 * @return Agent if exists otherwise null
+	 */
 	public Agent getAgent(String id) {
 		try {
 			if (!this.agents.containsKey(id))
@@ -317,7 +328,6 @@ public class Graph implements Serializable {
 		}else{
 			val = 1;
 		}
-		//System.out.println("@Graph.conutMsgSent() " + msgLabel + " = " + val);
 		this.numMsgSent.put(msgLabel, val);
 	}
 	
@@ -327,6 +337,29 @@ public class Graph implements Serializable {
 	
 	public void resetMsgSentCounter(){
 		this.numMsgSent.clear();
+	}
+	
+	/**
+	 * count number of message lost grouped by message label
+	 * @param msgLabel
+	 */
+	public void countMsgLost(String msgLabel){
+		int val;
+		if(this.numMsgLost.containsKey(msgLabel)){
+			val = this.numMsgLost.get(msgLabel) + 1;
+		}else{
+			val = 1;
+		}
+		//System.out.println("@Graph.conutMsgSent() " + msgLabel + " = " + val);
+		this.numMsgLost.put(msgLabel, val);
+	}
+	
+	public Map<String, Integer> getMsgLostCounter(){
+		return this.numMsgLost;
+	}
+	
+	public void resetMsgLostCounter(){
+		this.numMsgLost.clear();
 	}
 
 	/**
@@ -390,6 +423,7 @@ public class Graph implements Serializable {
     	 this.agents = new HashMap<String, Agent>();
     	 this.numMsgRecv = new HashMap<String, Integer>();
     	 this.numMsgSent = new HashMap<String, Integer>();
+    	 this.numMsgLost = new HashMap<String, Integer>();
     	 this.clientRandom = null;
     }
 

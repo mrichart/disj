@@ -11,12 +11,15 @@
 package distributed.plugin.ui.actions;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -270,19 +273,27 @@ public class ProcessActions extends WorkbenchPartAction {
 
 	}
 	
+	/*
+	 * Run replay record
+	 */
 	private void executeLoadRecord(){
-		editor.setController(new ReplayController(this, editor));
-		Shell shell = getWorkbenchPart().getSite().getShell();
 		
+		// Open replay dialog that contains
+		// file record input dialog
+		Shell shell = getWorkbenchPart().getSite().getShell();		
 		FileDialog dialog = new FileDialog(shell, SWT.OPEN);
 		dialog.setFilterExtensions(new String[]{"*.rec"});		
 		String fileName = dialog.open();	
 		
+/*		
 		if (editor.setRecFile(fileName)){
 			MessageDialog.openInformation(shell, "Load Record Message","Record Loading Completed");
 		}else{
 			MessageDialog.openInformation(shell, "Load Record Message","File not found");
 		}
+	*/	
+		Graph graph = this.doubleCheck();
+		this.engine.replay(graph, fileName);
 	
 	}
 	
@@ -293,6 +304,43 @@ public class ProcessActions extends WorkbenchPartAction {
 		editor.setRecFileNameForSaving(filename);
 	}
 	
+	/*
+	 * FIXME Double check and validate an input graph
+	 */
+	private Graph doubleCheck(){
+		this.validateSavedGraph(editor);
+		
+		GraphElement ge = editor.getGraphElement();
+		List<NodeElement> nList = ge.getNodeElements();
+		Graph graph = ge.getGraph();
+		
+		// FIXME Double assignment: some time graph is empty
+		// it should not happen !!
+		Node node;
+		for (NodeElement n : nList) {
+			try {
+				node = n.getNode();
+				graph.addNode(n.getNodeId(), node);
+			} catch (DisJException e) {
+				System.err.println("@executeRun()[WARNING] try to add duplicated node");
+			}
+		}
+		List <LinkElement> eList = ge.getLinkElements();
+		Edge edge;
+		for (LinkElement le : eList) {
+			try {
+				edge = le.getEdge();
+				graph.addEdge(le.getEdgeId(), edge);
+			} catch (DisJException e) {
+				System.err.println("executeRun()[WARNING] try to add duplicated edge");
+			}
+		}
+		return graph;
+	}
+	
+	/*
+	 * Run use algorithm live.
+	 */
 	private void executeRun() {
 		// first run
 		if (this.engine.isStarted() == false) {
@@ -300,32 +348,7 @@ public class ProcessActions extends WorkbenchPartAction {
 				return;
 			}
 			
-			this.validateSavedGraph(editor);
-			GraphElement ge = editor.getGraphElement();
-			List<NodeElement> nList = ge.getNodeElements();
-			Graph graph = ge.getGraph();
-			
-			// FIXME Double assignment: some time graph is empty
-			// it should not happen !!
-			Node node;
-			for (NodeElement n : nList) {
-				try {
-					node = n.getNode();
-					graph.addNode(n.getNodeId(), node);
-				} catch (DisJException e) {
-					System.err.println("@executeRun()[WARNING] try to add duplicated node");
-				}
-			}
-			List <LinkElement> eList = ge.getLinkElements();
-			Edge edge;
-			for (LinkElement le : eList) {
-				try {
-					edge = le.getEdge();
-					graph.addEdge(le.getEdgeId(), edge);
-				} catch (DisJException e) {
-					System.err.println("executeRun()[WARNING] try to add duplicated edge");
-				}
-			}
+			Graph graph = this.doubleCheck();
 			
 			// FIXME a cheated way to refresh the node color
 			// to user setting state

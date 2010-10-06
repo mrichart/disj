@@ -26,8 +26,8 @@ public class TimeGenerator {
 	// curTime}
 	private Map<String, Integer> execTimes;
 
-	// a set of current lastestId for each graph in workspace {graphId, lastId}
-	private Map<String, Integer> lastestId;
+	// a set of current latest unique ID for each graph in workspace {graphId, lastId}
+	private Map<String, Integer> latestId;
 
 	private static TimeGenerator timeGen;
 
@@ -36,7 +36,7 @@ public class TimeGenerator {
 	private TimeGenerator() {
 		this.execTimes = null;
 		this.execTimes = new HashMap<String, Integer>();
-		this.lastestId = new HashMap<String, Integer>();
+		this.latestId = new HashMap<String, Integer>();
 	}
 
 	/**
@@ -61,7 +61,7 @@ public class TimeGenerator {
 	public void addGraph(String graphId) {
 		if (!this.execTimes.containsKey(graphId)) {
 			this.execTimes.put(graphId, new Integer(0));
-			this.lastestId.put(graphId, new Integer(0));
+			this.latestId.put(graphId, new Integer(0));
 		}
 	}
 
@@ -87,6 +87,17 @@ public class TimeGenerator {
 	}
 
 	/**
+	 * Reset time and unique ID of a given graph ID
+	 * @param graphId
+	 */
+	public void reset(String graphId){
+		this.execTimes.remove(graphId);
+		this.latestId.remove(graphId);
+		
+		this.addGraph(graphId);
+	}
+	
+	/**
 	 * Get a next and new unique ID w.r.t a given graph
 	 * 
 	 * @param graphId A given graph ID
@@ -94,14 +105,12 @@ public class TimeGenerator {
 	 *         DistJException
 	 */
 	public int getNextNewId(String graphId) throws DisJException {
-		if (!this.lastestId.containsKey(graphId))
+		if (!this.latestId.containsKey(graphId))
 			throw new DisJException(IConstants.ERROR_5, graphId);
 
-		int id = lastestId.get(graphId);
-		this.lastestId.put(graphId, id + 1);
+		int id = latestId.get(graphId);
+		this.latestId.put(graphId, id + 1);
 		return id;
 	}
 
-	public static void main(String[] args) {
-	}
 }

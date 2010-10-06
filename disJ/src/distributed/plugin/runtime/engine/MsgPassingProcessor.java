@@ -47,16 +47,14 @@ import distributed.plugin.ui.IGraphEditorConstants;
  */
 public class MsgPassingProcessor implements IProcessor {
 
-	private int callingChain;
-
 	private boolean stop;
 
 	private boolean pause;
 
-	private boolean stepForward;
-
 	private int speed;
 
+	private int callingChain;
+	
 	private String procName;
 
 	private Class<Entity> client;
@@ -185,16 +183,18 @@ public class MsgPassingProcessor implements IProcessor {
 		for (int i = 0; i < receivers.size(); i++) {
 			String port = receivers.get(i);
 			Edge recv = sNode.getEdge(port);
-					
+			recv.recMsgPassed(msgLabel, sender);
+			
 			// tracking message sent to each target
 			this.updateEdgeLog(recv, sender, message);
-			this.updateSentLog(sNode, port, message);
+			this.updateSentLog(sNode, port, message);			
 			this.graph.countMsgSent(msgLabel);
 			
 			// validate the probability of failure
 			if (!recv.isReliable()) {
 				int prob = ran.nextInt(100) + 1;
 				if (prob <= recv.getProbOfFailure()) {
+					this.graph.countMsgLost(msgLabel);
 					// log for losing msg
 					this.logEdgeFailurMsg(recv, sender, message);
 					continue;
@@ -217,7 +217,7 @@ public class MsgPassingProcessor implements IProcessor {
 		this.queue.pushEvents(newEvents);
 		
 		// update time's lower bound
-		this.setCurrentTime(this.queue.topEvent().getExecTime());
+		this.setCurrentTime(this.queue.getSmallestTime());
 	}
 
 	/*
@@ -239,7 +239,7 @@ public class MsgPassingProcessor implements IProcessor {
 
 			// update time's lower bound, which may be the alarm ringing is
 			// a smallest
-			this.setCurrentTime(this.queue.topEvent().getExecTime());
+			this.setCurrentTime(this.queue.getSmallestTime());
 
 		} else if (message.getLabel().equals(IConstants.MESSAGE_SET_BLOCK_MSG)) {
 			
@@ -279,9 +279,9 @@ public class MsgPassingProcessor implements IProcessor {
 	 */
 	private void updateSentLog(Node sender, String port, IMessage msg) {
 		sender.incMsgSend();
-		Object[] value = new Object[2];
+		String[] value = new String[2];
 		value[0] = port;
-		value[1] = msg;			
+		value[1] = msg.getLabel();			
 		this.log.logNode(logTag.NODE_SEND, sender.getNodeId(), value);			
 	}
 
@@ -290,9 +290,9 @@ public class MsgPassingProcessor implements IProcessor {
 	 */
 	private void updateRecvLog(Node receiver, String port, IMessage msg) {
 		receiver.incMsgRecv();
-		Object[] value = new Object[2];
+		String[] value = new String[2];
 		value[0] = port;
-		value[1] = msg;			
+		value[1] = msg.getLabel();			
 		this.log.logNode(logTag.NODE_RECV, receiver.getNodeId(), value);	
 	}
 
@@ -301,9 +301,9 @@ public class MsgPassingProcessor implements IProcessor {
 	 */
 	private void updateEdgeLog(Edge edge, String nodeId, IMessage msg) {
 		edge.incNumMsg();
-		Object[] value = new Object[2];
+		String[] value = new String[2];
 		value[0] = nodeId;
-		value[1] = msg;	
+		value[1] = msg.getLabel();	
 		this.log.logEdge(logTag.EDGE_MSG, edge.getEdgeId(), value);
 	}
 
@@ -311,9 +311,9 @@ public class MsgPassingProcessor implements IProcessor {
 	 * Update edge's log for losing message
 	 */
 	private void logEdgeFailurMsg(Edge edge, String nodeId, IMessage msg) {
-		Object[] value = new Object[2];
+		String[] value = new String[2];
 		value[0] = nodeId;
-		value[1] = msg;	
+		value[1] = msg.getLabel();	
 		this.log.logEdge(logTag.EDGE_LOST, edge.getEdgeId(), value);
 	}
 
@@ -378,6 +378,12 @@ public class MsgPassingProcessor implements IProcessor {
 			// init logger
 			this.log.initLog();
 			
+			// log state name list
+			this.log.logStates(logTag.STATE_FIELD, this.stateFields);
+			
+			// log the model and user class name
+			this.log.logModel(logTag.MODEL_MSG_PASS, this.client.getName());
+
 			// load and init any necessary data
 			this.loadInitNodes();
 
@@ -405,8 +411,8 @@ public class MsgPassingProcessor implements IProcessor {
 	 * Load client object into init nodes and create init event(s)
 	 */
 	private void loadInitNodes() throws DisJException {
-
-		List<Node> initNodes = GraphLoader.getInitNodes(graph);
+		
+		List<Node> initNodes = GraphLoader.getInitNodes(this.graph);
 		try {
 			for (int i = 0; i < initNodes.size(); i++) {
 				Node init = initNodes.get(i);
@@ -415,11 +421,11 @@ public class MsgPassingProcessor implements IProcessor {
 				init.setLogger(this.log);
 				init.setStateNames(this.stateFields);
 				
-				Entity clientObj = GraphLoader.createEntityObject(client);
+				Entity clientObj = GraphLoader.createEntityObject(this.client);
 				clientObj.initEntity(this, init);
-				init.addEntity(clientObj);								
+				init.addEntity(clientObj);				
 			}
-
+			
 			//Random r = new Random(System.currentTimeMillis());
 			List<Event> events = new ArrayList<Event> ();
 			// create a set of init events
@@ -447,7 +453,7 @@ public class MsgPassingProcessor implements IProcessor {
 			this.queue.pushEvents(events);
 
 			// update time's lower bound
-			this.setCurrentTime(this.queue.topEvent().getExecTime());
+			this.setCurrentTime(this.queue.getSmallestTime());
 
 		} catch (Exception e) {
 			throw new DisJException(IConstants.ERROR_8, e.toString());
@@ -457,128 +463,107 @@ public class MsgPassingProcessor implements IProcessor {
 	/*
 	 * Start executing event in the queue
 	 */
-	private void executeEvents() throws DisJException {
+	private void executeEvents() throws Exception {
 
-		while (!this.queue.isEmpty()) {
-			if (this.stop)
-				break;
-
-			// To slow down the simulation speed
+		while (!this.queue.isEmpty() && this.stop == false) {
+			
+			// Slow down the simulation speed
 			try {
 				Thread.sleep(this.speed);
 			} catch (InterruptedException ignore) {
-				System.out.println("@MsgPassingProcessor.executeEvent() Slow down process with speed: "
-						+ this.speed + " =>" + ignore);
+				//this.systemOut.println("@MsgPassingProcessor.executeEvent() " +
+				//		"Slow down process with speed: " + this.speed);
 			}
-
-			// suspend the process and/or hit breakpoint
-			if (!this.pause) {
-				MsgPassingEvent e = (MsgPassingEvent) this.queue.topEvent();
-				Node thisNode = this.graph.getNode(e.getHostId());
-
-				if (thisNode.getBreakpoint() == true) {
-					this.setPause(true);
-					while (this.pause) {
-						if (this.stop)
-							break;
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException ignore) {
-							System.out
-									.println("@MsgPassingProcessor.executeEvent() breakpoint=true: "
-											+ ignore);
-						}
-					}
-				}
-
-				if (this.stop)
-					break;
-
-				if (e.getEventType() == IConstants.EVENT_ARRIVAL_TYPE) {
-					this.invokeReceive(this.queue.popEvents());
-
-					// tracking a length of message calling chain
-					this.callingChain++;
-
-				} else if (e.getEventType() == IConstants.EVENT_ALARM_RING_TYPE) {
-					this.invokeAlarmRing(this.queue.popEvents());
-
-				} else {
-					this.invokeInit(this.queue.popEvents());
-				}
-
-				if (this.stepForward) {
-					this.pause = true;
-				}
-
-				// FIXME print out the message to console that related to this
-				// entity then clean it up.
-
-			} else {
+			
+			while (this.pause && this.stop == false) {				
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException ignore) {
-					System.out.println("@MsgPassingProcessor.executeEvent() pause=true: "
-							+ ignore);
+					this.systemOut.println("@MsgPassingProcessor.executeEvent()" +
+							" pause = true");
+				}
+			}				
+			if (this.stop){
+				break;
+			}
+			
+			// Execute event
+			//MsgPassingEvent e = (MsgPassingEvent) this.queue.topEvent();
+			// tracking a length of message calling chain
+			// this.callingChain++;
+			
+			// Get all events with smallest time
+			List<Event> list = this.queue.popEvents();
+			MsgPassingEvent e = null;
+			boolean count = false;
+			for(int i =0; i < list.size(); i++){
+				e = (MsgPassingEvent)list.get(i);		
+				if (e.getEventType() == IConstants.EVENT_ARRIVAL_TYPE) {
+					this.invokeReceive(e);
+					if(!count){
+						this.callingChain++;
+						count = true;
+					}
+				} else if (e.getEventType() == IConstants.EVENT_ALARM_RING_TYPE) {
+					this.invokeAlarmRing(e);
+	
+				} else if( e.getEventType() == IConstants.EVENT_INITIATE_TYPE){
+					this.invokeInit(e);
 				}
 			}
-
 		}
 	}
 
 	/*
 	 * Invoke client's init()
 	 */
-	private void invokeInit(List<Event> events) throws DisJException {
-		for (int i = 0; i < events.size(); i++) {
-			MsgPassingEvent e = (MsgPassingEvent)events.get(i);
-			Node node = this.graph.getNode(e.getHostId());
+	private void invokeInit(MsgPassingEvent event) throws Exception {
+		
+		Node node = this.graph.getNode(event.getHostId());
 
-			// Will NOT execute a Fail node
-			if (node.isAlive()) {
-				Entity entity = this.loadEntity(node);
-							
-				// update log
-				this.updateInitLog(node);
-				
-				// execute client code
-				node.setInitExec(true);
-				entity.init();
-				
-				// catching up the holding events
-				// this can happen only to recvMsg
-				// since setAlarm will not be able to
-				// occurred until initNode is initialized
-				List<Event> list = node.getHoldEvents();
-				if(!list.isEmpty()){
-					this.invokeReceive(list);
+		// Will NOT execute a Fail node
+		if (node.isAlive()) {
+			Entity entity = this.loadEntity(node);
+						
+			// update log
+			this.updateInitLog(node);
+			
+			// execute client code
+			node.setInitExec(true);
+			entity.init();
+			
+			// catching up the holding events
+			// this can happen only to recvMsg
+			// since setAlarm will not be able to
+			// occurred until initNode is initialized
+			List<Event> list = node.getHoldEvents();
+			if(!list.isEmpty()){
+				for(int i =0; i <list.size(); i++){
+					MsgPassingEvent e = (MsgPassingEvent)list.get(i);
+					this.invokeReceive(e);
 				}
+				node.clearHoldEvents();
 			}
+		}else{
+			node.clearHoldEvents();
 		}
 	}
 
 	/*
 	 * Invoke client's receive() w.r.t the target node
 	 */
-	private void invokeReceive(List<Event> events) throws DisJException {
-		
-		List<Object[]> invokeList = new ArrayList<Object[]>();
-		for (int i = 0; i < events.size(); i++) {
-			MsgPassingEvent e = (MsgPassingEvent)events.get(i);
+	private void invokeReceive(MsgPassingEvent event) throws Exception {
+		// retrieve a receiver node for this event
+		Edge link = this.graph.getEdge(event.getEdgeName());
+		Node recv = link.getOthereEnd(this.graph.getNode(event.getHostId()));
+		String port = recv.getPortLabel(link);
 
-			// retrieve a receiver node for this event
-			Edge link = this.graph.getEdge(e.getEdgeName());
-			Node recv = link.getOthereEnd(this.graph.getNode(e.getHostId()));
-			String port = recv.getPortLabel(link);
-
-			// Will NOT execute a Fail node
-			if (!recv.isAlive())
-				continue;
-
+		// Will NOT execute a Fail node
+		if (recv.isAlive()){			
 			// check if the port is blocked
 			if (recv.isBlocked(port) == true) {
 				// add event to a block queue
-				recv.addEventToBlockedList(port, e);
+				recv.addEventToBlockedList(port, event);
 				// this.updateBlockedLog(recv, port, e.getMessage().getLabel());
 
 				// not allow to execute receive msg if it is init node and
@@ -587,50 +572,33 @@ public class MsgPassingProcessor implements IProcessor {
 					|| (recv.isInitExec() == true)) {
 				
 				// update receive log
-				this.updateRecvLog(recv, port, e.getMessage());
-				this.graph.countMsgRecv(e.getMessage().getLabel());
+				this.updateRecvLog(recv, port, event.getMessage());
+				this.graph.countMsgRecv(event.getMessage().getLabel());
 				
 				Entity entity = this.loadEntity(recv);
-				String recvPort = GraphLoader.getEdgeLabel(recv, link);
-				Object[] params = new Object[] {e, entity, recvPort };
-				invokeList.add(params);
-
+				String recvPort = GraphLoader.getEdgeLabel(recv, link);			
+				entity.getNodeOwner().setLatestRecvPort(recvPort);
+				
+				// Invoke client code
+				entity.receive(recvPort, event.getMessage());				
+				
 			} else {
 				throw new DisJException(IConstants.ERROR_23,
 						"@MsgPassingProcessor.invokeReceiver() ");
-			}
-		}
-
-		Entity entity = null;
-		try{
-			// invoke receive() on a target node
-			for (int i = 0; i < invokeList.size(); i++) {
-				Object[] params = (Object[]) invokeList.get(i);
-				MsgPassingEvent e = (MsgPassingEvent) params[0];
-				entity = (Entity) params[1];
-				String portLabel = (String) params[2];
-				entity.getNodeOwner().setLatestRecvPort(portLabel);
-				entity.receive(portLabel, e.getMessage());
-			}
-		}catch(Exception e){					
-			throw new RuntimeException(e);
+			}						
 		}
 	}
 
 	/*
 	 * Internal clock ring, invoke client's alarmRing()
 	 */
-	private void invokeAlarmRing(List<Event> events) throws DisJException {
-		for (int i = 0; i < events.size(); i++) {
-			MsgPassingEvent e = (MsgPassingEvent)events.get(i);
-			Node node = this.graph.getNode(e.getHostId());
-
-			// Will NOT execute a Fail node
-			if (node.isAlive()) {
-				Entity entity = this.loadEntity(node);
-				entity.alarmRing();
-			}
-		}
+	private void invokeAlarmRing(MsgPassingEvent event) throws DisJException {		
+		Node node = this.graph.getNode(event.getHostId());
+		// Will NOT execute a Fail node
+		if (node.isAlive()) {
+			Entity entity = this.loadEntity(node);
+			entity.alarmRing();
+		}		
 	}
 
 	/*
@@ -711,14 +679,6 @@ public class MsgPassingProcessor implements IProcessor {
 	
 	public int getCallingChain() {
 		return this.callingChain;
-	}
-
-	public boolean isStepForward() {
-		return stepForward;
-	}
-
-	public void setStepForward(boolean stepForward) {
-		this.stepForward = stepForward;
 	}
 
 	@Override
