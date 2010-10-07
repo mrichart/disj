@@ -299,8 +299,6 @@ public class NodePart extends AbstractGraphicalEditPart implements
 			if (ui != null) {
 				display = Display.getDefault();
 				display.asyncExec(ui);
-				// Thread t = new Thread(ui, prop);
-				// t.start();
 			}
 		} catch (RuntimeException e) {
 			// TODO ignore this
