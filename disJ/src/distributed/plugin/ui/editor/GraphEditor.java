@@ -604,6 +604,9 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		return categories;
 	}
 
+	/*
+	 * Selection option
+	 */
 	private PaletteContainer createControlGroup(PaletteRoot root) {
 
 		PaletteGroup controlGroup = new PaletteGroup(
@@ -626,6 +629,9 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		return controlGroup;
 	}
 
+	/*
+	 * Create a raw graph manually
+	 */
 	private PaletteContainer createDrawerComponents() {
 
 		URL installUrl = GraphEditorPlugin.getDefault().getBundle().getEntry(
@@ -687,6 +693,9 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		return drawer;
 	}
 
+	/*
+	 * Create a build in topology
+	 */
 	private PaletteContainer createGraphComponents() {
 		
 		URL installUrl = GraphEditorPlugin.getDefault().getBundle().getEntry("/");
@@ -717,6 +726,11 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		);
 		entries.add(combined);
 
+		try {
+			imageUrl = new URL(installUrl, "icons/tree.png");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.TREE, IGraphEditorConstants.TREE_DESC,
 				IGraphEditorConstants.TEMPLATE_TREE, this
@@ -730,8 +744,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 			imageUrl = new URL(installUrl, "icons/complete.png");
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
-		}
-		
+		}	
 		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.COMPLETE,
 				IGraphEditorConstants.COMPLETE_DESC,
@@ -741,13 +754,12 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 						ImageDescriptor.createFromURL(imageUrl)//$NON-NLS-1$
 		);
 		entries.add(combined);
-/*
+
 		try {
-			imageUrl = new URL(installUrl, "icons/spatial.gif");
+			imageUrl = new URL(installUrl, "icons/spatial.png");
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
-		}
-*/		
+		}		
 		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.SPATIAL,
 				IGraphEditorConstants.SPATIAL_DESC,
@@ -757,13 +769,12 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 						ImageDescriptor.createFromURL(imageUrl)//$NON-NLS-1$
 		);
 		entries.add(combined);
-/*
+
 		try {
-			imageUrl = new URL(installUrl, "icons/mesh.gif");
+			imageUrl = new URL(installUrl, "icons/mesh.png");
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
-		}
-*/		
+		}		
 		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.MESH, IGraphEditorConstants.MESH_DESC,
 				IGraphEditorConstants.TEMPLATE_MESH, this
@@ -773,6 +784,11 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		);
 		entries.add(combined);
 
+		try {
+			imageUrl = new URL(installUrl, "icons/hypercube.png");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.HYPER_CUBE,
 				IGraphEditorConstants.HYPER_CUBE_DESC,
@@ -783,6 +799,11 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		);
 		entries.add(combined);
 
+		try {
+			imageUrl = new URL(installUrl, "icons/torus.png");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		PaletteStack toruses = new PaletteStack(
 				IGraphEditorConstants.TORUS_STACK,
 				IGraphEditorConstants.TORUS_STACK_DESC, null);
@@ -808,10 +829,15 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		toruses.add(combined);
 		entries.add(toruses);
 
+		try {
+			imageUrl = new URL(installUrl, "icons/gen.png");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		PaletteStack random = new PaletteStack(
 				IGraphEditorConstants.RANDOM_STACK,
 				IGraphEditorConstants.RANDOM_STACK_DESC, null);
-
+		
 		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.GENERIC,
 				IGraphEditorConstants.GENERIC_DESC,
@@ -821,7 +847,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 						ImageDescriptor.createFromURL(imageUrl)//$NON-NLS-1$
 		);
 		random.add(combined);
-
+		
 		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.GENERIC_C,
 				IGraphEditorConstants.GENERIC_C_DESC,
