@@ -609,7 +609,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		PaletteGroup controlGroup = new PaletteGroup(
 				IGraphEditorConstants.CONTROL_GROUP_LABEL);
 
-		List<PaletteEntry> entries = new ArrayList<PaletteEntry>();
+		List entries = new ArrayList();
 		ToolEntry tool = new PanningSelectionToolEntry();
 		entries.add(tool);
 		root.setDefaultEntry(tool);
@@ -619,7 +619,8 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 		PaletteSeparator sep = new PaletteSeparator(
 				IGraphEditorConstants.SEPARATOR_ONE);
-		sep.setUserModificationPermission(PaletteEntry.PERMISSION_NO_MODIFICATION);
+		sep
+				.setUserModificationPermission(PaletteEntry.PERMISSION_NO_MODIFICATION);
 		entries.add(sep);
 		controlGroup.addAll(entries);
 		return controlGroup;
@@ -632,7 +633,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		URL imageUrl = null;
 
 		try {
-			imageUrl = new URL(installUrl, "icons/comp.gif");
+			imageUrl = new URL(installUrl, "icons/draw.png");
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -640,7 +641,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 				IGraphEditorConstants.DRAW_COMPONENTS, ImageDescriptor
 						.createFromURL(imageUrl));
 
-		List<ToolEntry> entries = new ArrayList<ToolEntry>();
+		List entries = new ArrayList();
 
 		try {
 			imageUrl = new URL(installUrl, "icons/node.gif");
@@ -657,7 +658,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		entries.add(combined);
 
 		try {
-			imageUrl = new URL(installUrl, "icons/uni_link.gif");
+			imageUrl = new URL(installUrl, "icons/uni_link.png");
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -670,7 +671,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		entries.add(tool);
 
 		try {
-			imageUrl = new URL(installUrl, "icons/bi_link.gif");
+			imageUrl = new URL(installUrl, "icons/bi_link.png");
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -692,7 +693,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		URL imageUrl = null;
 		
 		try {
-			imageUrl = new URL(installUrl, "icons/topology.gif");
+			imageUrl = new URL(installUrl, "icons/graph.png");
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -700,10 +701,10 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 				IGraphEditorConstants.TOPOLOGY_TYPES,
 				ImageDescriptor.createFromURL(imageUrl));
 
-		List<PaletteEntry> entries = new ArrayList<PaletteEntry>();
+		List entries = new ArrayList();
 
 		try {
-			imageUrl = new URL(installUrl, "icons/temp.gif");
+			imageUrl = new URL(installUrl, "icons/ring.png");
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -725,6 +726,12 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		);
 		entries.add(combined);
 
+		try {
+			imageUrl = new URL(installUrl, "icons/complete.png");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		
 		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.COMPLETE,
 				IGraphEditorConstants.COMPLETE_DESC,
@@ -734,7 +741,13 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 						ImageDescriptor.createFromURL(imageUrl)//$NON-NLS-1$
 		);
 		entries.add(combined);
-
+/*
+		try {
+			imageUrl = new URL(installUrl, "icons/spatial.gif");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+*/		
 		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.SPATIAL,
 				IGraphEditorConstants.SPATIAL_DESC,
@@ -744,7 +757,13 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 						ImageDescriptor.createFromURL(imageUrl)//$NON-NLS-1$
 		);
 		entries.add(combined);
-
+/*
+		try {
+			imageUrl = new URL(installUrl, "icons/mesh.gif");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+*/		
 		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.MESH, IGraphEditorConstants.MESH_DESC,
 				IGraphEditorConstants.TEMPLATE_MESH, this
@@ -891,7 +910,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 		Action action = new DirectEditAction((IWorkbenchPart) this);
 		this.addAction(action);
-		this.getSelectionActions().add(action.getId());
+		getSelectionActions().add(action.getId());
 
 		this.addAction(new CopyTemplateAction(this));
 

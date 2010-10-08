@@ -37,7 +37,7 @@ public class LoadRetargetAction extends RetargetAction {
         
         	try {
 				final URL installUrl = GraphEditorPlugin.getDefault().getBundle().getEntry("/");
-				final URL imageUrl = new URL(installUrl, "icons/load_en.gif");
+				final URL imageUrl = new URL(installUrl, "icons/load.png");
 				setImageDescriptor(ImageDescriptor.createFromURL(imageUrl));
 				
 			} catch (MalformedURLException e) {					

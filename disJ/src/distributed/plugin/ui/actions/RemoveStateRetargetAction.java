@@ -34,7 +34,7 @@ public class RemoveStateRetargetAction extends RetargetAction {
         super(actionID, text);
     	try {
 			final URL installUrl = GraphEditorPlugin.getDefault().getBundle().getEntry("/");
-			final URL imageUrl = new URL(installUrl, "icons/rem_state_en.gif");
+			final URL imageUrl = new URL(installUrl, "icons/view_state.png");
 			setImageDescriptor(ImageDescriptor.createFromURL(imageUrl));
 			
 		} catch (MalformedURLException e) {					

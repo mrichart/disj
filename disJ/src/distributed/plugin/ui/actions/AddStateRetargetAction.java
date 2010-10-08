@@ -35,7 +35,7 @@ public class AddStateRetargetAction extends RetargetAction {
 		try {
 			final URL installUrl = GraphEditorPlugin.getDefault().getBundle()
 					.getEntry("/");
-			final URL imageUrl = new URL(installUrl, "icons/add_state_en.gif");
+			final URL imageUrl = new URL(installUrl, "icons/add_state.png");
 			setImageDescriptor(ImageDescriptor.createFromURL(imageUrl));
 
 		} catch (MalformedURLException e) {

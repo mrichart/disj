@@ -35,7 +35,7 @@ public class StopRetargetAction extends RetargetAction {
 		try {
 			final URL installUrl = GraphEditorPlugin.getDefault().getBundle()
 					.getEntry("/");
-			final URL imageUrl = new URL(installUrl, "icons/stop_en.gif");
+			final URL imageUrl = new URL(installUrl, "icons/stop.png");
 			setImageDescriptor(ImageDescriptor.createFromURL(imageUrl));
 
 		} catch (MalformedURLException e) {

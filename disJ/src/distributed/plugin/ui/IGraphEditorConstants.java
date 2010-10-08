@@ -86,28 +86,28 @@ public interface IGraphEditorConstants {
 	public static final String RESUME = "Run/Resume";
 	public static final String SUSPEND = "Suspend";
 	public static final String STOP = "Stop";
-	public static final String LOAD = "Load Class";
-	public static final String LOAD_RANDOM = "Load Random Number Generator";
+	public static final String LOAD = "Load Java Class";
+	public static final String LOAD_RANDOM = "Load Random Generator";
 	public static final String NEXT = "Step Next";
-	public static final String ADD_STATE = "Add State";
-	public static final String REMOVE_STATE = "View/Remove States";
+	public static final String ADD_STATE = "Add States";
+	public static final String REMOVE_STATE = "Remove/View States";
 	public static final String SPEED = "Process Speed";
 	public static final String REPLAY = "Replay Record";
 	public static final String SAVE_RECORD = "Save the last run";
 	
 	public static final String EXECUTE_MENU_ID = "IGraphEditorConstants.Simulator";
-	public static final String SUB_MENU_ID = "IGraphEditorConstants.Debug Menu";
+	public static final String SUB_MENU_ID = "IGraphEditorConstants.Debug_Menu";
 	public static final String ACTION_RESUME = "IGraphEditorConstants.Resume";
 	public static final String ACTION_SUSPEND = "IGraphEditorConstants.Suspend";
 	public static final String ACTION_STOP = "IGraphEditorConstants.Stop";
-	public static final String ACTION_LOAD = "IGraphEditorConstants.Load Class";
-	public static final String ACTION_LOAD_RANDOM = "IGraphEditorConstants.Load Random Number Generator";
-	public static final String ACTION_STEP_NEXT = "IGraphEditorConstants.Step Next";
-	public static final String ADD_STATE_ID = "IGraphEditorConstants.Add State";
-	public static final String REMOVE_STATE_ID = "IGraphEditorConstants.Remove State";
-	public static final String ACTION_SET_SPEED = "IGraphEditorConstants.Process Speed";
-	public static final String ACTION_REPLAY_RECORD ="IGraphEditorConstants.ReplayRecord Replay";
-	public static final String ACTION_SAVE_RECORD="IGraphEditorConstants.SAVE_RECORD_ID Save_Recording";
+	public static final String ACTION_LOAD = "IGraphEditorConstants.Load_Java_Class";
+	public static final String ACTION_LOAD_RANDOM = "IGraphEditorConstants.Load_Random";
+	public static final String ACTION_STEP_NEXT = "IGraphEditorConstants.Step_Next";
+	public static final String ADD_STATE_ID = "IGraphEditorConstants.Add_State";
+	public static final String REMOVE_STATE_ID = "IGraphEditorConstants.Remove_State";
+	public static final String ACTION_SET_SPEED = "IGraphEditorConstants.Process_Speed";
+	public static final String ACTION_REPLAY_RECORD ="IGraphEditorConstants.Replay_Record";
+	public static final String ACTION_SAVE_RECORD="IGraphEditorConstants.Save_Recording";
 	
 	// command template
 	public static final String TEMPLATE_NODE = "0";
