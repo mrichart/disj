@@ -123,7 +123,7 @@ public class GraphElementFactory implements CreationFactory {
         } else if (template.equals(IGraphEditorConstants.TEMPLATE_SPATIAL)){
             return this.createSpatialGraph();
         
-        } else if (template.equals(IGraphEditorConstants.TEMPLATE_GENERIC_C)){
+        } else if (template.equals(IGraphEditorConstants.TEMPLATE_CONNECTED)){
             return this.createGeneric_C();
         } else{
             return null;

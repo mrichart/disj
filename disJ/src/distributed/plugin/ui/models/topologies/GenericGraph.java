@@ -19,17 +19,14 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import distributed.plugin.ui.IGraphEditorConstants;
-import distributed.plugin.ui.dialogs.GenericGraphCDialog;
+import distributed.plugin.ui.dialogs.ConnGraphDialog;
 import distributed.plugin.ui.dialogs.GenericGraphDialog;
 import distributed.plugin.ui.models.GraphElementFactory;
 import distributed.plugin.ui.models.LinkElement;
 import distributed.plugin.ui.models.NodeElement;
 
 /**
- * @author Me
  * 
- *         TODO To change the template for this generated type comment go to
- *         Window - Preferences - Java - Code Style - Code Templates
  */
 public class GenericGraph extends AbstractGraph {
 
@@ -72,7 +69,7 @@ public class GenericGraph extends AbstractGraph {
 				this.numInit = dialog.getNumInit();
 			}
 		}else{
-			GenericGraphCDialog dialog = new GenericGraphCDialog(this.shell);
+			ConnGraphDialog dialog = new ConnGraphDialog(this.shell);
 			dialog.open();
 			if(!dialog.isCancel()){
 				this.numNode = dialog.getNumNode();
@@ -200,7 +197,7 @@ public class GenericGraph extends AbstractGraph {
 				}
 			}
 		} else if (this.type == IGraphEditorConstants.GENERIC_C) {
-			generateConnectedGenericGraph();
+			generateConnectedGraph();
 
 		}
 
@@ -209,7 +206,7 @@ public class GenericGraph extends AbstractGraph {
 	 * added by Russell Nov,2008
 	 */
 
-	private void generateConnectedGenericGraph() {
+	private void generateConnectedGraph() {
 		
 		Vector<Integer> connectedNodes = new Vector<Integer>();
 		Vector<Integer> unconnectedNodes = new Vector<Integer>();

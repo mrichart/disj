@@ -30,7 +30,7 @@ import distributed.plugin.ui.IGraphEditorConstants;
  *         TODO To change the template for this generated type comment go to
  *         Window - Preferences - Java - Code Style - Code Templates
  */
-public class GenericGraphCDialog extends Dialog {
+public class ConnGraphDialog extends Dialog {
 
 	private boolean cancel;
 	
@@ -45,7 +45,7 @@ public class GenericGraphCDialog extends Dialog {
 	/**
 	 * @param arg0
 	 */
-	public GenericGraphCDialog(Shell arg0) {
+	public ConnGraphDialog(Shell arg0) {
 		super(arg0);
 		setText("Random Connected Graph Dialog");
 		this.cancel = true;
@@ -198,11 +198,14 @@ public class GenericGraphCDialog extends Dialog {
 	    
 	private String validateLinkInput(int numNode, Object links) {
 		try {			
-			int l = Integer.parseInt(((String) links).trim());
-			if (l>(numNode)*(numNode-1)/2)
+			int numLink = Integer.parseInt(((String) links).trim());
+			if (numLink > (numNode*(numNode-1))/2){
 				return "Too many links";
-			else
+			} else if(numLink < numNode){
+				return "Number of links must be more than or equal to number of node";
+			}else{
 				return null;
+			}
 		} catch (NumberFormatException n) {
 			return "Input must be an integer number";
 		}

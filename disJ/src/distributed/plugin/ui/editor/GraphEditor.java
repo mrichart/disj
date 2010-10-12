@@ -574,9 +574,9 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_GENERIC,
 				new GraphElementFactory(this.getGraphElement(),
 						IGraphEditorConstants.TEMPLATE_GENERIC));
-		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_GENERIC_C,
+		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_CONNECTED,
 				new GraphElementFactory(this.getGraphElement(),
-						IGraphEditorConstants.TEMPLATE_GENERIC_C));
+						IGraphEditorConstants.TEMPLATE_CONNECTED));
 		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_SPATIAL,
 				new GraphElementFactory(this.getGraphElement(),
 						IGraphEditorConstants.TEMPLATE_SPATIAL));
@@ -818,6 +818,11 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		);
 		toruses.add(combined);
 
+		try {
+			imageUrl = new URL(installUrl, "icons/torus2.png");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.TORUS_2,
 				IGraphEditorConstants.TORUS_2_DESC,
@@ -830,7 +835,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		entries.add(toruses);
 
 		try {
-			imageUrl = new URL(installUrl, "icons/gen.png");
+			imageUrl = new URL(installUrl, "icons/conn.png");
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -839,20 +844,25 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 				IGraphEditorConstants.RANDOM_STACK_DESC, null);
 		
 		combined = new CombinedTemplateCreationEntry(
+				IGraphEditorConstants.GENERIC_C,
+				IGraphEditorConstants.GENERIC_C_DESC,
+				IGraphEditorConstants.TEMPLATE_CONNECTED, this
+						.getFactory(IGraphEditorConstants.TEMPLATE_CONNECTED),
+						ImageDescriptor.createFromURL(imageUrl), //$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl)//$NON-NLS-1$
+		);		
+		random.add(combined);
+		
+		try {
+			imageUrl = new URL(installUrl, "icons/genn.png");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		combined = new CombinedTemplateCreationEntry(
 				IGraphEditorConstants.GENERIC,
 				IGraphEditorConstants.GENERIC_DESC,
 				IGraphEditorConstants.TEMPLATE_GENERIC, this
 						.getFactory(IGraphEditorConstants.TEMPLATE_GENERIC),
-						ImageDescriptor.createFromURL(imageUrl), //$NON-NLS-1$
-						ImageDescriptor.createFromURL(imageUrl)//$NON-NLS-1$
-		);
-		random.add(combined);
-		
-		combined = new CombinedTemplateCreationEntry(
-				IGraphEditorConstants.GENERIC_C,
-				IGraphEditorConstants.GENERIC_C_DESC,
-				IGraphEditorConstants.TEMPLATE_GENERIC_C, this
-						.getFactory(IGraphEditorConstants.TEMPLATE_GENERIC_C),
 						ImageDescriptor.createFromURL(imageUrl), //$NON-NLS-1$
 						ImageDescriptor.createFromURL(imageUrl)//$NON-NLS-1$
 		);

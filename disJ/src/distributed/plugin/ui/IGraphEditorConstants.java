@@ -122,7 +122,7 @@ public interface IGraphEditorConstants {
 	public static final String TEMPLATE_TORUS_1 = "9";
 	public static final String TEMPLATE_TORUS_2 = "10";
 	public static final String TEMPLATE_GENERIC = "11";
-	public static final String TEMPLATE_GENERIC_C = "12";
+	public static final String TEMPLATE_CONNECTED = "12";
 	public static final String TEMPLATE_SPATIAL = "13";
 	
 	
