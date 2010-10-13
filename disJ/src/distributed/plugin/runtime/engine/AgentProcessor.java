@@ -322,8 +322,8 @@ public abstract class AgentProcessor implements IProcessor {
 			// notify node of departure
 			entity.notifyEvent(NotifyType.AGENT_DEPARTURE);
 			
-			this.systemOut.println("@processMove() " + agent.getAgentId() + " from " 
-					+ fromNodeId + " to " + target.getNodeId());
+			//this.systemOut.println("@processMove() " + agent.getAgentId() + " from " 
+			//		+ fromNodeId + " to " + target.getNodeId());
 			
 			// update log
 			String[] value = {sNode.getNodeId(), toPort};
@@ -419,12 +419,18 @@ public abstract class AgentProcessor implements IProcessor {
 		// clear agents at processor
 		this.allAgents.clear();
 		
-		// clear agents at each node
+		// clear all nodes and edges
 		Map<String, Node> nodes = this.graph.getNodes();
 		Iterator<String> its = nodes.keySet().iterator();
 		for(Node n = null; its.hasNext();){
 			n = nodes.get(its.next());
-			n.clearAllAgents();
+			n.cleanUp();
+		}
+		Map<String, Edge> edges = this.graph.getEdges();
+		its = edges.keySet().iterator();
+		for(Edge e = null; its.hasNext();){
+			e = edges.get(its.next());
+			e.cleanUp();
 		}
 		
 		// clean agent at graph
@@ -563,7 +569,7 @@ public abstract class AgentProcessor implements IProcessor {
 			// execute user code
 			entity.init();
 						
-			this.systemOut.println("@invokeInit() " + agent.getAgentId());
+			//this.systemOut.println("@invokeInit() " + agent.getAgentId());
 		}		
 	}
 	
@@ -592,8 +598,7 @@ public abstract class AgentProcessor implements IProcessor {
 				// execute user code
 				entity.alarmRing();
 			}
-		}
-		//this.systemOut.println("@invokeAlarmRing() " + agent.getAgentId());		
+		}		
 	}
 	
 	private void invokeArrival(AgentEvent event) throws DisJException {
@@ -613,12 +618,13 @@ public abstract class AgentProcessor implements IProcessor {
 			agent.setAlive(false);
 			this.allAgents.put(agent.getAgentId(), agent);
 			this.graph.removeAgent(agent.getAgentId());
+			return;
 		}
 
 		// check if the port is blocked
 		if (node.isBlocked(port) == true) {
 			// add event to a block queue
-			node.addEventToBlockedList(port, event);
+			node.addEventToBlockedPort(port, event);
 			// this.updateBlockedLog(recv, port, e.getMessage().getLabel());
 
 			// not allow to execute receive msg if it is init node and
@@ -650,7 +656,7 @@ public abstract class AgentProcessor implements IProcessor {
 				entity.arrive(port);
 			}
 
-			this.systemOut.println("@invokeArrival()" + agent.getAgentId()
+			this.systemOut.println("@invokeArrival() Agent: " + agent.getAgentId()
 					+ " arrives " + node.getNodeId());
 		}
 	}

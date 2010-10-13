@@ -197,7 +197,7 @@ public abstract class LinkElement extends AdapterElement {
             return new Integer(this.mapDelayType(this.edge.getDelayType()));
 
         } else if (propName.equals(PROPERTY_TOTAL_MSG)) {
-            return "" + this.edge.getNumMsg();
+            return "" + this.edge.getNumMsgEnter();
 
         } else if (propName.equals(PROPERTY_DELAY_SEED)) {
             return "" + this.edge.getDelaySeed();
@@ -386,12 +386,13 @@ public abstract class LinkElement extends AdapterElement {
                 System.err.println("[LinkElement].setPropertyValue " + ignore);
             }
         } else
-        */ if (propName.equals(PROPERTY_TOTAL_MSG)) {
+         if (propName.equals(PROPERTY_TOTAL_MSG)) {
             this.edge.resetNumMsg();
 
         } else {
             return;
         }   
+        */
     }
 
     /**

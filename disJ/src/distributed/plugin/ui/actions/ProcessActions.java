@@ -315,7 +315,7 @@ public class ProcessActions extends WorkbenchPartAction {
 				node = n.getNode();
 				graph.addNode(n.getNodeId(), node);
 			} catch (DisJException e) {
-				System.err.println("@executeRun()[WARNING] try to add duplicated node");
+				System.err.println("@ProcessAction.doubleCheck()[WARNING] try to add duplicated node");
 			}
 		}
 		List <LinkElement> eList = ge.getLinkElements();
@@ -325,7 +325,7 @@ public class ProcessActions extends WorkbenchPartAction {
 				edge = le.getEdge();
 				graph.addEdge(le.getEdgeId(), edge);
 			} catch (DisJException e) {
-				System.err.println("executeRun()[WARNING] try to add duplicated edge");
+				System.err.println("@ProcessAction.doubleCheck()[WARNING] try to add duplicated edge");
 			}
 		}
 		return graph;

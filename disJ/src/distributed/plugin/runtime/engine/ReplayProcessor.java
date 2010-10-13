@@ -270,12 +270,12 @@ public class ReplayProcessor implements IProcessor {
 		Edge edge = this.edges.get(edgeId);
 		
 		if(tag == logTag.EDGE_MSG){						
-			edge.incNumMsg();
+			edge.incNumMsgEnter();
 			edge.recMsgPassed(msgLabel, nodeId);
 			this.graph.countMsgSent(msgLabel);
 			
 		} else if (tag == logTag.EDGE_LOST){
-			edge.incNumMsg();
+			edge.incNumMsgEnter();
 			edge.recMsgPassed(msgLabel, nodeId);
 			this.graph.countMsgSent(msgLabel);
 			this.graph.countMsgLost(msgLabel);

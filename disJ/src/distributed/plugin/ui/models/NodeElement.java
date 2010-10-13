@@ -422,22 +422,24 @@ public class NodeElement extends AdapterElement {
 //			return;
 
 //		} else 
-			if (propName.equals(PROPERTY_MSG_RECV)) {
-			this.node.setNumMsgRecv(0);
-			return;
-
-		} else if (propName.equals(PROPERTY_MSG_SENT)) {
-			this.node.setNumMsgSend(0);
-			return;
-
-		} else if (propName.equals(PROPERTY_STATES)) {
-			this.node.resetStateList();
-			return;
-			
-		} else if (propName.equals(PROPERTY_NUM_TOKEN)) {
-			this.node.clearToken();
-			return;
-		} else if (propName.equals(PROPERTY_NUM_AGENT)) {
+//			if (propName.equals(PROPERTY_MSG_RECV)) {
+//			this.node.setNumMsgRecv(0);
+//			return;
+//
+//		} else if (propName.equals(PROPERTY_MSG_SENT)) {
+//			this.node.setNumMsgSend(0);
+//			return;
+//
+//		} else if (propName.equals(PROPERTY_STATES)) {
+//			this.node.resetStateList();
+//			return;
+//			
+//		} else if (propName.equals(PROPERTY_NUM_TOKEN)) {
+//			this.node.clearTokens();
+//			return;
+//		} else
+//			
+		if (propName.equals(PROPERTY_NUM_AGENT)) {
 			this.node.getAllAgents().size();
 			return;
 		}

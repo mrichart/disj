@@ -252,7 +252,7 @@ public class MsgPassingProcessor implements IProcessor {
 						e.setExecTime(time);
 					}
 					this.queue.pushEvents(events);
-					node.clearBlockedPort(port);
+					node.removeBlockedPort(port);
 				}
 			}
 			node.setPortBlock(port, block);
@@ -293,7 +293,7 @@ public class MsgPassingProcessor implements IProcessor {
 	 * Update edge's log for entering message
 	 */
 	private void updateEdgeLog(Edge edge, String nodeId, IMessage msg) {
-		edge.incNumMsg();
+		edge.incNumMsgEnter();
 		String[] value = new String[2];
 		value[0] = nodeId;
 		value[1] = msg.getLabel();	
@@ -560,7 +560,7 @@ public class MsgPassingProcessor implements IProcessor {
 			// check if the port is blocked
 			if (recv.isBlocked(port) == true) {
 				// add event to a block queue
-				recv.addEventToBlockedList(port, event);
+				recv.addEventToBlockedPort(port, event);
 				// this.updateBlockedLog(recv, port, e.getMessage().getLabel());
 
 				// not allow to execute receive msg if it is init node and

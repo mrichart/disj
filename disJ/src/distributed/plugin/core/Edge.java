@@ -19,6 +19,7 @@ import distributed.plugin.random.IRandom;
 import distributed.plugin.random.Poisson;
 import distributed.plugin.random.Uniform;
 import distributed.plugin.runtime.GraphFactory;
+import distributed.plugin.stat.EdgeStat;
 
 /**
  * @author Me
@@ -33,13 +34,13 @@ public class Edge implements Serializable {
 	
 	private String edgeId; // unique id system use only
 
+	private short direction;
+
 	private int msgFlowType; // i.e. FIFO
 
 	private int lastestMsgTimeForStart;
 
 	private int lastestMsgTimeForEnd;
-
-	private int totalMsg; // total messages have been passed through this edge
 
 	private boolean isReliable;
 	
@@ -48,13 +49,12 @@ public class Edge implements Serializable {
 	private int delayType; //i.e random uniform, synchronize
 
 	private int delaySeed; // for synchronize delay and random uniform type
-
-	private short direction;
-
+	
 	transient private Node start;
 
 	transient private Node end;
 
+	transient private EdgeStat stat;
 	
 	//private LinkElement linkElement;
 	
@@ -91,7 +91,6 @@ public class Edge implements Serializable {
 
 		this.graphId = graphId;
 		this.msgFlowType = msgFlowType;
-		this.totalMsg = 0;
 		this.edgeId = id;
 		this.direction = direction;
 		this.isReliable = isReliable;
@@ -102,21 +101,21 @@ public class Edge implements Serializable {
 		}
 		this.delayType = delayType;
 		this.delaySeed = delaySeed;
-		if (start == end && start != null)
+		if (start == end && start != null){
 			throw new DisJException(IConstants.ERROR_10, start.toString());
-
+		}
+		
 		this.start = start;
 		this.end = end;
+		this.stat = new EdgeStat(this.edgeId);
 	}
 
-	/**
-	 * Increment number of message has been use in this link
-	 * 
-	 */
-	public void incNumMsg() {
-		this.totalMsg++;
+	public void cleanUp(){
+		this.lastestMsgTimeForEnd = 0;
+		this.lastestMsgTimeForStart = 0;	
+		this.stat.reset();		
 	}
-
+	
 	/**
 	 * Get a arrival time of a message on this edge based on the sender and delay
 	 * type
@@ -298,14 +297,18 @@ public class Edge implements Serializable {
 	/**
 	 * @return Returns the numMsg.
 	 */
-	public int getNumMsg() {
-		return totalMsg;
-	}
-
-	public void resetNumMsg(){
-	    this.totalMsg = 0;
+	public int getNumMsgEnter() {
+		return this.stat.getTotalMsgEnter();
 	}
 	
+	/**
+	 * Increment number of message has been use in this link
+	 * 
+	 */
+	public void incNumMsgEnter() {
+		this.stat.incMsgEnter();
+	}
+
 	public String getGraphId() {
 		return this.graphId;
 	}
@@ -367,7 +370,7 @@ public class Edge implements Serializable {
 		if(this.start != null && this.end != null){
 			String s1 = ("\n\nEdge: " + this.edgeId + "\nReliable: " + this.isReliable
 				+ "\nMessage Flow Type: " + this.msgFlowType
-				+ "\nNum Message Entered: " + this.totalMsg + "\nDelay type: "
+				+ "\nDelay type: "
 				+ this.delayType + "\nNode 1: " + this.start.getNodeId()
 				+ "\nNode 2: " + this.end.getNodeId());
 			return s1;
@@ -375,7 +378,7 @@ public class Edge implements Serializable {
 		}else{		
 			String s2 = ("\n\nEdge: " + this.edgeId + "\nReliable: " + this.isReliable
 				+ "\nMessage Flow Type: " + this.msgFlowType
-				+ "\nNum Message Entered: " + this.totalMsg + "\nDelay type: "
+				+ "\nNum Message Entered: " + "\nDelay type: "
 				+ this.delayType);
 			return s2;
 		}		
@@ -422,9 +425,11 @@ public class Edge implements Serializable {
 	public void setMsgFlowType(int msgFlowType) {
 		this.msgFlowType = msgFlowType;
 	}
+	
     public void setEnd(Node end) {
         this.end = end;
     }
+    
     public void setStart(Node start) {
         this.start = start;
     }
@@ -460,15 +465,7 @@ public class Edge implements Serializable {
 	public LinkElement getLinkElement(){
 		return this.linkElement;
 	}
-*/
-	public int getTotalMsg() {
-		return totalMsg;
-	}
-
-	public void setTotalMsg(int totalMsg) {
-		this.totalMsg = totalMsg;
-	}
-	
+*/	
 	/*
      * Overriding serialize object due to Java Bug4152790
      */
@@ -480,7 +477,8 @@ public class Edge implements Serializable {
      */
     private void readObject(ObjectInputStream os) throws IOException, ClassNotFoundException  {
     	// rebuild this object
-    	os.defaultReadObject();  	
+    	os.defaultReadObject();
+    	this.stat = new EdgeStat(this.edgeId);
     }
 
 }

@@ -27,6 +27,7 @@ import distributed.plugin.runtime.Event;
 import distributed.plugin.runtime.IDistributedModel;
 import distributed.plugin.runtime.engine.Entity;
 import distributed.plugin.runtime.engine.AgentModel.NotifyType;
+import distributed.plugin.stat.NodeStat;
 
 /**
  * @author Me
@@ -48,10 +49,6 @@ public class Node implements Serializable {
 	 * a name of this node for user use 
 	 */
 	private String name;
-
-	private int numMsgRecv;
-
-	private int numMsgSend;
 
 	private String latestRecvPort;
 
@@ -114,12 +111,12 @@ public class Node implements Serializable {
 	 * a list of msg queue for blocking message {localport label, list of
 	 * events}
 	 */
-	transient private Map<String, List<Event>> blockMsg;
+	transient private Map<String, List<Event>> blockedPorts;
 	
 	/*
 	 * a list of blocking state of each port{port label,boolean}
 	 */
-	transient private Map<String, Boolean> blockPort;
+	transient private Map<String, Boolean> portStates;
 
 	/*
 	 * hold the events if initializer host has other actions before it has been
@@ -132,11 +129,6 @@ public class Node implements Serializable {
 	 * A mapping table of every possible state name and value defined by user
 	 */
 	transient private Map<Integer, String> stateNames;
-	
-	/*
-	 * Tracking every state that node has been through in orderly
-	 */
-	transient private List<String> pastStates;
 	
 	/*
 	 * A list of agent that currently resides in this node
@@ -153,6 +145,7 @@ public class Node implements Serializable {
 	 */
 	transient private Map<String, List<NotifyType>> registees;
 	
+	transient private NodeStat stat;
 	/*
 	 * X, Y coordinate in graph editor
 	 */
@@ -203,8 +196,6 @@ public class Node implements Serializable {
 		this.numInitAgent = 0;		
 		this.initExec = false;
 		this.isAlive = isStartHost;
-		this.numMsgRecv = 0;
-		this.numMsgSend = 0;
 		this.numToken = 0;
 		this.latestRecvPort = null;
 		this.entity = null;
@@ -212,12 +203,12 @@ public class Node implements Serializable {
 		this.userInput = "";
 		this.edges = new HashMap<String, Edge>();
 		this.ports = new HashMap<String, Short>();
+		this.stat = new NodeStat(nodeId);
 		
-		this.blockMsg = new HashMap<String, List<Event>>();		
-		this.blockPort = new HashMap<String, Boolean>();
+		this.blockedPorts = new HashMap<String, List<Event>>();		
+		this.portStates = new HashMap<String, Boolean>();
 		this.holdEvents = new ArrayList<Event>();
 		this.stateNames = new HashMap<Integer, String>();
-		this.pastStates = new ArrayList<String>();
 		this.curAgents = new ArrayList<Agent>();
 		this.whiteboard = new ArrayList<String>();
 		this.registees = new HashMap<String, List<NotifyType>>();
@@ -318,7 +309,7 @@ public class Node implements Serializable {
 		if (!this.edges.containsKey(label) && !this.edges.containsValue(edge)) {
 			this.edges.put(label, edge);
 			this.ports.put(label, type);
-			this.blockPort.put(label, false);
+			this.portStates.put(label, false);
 
 		} else {
 			throw new DisJException(IConstants.ERROR_2, label);
@@ -338,7 +329,7 @@ public class Node implements Serializable {
 		String key = this.getPortLabel(edge);
 		this.edges.remove(key);
 		this.ports.remove(key);
-		this.blockPort.remove(key);
+		this.portStates.remove(key);
 	}
 
 	/**
@@ -364,6 +355,13 @@ public class Node implements Serializable {
 		this.whiteboard = whiteboard;
 	}
 
+	public void clearWhieboard(){
+		if(this.whiteboard != null){
+			this.whiteboard.clear();
+		}else{
+			this.whiteboard = new ArrayList<String>();
+		}
+	}
 	/**
 	 * Get a list of all registred agent to this node
 	 * 
@@ -423,6 +421,13 @@ public class Node implements Serializable {
 		}
 	}
 	
+	public void clearRegistees(){
+		if(this.registees != null){
+			this.registees.clear();
+		}else{
+			this.registees = new HashMap<String, List<NotifyType>>();
+		}
+	}
 	/**
 	 * Get a port label of this node that connected to a given edge
 	 * 
@@ -481,10 +486,10 @@ public class Node implements Serializable {
 	 * @throws DisJException
 	 */
 	public boolean isBlocked(String label) throws DisJException {
-		if (!this.blockPort.containsKey(label)){
+		if (!this.portStates.containsKey(label)){
 			throw new DisJException(IConstants.ERROR_1, label);
 		}
-		return ((Boolean) this.blockPort.get(label)).booleanValue();
+		return ((Boolean) this.portStates.get(label)).booleanValue();
 	}
 
 	/**
@@ -495,16 +500,16 @@ public class Node implements Serializable {
 	 * @throws DisJException
 	 */
 	public void setPortBlock(String label, boolean state) throws DisJException {
-		if (!this.blockPort.containsKey(label))
+		if (!this.portStates.containsKey(label))
 			throw new DisJException(IConstants.ERROR_1, "@Node.setPortBlock() "
 					+ label);
 
 		if (state == true) {
 			// create a block message holding place
-			if (!this.blockMsg.containsKey(label))
-				this.blockMsg.put(label, new ArrayList<Event>());
+			if (!this.blockedPorts.containsKey(label))
+				this.blockedPorts.put(label, new ArrayList<Event>());
 		}
-		this.blockPort.put(label, new Boolean(state));
+		this.portStates.put(label, new Boolean(state));
 	}
 
 	/**
@@ -514,14 +519,14 @@ public class Node implements Serializable {
 	 *            A port that has been blocked
 	 * @param event
 	 */
-	public void addEventToBlockedList(String portLabel, Event event)
+	public void addEventToBlockedPort(String portLabel, Event event)
 			throws DisJException {
-		if (!this.blockMsg.containsKey(portLabel))
+		if (!this.blockedPorts.containsKey(portLabel))
 			throw new DisJException(IConstants.ERROR_14, portLabel);
 
-		List<Event> events = this.blockMsg.get(portLabel);
+		List<Event> events = this.blockedPorts.get(portLabel);
 		events.add(event);
-		this.blockMsg.put(portLabel, events);
+		this.blockedPorts.put(portLabel, events);
 	}
 
 	/**
@@ -531,7 +536,7 @@ public class Node implements Serializable {
 	 * @return
 	 */
 	public List<Event> getBlockedEvents(String portLabel) {
-		return this.blockMsg.get(portLabel);
+		return this.blockedPorts.get(portLabel);
 	}
 
 	/**
@@ -539,10 +544,19 @@ public class Node implements Serializable {
 	 * 
 	 * @param portLabel
 	 */
-	public void clearBlockedPort(String portLabel) {
-		this.blockMsg.remove(portLabel);
+	public void removeBlockedPort(String portLabel) {
+		if(this.blockedPorts != null){
+			this.blockedPorts.remove(portLabel);
+		}
 	}
 
+	public void clearAllBlockedPorts(){
+		if(this.blockedPorts != null){
+			this.blockedPorts.clear();
+		}else{
+			this.blockedPorts = new HashMap<String, List<Event>>();
+		}
+	}
 	/**
 	 * Add a user algorithm representative who will stay at this node
 	 * 
@@ -569,7 +583,7 @@ public class Node implements Serializable {
 	 * Increment number of message receive and log the receiver
 	 */
 	public void incMsgRecv() {
-		this.numMsgRecv++;
+		this.stat.incNumMsgRecv();
 	}
 
 	/**
@@ -577,7 +591,7 @@ public class Node implements Serializable {
 	 * 
 	 */
 	public void incMsgSend() {
-		this.numMsgSend++;
+		this.stat.incNumMsgSend();
 	}
 
 	/**
@@ -593,14 +607,14 @@ public class Node implements Serializable {
 	 * @return Returns the numMsgRecv.
 	 */
 	public int getNumMsgRecv() {
-		return numMsgRecv;
+		return this.stat.getNumMsgRecv();
 	}
 
 	/**
 	 * @return Returns the numMsgSend.
 	 */
 	public int getNumMsgSend() {
-		return numMsgSend;
+		return this.stat.getNumMsgSend();
 	}
 
 	/**
@@ -653,7 +667,7 @@ public class Node implements Serializable {
 		return numToken;
 	}
 
-	public void clearToken() {
+	public void clearTokens() {
 		this.numToken = 0;
 	}
 	
@@ -703,7 +717,7 @@ public class Node implements Serializable {
 	
 		// it is not a reset action
 		if(this.curState != -1){
-			this.pastStates.add(this.getStateName(state));
+			this.stat.addState(this.getStateName(state));
 			if(log != null){
 				this.log.logNode(logTag.NODE_STATE, this.nodeId, this.curState+"");	
 			}
@@ -724,14 +738,12 @@ public class Node implements Serializable {
 	}
 
 	public List<String> getStateList() {
-		return this.pastStates;
+		return this.stat.getPastStates();
 	}
 
 	public void resetStateList() {
-		if(this.pastStates != null){
-			this.pastStates.clear();
-		}else{
-			this.pastStates = new ArrayList<String>();
+		if(this.stat != null){
+			this.stat.clearState();
 		}
 	}
 
@@ -799,7 +811,11 @@ public class Node implements Serializable {
 	}
 	
 	public void clearHoldEvents(){
-		this.holdEvents.clear();
+		if(this.holdEvents != null){
+			this.holdEvents.clear();
+		}else{
+			this.holdEvents = new ArrayList<Event>();
+		}
 	}
 
 	/**
@@ -880,14 +896,6 @@ public class Node implements Serializable {
 		this.breakpoint = breakpoint;
 	}
 
-	public void setNumMsgRecv(int numMsgRecv) {
-		this.numMsgRecv = numMsgRecv;
-	}
-
-	public void setNumMsgSend(int numMsgSend) {
-		this.numMsgSend = numMsgSend;
-	}
-
 	/**
 	 * remove a given entity from this node
 	 * @param entity
@@ -897,7 +905,7 @@ public class Node implements Serializable {
 	}
 
 	public Map<String, Boolean> getBlockPort() {
-		return this.blockPort;
+		return this.portStates;
 	}
 
 	public int getX() {
@@ -956,12 +964,12 @@ public class Node implements Serializable {
     private void readObject(ObjectInputStream os) throws IOException, ClassNotFoundException  {
     	 // rebuild this object
     	 os.defaultReadObject();
-    	 this.clearToken();
-    	 this.blockMsg = new HashMap<String, List<Event>>();
-    	 this.blockPort = new HashMap<String, Boolean>();
+    	 this.numToken = 0;
+    	 this.stat = new NodeStat(this.nodeId);
+    	 this.blockedPorts = new HashMap<String, List<Event>>();
+    	 this.portStates = new HashMap<String, Boolean>();
     	 this.holdEvents = new ArrayList<Event>();
     	 this.stateNames = new HashMap<Integer, String>();	 
-    	 this.pastStates = new ArrayList<String>();
     	 this.curAgents = new ArrayList<Agent>();
     	 this.whiteboard = new ArrayList<String>();
     	 this.registees = new HashMap<String, List<NotifyType>>();
@@ -970,9 +978,19 @@ public class Node implements Serializable {
     	 Iterator<String> it = this.ports.keySet().iterator();
     	 for(;it.hasNext();){
     		 String port = it.next();
-    		 this.blockPort.put(port, false);
+    		 this.portStates.put(port, false);
     	 }
     }
 
+    public void cleanUp(){
+    	this.clearAllAgents();
+    	this.clearAllBlockedPorts();
+    	this.clearHoldEvents();
+    	this.clearTokens();
+    	this.clearWhieboard();
+    	this.clearRegistees();
+    	this.resetStateList();
+    	this.stat.reset();
+    }
 
 }

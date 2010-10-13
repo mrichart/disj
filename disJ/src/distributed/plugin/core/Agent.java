@@ -6,13 +6,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.runtime.engine.AgentModel;
+import distributed.plugin.stat.AgentStat;
 
 @SuppressWarnings("serial")
 public class Agent implements Serializable{
@@ -90,15 +90,11 @@ public class Agent implements Serializable{
 	transient private String[] info;
 
 	/*
-	 * Tracking every state that node has been through in orderly
-	 */
-	transient private List<String> pastStates;
-	
-	/*
 	 * A mapping table of every possible state name and value defined by user
 	 */
 	transient private Map<Integer, String> stateNames;
 	
+	transient private AgentStat stat;
 	
 	protected PropertyChangeSupport listeners = new PropertyChangeSupport(this);
 	
@@ -123,8 +119,8 @@ public class Agent implements Serializable{
 		this.log = null;
 		this.info = null;
 		this.entity = null;
-		
-		this.pastStates = new ArrayList<String>();
+		this.stat = new AgentStat(this.agentId);
+
 		this.stateNames = new HashMap<Integer, String>();
 	}
 	
@@ -187,7 +183,7 @@ public class Agent implements Serializable{
 		
 			// it is not a reset action
 			if(this.curState != -1){
-				this.pastStates.add(this.getStateName(state));
+				this.stat.addState(this.getStateName(state));
 				if(log != null){
 					this.log.logAgent(logTag.AGENT_STATE, this.agentId, 
 							this.curState+"");
@@ -197,7 +193,7 @@ public class Agent implements Serializable{
 	}
 
 	public List<String> getStateList() {
-		return this.pastStates;
+		return this.stat.getPastStates();
 	}
 
 	/**

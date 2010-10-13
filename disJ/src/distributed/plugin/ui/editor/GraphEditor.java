@@ -167,11 +167,11 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	
 	private IPartListener partListener = new IPartListener() {
 		// If an open, unsaved file was deleted, query the user to either do a
-		// "Save As"
-		// or close the editor.
+		// "Save As" or close the editor.
 		public void partActivated(IWorkbenchPart part) {
-			if (part != GraphEditor.this)
+			if (part != GraphEditor.this){
 				return;
+			}
 			if (!((FileEditorInput) getEditorInput()).getFile().exists()) {
 				Shell shell = getSite().getShell();
 				String title = IGraphEditorConstants.GraphicalEditor_FILE_DELETED_TITLE_UI;

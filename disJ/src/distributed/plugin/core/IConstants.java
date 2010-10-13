@@ -16,7 +16,7 @@ package distributed.plugin.core;
  * A collection for all constance values that used in this project
  */
 public interface IConstants {
-
+	
 	// message direction support for port
 	public static final short DIRECTION_IN = 0;
 	public static final short DIRECTION_OUT = 1;
