@@ -232,6 +232,10 @@ public class Node implements Serializable {
 		return this.nodeId;
 	}
 
+	public NodeStat getStat() {
+		return stat;
+	}
+
 	/**
 	 * Set a state-name pairs list of this node
 	 * 

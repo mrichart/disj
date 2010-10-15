@@ -15,6 +15,7 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import distributed.plugin.core.Agent;
 import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
+import distributed.plugin.core.Graph;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Logger;
 import distributed.plugin.core.Node;
@@ -22,7 +23,6 @@ import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.AgentEvent;
 import distributed.plugin.runtime.Event;
-import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.GraphLoader;
 import distributed.plugin.runtime.IMessage;
 import distributed.plugin.runtime.IProcessor;
@@ -321,13 +321,15 @@ public abstract class AgentProcessor implements IProcessor {
 			
 			// notify node of departure
 			entity.notifyEvent(NotifyType.AGENT_DEPARTURE);
-			
-			//this.systemOut.println("@processMove() " + agent.getAgentId() + " from " 
-			//		+ fromNodeId + " to " + target.getNodeId());
-			
+						
 			// update log
 			String[] value = {sNode.getNodeId(), toPort};
 			this.log.logAgent(logTag.AGENT_LEAVE, agentId, value);
+			
+			// update statistic
+			agent.getStat().incMove();
+			agent.getStat().incStateMove(agent.getCurState());
+			link.getStat().incEnterEdge();
 			
 			// validate the probability of failure
 			if (!link.isReliable()) {
@@ -345,7 +347,12 @@ public abstract class AgentProcessor implements IProcessor {
 				}
 			}
 			// generate arrival event at a target
-			int execTime = link.getDelayTime(sNode, this.getCurrentTime());
+			int curTime = this.getCurrentTime();
+			int execTime = link.getDelayTime(sNode, curTime);
+			
+			// update statistic
+			link.getStat().addTimeUse(execTime - curTime);
+			
 			int eventId = this.getNextId();		
 			IMessage msg = new Message(IConstants.MESSAGE_EVENT_ARRIVE_AT, link.getEdgeId());			 
 			Event e = new AgentEvent(IConstants.EVENT_ARRIVAL_TYPE, eventId,
@@ -467,6 +474,9 @@ public abstract class AgentProcessor implements IProcessor {
 			this.systemOut.println("\n*****Simulation for " + this.procName
 					+ " is successfully over.*****");
 
+			// display statistic report
+			this.displayStat();
+		
 			while(stop == false){
 				try{
 					Thread.sleep(3000);
@@ -478,6 +488,7 @@ public abstract class AgentProcessor implements IProcessor {
 			this.systemOut.println(e.toString());
 			
 		} finally {
+			
 			// clean up logger
 			this.log.cleanUp();
 
@@ -612,6 +623,11 @@ public abstract class AgentProcessor implements IProcessor {
 		Node node = this.graph.getNode(event.getNodeId());
 		String port = node.getPortLabel(link);
 
+		// update statistics
+		agent.getStat().incNodeVisit(node.getNodeId());
+		node.getStat().incNumAgentVisit();
+		link.getStat().incLeaveEdge();
+		
 		// Will NOT execute a Fail node or agent
 		if (!node.isAlive() || !agent.isAlive()) {
 			// node dies agent must die as well

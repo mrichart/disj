@@ -57,6 +57,10 @@ public abstract class TokenAgent extends AgentModel implements ITokenModel {
 			
 			// notify
 			this.notifyEvent(NotifyType.TOKEN_UPDATE);
+			
+			// update statistic
+			this.agentOwner.getStat().incDrop();
+			node.getStat().incNumTokDrop();
 		}	
 	}
 
@@ -91,6 +95,12 @@ public abstract class TokenAgent extends AgentModel implements ITokenModel {
 		
 		// notify
 		this.notifyEvent(NotifyType.TOKEN_UPDATE);
+		
+		// update statistic
+		for(int i =0; i < amount; i++){
+			this.agentOwner.getStat().incPick();
+			node.getStat().incNumTokPick();
+		}
 			
 	}
 	

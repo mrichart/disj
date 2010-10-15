@@ -4,12 +4,17 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.util.Iterator;
+import java.util.Map;
 
+import distributed.plugin.core.Agent;
+import distributed.plugin.core.Edge;
+import distributed.plugin.core.Graph;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.random.IRandom;
-import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.GraphLoader;
+import distributed.plugin.stat.GraphStat;
 
 public class BoardAgentProcessor extends AgentProcessor {
 
@@ -81,6 +86,47 @@ public class BoardAgentProcessor extends AgentProcessor {
 		// log agent list
 		super.logAgentInfo();
 
+	}
+	
+	@Override
+	public void displayStat() {
+		GraphStat gStat = this.graph.getStat();
+		Map<String, Agent> agents = this.graph.getAgents();
+		Map<String, Edge> edges = this.graph.getEdges();
+		
+		int totalMove = gStat.getTotalAgentMove(agents);
+		int totalRead = gStat.getTotalBoardRead(agents);
+		int totalWrite = gStat.getTotalBoardWrite(agents);
+		int totalDel = gStat.getTotalBoardDel(agents);
+		int timeUse = gStat.getTotalEdgeDelay(edges);
+		
+		Map<String, Integer> nodeState = gStat.getTotalNodeVisit(agents);
+		Map<Integer, Integer> stateMove = gStat.getTotalStateMove(agents);
+		
+		System.out.println("************** STATISTIC REPORT **************");
+		System.out.println("Total Agents moved: " + totalMove);
+		System.out.println("Total Board read: " + totalRead);
+		System.out.println("Total Board write: " + totalWrite);
+		System.out.println("Total Board delete: " + totalDel);
+		System.out.println("Total Dealy time has been accumulated: " + timeUse);
+		
+		System.out.println();
+		Iterator<Integer> its = stateMove.keySet().iterator();
+		int count = 0;
+		for(int stateId = 0; its.hasNext();){
+			stateId = its.next();
+			count = stateMove.get(stateId);
+			System.out.println("State " + this.stateFields.get(stateId) + " moved " + count);
+		}
+		
+		System.out.println();
+		Iterator<String> it = nodeState.keySet().iterator();
+		count = 0;
+		for(String nodeId = null; it.hasNext();){
+			nodeId = it.next();
+			count = nodeState.get(nodeId);
+			System.out.println("Node " + nodeId + " has been visited " + count);
+		}
 	}
 
 }

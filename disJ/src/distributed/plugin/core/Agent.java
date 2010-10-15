@@ -166,6 +166,11 @@ public class Agent implements Serializable{
 		return this.curState;
 	}
 
+	
+	public AgentStat getStat() {
+		return stat;
+	}
+
 	/**
 	 * Add a new state into the last element of the list
 	 * 

@@ -50,6 +50,7 @@ public class Edge implements Serializable {
 
 	private int delaySeed; // for synchronize delay and random uniform type
 	
+	
 	transient private Node start;
 
 	transient private Node end;
@@ -116,6 +117,10 @@ public class Edge implements Serializable {
 		this.stat.reset();		
 	}
 	
+	public EdgeStat getStat() {
+		return stat;
+	}
+
 	/**
 	 * Get a arrival time of a message on this edge based on the sender and delay
 	 * type
@@ -298,7 +303,7 @@ public class Edge implements Serializable {
 	 * @return Returns the numMsg.
 	 */
 	public int getNumMsgEnter() {
-		return this.stat.getTotalMsgEnter();
+		return this.stat.getTotalEdgeEnter();
 	}
 	
 	/**
@@ -306,7 +311,7 @@ public class Edge implements Serializable {
 	 * 
 	 */
 	public void incNumMsgEnter() {
-		this.stat.incMsgEnter();
+		this.stat.incEnterEdge();
 	}
 
 	public String getGraphId() {

@@ -38,9 +38,9 @@ import org.eclipse.ui.IFileEditorInput;
 
 import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
+import distributed.plugin.core.Graph;
 import distributed.plugin.core.Node;
 import distributed.plugin.random.IRandom;
-import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.engine.BoardAgent;
 import distributed.plugin.runtime.engine.Entity;
 import distributed.plugin.runtime.engine.SimulatorEngine;

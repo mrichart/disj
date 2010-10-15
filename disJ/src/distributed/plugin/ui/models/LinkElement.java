@@ -25,9 +25,9 @@ import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
 import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
+import distributed.plugin.core.Graph;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
-import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.GraphFactory;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.validators.EmptyCellEditorValidator;

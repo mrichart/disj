@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import distributed.plugin.core.DisJException;
+import distributed.plugin.core.Graph;
 import distributed.plugin.core.IConstants;
 
 /**

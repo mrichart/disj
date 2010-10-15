@@ -13,7 +13,7 @@ package distributed.plugin.ui.models;
 import org.eclipse.gef.requests.CreationFactory;
 import org.eclipse.swt.widgets.Shell;
 
-import distributed.plugin.runtime.Graph;
+import distributed.plugin.core.Graph;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.models.topologies.CompletGraph;
 import distributed.plugin.ui.models.topologies.GenericGraph;

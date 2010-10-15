@@ -22,6 +22,7 @@ import java.util.Map;
 
 import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
+import distributed.plugin.core.Graph;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
 import distributed.plugin.runtime.engine.BoardAgent;

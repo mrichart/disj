@@ -22,18 +22,19 @@ public class AgentStat extends Statistic {
 	// number of time of different node that agent visited
 	private Map<String, Integer> nodeVisit;
 
-	/*
 	// number of time that agent moves at different state
-	private Map<String, Integer> stateMove;
+	private Map<Integer, Integer> stateMove;
 	
-	// number of time that agent pick token at different state
+	// number of time that agent pick token at different node
 	private Map<String, Integer> tokPick;
 	
-	// number of time that agent drop token at different state
+	// number of time that agent drop token at different node
 	private Map<String, Integer> tokDrop;
 	
-	*/
-	
+	/**
+	 * 
+	 * @param name
+	 */
 	public AgentStat(String name) {
 		this.agentId = name;
 		this.numBoardDel = 0;
@@ -45,6 +46,9 @@ public class AgentStat extends Statistic {
 		
 		this.pastStates = new ArrayList<String>();
 		this.nodeVisit = new HashMap<String, Integer>();
+		this.stateMove = new HashMap<Integer, Integer>();
+		this.tokPick = new HashMap<String, Integer>();
+		this.tokDrop = new HashMap<String, Integer>();
 	}
 
 	@Override
@@ -58,6 +62,9 @@ public class AgentStat extends Statistic {
 		
 		this.pastStates = new ArrayList<String>();
 		this.nodeVisit = new HashMap<String, Integer>();
+		this.stateMove = new HashMap<Integer, Integer>();
+		this.tokPick = new HashMap<String, Integer>();
+		this.tokDrop = new HashMap<String, Integer>();
 	}
 
 	@Override
@@ -125,7 +132,7 @@ public class AgentStat extends Statistic {
 		return nodeVisit;
 	}
 	
-	public void incVisit(String nodeId){
+	public void incNodeVisit(String nodeId){
 		if(this.nodeVisit.containsKey(nodeId)){
 			int count = this.nodeVisit.get(nodeId);
 			count++;
@@ -135,5 +142,46 @@ public class AgentStat extends Statistic {
 		}
 	}
 
+	public Map<Integer, Integer> getStateMove() {
+		return stateMove;
+	}
+
+	public void incStateMove(int stateId){
+		if(this.stateMove.containsKey(stateId)){
+			int count = this.stateMove.get(stateId);
+			count++;
+			this.stateMove.put(stateId, count);
+		}else{
+			this.stateMove.put(stateId, 1);
+		}
+	}
+
+	public Map<String, Integer> getTokPick() {
+		return tokPick;
+	}
+
+	public void incNodeTokPick(String nodeId){
+		if(this.tokPick.containsKey(nodeId)){
+			int count = this.tokPick.get(nodeId);
+			count++;
+			this.tokPick.put(nodeId, count);
+		}else{
+			this.tokPick.put(nodeId, 1);
+		}
+	}
+	
+	public Map<String, Integer> getTokDrop() {
+		return tokDrop;
+	}
+	
+	public void incNodeTokDrop(String nodeId){
+		if(this.tokDrop.containsKey(nodeId)){
+			int count = this.tokDrop.get(nodeId);
+			count++;
+			this.tokDrop.put(nodeId, count);
+		}else{
+			this.tokDrop.put(nodeId, 1);
+		}
+	}
 	
 }

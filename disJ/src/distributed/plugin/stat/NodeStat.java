@@ -14,6 +14,10 @@ public class NodeStat extends Statistic {
 	private String nodeId;	
 	private List<String> pastStates;
 	
+	/**
+	 * 
+	 * @param name
+	 */
 	public NodeStat(String name) {
 		this.nodeId = name;
 		this.numAgentVisit = 0;

@@ -28,8 +28,8 @@ import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
 import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
+import distributed.plugin.core.Graph;
 import distributed.plugin.core.IConstants;
-import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.GraphFactory;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.validators.NumberCellEditorValidator;
@@ -312,20 +312,12 @@ public class GraphElement extends AdapterElement {
         } else if (propName.equals(PROPERTY_TOTAL_LINK)) {
             return this.linkElements.size();
             
-        } else if (propName.equals(PROPERTY_TOTAL_MSG_RECV)) {
-            int sum = 0;
-            Map<String, Integer> counter = this.graph.getMsgRecvCounter();
-            for (String msgLabel : counter.keySet()) {
-				sum += counter.get(msgLabel);
-			}
+        } else if (propName.equals(PROPERTY_TOTAL_MSG_RECV)) {           
+        	int sum = this.graph.getStat().getTotalMsgRecv(this.graph.getNodes());           
             return sum;
             
         } else if (propName.equals(PROPERTY_TOTAL_MSG_SENT)) {
-        	int sum = 0;
-            Map<String, Integer> counter = this.graph.getMsgSentCounter();
-            for (String msgLabel : counter.keySet()) {
-				sum += counter.get(msgLabel);
-			}
+        	int sum = this.graph.getStat().getTotalMsgSent(this.graph.getNodes());           
             return sum;
             
         } else if (propName.equals(PROPERTY_GLOBAL_MSG_FLOW_TYPE)) {
@@ -436,11 +428,8 @@ public class GraphElement extends AdapterElement {
         } else if (id.equals(PROPERTY_MAX_TOKEN)) {
         	// allow to set max token only before the start
         	// of the simulation
-        	if(this.graph.getAgents().isEmpty() &&
-        			this.graph.getMsgRecvCounter().isEmpty() && 
-        			this.graph.getMsgSentCounter().isEmpty()){
-        		
-	        	int val;
+        	if(this.graph.getAgents().isEmpty()){
+        		int val;
 	        	try{
 	        		Integer i = Integer.valueOf(value.toString());
 	        		val = i.intValue();
@@ -480,14 +469,14 @@ public class GraphElement extends AdapterElement {
 		} else if (propName.equals("PROPERTY_PROTOCOL")) {
 			this.graph.setProtocol("");
 
-		} else 
-		*/if (propName.equals(PROPERTY_TOTAL_MSG_SENT)) {
+		} else if (propName.equals(PROPERTY_TOTAL_MSG_SENT)) {
 			this.graph.resetMsgSentCounter();
 
 		} else if (propName.equals(PROPERTY_TOTAL_MSG_RECV)) {
 			this.graph.resetMsgRecvCounter();
 		}
-    	 try {
+		*/
+    	try {
     		// store new updated
  			GraphFactory.addGraph(this.graph);
  		} catch (DisJException e) {

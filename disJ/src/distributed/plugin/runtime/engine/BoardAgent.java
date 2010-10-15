@@ -27,6 +27,14 @@ public abstract class BoardAgent extends AgentModel implements IBoardModel{
 			String msg = iterator.next();
 			temp.add(msg);
 		}
+		
+		// update log
+		String[] value = {this.agentOwner.getCurNode().getNodeId()};
+		this.agentOwner.getLogger().logAgent(logTag.AGENT_READ_TO_BOARD, this.getAgentId(), value);
+		
+		// update statistic
+		this.agentOwner.getStat().incRead();
+		
 		return temp;
 	}
 	
@@ -42,6 +50,9 @@ public abstract class BoardAgent extends AgentModel implements IBoardModel{
 		// notify
 		this.notifyEvent(NotifyType.BOARD_UPDATE);
 		
+		// update statistic
+		this.agentOwner.getStat().incDelete();
+		
 		return b; 
 	}
 	
@@ -56,6 +67,9 @@ public abstract class BoardAgent extends AgentModel implements IBoardModel{
 		
 		// notify
 		this.notifyEvent(NotifyType.BOARD_UPDATE);
+		
+		// update statistic
+		this.agentOwner.getStat().incWrite();
 	}	
 	
 }

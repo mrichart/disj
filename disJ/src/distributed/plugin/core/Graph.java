@@ -8,7 +8,7 @@
  *     DisJ Development Group
  *******************************************************************************/
 
-package distributed.plugin.runtime;
+package distributed.plugin.core;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -17,12 +17,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import distributed.plugin.core.Agent;
-import distributed.plugin.core.DisJException;
-import distributed.plugin.core.Edge;
-import distributed.plugin.core.IConstants;
-import distributed.plugin.core.Node;
 import distributed.plugin.random.IRandom;
+import distributed.plugin.stat.GraphStat;
 
 /**
  * @author Me
@@ -42,7 +38,7 @@ public class Graph implements Serializable {
 
 	private int currentEdgeId;
 
-	private String id;
+	private String graphId;
 
 	private String protocol;
 	
@@ -55,21 +51,17 @@ public class Graph implements Serializable {
 	private Map<String, Edge> edges;
 	
 	transient private Map<String, Agent> agents;
-
-	transient private Map<String, Integer> numMsgSent;
-	
-	transient private Map<String, Integer> numMsgRecv;	
-	
-	transient private Map<String, Integer> numMsgLost;
 	
 	transient private IRandom clientRandom;
+	
+	transient private GraphStat stat;
 
-	protected Graph() {
+	public Graph() {
 		this("");
 	}
 
 	private Graph(String id) {
-		this.id = id;
+		this.graphId = id;
 		this.globalFlowType = IConstants.MSGFLOW_FIFO_TYPE;
 		this.globalDelayType = IConstants.MSGDELAY_GLOBAL_SYNCHRONOUS;
 		this.globalDelaySeed = IConstants.DEFAULT_MSGDELAY_SEED;
@@ -78,13 +70,16 @@ public class Graph implements Serializable {
 		this.protocol = "";
 		this.modelId = -1;
 		this.maxToken = IConstants.DEFAULT_MAX_NUM_TOKEN;
+		this.stat = new GraphStat(this.graphId);
 		
-		this.numMsgSent = new HashMap<String, Integer>();
-		this.numMsgRecv = new HashMap<String, Integer>();
-		this.numMsgLost = new HashMap<String, Integer>();
 		this.nodes = new HashMap<String, Node>();
 		this.edges = new HashMap<String, Edge>();
 		this.agents = new HashMap<String, Agent>();
+	}
+
+	
+	public GraphStat getStat() {
+		return stat;
 	}
 
 	/**
@@ -229,7 +224,7 @@ public class Graph implements Serializable {
 	 * @return Returns the id of this graph
 	 */
 	public String getId() {
-		return this.id;
+		return this.graphId;
 	}
 
 	public int getModelId() {
@@ -278,8 +273,8 @@ public class Graph implements Serializable {
 	 * @param id
 	 */
 	public void setId(String id) {
-		if (this.id == null || this.id.trim().equals(""))
-			this.id = id;
+		if (this.graphId == null || this.graphId.trim().equals(""))
+			this.graphId = id;
 	}
 
 	/**
@@ -316,77 +311,10 @@ public class Graph implements Serializable {
 	public void setProtocol(String protocol) {
 		this.protocol = protocol;
 	}
-	
-	/**
-	 * count number of message sent grouped by message label
-	 * @param msgLabel
-	 */
-	public void countMsgSent(String msgLabel){
-		int val;
-		if(this.numMsgSent.containsKey(msgLabel)){
-			val = this.numMsgSent.get(msgLabel) + 1;
-		}else{
-			val = 1;
-		}
-		this.numMsgSent.put(msgLabel, val);
-	}
-	
-	public Map<String, Integer> getMsgSentCounter(){
-		return this.numMsgSent;
-	}
-	
-	public void resetMsgSentCounter(){
-		this.numMsgSent.clear();
-	}
-	
-	/**
-	 * count number of message lost grouped by message label
-	 * @param msgLabel
-	 */
-	public void countMsgLost(String msgLabel){
-		int val;
-		if(this.numMsgLost.containsKey(msgLabel)){
-			val = this.numMsgLost.get(msgLabel) + 1;
-		}else{
-			val = 1;
-		}
-		//System.out.println("@Graph.conutMsgSent() " + msgLabel + " = " + val);
-		this.numMsgLost.put(msgLabel, val);
-	}
-	
-	public Map<String, Integer> getMsgLostCounter(){
-		return this.numMsgLost;
-	}
-	
-	public void resetMsgLostCounter(){
-		this.numMsgLost.clear();
-	}
-
-	/**
-	 * count number of message received grouped by message label
-	 * @param msgLabel
-	 */
-	public void countMsgRecv(String msgLabel){
-		int val;
-		if(this.numMsgRecv.containsKey(msgLabel)){
-			val = this.numMsgRecv.get(msgLabel) + 1;			
-		}else{
-			val = 1;
-		}
-		this.numMsgRecv.put(msgLabel, val);
-	}
-	
-	public Map<String, Integer> getMsgRecvCounter(){
-		return this.numMsgRecv;
-	}
-	
-	public void resetMsgRecvCounter(){
-		this.numMsgRecv.clear();
-	}
-
 
 	/**
 	 * Get a statistic of current state vs number of node
+	 * 
 	 * @return
 	 */
 	public Map<Integer, Integer> getNodeStateCount(){
@@ -421,10 +349,8 @@ public class Graph implements Serializable {
     	 // rebuild this object
     	 os.defaultReadObject(); 
     	 this.agents = new HashMap<String, Agent>();
-    	 this.numMsgRecv = new HashMap<String, Integer>();
-    	 this.numMsgSent = new HashMap<String, Integer>();
-    	 this.numMsgLost = new HashMap<String, Integer>();
-    	 this.clientRandom = null;
+    	 this.stat = new GraphStat(this.graphId);
+     	 this.clientRandom = null;
     }
 
 }

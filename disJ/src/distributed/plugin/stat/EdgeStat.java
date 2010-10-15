@@ -5,8 +5,8 @@ import java.util.Map;
 
 public class EdgeStat extends Statistic {
 
-	private int totalMsgEnter;
-	private int totalMsgLeave;
+	private int totalEnter;
+	private int totalLeave;
 	
 	// total time of msg stay in this link
 	private int totalTimeUse; 
@@ -14,24 +14,28 @@ public class EdgeStat extends Statistic {
 	private String edgeId;
 	
 	// number of time of different type of msg using this link
-	private Map<String, Integer> msgTypes; 
+	private Map<String, Integer> msgCreateTypes; 
 	
+	/**
+	 * 
+	 * @param name
+	 */
 	public EdgeStat(String name) {
 		this.edgeId = name;
-		this.totalMsgEnter = 0;
-		this.totalMsgLeave = 0;
+		this.totalEnter = 0;
+		this.totalLeave = 0;
 		this.totalTimeUse = 0;
 		
-		this.msgTypes = new HashMap<String, Integer>();
+		this.msgCreateTypes = new HashMap<String, Integer>();
 	}
 
 	@Override
 	public void reset() {
-		this.totalMsgEnter = 0;
-		this.totalMsgLeave = 0;
+		this.totalEnter = 0;
+		this.totalLeave = 0;
 		this.totalTimeUse = 0;
 		
-		this.msgTypes = new HashMap<String, Integer>();		
+		this.msgCreateTypes = new HashMap<String, Integer>();		
 	}
 
 	@Override
@@ -39,20 +43,20 @@ public class EdgeStat extends Statistic {
 		return this.edgeId;
 	}
 
-	public int getTotalMsgEnter() {
-		return totalMsgEnter;
+	public int getTotalEdgeEnter() {
+		return totalEnter;
 	}
 
-	public void incMsgEnter(){
-		this.totalMsgEnter++;
+	public void incEnterEdge(){
+		this.totalEnter++;
 	}
 	
-	public int getTotalMsgLeave() {
-		return totalMsgLeave;
+	public int getTotalEdgeLeave() {
+		return totalLeave;
 	}
 
-	public void incMsgLeave(){
-		this.totalMsgLeave++;
+	public void incLeaveEdge(){
+		this.totalLeave++;
 	}
 	
 	public int getTotalTimeUse() {
@@ -66,16 +70,16 @@ public class EdgeStat extends Statistic {
 	}
 
 	public Map<String, Integer> getMsgTypes() {
-		return msgTypes;
+		return msgCreateTypes;
 	}
 	
-	public void incMsgCount(String msgType){
-		if(this.msgTypes.containsKey(msgType)){
-			int count = this.msgTypes.get(msgType);
+	public void incMsgCreatCount(String msgType){
+		if(this.msgCreateTypes.containsKey(msgType)){
+			int count = this.msgCreateTypes.get(msgType);
 			count++;
-			this.msgTypes.put(msgType, count);			
+			this.msgCreateTypes.put(msgType, count);			
 		}else{
-			this.msgTypes.put(msgType, 1);
+			this.msgCreateTypes.put(msgType, 1);
 		}
 	}
 	

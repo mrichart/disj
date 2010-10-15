@@ -14,14 +14,15 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import distributed.plugin.core.Agent;
 import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
+import distributed.plugin.core.Graph;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Logger;
 import distributed.plugin.core.Node;
 import distributed.plugin.core.Logger.logTag;
-import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.IMessage;
 import distributed.plugin.runtime.IProcessor;
 import distributed.plugin.runtime.engine.AgentModel.NotifyType;
+import distributed.plugin.stat.GraphStat;
 import distributed.plugin.ui.IGraphEditorConstants;
 
 public class ReplayProcessor implements IProcessor {
@@ -140,7 +141,6 @@ public class ReplayProcessor implements IProcessor {
 	@Override
 	public void processReqeust(String sender, List<String> receivers,
 			IMessage message) throws DisJException {
-
 	}
 
 	@Override
@@ -162,6 +162,12 @@ public class ReplayProcessor implements IProcessor {
 			this.systemOut.println(e.toString());
 			
 		}finally{
+			// display statistic report
+			this.displayStat();
+			
+			// clean up necessary data
+			this.cleanUp();
+			
 			this.systemOut.println("\n*****Replay on graph " 
 					+ this.graph.getId() 
 					+ " is terminated*****");
@@ -267,18 +273,17 @@ public class ReplayProcessor implements IProcessor {
 		String edgeId = value[2];
 		String nodeId = value[3];
 		String msgLabel = value[4];
-		Edge edge = this.edges.get(edgeId);
 		
-		if(tag == logTag.EDGE_MSG){						
+		Edge edge = this.edges.get(edgeId);
+		edge.recMsgPassed(msgLabel, nodeId);
+		
+		if(tag == logTag.EDGE_MSG){
+			// update statistic
 			edge.incNumMsgEnter();
-			edge.recMsgPassed(msgLabel, nodeId);
-			this.graph.countMsgSent(msgLabel);
 			
 		} else if (tag == logTag.EDGE_LOST){
+			// update statistic
 			edge.incNumMsgEnter();
-			edge.recMsgPassed(msgLabel, nodeId);
-			this.graph.countMsgSent(msgLabel);
-			this.graph.countMsgLost(msgLabel);
 		}
 	}
 	
@@ -300,14 +305,16 @@ public class ReplayProcessor implements IProcessor {
 		} else if (tag == logTag.NODE_SEND){
 			port = value[3];
 			msgLabel = value[4];
+			
+			// update statistic
 			node.incMsgSend();
-			this.graph.countMsgSent(msgLabel);
 			
 		} else if (tag == logTag.NODE_RECV){
 			port = value[3];
 			msgLabel = value[4];
+			
+			// update statistic
 			node.incMsgRecv();
-			this.graph.countMsgRecv(msgLabel);
 			
 		} else if (tag == logTag.NODE_INIT){
 			node.setInitExec(true);		
@@ -342,11 +349,18 @@ public class ReplayProcessor implements IProcessor {
 			Node node = this.nodes.get(nodeId);
 			node.removeAgent(agent);
 			
+			// update statistic
+			agent.getStat().incMove();
+			agent.getStat().incStateMove(agent.getCurState());
+			
 		} else if (tag == logTag.AGENT_ARRIVE){
 			String nodeId = value[3];
 			String fromPort = value[4];
 			Node node = this.nodes.get(nodeId);
 			node.addAgent(agent);
+			
+			// update statistic
+			agent.getStat().incNodeVisit(nodeId);
 			
 		} else if (tag == logTag.AGENT_SLEEP){
 			String nodeId = value[3];
@@ -363,6 +377,12 @@ public class ReplayProcessor implements IProcessor {
 			this.allAgents.put(agentId, agent);
 			this.graph.removeAgent(agentId);
 			
+		} else if (tag == logTag.AGENT_READ_TO_BOARD){
+			String nodeId = value[3];
+			
+			// update statistic
+			agent.getStat().incRead();
+			
 		} else if (tag == logTag.AGENT_WRITE_TO_BOARD){
 			String nodeId = value[3];
 			String info = value[4];
@@ -370,6 +390,9 @@ public class ReplayProcessor implements IProcessor {
 			List<String> board = node.getWhiteboard();
 			board.add(info);
 			node.setWhiteboard(board);
+			
+			// update statistic
+			agent.getStat().incWrite();
 			
 		} else if (tag == logTag.AGENT_DELETE_FROM_BOARD){
 			String nodeId = value[3];
@@ -379,6 +402,9 @@ public class ReplayProcessor implements IProcessor {
 			board.remove(info);
 			node.setWhiteboard(board);
 			
+			// update statistic
+			agent.getStat().incDelete();
+			
 		} else if (tag == logTag.AGENT_DROP_TOKEN){
 			String nodeId = value[3];
 			Node node = this.nodes.get(nodeId);
@@ -386,6 +412,10 @@ public class ReplayProcessor implements IProcessor {
 			int curToken = (Integer)agent.getData();
 			curToken--;
 			agent.setData(curToken);
+			
+			// update statistic
+			agent.getStat().incDrop();
+			agent.getStat().incNodeTokDrop(nodeId);
 			
 		} else if (tag == logTag.AGENT_PICK_TOKEN){
 			String nodeId = value[3];
@@ -395,6 +425,12 @@ public class ReplayProcessor implements IProcessor {
 			int curToken = (Integer)agent.getData();
 			curToken += amount;
 			agent.setData(curToken);
+			
+			// update statistic
+			for(int i =0; i < amount; i++){
+				agent.getStat().incPick();
+				agent.getStat().incNodeTokPick(nodeId);
+			}
 			
 		} else if (tag == logTag.AGENT_INIT){
 			String hostId = value[3];
@@ -425,5 +461,138 @@ public class ReplayProcessor implements IProcessor {
 		}		
 	}
 	
+	@Override
+	public void displayStat() {
+		GraphStat gStat = this.graph.getStat();
+				
+		if(this.modelType == logTag.MODEL_MSG_PASS){
+			Map<String, Node> nodes = this.graph.getNodes();
+			Map<String, Edge> edges = this.graph.getEdges();
+			
+			int totalRecv = gStat.getTotalMsgRecv(nodes);
+			int totalSent = gStat.getTotalMsgSent(nodes);
+			int totalEnter = gStat.getTotalEnter(edges);
+			int totalLeave = gStat.getTotalLeave(edges);
+			int timeUse = gStat.getTotalEdgeDelay(edges);
+			
+			Map<Integer, Integer> nodeState = gStat.getNodeCurStateCount(nodes);
+			Map<String, Integer> msgTypes = gStat.getTotalMsgTypeCount(edges);
+			
+			System.out.println("************** STATISTIC REPORT **************");
+			System.out.println("Total Message has been sent: " + totalSent);
+			System.out.println("Total Message has been received: " + totalRecv);
+			System.out.println("Total Message has entered link: " + totalEnter);
+			System.out.println("Total Message has leaved link: " + totalLeave);
+			System.out.println("Total Dealy time has been accumulated: " + timeUse);
+			
+			System.out.println();
+			Iterator<Integer> its = nodeState.keySet().iterator();
+			int count = 0;
+			for(int stateId = 0; its.hasNext();){
+				stateId = its.next();
+				count = nodeState.get(stateId);
+				System.out.println("Stat " + this.stateFields.get(stateId) + " has " + count);
+			}
+			
+			System.out.println();
+			Iterator<String> it = msgTypes.keySet().iterator();
+			count = 0;
+			for(String type = null; it.hasNext();){
+				type = it.next();
+				count = msgTypes.get(type);
+				System.out.println("Message " + type + " has been created " + count);
+			}			
+		} else if (this.modelType == logTag.MODEL_AGENT_BOARD){
+			Map<String, Agent> agents = this.graph.getAgents();
+			Map<String, Edge> edges = this.graph.getEdges();
+			
+			int totalMove = gStat.getTotalAgentMove(agents);
+			int totalRead = gStat.getTotalBoardRead(agents);
+			int totalWrite = gStat.getTotalBoardWrite(agents);
+			int totalDel = gStat.getTotalBoardDel(agents);
+			int timeUse = gStat.getTotalEdgeDelay(edges);
+			
+			Map<String, Integer> nodeState = gStat.getTotalNodeVisit(agents);
+			Map<Integer, Integer> stateMove = gStat.getTotalStateMove(agents);
+			
+			System.out.println("************** STATISTIC REPORT **************");
+			System.out.println("Total Agents moved: " + totalMove);
+			System.out.println("Total Board read: " + totalRead);
+			System.out.println("Total Board write: " + totalWrite);
+			System.out.println("Total Board delete: " + totalDel);
+			System.out.println("Total Dealy time has been accumulated: " + timeUse);
+			
+			System.out.println();
+			Iterator<Integer> its = stateMove.keySet().iterator();
+			int count = 0;
+			for(int stateId = 0; its.hasNext();){
+				stateId = its.next();
+				count = stateMove.get(stateId);
+				System.out.println("Stat " + this.stateFields.get(stateId) + " moved " + count);
+			}
+			
+			System.out.println();
+			Iterator<String> it = nodeState.keySet().iterator();
+			count = 0;
+			for(String nodeId = null; it.hasNext();){
+				nodeId = it.next();
+				count = nodeState.get(nodeId);
+				System.out.println("Node " + nodeId + " has been visited " + count);
+			}
+		} else if (this.modelType == logTag.MODEL_AGENT_TOKEN){
+			Map<String, Agent> agents = this.graph.getAgents();
+			Map<String, Edge> edges = this.graph.getEdges();
+			
+			int totalPick = gStat.getTotalTokPick(agents);
+			int totalDrop = gStat.getTotalTokDrop(agents);
+			int timeUse = gStat.getTotalEdgeDelay(edges);
+			
+			Map<String, Integer> nodeState = gStat.getTotalNodeVisit(agents);
+			Map<Integer, Integer> stateMove = gStat.getTotalStateMove(agents);
+			Map<String, Integer> nodeDrop = gStat.getTotalNodeDrop(agents);
+			Map<String, Integer> nodePick = gStat.getTotalNodePick(agents);
+			
+			System.out.println("************** STATISTIC REPORT **************");
+			System.out.println("Total Token has been picked: " + totalPick);
+			System.out.println("Total Token has been dropped: " + totalDrop);
+			System.out.println("Total Dealy time has been accumulated: " + timeUse);
+			
+			System.out.println();
+			Iterator<Integer> its = stateMove.keySet().iterator();
+			int count = 0;
+			for(int stateId = 0; its.hasNext();){
+				stateId = its.next();
+				count = stateMove.get(stateId);
+				System.out.println("Stat " + this.stateFields.get(stateId) + " moved " + count);
+			}
+			
+			System.out.println();
+			Iterator<String> it = nodeState.keySet().iterator();
+			count = 0;
+			for(String nodeId = null; it.hasNext();){
+				nodeId = it.next();
+				count = nodeState.get(nodeId);
+				System.out.println("Node " + nodeId + " has been visited " + count);
+			}
+			
+			System.out.println();
+			it = nodeDrop.keySet().iterator();
+			count = 0;
+			for(String nodeId = null; it.hasNext();){
+				nodeId = it.next();
+				count = nodeDrop.get(nodeId);
+				System.out.println("Node " + nodeId + " Token has been dropped " + count);
+			}
+			
+			System.out.println();
+			it = nodePick.keySet().iterator();
+			count = 0;
+			for(String nodeId = null; it.hasNext();){
+				nodeId = it.next();
+				count = nodePick.get(nodeId);
+				System.out.println("Node " + nodeId + " Token has been picked " + count);
+			}
+		}		
+	}
 
 }

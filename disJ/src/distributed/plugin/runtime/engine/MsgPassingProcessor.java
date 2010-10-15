@@ -18,6 +18,7 @@ import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -27,17 +28,18 @@ import org.eclipse.ui.console.MessageConsoleStream;
 
 import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
+import distributed.plugin.core.Graph;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Logger;
 import distributed.plugin.core.Node;
 import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.Event;
-import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.GraphLoader;
 import distributed.plugin.runtime.IMessage;
 import distributed.plugin.runtime.IProcessor;
 import distributed.plugin.runtime.MsgPassingEvent;
+import distributed.plugin.stat.GraphStat;
 import distributed.plugin.ui.IGraphEditorConstants;
 
 /**
@@ -188,20 +190,27 @@ public class MsgPassingProcessor implements IProcessor {
 			// tracking message sent to each target
 			this.updateEdgeLog(recv, sender, message);
 			this.updateSentLog(sNode, port, message);			
-			this.graph.countMsgSent(msgLabel);
+						
+			// update statistic
+			sNode.getStat().incNumMsgSend();
+			recv.getStat().incEnterEdge();
+			recv.getStat().incMsgCreatCount(msgLabel);
 			
 			// validate the probability of failure
 			if (!recv.isReliable()) {
 				int prob = ran.nextInt(100) + 1;
 				if (prob <= recv.getProbOfFailure()) {
-					this.graph.countMsgLost(msgLabel);
 					// log for losing msg
 					this.logEdgeFailurMsg(recv, sender, message);
 					continue;
 				}
 			}
+			int curTime = this.getCurrentTime();
+			int execTime = recv.getDelayTime(sNode, curTime);
 			
-			int execTime = recv.getDelayTime(sNode, this.getCurrentTime());
+			// update statistic
+			recv.getStat().addTimeUse(execTime - curTime);
+			
 			int eventId = this.getNextId();		
 			 try {
 				 IMessage msg = new Message(message.getLabel(), SimulatorEngine.deepClone(data));
@@ -316,42 +325,7 @@ public class MsgPassingProcessor implements IProcessor {
 	 * @throws DisJException
 	 */
 	public void cleanUp() {
-
-/*
-		String title = "*****Statistics report of the simulation in text format*****";
-
-		//System.out.println(title);
-		appendToRecFile(title);
-
-		Map<String, Node> nodes = this.graph.getNodes();
-		for (String id : nodes.keySet()) {
-			String nodeSummary = this.graph.getNode(id).toString();	
-			this.appendToRecFile(nodeSummary);
-		}
-		
-		Map<String, Edge> edges = this.graph.getEdges();
-		for (String label : edges.keySet()) {
-			String nodeSummary = this.graph.getEdge(label).toString();	
-			this.appendToRecFile(nodeSummary);
-		}
-*/		
-		Map<String, Integer> msg = this.graph.getMsgSentCounter();
-		for(String msgType : msg.keySet()){
-			int count = msg.get(msgType);
-			if(msgType.equals("")){
-				msgType = "Others";
-			}
-			//this.appendToRecFile("\n" + msgType + " = " + count);
-			System.out.println("@MsgPassingProcessor.Cleanup() Message: " + msgType + " = " + count + " messages");
-		}
-		
-		Map<Integer, Integer> count = this.graph.getNodeStateCount();
-		for (int s : count.keySet()) {
-			int c = count.get(s);
-			//this.appendToRecFile("\n State " + s + " = " + c);
-			System.out.println("@MsgPassingProcessor.Cleanup() State: " + s + " = " + c + " nodes");
-		}
-		
+	
 		// clean up the memory
 		this.graph = null;
 
@@ -385,16 +359,28 @@ public class MsgPassingProcessor implements IProcessor {
 
 			this.systemOut.println("\n*****Simulation for " + this.procName
 					+ " is successfully over.*****");
+			
+			// display statistic report
+			this.displayStat();
 
+			while(stop == false){
+				try{
+					Thread.sleep(3000);
+				}catch(Exception e){}
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			this.systemOut.println(e.toString());
 			
-		} finally {			
+		} finally {
+			
 			// clean up logger
 			this.log.cleanUp();
 
+			// clean up necessary data
 			this.cleanUp();
+			
 			this.systemOut.println("\n*****The simulation of " + this.procName
 					+ " is terminated.*****");
 		}
@@ -555,6 +541,9 @@ public class MsgPassingProcessor implements IProcessor {
 		Node recv = link.getOthereEnd(this.graph.getNode(event.getHostId()));
 		String port = recv.getPortLabel(link);
 
+		// update statistic
+		link.getStat().incLeaveEdge();
+		
 		// Will NOT execute a Fail node
 		if (recv.isAlive()){			
 			// check if the port is blocked
@@ -570,7 +559,9 @@ public class MsgPassingProcessor implements IProcessor {
 				
 				// update receive log
 				this.updateRecvLog(recv, port, event.getMessage());
-				this.graph.countMsgRecv(event.getMessage().getLabel());
+				
+				// update statistic
+				recv.getStat().incNumMsgRecv();
 				
 				Entity entity = this.loadEntity(recv);
 				String recvPort = GraphLoader.getEdgeLabel(recv, link);			
@@ -681,6 +672,47 @@ public class MsgPassingProcessor implements IProcessor {
 	@Override
 	public Map<Integer, String> getStateFields() {
 		return this.stateFields;
+	}
+
+	@Override
+	public void displayStat() {
+		GraphStat gStat = this.graph.getStat();
+		Map<String, Node> nodes = this.graph.getNodes();
+		Map<String, Edge> edges = this.graph.getEdges();
+		
+		int totalRecv = gStat.getTotalMsgRecv(nodes);
+		int totalSent = gStat.getTotalMsgSent(nodes);
+		int totalEnter = gStat.getTotalEnter(edges);
+		int totalLeave = gStat.getTotalLeave(edges);
+		int timeUse = gStat.getTotalEdgeDelay(edges);
+		
+		Map<Integer, Integer> nodeState = gStat.getNodeCurStateCount(nodes);
+		Map<String, Integer> msgTypes = gStat.getTotalMsgTypeCount(edges);
+		
+		System.out.println("************** STATISTIC REPORT **************");
+		System.out.println("Total Message has been sent: " + totalSent);
+		System.out.println("Total Message has been received: " + totalRecv);
+		System.out.println("Total Message has entered link: " + totalEnter);
+		System.out.println("Total Message has leaved link: " + totalLeave);
+		System.out.println("Total Dealy time has been accumulated: " + timeUse);
+		
+		System.out.println();
+		Iterator<Integer> its = nodeState.keySet().iterator();
+		int count = 0;
+		for(int stateId = 0; its.hasNext();){
+			stateId = its.next();
+			count = nodeState.get(stateId);
+			System.out.println("State " + this.stateFields.get(stateId) + " has " + count);
+		}
+		
+		System.out.println();
+		Iterator<String> it = msgTypes.keySet().iterator();
+		count = 0;
+		for(String type = null; it.hasNext();){
+			type = it.next();
+			count = msgTypes.get(type);
+			System.out.println("Message " + type + " has been created " + count);
+		}
 	}
 	 
 }

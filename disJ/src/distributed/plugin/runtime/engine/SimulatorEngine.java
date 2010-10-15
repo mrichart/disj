@@ -24,9 +24,9 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 
 import distributed.plugin.core.DisJException;
+import distributed.plugin.core.Graph;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.random.IRandom;
-import distributed.plugin.runtime.Graph;
 import distributed.plugin.runtime.IProcessor;
 
 /**

@@ -47,6 +47,11 @@ public interface IProcessor extends Runnable {
 	 */
 	public MessageConsoleStream getSystemOut();
 	
+	/**
+	 * Compute and display all required statistic
+	 */
+	public void displayStat();
+	
 	public void setStop(boolean stop);
 
 	public boolean isStop();
