@@ -389,15 +389,19 @@ public class NodeElement extends AdapterElement {
 		} else if (id.equals(PROPERTY_NUM_INIT_AGENT)) {
 			// allow to set iff it is an initializer node 
 			// and the simulation hasn't been started
-			if(this.node.isInitializer()){
-				if(this.node.getStateList().isEmpty()){
-					try {					
-						int numAgent = Integer.valueOf(value.toString());
-						this.node.setNumInitAgent(numAgent);
-					}catch(NumberFormatException e){
-					}
-				}
-			}			
+			int numAgent = 0;
+			
+			try {					
+				numAgent = Integer.valueOf(value.toString());				
+			}catch(NumberFormatException e){
+			}
+			if(this.node.isInitializer()){				
+				if(this.node.getStateList().isEmpty()){			
+					this.node.setNumInitAgent(numAgent);
+				}				
+			}else{				
+				this.node.setNumInitAgent(0);
+			}
 		} else {
 			return;
 		}

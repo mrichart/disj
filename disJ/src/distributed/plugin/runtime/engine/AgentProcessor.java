@@ -672,8 +672,8 @@ public abstract class AgentProcessor implements IProcessor {
 				entity.arrive(port);
 			}
 
-			this.systemOut.println("@invokeArrival() Agent: " + agent.getAgentId()
-					+ " arrives " + node.getNodeId());
+			//this.systemOut.println("@invokeArrival() Agent: " + agent.getAgentId()
+			//		+ " arrives " + node.getNodeId());
 		}
 	}
 

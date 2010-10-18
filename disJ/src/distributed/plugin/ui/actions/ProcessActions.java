@@ -182,6 +182,7 @@ public class ProcessActions extends WorkbenchPartAction {
 
 		if (commandType == IGraphEditorConstants.ACTION_STOP
 				|| commandType == IGraphEditorConstants.ACTION_SUSPEND) {
+			
 			if (editor.getClientObject() == null
 					&& graph.getProtocol().equals("")) {
 				MessageDialog.openError(
@@ -193,6 +194,7 @@ public class ProcessActions extends WorkbenchPartAction {
 		}
 
 		if (commandType == IGraphEditorConstants.ACTION_RESUME) {
+			
 			if (editor.getClientObject() == null
 					&& graph.getProtocol().equals("")) {
 				MessageDialog.openError(
@@ -205,7 +207,8 @@ public class ProcessActions extends WorkbenchPartAction {
 					loadClientClass(graph.getModelId(), graph.getProtocol());
 				}
 			}
-		}
+		} 
+		
 		// default return is true;
 		return true;
 	}
@@ -373,6 +376,13 @@ public class ProcessActions extends WorkbenchPartAction {
 	}
 
 	private void executeLoad(){
+		if (this.engine.isStarted() == true) {
+			MessageDialog.openError(
+					getWorkbenchPart().getSite().getShell(),
+					"Engine is running",
+					"Stop the engine and reload algorithm again");
+			return;
+		}
 		Shell parent = this.editor.getSite().getShell();
 		String className = null;
 
@@ -446,6 +456,13 @@ public class ProcessActions extends WorkbenchPartAction {
 
 
 	private void executeRandomLoad() {
+		if (this.engine.isStarted() == true) {
+			MessageDialog.openError(
+					getWorkbenchPart().getSite().getShell(),
+					"Engine is running",
+					"Stop the engine and reload random library again");
+			return;
+		}
 		// open Dialog
 		Shell parent = this.editor.getSite().getShell();
 		String className = "Fully Qualified Class Name";
@@ -512,6 +529,9 @@ public class ProcessActions extends WorkbenchPartAction {
 		if (!this.validateAction(IGraphEditorConstants.ACTION_STOP)){
 			return;
 		}
+		if (this.engine.isStarted() == false) {
+			return;
+		}
 		try {
 			if (this.engine.isStarted()){
 				this.engine.terminate();
@@ -534,10 +554,10 @@ public class ProcessActions extends WorkbenchPartAction {
 		if (!this.validateAction(IGraphEditorConstants.ACTION_SUSPEND)){
 			return;
 		}
+		if (this.engine.isStarted() == false) {
+			return;
+		}
 		try {
-			// if(!this.getEngine().isRunning())
-			// this.missUseActionMsg("Engine is not running");
-
 			if (!this.engine.isSuspend())
 				this.engine.suspend();
 			else {
@@ -550,6 +570,9 @@ public class ProcessActions extends WorkbenchPartAction {
 	}
 
 	private void executeStepNext() {
+		if (this.engine.isStarted() == false) {
+			return;
+		}
 		try {
 			if (this.engine.isSuspend()) {
 				this.engine.stepForward();
