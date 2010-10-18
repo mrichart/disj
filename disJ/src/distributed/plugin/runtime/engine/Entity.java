@@ -1234,5 +1234,13 @@ public abstract class Entity implements IMessagePassingModel {
 	public final int getMaxYLocation(){
 		return this.nodeOwner.getMaxY();
 	}
+	
+	/**
+	 * Get a size of network that attached to the simulation
+	 * @return A number of node in the network
+	 */
+	public final int getNetworkSize(){
+		return this.processor.getNetworkSize();
+	}
 
 }

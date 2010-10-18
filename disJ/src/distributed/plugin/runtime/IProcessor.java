@@ -52,6 +52,12 @@ public interface IProcessor extends Runnable {
 	 */
 	public void displayStat();
 	
+	/**
+	 * Get a size of network that attached to the simulator
+	 * @return Number of node in the network
+	 */
+	public int getNetworkSize();
+	
 	public void setStop(boolean stop);
 
 	public boolean isStop();

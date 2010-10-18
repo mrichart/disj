@@ -715,4 +715,15 @@ public class MsgPassingProcessor implements IProcessor {
 		}
 	}
 	 
+	@Override
+	public int getNetworkSize(){
+		int size = 0;
+		if(this.graph != null){
+			Map<String, Node> nodes = this.graph.getNodes();
+			if(nodes != null){
+				size = nodes.size();
+			}
+		}
+		return size;
+	}
 }

@@ -230,4 +230,12 @@ public abstract class AgentModel implements IAgentModel {
 			throw new IllegalStateException("@notifyEvent() " + e.toString());
 		}
 	}
+	
+	/**
+	 * Get a size of network that attached to the simulation
+	 * @return A number of node in the network
+	 */
+	public final int getNetworkSize(){
+		return this.processor.getNetworkSize();
+	}
 }
