@@ -95,7 +95,7 @@ public interface IConstants {
 	
 	// Event message label
 	public static final String MESSAGE_SET_ALARM_CLOCK = "ALARM_CLOCK";
-	public static final String MESSAGE_SET_BLOCK_MSG = "BLOCK_MSG";
+	//public static final String MESSAGE_SET_BLOCK_MSG = "BLOCK_MSG";
 	public static final String MESSAGE_EVENT_MOVE_TO = "MOVE_TO";
 	public static final String MESSAGE_EVENT_ARRIVE_AT = "ARRIVE_AT";
 	public static final String MESSAGE_EVENT_NOTIFY = "NOTIFY_AGENT";

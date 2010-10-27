@@ -172,7 +172,7 @@ public interface IMessagePassingModel extends IDistributedModel {
 	 * @param state True is for block, False is unblock
 	 * 
 	 */
-	public void blockPort(String portLabel, boolean state) ;
+	//public void blockPort(String portLabel, boolean state) ;
 	
 	/**
 	 * Print out a text object into an Eclipse Console, the function will use

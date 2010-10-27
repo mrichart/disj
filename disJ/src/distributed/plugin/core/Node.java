@@ -119,6 +119,12 @@ public class Node implements Serializable {
 	transient private Map<String, Boolean> portStates;
 
 	/*
+	 * a list of blocking state of each entity label {msgLabel, boolean}
+	 * OR {agentId, boolean}
+	 */
+	transient private List<String> visitorStates;
+
+	/*
 	 * hold the events if initializer host has other actions before it has been
 	 * initialized to notify the change of state a list of state-name pair of
 	 * the corresponding entity
@@ -207,6 +213,7 @@ public class Node implements Serializable {
 		
 		this.blockedPorts = new HashMap<String, List<Event>>();		
 		this.portStates = new HashMap<String, Boolean>();
+		this.visitorStates = new ArrayList<String>();
 		this.holdEvents = new ArrayList<Event>();
 		this.stateNames = new HashMap<Integer, String>();
 		this.curAgents = new ArrayList<Agent>();
@@ -497,7 +504,7 @@ public class Node implements Serializable {
 	}
 
 	/**
-	 * Set a new state of a given port
+	 * Set a new block state of a given port
 	 * 
 	 * @param label
 	 * @param state
@@ -561,6 +568,31 @@ public class Node implements Serializable {
 			this.blockedPorts = new HashMap<String, List<Event>>();
 		}
 	}
+	
+	public void blockVisitor(String visitorLabel, String portLabel){
+		if(!this.visitorStates.contains(visitorLabel+"<->"+ portLabel)){
+			this.visitorStates.add(visitorLabel+"<->"+ portLabel);
+		}
+	}
+	
+	public void unblockVisitor(String visitorLabel, String portLabel){
+		if(this.visitorStates.contains(visitorLabel+"<->"+ portLabel)){
+			this.visitorStates.remove(visitorLabel+"<->"+ portLabel);			
+		}
+	}
+	
+	public boolean isVisitorBlocked(String visitorLabel, String portLabel){
+		return this.visitorStates.contains(visitorLabel+"<->"+ portLabel);
+	}
+	
+	public void clearAllBlockedVistors(){
+		if(this.visitorStates != null){
+			this.visitorStates.clear();
+		}else{
+			this.visitorStates = new ArrayList<String>();
+		}
+	}
+	
 	/**
 	 * Add a user algorithm representative who will stay at this node
 	 * 
@@ -972,6 +1004,7 @@ public class Node implements Serializable {
     	 this.stat = new NodeStat(this.nodeId);
     	 this.blockedPorts = new HashMap<String, List<Event>>();
     	 this.portStates = new HashMap<String, Boolean>();
+    	 this.visitorStates = new ArrayList<String>();
     	 this.holdEvents = new ArrayList<Event>();
     	 this.stateNames = new HashMap<Integer, String>();	 
     	 this.curAgents = new ArrayList<Agent>();
@@ -989,6 +1022,7 @@ public class Node implements Serializable {
     public void cleanUp(){
     	this.clearAllAgents();
     	this.clearAllBlockedPorts();
+    	this.clearAllBlockedVistors();
     	this.clearHoldEvents();
     	this.clearTokens();
     	this.clearWhieboard();

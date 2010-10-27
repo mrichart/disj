@@ -165,7 +165,7 @@ public abstract class Entity implements IMessagePassingModel {
 	}
 	
 	// FIXME what is lvc ?????
-	public final void setLinkVisibility(String port, boolean visible) {
+//	public final void setLinkVisibility(String port, boolean visible) {
 //		try {
 //			getNodeOwner().getEdge(port).getLinkElement().setVisible(visible);
 //			//this.processor.appendToRecFile("lvc:"+port
@@ -174,10 +174,10 @@ public abstract class Entity implements IMessagePassingModel {
 //		} catch (DisJException e) {
 //			e.printStackTrace();
 //		}
-	}
+//	}
 
 	// FIXME this will NOT work!!!
-	public final String getNeighbourName(String port) {
+/*	public final String getNeighbourName(String port) {
 		String returnValue = "";
 		try {
 //			String name1 = getNodeOwner().getEdge(port).getLinkElement()
@@ -200,7 +200,7 @@ public abstract class Entity implements IMessagePassingModel {
 		}
 		return returnValue;
 	}
-
+*/
 	/**
 	 * Set an internal clock to be alarmed after a give time unit If time is
 	 * less than or equal to zero, it will ignore
@@ -229,7 +229,7 @@ public abstract class Entity implements IMessagePassingModel {
 	 * 
 	 * @see distributed.plugin.runtime.IMessagePassingModel#blockPort(java.lang.String,
 	 *      boolean)
-	 */
+	 *
 	public final void blockPort(String label, boolean state) {
 		try {
 			Object[] msg = new Object[] { label, new Boolean(state) };
@@ -241,7 +241,8 @@ public abstract class Entity implements IMessagePassingModel {
 			this.systemOut.println(e.toString());
 		}
 	}
-
+*/
+	
 	/**
 	 * Send a given message through a given port name. If a port name does not
 	 * exist, there will be no message sending.
@@ -1162,7 +1163,7 @@ public abstract class Entity implements IMessagePassingModel {
 	 * 
 	 * @return A current time unit at the time method is calling
 	 */
-	public int getTime() {
+	public final int getTime() {
 		return this.processor.getCurrentTime();
 	}
 
@@ -1180,20 +1181,20 @@ public abstract class Entity implements IMessagePassingModel {
      * </code>
 	 * <p>
 	 * In this example msgA causes the creation of msgB, and msgB causes the
-	 * creation of msgC and msgD, and msgD casue msgF and so on, while msgE has
+	 * creation of msgC and msgD, and msgD cause msgF and so on, while msgE has
 	 * no cause to creation of any message.
 	 * </p>
 	 * 
 	 * <p>
-	 * The current message casual time when msgG is created is 4 becasue there
+	 * The current message casual time when msgG is created is 4 because there
 	 * are 4 hops from msgA to msgG from this illustration
 	 * </p>
 	 * 
 	 * 
-	 * @return a message casual time which start from the beging of the process
+	 * @return a message casual time which start from the beginning of the process
 	 *         to a current call of this method
 	 */
-	public int getCurrentMessageCasualTime() {
+	public final int getCurrentMessageCasualTime() {
 		return this.processor.getCallingChain();
 	}
 

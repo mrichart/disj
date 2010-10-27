@@ -168,11 +168,13 @@ public class Graph implements Serializable {
 	 */
 	public Edge getEdge(String id) {
 		try {
-			if (!edges.containsKey(id))
+			if (!edges.containsKey(id)){
 				throw new DisJException(IConstants.ERROR_1, id);
-			else
+			}else{
 				return (Edge) edges.get(id);
+			}
 		} catch (DisJException e) {
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -185,10 +187,11 @@ public class Graph implements Serializable {
 	 */
 	public Node getNode(String id) {
 		try {
-			if (!nodes.containsKey(id))
+			if (!nodes.containsKey(id)){
 				throw new DisJException(IConstants.ERROR_0, id);
-			else
+			} else{
 				return (Node) nodes.get(id);
+			}
 		} catch (DisJException e) {
 			e.printStackTrace();
 			return null;
