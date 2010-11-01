@@ -1,10 +1,16 @@
 package distributed.plugin.runtime.adversary;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 import distributed.plugin.core.Edge;
+import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
+import distributed.plugin.runtime.AgentEvent;
+import distributed.plugin.runtime.Event;
 import distributed.plugin.runtime.engine.AgentProcessor;
 
 public abstract class AgentControl extends AbstractControl {
@@ -96,4 +102,70 @@ public abstract class AgentControl extends AbstractControl {
 		return tmp;
 	}
 	
+	/**
+	 * Allow adversary to block a given agent at a given port of a node
+	 * 
+	 * @param agentId An ID of agent that want to block
+	 * @param incomingPort A port that want to block
+	 * @param nodeId An ID of a node that wants to block
+	 */
+	protected final void blockAgent(String agentId, String incomingPort, String nodeId){
+		Node recv = this.getNode(nodeId);
+		if(this.isInPortExist(nodeId, incomingPort)){
+			recv.blockVisitor(agentId, incomingPort);
+		}else{
+			throw new IllegalArgumentException("@blockmsg() an in-port "
+					+ incomingPort + " does not exist for node ID " + nodeId);
+		}
+	}
+	
+	/**
+	 * Allow adversary to unblock an agent at given port and node.	
+	 * 
+	 * @param agentId An ID of agent that want to unblock
+	 * @param incomingPort A port that want to unblock
+	 * @param nodeId An ID of a node that wants to unblock
+	 */
+	protected final void unblockAgent(String agentId, String incomingPort, String nodeId){
+		Node recv = this.getNode(nodeId);
+		
+		if(!this.isInPortExist(nodeId, incomingPort)){
+			throw new IllegalArgumentException("@unblockMsg() an in-port "
+					+ incomingPort + " does not exist for node ID " + nodeId);
+		}
+		
+		recv.unblockVisitor(agentId, incomingPort);
+		List<Event> events = recv.getBlockedEvents(incomingPort);
+		List<Event> out = new ArrayList<Event>();
+		Iterator<Event> its = events.iterator();
+		
+		// put them in a queue with the current execution time
+		int time = this.getCurrentTime();
+		for (AgentEvent e = null; its.hasNext(); ){
+			e = (AgentEvent)its.next();
+			if(e.getEventType() == IConstants.EVENT_ARRIVAL_TYPE){
+				if(e.getAgentId().equals(agentId)){
+					events.remove(e);
+					e.setExecTime(time);
+					out.add(e);					
+				}
+			}
+		}
+		// pump it to the processor
+		this.proc.pushEvents(out);
+	}
+	
+	/**
+	 * Check whether a given agent is blocked at a given port and node
+	 * 
+	 * @param agentId An ID of agent
+	 * @param incomingPort An incoming port of the node
+	 * @param nodeId An ID of a node that is checking
+	 * @return True if the port exists and it blocks arrival agent with
+	 * a given ID, otherwise false
+	 */
+	protected final boolean isAgentBlocked(String agentId, String incomingPort, String nodeId) {
+		Node recv = this.getNode(nodeId);
+		return recv.isVisitorBlocked(agentId, incomingPort);
+	}
 }

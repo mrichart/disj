@@ -96,8 +96,12 @@ public abstract class AbstractControl {
 				MsgPassingEvent e = (MsgPassingEvent) events.get(i);
 				e.setExecTime(time);
 			}
-			this.proc.pushEvents(events);
+			// clear the port
 			recv.removeBlockedEvents(incomingPort);
+			
+			// pump it back to processing queue
+			this.proc.pushEvents(events);
+			
 		}					
 	}
 	

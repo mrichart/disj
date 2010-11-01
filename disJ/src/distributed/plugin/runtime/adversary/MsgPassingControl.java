@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Random;
 
 import distributed.plugin.core.Edge;
+import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
 import distributed.plugin.runtime.Event;
 import distributed.plugin.runtime.IMessage;
@@ -127,12 +128,18 @@ public abstract class MsgPassingControl extends AbstractControl {
 		List<Event> events = recv.getBlockedEvents(incomingPort);
 		List<Event> out = new ArrayList<Event>();
 		Iterator<Event> its = events.iterator();
+		
+		// put them in a queue with the current execution time
+		int time = this.getCurrentTime();
 		for (MsgPassingEvent e = null; its.hasNext(); ){
 			e = (MsgPassingEvent)its.next();
-			if(e.getMessage().getLabel().equals(msgLabel)){
-				out.add(e);
-				events.remove(e);
-			}		
+			if(e.getEventType() == IConstants.EVENT_ARRIVAL_TYPE){
+				if(e.getMessage().getLabel().equals(msgLabel)){
+					events.remove(e);
+					e.setExecTime(time);
+					out.add(e);				
+				}
+			}
 		}
 		// pump it to the processor
 		this.proc.pushEvents(out);
