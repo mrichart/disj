@@ -26,6 +26,7 @@ import distributed.plugin.runtime.Event;
 import distributed.plugin.runtime.GraphLoader;
 import distributed.plugin.runtime.IMessage;
 import distributed.plugin.runtime.IProcessor;
+import distributed.plugin.runtime.adversary.AgentControl;
 import distributed.plugin.runtime.engine.AgentModel.NotifyType;
 import distributed.plugin.ui.IGraphEditorConstants;
 
@@ -72,6 +73,12 @@ public abstract class AgentProcessor implements IProcessor {
 	 */
 	MessageConsoleStream systemOut;
 
+	
+	/*
+	 * Adversary controller
+	 */
+	private AgentControl adversary;
+	
 	/**
 	 * Constructor
 	 * 
@@ -106,6 +113,15 @@ public abstract class AgentProcessor implements IProcessor {
 		if (this.clientRandom != null) {
 			this.initClientRandomStateVariables();
 		}
+	}
+	
+	/**
+	 * Push all given events to a processing queue
+	 * 
+	 * @param events
+	 */
+	public void pushEvents(List<Event> events){
+		this.queue.pushEvents(events);
 	}
 	
 	/*
@@ -245,7 +261,7 @@ public abstract class AgentProcessor implements IProcessor {
 				}
 			}
 			// add to the queue
-			this.queue.pushEvents(events);
+			this.pushEvents(events);
 			
 		} catch (Exception e) {
 			throw new DisJException(IConstants.ERROR_8, e.toString());
@@ -332,23 +348,49 @@ public abstract class AgentProcessor implements IProcessor {
 			link.getStat().incEnterEdge();
 			
 			// validate the probability of failure
-			if (!link.isReliable()) {
-				Random ran = new Random(System.currentTimeMillis());
-				int prob = ran.nextInt(100) + 1;
-				if (prob <= link.getProbOfFailure()) {
-					this.systemOut.println("Agent " + agentId + " lost in a link " + link.getEdgeId()
+			if(this.adversary == null){
+				if (!link.isReliable()) {
+					Random ran = new Random(System.currentTimeMillis());
+					int prob = ran.nextInt(100) + 1;
+					if (prob <= link.getProbOfFailure()) {
+						this.systemOut.println("Agent " + agentId + " lost in a link " 
+								+ link.getEdgeId()
+								+ " while travelling from " + fromNodeId);
+						
+						// flag that agent is dead on a link
+						agent.setAlive(false);					
+						this.allAgents.put(agentId, agent);
+						this.graph.removeAgent(agentId);					
+						return;
+					}
+				}
+			}else{
+				if(this.adversary.setDrop(agent.getAgentId(), link.getEdgeId(), target.getNodeId())){
+					this.systemOut.println("Agent " + agentId + " lost in a link " 
+							+ link.getEdgeId()
 							+ " while travelling from " + fromNodeId);
 					
 					// flag that agent is dead on a link
 					agent.setAlive(false);					
 					this.allAgents.put(agentId, agent);
 					this.graph.removeAgent(agentId);					
-					return;
+					return;						
 				}
-			}
+			}			
+			
 			// generate arrival event at a target
 			int curTime = this.getCurrentTime();
-			int execTime = link.getDelayTime(sNode, curTime);
+			int execTime = 0;
+			if(this.adversary == null){
+				execTime = link.getDelayTime(sNode, curTime);
+				
+			}else{
+				execTime = this.adversary.setArrivalTime(agent.getAgentId(), 
+						link.getEdgeId(), target.getNodeId());
+				if(execTime <= curTime){
+					execTime = curTime + 1;
+				}
+			}
 			
 			// update statistic
 			link.getStat().addTimeUse(execTime - curTime);
@@ -415,6 +457,13 @@ public abstract class AgentProcessor implements IProcessor {
 
 	public void setSpeed(int speed) {
 		this.speed = speed;
+	}
+
+	/**
+	 * @return Returns the graph of this processor
+	 */
+	public Graph getGraph() {
+		return this.graph;
 	}
 
 	public void cleanUp() {
@@ -570,6 +619,20 @@ public abstract class AgentProcessor implements IProcessor {
 			this.graph.removeAgent(agent.getAgentId());	
 
 		}else{
+			int execTime = 0;
+			
+			if(this.adversary != null){
+				execTime = this.adversary.initTimeControl(agent.getAgentId());
+				if(execTime > this.getCurrentTime()){
+					// update event execution time
+					event.setExecTime(execTime);
+					
+					// push event back to the queue
+					this.queue.pushEvent(event);
+					return;
+				}
+			}
+			
 			AgentModel entity = agent.getClientEntity();
 			agent.setHasInitExec(true);
 			
@@ -640,7 +703,7 @@ public abstract class AgentProcessor implements IProcessor {
 		// check if the port is blocked
 		if (node.isBlocked(port) == true) {
 			// add event to a block queue
-			node.addEventToBlockedPort(port, event);
+			node.addEventToBlockList(port, event);
 			// this.updateBlockedLog(recv, port, e.getMessage().getLabel());
 
 			// not allow to execute receive msg if it is init node and
@@ -739,4 +802,32 @@ public abstract class AgentProcessor implements IProcessor {
 		}
 		return size;
 	}
+	
+	/**
+	 * Get a list of agents(with expected arrival time) currently in 
+	 * a link and heading to a given destination node
+	 * 
+	 * @param edgeId An ID of a link
+	 * @param nodeId An ID of a destination node
+	 * @return a list of agents with expected arrival time if exist, 
+	 * otherwise empty list is returned
+	 */
+	public Map<String, Integer> getMovingAgents(String edgeId, String nodeId){
+		Map<String, Integer> tmp = new HashMap<String, Integer>();
+		List<Event> list = this.queue.getAllEvents();
+		AgentEvent e = null;
+		for(int i =0; i < list.size(); i++){
+			e = (AgentEvent)list.get(i);
+			if(e.getEventType() == IConstants.EVENT_ARRIVAL_TYPE){
+				IMessage m = e.getInfo();
+				String linkId = (String)m.getContent();
+				if(linkId.equals(edgeId) && e.getNodeId().equals(nodeId)){
+					tmp.put(e.getAgentId(), e.getExecTime());
+				}
+			}
+		}
+		return tmp;
+	}
+	
+	
 }

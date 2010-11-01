@@ -101,6 +101,15 @@ public class EventQueue {
 	private void orderQueue() {
 		Collections.sort(this.queue);
 	}
+	
+	/*
+	 * Get a copy of all current events 
+	 */
+	protected synchronized List<Event> getAllEvents(){
+		List<Event> tmp = new ArrayList<Event>();
+		tmp.addAll(this.queue);
+		return tmp;
+	}
 
 	public String toString() {
 		StringBuffer ele = new StringBuffer(1024);

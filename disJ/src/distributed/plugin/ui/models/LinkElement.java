@@ -43,21 +43,22 @@ import distributed.plugin.ui.validators.PercentageCellEditorValidator;
 public abstract class LinkElement extends AdapterElement {
 
 	static final long serialVersionUID = IConstants.SERIALIZE_VERSION;
-		
-	private static final String PROPERTY_DIRECTION_TYPE = "L00 Type of Direction";   
-	private static final String PROPERTY_START_PORT = "L01 Source Port Name";   
-	private static final String PROPERTY_END_PORT = "L02 Target Port Name";
-	private static final String PROPERTY_MSG_FLOW_TYPE = "L03 Message Flow Type";
-	private static final String PROPERTY_DELAY_TYPE = "L04 Delay Type";   
-	private static final String PROPERTY_DELAY_SEED = "L05 Delay Seed";   
-	private static final String PROPERTY_RELIABLE = "L06 Reliable";   
-	private static final String PROPERTY_PROB_FAILURE = "L07 Probability of Failure";
-	private static final String PROPERTY_TOTAL_MSG = "L08 Total Traffic";
+	
+	private static final String PROPERTY_EDGE_ID = "L00 Edge ID";
+	private static final String PROPERTY_DIRECTION_TYPE = "L01 Type of Direction";   
+	private static final String PROPERTY_START_PORT = "L02 Source Port Name";   
+	private static final String PROPERTY_END_PORT = "L03 Target Port Name";
+	private static final String PROPERTY_MSG_FLOW_TYPE = "L04 Message Flow Type";
+	private static final String PROPERTY_DELAY_TYPE = "L05 Delay Type";   
+	private static final String PROPERTY_DELAY_SEED = "L06 Delay Seed";   
+	private static final String PROPERTY_RELIABLE = "L07 Reliable";   
+	private static final String PROPERTY_PROB_FAILURE = "L08 Probability of Failure";
+	private static final String PROPERTY_TOTAL_MSG = "L09 Total Traffic";
 
 	private static final String[] propertyArray = {PROPERTY_DIRECTION_TYPE, 
 		PROPERTY_START_PORT, PROPERTY_END_PORT, PROPERTY_MSG_FLOW_TYPE, 
 		PROPERTY_DELAY_TYPE, PROPERTY_DELAY_SEED, PROPERTY_RELIABLE,
-		PROPERTY_PROB_FAILURE,PROPERTY_TOTAL_MSG};
+		PROPERTY_PROB_FAILURE,PROPERTY_TOTAL_MSG, PROPERTY_EDGE_ID};
 
 	private static final int NUM_PROPERTIES = propertyArray.length;
 
@@ -117,6 +118,9 @@ public abstract class LinkElement extends AdapterElement {
         ((PropertyDescriptor) descriptors[8])
                 .setValidator(PercentageCellEditorValidator.instance());
 
+        descriptors[9] = new PropertyDescriptor(
+                PROPERTY_EDGE_ID, PROPERTY_EDGE_ID);
+        
     }
 
     private String name;
@@ -223,6 +227,10 @@ public abstract class LinkElement extends AdapterElement {
         } else if (propName.equals(PROPERTY_PROB_FAILURE)) {        
               int  val = this.edge.getProbOfFailure();          
             return val+"";
+
+        } else if (propName.equals(PROPERTY_EDGE_ID)) {        
+              String  val = this.edge.getEdgeId();       
+            return val;
 
         } else {
             return "unknown property id";

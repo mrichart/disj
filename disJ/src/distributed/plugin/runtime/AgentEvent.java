@@ -8,7 +8,7 @@ public class AgentEvent extends Event {
 		DROP_TOKEN, PICK_TOKEN;
 	}
 	
-	private String nodeId;
+	private String targetNodeId;
 	
 	private String agentId;
 	
@@ -24,17 +24,17 @@ public class AgentEvent extends Event {
 	
 	
 	public AgentEvent(short eventType, int eventId, int execTime, 
-			String nodeId, String agentId, IMessage info) {
+			String targetId, String agentId, IMessage info) {
 		super(eventType, eventId, execTime);
 
-		this.nodeId = nodeId;
+		this.targetNodeId = targetId;
 		this.agentId = agentId;
 		this.info = info;
 
 	}
 
 	public String getNodeId() {
-		return nodeId;
+		return targetNodeId;
 	}
 
 	public String getAgentId() {
@@ -50,14 +50,14 @@ public class AgentEvent extends Event {
 			return false;
 
 		AgentEvent e = (AgentEvent) obj;
-		return (e.getNodeId().equals(this.nodeId) 
+		return (e.getNodeId().equals(this.targetNodeId) 
 				&& e.getAgentId() == this.agentId
 				&& e.getExecTime() == this.getExecTime() 
 				&& e.getEventType() == this.getEventType());
 	}
 
 	public String toString() {
-		return super.toString()+ this.nodeId + IConstants.MAIN_DELIMETER
+		return super.toString()+ this.targetNodeId + IConstants.MAIN_DELIMETER
 				+ this.agentId + IConstants.MAIN_DELIMETER + info.getLabel();
 	}
 

@@ -16,6 +16,7 @@ import java.util.Map;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 import distributed.plugin.core.DisJException;
+import distributed.plugin.core.Graph;
 
 
 /**
@@ -57,6 +58,25 @@ public interface IProcessor extends Runnable {
 	 * @return Number of node in the network
 	 */
 	public int getNetworkSize();
+	
+	/**
+	 * Get a graph that currently simulate
+	 * @return a graph instance
+	 */
+	public Graph getGraph();
+	
+	/**
+	 * Get current simulation time of this processor
+	 * @return A current simulation time
+	 */
+	public int getCurrentTime();
+	
+	/**
+	 * Push a list of events into a processing queue
+	 * @param events
+	 */
+	public void pushEvents(List<Event> events);
+	
 	
 	public void setStop(boolean stop);
 

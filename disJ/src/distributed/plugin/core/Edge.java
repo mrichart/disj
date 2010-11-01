@@ -324,19 +324,20 @@ public class Edge implements Serializable {
 	 * @param node
 	 * @return
 	 */
-	public Node getOthereEnd(Node node) throws DisJException {
+	public Node getOthereEnd(Node node) {
 
-		if (node == null)
-			throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
-
+		if (node == null){
+			throw new IllegalArgumentException("@Edge.getOtherEnd() node is NULL");
+		}
 		if (this.start == node)
 			return this.end;
 
-		if (this.end == node)
+		if (this.end == node){
 			return this.start;
-		else
-			throw new DisJException(IConstants.ERROR_9, "Node="
-					+ node.toString() + " : Edge=" + this.toString());
+		}else{
+			throw new IllegalArgumentException("@Edge.getOtherEnd() "
+					+ " The edge has NO a given Node " + node.getNodeId());
+		}
 	}
 
 	/**

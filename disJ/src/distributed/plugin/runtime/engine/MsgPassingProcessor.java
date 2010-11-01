@@ -129,8 +129,39 @@ public class MsgPassingProcessor implements IProcessor {
 		}		
 	}
 
+	/**
+	 * Push all given events to a processing queue
+	 * 
+	 * @param events
+	 */
 	public void pushEvents(List<Event> events){
 		this.queue.pushEvents(events);
+	}
+	
+	/**
+	 * Get all messages currently traveling under a given link
+	 * and heading to a given destination node
+	 * 
+	 * @param edgeId An ID of link
+	 * @param nodeId An ID of destination node
+	 * @return A list that contains every message (with expected
+	 * arrival time) that is currently traveling in the link, 
+	 * empty list is returned if no message in the link
+	 */
+	public Map<IMessage, Integer> getTravelingMsg(String edgeId, String nodeId){
+		Map<IMessage, Integer> tmp = new HashMap<IMessage, Integer>();
+		List<Event> list = this.queue.getAllEvents();
+		MsgPassingEvent e = null;
+		for(int i =0; i < list.size(); i++){
+			e = (MsgPassingEvent)list.get(i);
+			if(e.getEventType() == IConstants.EVENT_ARRIVAL_TYPE){
+				if(edgeId.equals(e.getEdgeId()) && 
+						!e.getHostId().equals(nodeId)){
+					tmp.put(e.getMessage(), e.getExecTime());
+				}
+			}
+		}
+		return tmp;
 	}
 	
 	/*
@@ -216,7 +247,8 @@ public class MsgPassingProcessor implements IProcessor {
 					}
 				}
 			}else{
-				if(this.adversary.isLost(recvEdge.getEdgeId(), message)){
+				Node rNode = recvEdge.getOthereEnd(sNode);
+				if(this.adversary.setDrop(message, recvEdge.getEdgeId(), rNode.getNodeId())){
 					// log for losing msg
 					this.logEdgeFailurMsg(recvEdge, sender, message);
 					continue;		
@@ -230,7 +262,7 @@ public class MsgPassingProcessor implements IProcessor {
 				
 			}else{
 				Node rNode = recvEdge.getOthereEnd(sNode);
-				execTime = this.adversary.getDelatyTime(curTime, message, recvEdge.getEdgeId(), rNode.getNodeId());
+				execTime = this.adversary.setArrivalTime(message, recvEdge.getEdgeId(), rNode.getNodeId());
 				if(execTime <= curTime){
 					execTime = curTime + 1;
 				}
@@ -537,6 +569,21 @@ public class MsgPassingProcessor implements IProcessor {
 
 		// Will NOT execute a Fail node
 		if (node.isAlive()) {
+			int execTime = 0;
+			
+			if(this.adversary != null){
+				execTime = this.adversary.initTimeControl(node.getNodeId());
+				if(execTime > this.getCurrentTime()){
+					// update event execution time
+					event.setExecTime(execTime);
+					
+					// push event back to the queue
+					this.queue.pushEvent(event);
+					return;
+				}
+			}
+			
+			// get client entity algorithm
 			Entity entity = this.loadEntity(node);
 						
 			// update log
@@ -550,17 +597,26 @@ public class MsgPassingProcessor implements IProcessor {
 			// this can happen only to recvMsg
 			// since setAlarm will not be able to
 			// occurred until initNode is initialized
-			List<Event> list = node.getHoldEvents();
-			if(!list.isEmpty()){
-				for(int i =0; i <list.size(); i++){
-					MsgPassingEvent e = (MsgPassingEvent)list.get(i);
-					this.invokeReceive(e);
+			List<String> ports = node.getIncomingPorts();
+			String port;
+			MsgPassingEvent e ;
+			for(int i =0; i < ports.size(); i++){
+				port = ports.get(i);
+				// unblock all the ports
+				node.setBlockPort(port, false);
+				
+				// catching up the events
+				List<Event> list = node.getBlockedEvents(port);
+				if(list != null){
+					for(int j =0; j < list.size(); j++){
+						e = (MsgPassingEvent)list.get(j);
+						this.invokeReceive(e);
+					}
 				}
-				node.clearHoldEvents();
-			}
-		}else{
-			node.clearHoldEvents();
+			}			
 		}
+		// clear all blocked events
+		node.clearAllBlockedEvents();		
 	}
 
 	/*
@@ -568,7 +624,7 @@ public class MsgPassingProcessor implements IProcessor {
 	 */
 	private void invokeReceive(MsgPassingEvent event) throws Exception {
 		// retrieve a receiver node for this event
-		Edge link = this.graph.getEdge(event.getEdgeName());
+		Edge link = this.graph.getEdge(event.getEdgeId());
 		Node recv = link.getOthereEnd(this.graph.getNode(event.getHostId()));
 		String port = recv.getPortLabel(link);
 
@@ -578,47 +634,51 @@ public class MsgPassingProcessor implements IProcessor {
 		// Will NOT execute a Fail node
 		if (recv.isAlive()){
 			
-			if(this.adversary == null){				
-				// not allow to execute receive msg if it is init node and
-				// it has not yet execute init()
-				if ((recv.isInitializer() == false)
-						|| (recv.isInitExec() == true)) {
-					
-					// update receive log
-					this.updateRecvLog(recv, port, event.getMessage());
-					
-					// update statistic
-					recv.getStat().incNumMsgRecv();
-					
-					Entity entity = this.loadEntity(recv);
-					String recvPort = GraphLoader.getEdgeLabel(recv, link);			
-					entity.getNodeOwner().setLatestRecvPort(recvPort);
-					
-					// Invoke client code
-					entity.receive(recvPort, event.getMessage());				
-					
-				} else {
-					throw new DisJException(IConstants.ERROR_23,
-							"@MsgPassingProcessor.invokeReceiver() ");
-				}
+			// not allow to receive msg if it is init node and
+			// it has not yet execute init()
+			if(recv.isInitializer() && !recv.isInitExec()){
+				// block the incoming port
+				recv.setBlockPort(port, true);
+				
+				// add event to a block queue
+				recv.addEventToBlockList(port, event);
+				
 			}else{
-				this.adversary.arrivalControl(event.getMessage(), port, recv.getNodeId());
+				
+				if(this.adversary != null){	
+					// let check adversary commands
+					this.adversary.arrivalControl(event.getMessage(), port, recv.getNodeId());					
+				}
 				
 				// check if the port is blocked
-				if (recv.isBlocked(port) == true) {
+				if (recv.isBlocked(port) == true) {						
 					// add event to a block queue
-					recv.addEventToBlockedPort(port, event);
-					
-				}else{
-					// check whether a given msg label is blocked
-					String msgLabel = event.getMessage().getLabel();
-					if(recv.isVisitorBlocked(msgLabel, port)){
-						// add event to a block queue
-						recv.addEventToBlockedPort(port, event);
-					}
+					recv.addEventToBlockList(port, event);
+					return;
 				}
+				
+				// check whether a given msg label is blocked
+				String msgLabel = event.getMessage().getLabel();
+				if(recv.isVisitorBlocked(msgLabel, port)){
+					// add event to a block queue
+					recv.addEventToBlockList(port, event);
+					return;
+				}
+				
+				// update receive log
+				this.updateRecvLog(recv, port, event.getMessage());
+				
+				// update statistic
+				recv.getStat().incNumMsgRecv();
+				
+				Entity entity = this.loadEntity(recv);
+				String recvPort = GraphLoader.getEdgeLabel(recv, link);			
+				entity.getNodeOwner().setLatestRecvPort(recvPort);
+				
+				// Invoke client code
+				entity.receive(recvPort, event.getMessage());				
 			}
-		}
+		}		
 	}
 
 	/*

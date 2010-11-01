@@ -19,6 +19,7 @@ import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Logger;
 import distributed.plugin.core.Node;
 import distributed.plugin.core.Logger.logTag;
+import distributed.plugin.runtime.Event;
 import distributed.plugin.runtime.IMessage;
 import distributed.plugin.runtime.IProcessor;
 import distributed.plugin.runtime.engine.AgentModel.NotifyType;
@@ -33,6 +34,8 @@ public class ReplayProcessor implements IProcessor {
 	
 	private int speed;
 		
+	private int curTime;
+	
 	private String fileName;
 	
 	private String userClassName;
@@ -63,6 +66,7 @@ public class ReplayProcessor implements IProcessor {
 
 	public ReplayProcessor(Graph graph, String fileName){
 		
+		this.curTime = 0;
 		this.pause = false;
 		this.stop = true;
 		this.speed = IConstants.SPEED_DEFAULT_RATE;
@@ -75,8 +79,7 @@ public class ReplayProcessor implements IProcessor {
 		this.userClassName = null;
 				
 		this.stateFields = new HashMap<Integer, String>();
-		
-		
+			
 		this.setSystemOutConsole();
 		
 	}
@@ -219,7 +222,10 @@ public class ReplayProcessor implements IProcessor {
 				}else if(second){
 					// get a model type and user class name used
 					value = Logger.readLogLine(line);
-					int time = Integer.parseInt(value[0]);
+					
+					// set current time
+					this.curTime = Integer.parseInt(value[0]);
+					
 					this.modelType = logTag.valueOf(value[1]);
 					this.userClassName = value[2];
 					this.graph.setProtocol(this.userClassName);
@@ -228,7 +234,9 @@ public class ReplayProcessor implements IProcessor {
 					
 				}else {
 					// get log data in block
-					value = Logger.readLogLine(line);										
+					value = Logger.readLogLine(line);
+					
+					
 					if(value[1].startsWith("EDGE_")){
 						this.rebuildEdge(value);
 						
@@ -268,7 +276,9 @@ public class ReplayProcessor implements IProcessor {
 	 * Rebuild edge event based on log
 	 */
 	private void rebuildEdge(String[] value){
-		int time = Integer.parseInt(value[0]);
+		// set current time
+		this.curTime = Integer.parseInt(value[0]);
+		
 		logTag tag = logTag.valueOf(value[1]);
 		String edgeId = value[2];
 		String nodeId = value[3];
@@ -291,7 +301,9 @@ public class ReplayProcessor implements IProcessor {
 	 * Rebuild node event based on log
 	 */
 	private void rebuildNode(String[] value){
-		int time = Integer.parseInt(value[0]);
+		// set current time
+		this.curTime = Integer.parseInt(value[0]);
+		
 		logTag tag = logTag.valueOf(value[1]);
 		String nodeId = value[2];
 		Node node = this.nodes.get(nodeId);
@@ -328,7 +340,9 @@ public class ReplayProcessor implements IProcessor {
 	 * Rebuild node event based on log
 	 */
 	private void rebuildAgent(String[] value){
-		int time = Integer.parseInt(value[0]);
+		// set current time
+		this.curTime = Integer.parseInt(value[0]);
+		
 		logTag tag = logTag.valueOf(value[1]);
 		String agentId = value[2];
 		Agent agent = this.allAgents.get(agentId);
@@ -606,5 +620,18 @@ public class ReplayProcessor implements IProcessor {
 		}
 		return size;
 	}
+
+	@Override
+	public int getCurrentTime() {
+		return this.curTime;
+	}
+
+	@Override
+	public Graph getGraph() {
+		return this.graph;
+	}
+
+	@Override
+	public void pushEvents(List<Event> events) {}
 
 }

@@ -49,7 +49,7 @@ public interface IConstants {
 	public static final short EVENT_ARRIVAL_TYPE = 2;
 	public static final short EVENT_NOTIFY_TYPE = 3;
 		
-	// Catched exception messages
+	// Cached error messages
 	public static final short ERROR_0 = 0;
 	public static final short ERROR_1 = 1;
 	public static final short ERROR_2 = 2;

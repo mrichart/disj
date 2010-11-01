@@ -30,7 +30,7 @@ public class DisJException extends Exception {
         ERROR_CODE[IConstants.ERROR_4] = "Graph already existed";
         ERROR_CODE[IConstants.ERROR_5] = "Graph not found";
         ERROR_CODE[IConstants.ERROR_6] = "Entity already assigned";
-        ERROR_CODE[IConstants.ERROR_7] = "Cannot invoke JDist operation when entity has not yet been created";
+        ERROR_CODE[IConstants.ERROR_7] = "Cannot invoke DisJ operation when entity has not yet been created";
         ERROR_CODE[IConstants.ERROR_8] = "Cannot create user Object";
         ERROR_CODE[IConstants.ERROR_9] = "Node not found for this edge";
         ERROR_CODE[IConstants.ERROR_10] = "Start and End node cannot be the same";

@@ -18,13 +18,12 @@ import distributed.plugin.core.IConstants;
  */
 public class MsgPassingEvent extends Event{
 
-	private String hostId; // node id
+	private String hostId; // node sender id
 
-	/**
-	 * an edge label's name (used by owner node) that
-	 * connect to a receiver
+	/*
+	 * An edge ID that connected between sender and receiver
 	 */
-	private String edgeName;  
+	private String edgeId;  
 
 	private IMessage message;
 
@@ -43,7 +42,7 @@ public class MsgPassingEvent extends Event{
 		super(eventType, eventId, execTime);
 		
 		this.hostId = hostId;
-		this.edgeName = target;
+		this.edgeId = target;
 		this.message = message;
 	}
 
@@ -63,13 +62,13 @@ public class MsgPassingEvent extends Event{
 	}
 
 	/**
-	 * Get an local edge's name base on the owner of the event
+	 * Get an edge ID base on the owner of the event
 	 * that has been sent through
 	 * 
 	 * @return Returns the targets.
 	 */
-	public String getEdgeName() {
-		return edgeName;
+	public String getEdgeId() {
+		return edgeId;
 	}
 
 	public boolean equals(Object obj) {
@@ -85,7 +84,7 @@ public class MsgPassingEvent extends Event{
 
 	public String toString() {
 		return super.toString()+ hostId + IConstants.MAIN_DELIMETER
-				+ edgeName + IConstants.MAIN_DELIMETER + message.getLabel();
+				+ edgeId + IConstants.MAIN_DELIMETER + message.getLabel();
 	}
 
 	
