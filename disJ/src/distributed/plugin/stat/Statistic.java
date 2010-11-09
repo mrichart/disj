@@ -1,7 +1,13 @@
 package distributed.plugin.stat;
 
-public abstract class Statistic {
+import java.io.Serializable;
 
+public abstract class Statistic implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public abstract String getName();
 	public abstract void reset();
 	

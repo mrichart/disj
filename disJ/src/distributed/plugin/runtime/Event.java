@@ -1,8 +1,11 @@
 package distributed.plugin.runtime;
 
+import java.io.Serializable;
+
 import distributed.plugin.core.IConstants;
 
-public abstract class Event implements IEvent<Event>{
+@SuppressWarnings("serial")
+public abstract class Event implements IEvent<Event>, Serializable{
 	
 	private short eventType;
 

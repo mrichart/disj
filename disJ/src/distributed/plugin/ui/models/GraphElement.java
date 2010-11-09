@@ -30,6 +30,7 @@ import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
 import distributed.plugin.core.Graph;
 import distributed.plugin.core.IConstants;
+import distributed.plugin.core.Node;
 import distributed.plugin.runtime.GraphFactory;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.validators.NumberCellEditorValidator;
@@ -475,13 +476,14 @@ public class GraphElement extends AdapterElement {
 		} else if (propName.equals(PROPERTY_TOTAL_MSG_RECV)) {
 			this.graph.resetMsgRecvCounter();
 		}
-		*/
+		
     	try {
     		// store new updated
  			GraphFactory.addGraph(this.graph);
  		} catch (DisJException e) {
  			e.printStackTrace();
- 		}       
+ 		} 
+ 		*/      
     }
     
 
@@ -528,17 +530,21 @@ public class GraphElement extends AdapterElement {
     	// rebuild this object
     	 ois.defaultReadObject();
 
-    	 // rebuild transient instances in Node/Link Element object	
+    	 // rebuild transient instances in Node/Link Element objects	
 		try {
 			String nId;
+			Node n = null;
 			for (NodeElement ne : this.nodeElements) {
 				nId = ne.getNodeId();
-				ne.setNode(this.graph.getNode(nId));
+				n = this.graph.getNode(nId);
+				ne.setNode(n);
 			}
 			String eId;
+			Edge ed = null;
 			for (LinkElement le : this.linkElements) {
 				eId = le.getEdgeId();
-				le.setEdge(this.graph.getEdge(eId));
+				ed = this.graph.getEdge(eId);
+				le.setEdge(ed);
 				
 				// rebuild source/target of each LinkElement
 				String sId = le.getSourceId();
@@ -549,9 +555,12 @@ public class GraphElement extends AdapterElement {
 			}
 			
 			
+			
 		} catch (Exception e) {
 			System.err.println("@GraphElement.readObject() " + e);
 		}    	
+		
+    	 //System.out.println(this.graph);
     }
 
     private NodeElement getNodeElement(String nId) throws DisJException{

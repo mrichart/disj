@@ -2,6 +2,7 @@ package distributed.plugin.runtime;
 
 import distributed.plugin.core.IConstants;
 
+@SuppressWarnings("serial")
 public class AgentEvent extends Event {
 
 	enum actionType {WRITE_TO_BOARD, READ_FROM_BOARD, REMOVE_FROM_BOARD, 

@@ -16,6 +16,7 @@ import distributed.plugin.core.IConstants;
  * @author npiyasin A data storage that it will be use for execution for each
  *         message
  */
+@SuppressWarnings("serial")
 public class MsgPassingEvent extends Event{
 
 	private String hostId; // node sender id

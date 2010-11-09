@@ -3,6 +3,7 @@ package distributed.plugin.stat;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("serial")
 public class EdgeStat extends Statistic {
 
 	private int totalEnter;

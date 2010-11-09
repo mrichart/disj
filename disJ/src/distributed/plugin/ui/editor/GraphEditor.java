@@ -102,7 +102,9 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 
+import distributed.plugin.core.DisJException;
 import distributed.plugin.random.IRandom;
+import distributed.plugin.runtime.GraphFactory;
 import distributed.plugin.runtime.IDistributedModel;
 import distributed.plugin.runtime.engine.SimulatorEngine;
 import distributed.plugin.ui.GraphEditorPlugin;
@@ -334,7 +336,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		super.initializeGraphicalViewer();
 		GraphicalViewer viewer = getGraphicalViewer();
 
-		viewer.setContents(this.getContent());
+		viewer.setContents(this.getGraphElement());
 
 		this.getGraphElement().setShell(getEditorSite().getShell());
 		// System.err.println("[GraphEditor] initGraphViewer successed "
@@ -396,9 +398,25 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		return this.graphElement;
 	}
 
+
+	private void setContent(GraphElement element) {
+		this.graphElement = element;
+		try {
+			// update tracker with latest version from a file
+			// since every editor opening does create new element
+			// with default values
+			GraphFactory.addGraph(this.graphElement.getGraph());
+		} catch (DisJException e) {}
+		this.setFactory(element);
+	}
+
 	public GraphElement getGraphElement() {
-		GraphElement e = (GraphElement) this.getContent();
-		return e;
+		if(this.graphElement == null){
+			GraphElement e = (GraphElement)this.getContent();
+			return e;
+		}else{
+			return this.graphElement;
+		}		
 	}
 
 	/**
@@ -442,11 +460,6 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 	public void setLoader(ClassLoader loader) {
 		this.loader = loader;
-	}
-
-	private void setContent(GraphElement element) {
-		this.graphElement = element;
-		this.setFactory(element);
 	}
 
 	private EditPartFactory getEditPartFactory() {
@@ -1020,7 +1033,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	}
 
 	private void writeObject(ObjectOutputStream oos) throws IOException {
-		Object obj = this.getContent();
+		Object obj = this.getGraphElement();
 		oos.writeObject(obj);
 		oos.close();
 	}
@@ -1064,11 +1077,11 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 		if (!editorSaving) {
 			if (getGraphicalViewer() != null) {
-				getGraphicalViewer().setContents(this.getContent());
+				getGraphicalViewer().setContents(this.getGraphElement());
 				// loadProperties();
 			}
 			if (overviewOutlinePage != null) {
-				overviewOutlinePage.setContents(this.getContent());
+				overviewOutlinePage.setContents(this.getGraphElement());
 			}
 		}
 	}

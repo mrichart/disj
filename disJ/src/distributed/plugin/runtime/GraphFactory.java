@@ -60,7 +60,8 @@ public final class GraphFactory {
 		if(g == null){
 			throw new DisJException(IConstants.ERROR_22);
 		}
-		String id = g.getId();		
+		String id = g.getId();
+		GRAPH_LIST.remove(id);
 		GRAPH_LIST.put(id, g);		
 		 						
 	}

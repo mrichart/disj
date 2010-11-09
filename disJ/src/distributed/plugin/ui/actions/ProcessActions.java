@@ -304,6 +304,7 @@ public class ProcessActions extends WorkbenchPartAction {
 	 * FIXME Double check and validate an input graph
 	 */
 	private Graph doubleCheck(){
+		
 		this.validateSavedGraph(editor);
 		
 		GraphElement ge = editor.getGraphElement();

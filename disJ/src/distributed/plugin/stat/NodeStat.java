@@ -3,6 +3,7 @@ package distributed.plugin.stat;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("serial")
 public class NodeStat extends Statistic {
 	
 	private int numMsgRecv;

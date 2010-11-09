@@ -8,8 +8,9 @@ import distributed.plugin.core.Agent;
 import distributed.plugin.core.Edge;
 import distributed.plugin.core.Node;
 
+@SuppressWarnings("serial")
 public class GraphStat extends Statistic {
-
+	
 	private String graphId;
 		
 	/**
