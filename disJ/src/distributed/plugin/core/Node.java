@@ -711,7 +711,7 @@ public class Node implements Serializable {
 					+ " is more than available token "
 					+ this.numToken);
 		}
-		this.numToken = numDecrease;
+		this.numToken -= numDecrease;
 	}
 
 	public void incrementToken(int numIncrease) {

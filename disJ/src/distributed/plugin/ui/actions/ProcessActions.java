@@ -311,9 +311,9 @@ public class ProcessActions extends WorkbenchPartAction {
 		List<NodeElement> nList = ge.getNodeElements();
 		Graph graph = ge.getGraph();
 		
-		// FIXME Double assignment: some time graph is empty
+		// FIXME Double assignment: sometime graph is empty
 		// it should not happen !!
-		Node node;
+/*		Node node;
 		for (NodeElement n : nList) {
 			try {
 				node = n.getNode();
@@ -332,6 +332,7 @@ public class ProcessActions extends WorkbenchPartAction {
 				System.err.println("@ProcessAction.doubleCheck()[WARNING] try to add duplicated edge");
 			}
 		}
+*/		
 		return graph;
 	}
 	
@@ -373,7 +374,6 @@ public class ProcessActions extends WorkbenchPartAction {
 				e.printStackTrace();
 			}
 		}
-
 	}
 
 	private void executeLoad(){
