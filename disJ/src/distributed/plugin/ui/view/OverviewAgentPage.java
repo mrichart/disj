@@ -54,7 +54,7 @@ import org.eclipse.ui.PlatformUI;
 
 import distributed.plugin.core.Agent;
 import distributed.plugin.core.IConstants;
-import distributed.plugin.ui.GraphEditorPlugin;
+import distributed.plugin.ui.Activator;
 import distributed.plugin.ui.models.GraphElement;
 
 public class OverviewAgentPage extends DisJViewPage {
@@ -103,7 +103,7 @@ public class OverviewAgentPage extends DisJViewPage {
 	private static ImageDescriptor IDSC_STAT;
 	static{		
 		try {
-			URL installUrl = GraphEditorPlugin.getDefault().getBundle().getEntry("/");
+			URL installUrl = Activator.getDefault().getBundle().getEntry("/");
 			URL imageUrl = new URL(installUrl, "icons/agent.png");			
 			IDSC_AGENT = ImageDescriptor.createFromURL(imageUrl);			
 			IMG_AGENT = IDSC_AGENT.createImage();

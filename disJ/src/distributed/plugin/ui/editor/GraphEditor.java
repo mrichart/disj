@@ -107,7 +107,7 @@ import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.GraphFactory;
 import distributed.plugin.runtime.IDistributedModel;
 import distributed.plugin.runtime.engine.SimulatorEngine;
-import distributed.plugin.ui.GraphEditorPlugin;
+import distributed.plugin.ui.Activator;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.actions.ProcessActions;
 import distributed.plugin.ui.actions.StateSettingAction;
@@ -133,7 +133,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	protected static final int DEFAULT_PALETTE_SIZE = 130;
 
 	static {
-		GraphEditorPlugin.getDefault().getPreferenceStore().setDefault(
+		Activator.getDefault().getPreferenceStore().setDefault(
 				PALETTE_SIZE, DEFAULT_PALETTE_SIZE);
 	}
 
@@ -519,32 +519,32 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	protected FlyoutPreferences getPalettePreferences() {
 		return new FlyoutPreferences() {
 			public int getDockLocation() {
-				return GraphEditorPlugin.getDefault().getPreferenceStore()
+				return Activator.getDefault().getPreferenceStore()
 						.getInt(PALETTE_DOCK_LOCATION);
 			}
 
 			public int getPaletteState() {
-				return GraphEditorPlugin.getDefault().getPreferenceStore()
+				return Activator.getDefault().getPreferenceStore()
 						.getInt(PALETTE_STATE);
 			}
 
 			public int getPaletteWidth() {
-				return GraphEditorPlugin.getDefault().getPreferenceStore()
+				return Activator.getDefault().getPreferenceStore()
 						.getInt(PALETTE_SIZE);
 			}
 
 			public void setDockLocation(int location) {
-				GraphEditorPlugin.getDefault().getPreferenceStore().setValue(
+				Activator.getDefault().getPreferenceStore().setValue(
 						PALETTE_DOCK_LOCATION, location);
 			}
 
 			public void setPaletteState(int state) {
-				GraphEditorPlugin.getDefault().getPreferenceStore().setValue(
+				Activator.getDefault().getPreferenceStore().setValue(
 						PALETTE_STATE, state);
 			}
 
 			public void setPaletteWidth(int width) {
-				GraphEditorPlugin.getDefault().getPreferenceStore().setValue(
+				Activator.getDefault().getPreferenceStore().setValue(
 						PALETTE_SIZE, width);
 			}
 		};
@@ -670,7 +670,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	 */
 	private PaletteContainer createDrawerComponents() {
 
-		URL installUrl = GraphEditorPlugin.getDefault().getBundle().getEntry(
+		URL installUrl = Activator.getDefault().getBundle().getEntry(
 				"/");
 		URL imageUrl = null;
 
@@ -734,7 +734,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	 */
 	private PaletteContainer createGraphComponents() {
 		
-		URL installUrl = GraphEditorPlugin.getDefault().getBundle().getEntry("/");
+		URL installUrl = Activator.getDefault().getBundle().getEntry("/");
 		URL imageUrl = null;
 		
 		try {

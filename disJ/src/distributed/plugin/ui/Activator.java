@@ -20,12 +20,12 @@ import org.osgi.framework.BundleContext;
 /**
  * The main plugin class to be used in the desktop.
  */
-public class GraphEditorPlugin extends AbstractUIPlugin {
+public class Activator extends AbstractUIPlugin {
 	
 	public static final String PLUGIN_ID = "disj";//"distributed.plugin.ui.editor.GraphEditor"; //$NON-NLS-1$
 	
 	//The shared instance.
-	private static GraphEditorPlugin plugin;
+	private static Activator plugin;
 	
 	//Resource bundle.
 	private ResourceBundle resourceBundle;
@@ -33,7 +33,7 @@ public class GraphEditorPlugin extends AbstractUIPlugin {
 	/**
 	 * The constructor.
 	 */
-	public GraphEditorPlugin() {
+	public Activator() {
 		super();
 		plugin = this;
 		try {
@@ -60,7 +60,7 @@ public class GraphEditorPlugin extends AbstractUIPlugin {
 	/**
 	 * Returns the shared instance.
 	 */
-	public static GraphEditorPlugin getDefault() {
+	public static Activator getDefault() {
 		return plugin;
 	}
 
@@ -69,7 +69,7 @@ public class GraphEditorPlugin extends AbstractUIPlugin {
 	 * or 'key' if not found.
 	 */
 	public static String getResourceString(String key) {
-		ResourceBundle bundle = GraphEditorPlugin.getDefault().getResourceBundle();
+		ResourceBundle bundle = Activator.getDefault().getResourceBundle();
 		try {
 			return (bundle != null) ? bundle.getString(key) : key;
 		} catch (MissingResourceException e) {

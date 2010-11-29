@@ -22,16 +22,16 @@ import org.eclipse.swt.graphics.Color;
 public interface IGraphEditorConstants {
 
 	// menu constants
-	public String GraphicalEditor_FILE_DELETED_TITLE_UI = GraphEditorPlugin
+	public String GraphicalEditor_FILE_DELETED_TITLE_UI = Activator
 			.getResourceString("%GraphicalEditor.FILE_DELETED_TITLE_UI_"); //$NON-NLS-1$
 
-	public String GraphicalEditor_FILE_DELETED_WITHOUT_SAVE_INFO = GraphEditorPlugin
+	public String GraphicalEditor_FILE_DELETED_WITHOUT_SAVE_INFO = Activator
 			.getResourceString("%GraphicalEditor.FILE_DELETED_WITHOUT_SAVE_INFO_");//$NON-NLS-1$
 
-	public String GraphicalEditor_SAVE_BUTTON_UI = GraphEditorPlugin
+	public String GraphicalEditor_SAVE_BUTTON_UI = Activator
 			.getResourceString("%GraphicalEditor.SAVE_BUTTON_UI_"); //$NON-NLS-1$
 
-	public String GraphicalEditor_CLOSE_BUTTON_UI = GraphEditorPlugin
+	public String GraphicalEditor_CLOSE_BUTTON_UI = Activator
 			.getResourceString("%GraphicalEditor.CLOSE_BUTTON_UI_"); //$NON-NLS-1$
 
 	// Default node background color

@@ -6,7 +6,7 @@ import java.net.URL;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.actions.RetargetAction;
 
-import distributed.plugin.ui.GraphEditorPlugin;
+import distributed.plugin.ui.Activator;
 
 public class LoadRandomRetargetAction extends RetargetAction {
 
@@ -14,7 +14,7 @@ public class LoadRandomRetargetAction extends RetargetAction {
 		super(actionID, text);
 		
 		try {
-			final URL installUrl = GraphEditorPlugin.getDefault().getBundle().getEntry("/");
+			final URL installUrl = Activator.getDefault().getBundle().getEntry("/");
 			final URL imageUrl = new URL(installUrl, "icons/load_ran.png");
 			setImageDescriptor(ImageDescriptor.createFromURL(imageUrl));
 			

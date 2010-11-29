@@ -16,7 +16,7 @@ import java.net.URL;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.actions.RetargetAction;
 
-import distributed.plugin.ui.GraphEditorPlugin;
+import distributed.plugin.ui.Activator;
 
 /**
  * @author Me
@@ -33,7 +33,7 @@ public class StepNextRetargetAction extends RetargetAction {
     public StepNextRetargetAction(String actionID, String text) {
         super(actionID, text);
     	try {
-			final URL installUrl = GraphEditorPlugin.getDefault().getBundle().getEntry("/");
+			final URL installUrl = Activator.getDefault().getBundle().getEntry("/");
 			final URL imageUrl = new URL(installUrl, "icons/step_next_en.gif");
 			setImageDescriptor(ImageDescriptor.createFromURL(imageUrl));
 			

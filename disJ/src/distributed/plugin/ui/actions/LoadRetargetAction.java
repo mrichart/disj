@@ -16,7 +16,7 @@ import java.net.URL;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.actions.RetargetAction;
 
-import distributed.plugin.ui.GraphEditorPlugin;
+import distributed.plugin.ui.Activator;
 
 /**
  * @author Me
@@ -36,7 +36,7 @@ public class LoadRetargetAction extends RetargetAction {
 //        	ImageDescriptor.createFromFile(GraphEditor.class,"icons/load_en.gif"));
         
         	try {
-				final URL installUrl = GraphEditorPlugin.getDefault().getBundle().getEntry("/");
+				final URL installUrl = Activator.getDefault().getBundle().getEntry("/");
 				final URL imageUrl = new URL(installUrl, "icons/load.png");
 				setImageDescriptor(ImageDescriptor.createFromURL(imageUrl));
 				

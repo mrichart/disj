@@ -16,7 +16,7 @@ import java.net.URL;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.actions.RetargetAction;
 
-import distributed.plugin.ui.GraphEditorPlugin;
+import distributed.plugin.ui.Activator;
 
 /**
  * @author Me
@@ -33,7 +33,7 @@ public class SuspendRetargetAction extends RetargetAction {
 	public SuspendRetargetAction(String actionID, String text) {
 		super(actionID, text);
 		try {
-			final URL installUrl = GraphEditorPlugin.getDefault().getBundle()
+			final URL installUrl = Activator.getDefault().getBundle()
 					.getEntry("/");
 			final URL imageUrl = new URL(installUrl, "icons/suspend_en.gif");
 			setImageDescriptor(ImageDescriptor.createFromURL(imageUrl));
