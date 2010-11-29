@@ -117,6 +117,11 @@ public interface IConstants {
     public static final String PROPERTY_CHANGE__LINK_INVISIBLE = "link_invisible";
     public static final String PROPERTY_CHANGE_NAME = "name";
     public static final String PROPERTY_CHANGE_USER_INPUT = "user_input";
+    
+    public static final String PROPERTY_CHANGE_ADD_AGENT = "add_agent";
+    public static final String PROPERTY_CHANGE_REM_AGENT = "rem_agent";
+    public static final String PROPERTY_CHANGE_STATE_AGENT = "agent_state_changed";
+    public static final String PROPERTY_CHANGE_LOC_AGENT = "agent_location_changed";
 	
 	
 	

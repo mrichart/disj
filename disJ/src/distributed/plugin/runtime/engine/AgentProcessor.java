@@ -268,7 +268,6 @@ public abstract class AgentProcessor implements IProcessor {
 		}
 	}
 	
-	@Override
 	public void processReqeust(String sender, List<String> receivers,
 			IMessage message){
 
@@ -500,8 +499,6 @@ public abstract class AgentProcessor implements IProcessor {
 
 	}
 	
-	
-	@Override
 	public void run() {
 		try {
 			// init logger
@@ -791,7 +788,6 @@ public abstract class AgentProcessor implements IProcessor {
 		return id;
 	}
 
-	@Override
 	public int getNetworkSize(){
 		int size = 0;
 		if(this.graph != null){

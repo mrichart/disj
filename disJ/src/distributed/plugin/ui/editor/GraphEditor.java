@@ -68,9 +68,9 @@ import org.eclipse.gef.ui.actions.DirectEditAction;
 import org.eclipse.gef.ui.actions.EditorPartAction;
 import org.eclipse.gef.ui.actions.GEFActionConstants;
 import org.eclipse.gef.ui.actions.StackAction;
+import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.palette.PaletteViewer;
 import org.eclipse.gef.ui.palette.PaletteViewerProvider;
-import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette;
 import org.eclipse.gef.ui.parts.GraphicalViewerKeyHandler;
 import org.eclipse.gef.ui.parts.ScrollingGraphicalViewer;
@@ -114,6 +114,9 @@ import distributed.plugin.ui.actions.StateSettingAction;
 import distributed.plugin.ui.models.GraphElement;
 import distributed.plugin.ui.models.GraphElementFactory;
 import distributed.plugin.ui.parts.GraphEditPartFactory;
+import distributed.plugin.ui.view.IDisJViewable;
+import distributed.plugin.ui.view.OverviewAgentPage;
+import distributed.plugin.ui.view.OverviewOutlinePage;
 
 /**
  * A graph editor for drawing topology
@@ -153,6 +156,8 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 	private PropertySheetPage undoablePropertySheetPage;
 
 	private OverviewOutlinePage overviewOutlinePage;
+	
+	private OverviewAgentPage agentViewPage;
 
 	private List<String> commandStackActionIDs;
 
@@ -304,7 +309,23 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 		this.getSite().getWorkbenchWindow().getPartService().addPartListener(
 				this.partListener);
+/*
+		// this is for testing
+		IWorkbenchPage[] ps = this.getSite().getWorkbenchWindow().getPages();
+		//ps[0].
+		
+		//Any workbench part that holds a viewer should register this viewer as 
+		// the selection provider with the respective view site: 
+		getSite().setSelectionProvider(tableviewer);
 
+		// You can retrieve the selection provider from a workbench part from its site. 
+		IWorkbenchPartSite i_site = this.getSite();
+		ISelectionProvider provider = i_site.getSelectionProvider();
+		// this can be null if the workbench part hasn't set one, better safe than sorry
+		if (provider != null) {
+		    provider.setSelection();
+		}
+*/		
 		// System.err.println("[GraphEditor] setSite successed");
 	}
 
@@ -486,7 +507,9 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 			return this.getPropertySheetPage();
 		else if (type == IContentOutlinePage.class)
 			return this.getOverviewOutlinePage();
-
+		else if (type == IDisJViewable.class)
+			return this.getAgentPage();
+		
 		return super.getAdapter(type);
 	}
 
@@ -1014,6 +1037,15 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		return overviewOutlinePage;
 	}
 
+	private OverviewAgentPage getAgentPage() {
+		if (agentViewPage == null) {
+			agentViewPage = new OverviewAgentPage(this.getGraphElement());
+			//GraphElement ge = this.getGraphElement();
+			//ge.setViewListener(this.agentViewPage);
+		}
+		return agentViewPage;
+	}
+	
 	protected void closeEditor(boolean save) {
 		this.getSite().getPage().closeEditor(GraphEditor.this, save);
 	}
@@ -1082,6 +1114,9 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 			}
 			if (overviewOutlinePage != null) {
 				overviewOutlinePage.setContents(this.getGraphElement());
+			}
+			if(agentViewPage != null){
+				agentViewPage.setContents(this.getGraphElement());
 			}
 		}
 	}

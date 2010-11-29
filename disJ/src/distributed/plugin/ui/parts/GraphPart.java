@@ -32,8 +32,10 @@ import org.eclipse.gef.Request;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.gef.editpolicies.RootComponentEditPolicy;
 import org.eclipse.gef.tools.MarqueeDragTracker;
+import org.eclipse.swt.widgets.Display;
 
 import distributed.plugin.ui.models.GraphElement;
+import distributed.plugin.ui.models.NodeElement;
 import distributed.plugin.ui.parts.policies.GraphXYEditLayoutPolicy;
 
 /**
@@ -160,10 +162,26 @@ public class GraphPart extends AbstractGraphicalEditPart implements
      * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
      */
     public void propertyChange(PropertyChangeEvent evt) {
-        String prop = evt.getPropertyName();
-        //System.out.println("[GraphPart] propertyChange: " + IConstants.PROPERTY_CHANGE_NODE+ "="+ prop);
-        refreshChildren();
-        refreshVisuals();
+        //String prop = evt.getPropertyName();
+        //System.out.println("[GraphPart] propertyChange: " + prop);
+        Display display = Display.getCurrent();
+        Runnable ui = null;
+
+        if (display == null) {
+			ui = new Runnable() {
+				public void run() {
+					refreshChildren();
+					refreshVisuals();
+				}
+			};
+		} else {
+			this.refreshChildren();
+			this.refreshVisuals();
+		}
+        if (ui != null) {
+			display = Display.getDefault();
+			display.asyncExec(ui);
+		}        
     }
 
     /**
@@ -176,12 +194,12 @@ public class GraphPart extends AbstractGraphicalEditPart implements
     }
 
     /**
-     * Return all parts of NodeElements and LinkElements
+     * Return all sub elements of this part 
      * 
      * @see org.eclipse.gef.editparts.AbstractEditPart#getModelChildren()
      */
-    protected List getModelChildren() {
-        List children = this.getGraphElement().getNodeElements();
+    protected List<NodeElement> getModelChildren() {
+        List<NodeElement> children = this.getGraphElement().getNodeElements();
         //children.addAll(this.getGraphElement().getLinkElements());
         return children;
     }
@@ -205,7 +223,7 @@ public class GraphPart extends AbstractGraphicalEditPart implements
         ConnectionLayer cLayer = (ConnectionLayer) getLayer(LayerConstants.CONNECTION_LAYER);
         AutomaticRouter router = new FanRouter();
         router.setNextRouter(new BendpointConnectionRouter());
-        cLayer.setConnectionRouter(router);
+        cLayer.setConnectionRouter(router); 
     }
 
 }

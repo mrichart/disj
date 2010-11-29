@@ -69,27 +69,22 @@ public abstract class AgentModel implements IAgentModel {
 
 	// public abstract void arrive(String incomingPort);
 
-	@Override
 	public final String[] getMemorySuitcase() {
 		return this.agentOwner.getInfo();
 	}
 
-	@Override
 	public final String getAgentId() {
 		return this.agentOwner.getAgentId();
 	}
 
-	@Override
 	public final String getNodeId() {
 		return this.agentOwner.getCurNode().getNodeId();
 	}
 
-	@Override
 	public final int getMaxMemorySlot() {
 		return this.agentOwner.getMaxSlot();
 	}
 
-	@Override
 	public final void moveTo(String outPort) {
 		// add destination
 		List<String> recv = new ArrayList<String>();
@@ -103,7 +98,6 @@ public abstract class AgentModel implements IAgentModel {
 		}
 	}
 
-	@Override
 	public final int getState() {
 		try {
 			if (this.agentOwner == null)
@@ -115,7 +109,6 @@ public abstract class AgentModel implements IAgentModel {
 		return this.curState;
 	}
 
-	@Override
 	public final void become(int state) {
 		try {
 			if (this.agentOwner == null)
@@ -133,13 +126,11 @@ public abstract class AgentModel implements IAgentModel {
 		return this.agentOwner.getCurNode().getCurState();
 	}
 
-	@Override
 	public final void setNodeState(int state) {
 		Node node = this.agentOwner.getCurNode();
 		node.setCurState(state);
 	}
 
-	@Override
 	public final void setAlarm(int time) {
 		if (time > 0) {
 			// No receiver
@@ -160,7 +151,6 @@ public abstract class AgentModel implements IAgentModel {
 		}
 	}
 
-	@Override
 	public final String getHomeId() {
 		return this.agentOwner.getHomeId();
 	}

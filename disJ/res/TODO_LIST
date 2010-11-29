@@ -13,3 +13,6 @@ TODO
 14. do step next 
 15. remove save rec icon
 16. update cookbook
+17. Remove existing graph and recreate a new graph in the file cause all
+kinds of error. (check maping state color and node, tracking node object
+and ID in graph and others etc..)

@@ -10,11 +10,14 @@
 
 package distributed.plugin.core;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import distributed.plugin.random.IRandom;
@@ -55,7 +58,9 @@ public class Graph implements Serializable {
 	transient private IRandom clientRandom;
 	
 	transient private GraphStat stat;
-
+	
+	protected PropertyChangeSupport listeners;
+	
 	public Graph() {
 		this("");
 	}
@@ -72,11 +77,20 @@ public class Graph implements Serializable {
 		this.maxToken = IConstants.DEFAULT_MAX_NUM_TOKEN;
 		this.stat = new GraphStat(this.graphId);
 		
+		this.listeners = new PropertyChangeSupport(this);
+		
 		this.nodes = new HashMap<String, Node>();
 		this.edges = new HashMap<String, Edge>();
 		this.agents = new HashMap<String, Agent>();
 	}
 
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+		listeners.addPropertyChangeListener(l);
+	}
+
+	public void firePropertyChange(String prop, Object old, Object newValue) {
+		listeners.firePropertyChange(prop, old, newValue);
+	}	
 	
 	public GraphStat getStat() {
 		return stat;
@@ -114,7 +128,21 @@ public class Graph implements Serializable {
 
 	public void addAgent(String id, Agent agent) {
 		if (!this.agents.containsKey(id)){
+			
+			// add UI listener
+			PropertyChangeListener[] lis = this.listeners.getPropertyChangeListeners();
+			for(int i =0; i < lis.length; i++){
+				agent.addPropertyChangeListener(lis[i]);
+			}
+			
+			// keep track of it
 			this.agents.put(id, agent);
+			
+			// notify UI
+			this.firePropertyChange(IConstants.PROPERTY_CHANGE_ADD_AGENT, null,
+					agent);
+			
+			
 		}
 	}
 	
@@ -151,13 +179,40 @@ public class Graph implements Serializable {
 	public boolean removeAgent(String id)  {
 		if (this.agents.containsKey(id)){
 			Agent a = this.agents.remove(id);
+			
+			// remove listeners
+			PropertyChangeListener[] lis = this.listeners.getPropertyChangeListeners();
+			for(int i =0; i < lis.length; i++){
+				a.removePropertyChangeListener(lis[i]);
+			}
+			
+			// notify UI
+			this.firePropertyChange(IConstants.PROPERTY_CHANGE_REM_AGENT, null,
+					a);
 			return (a != null);
 		}
 		return false;
 	}
 	
 	public void removeAllAgents(){
+		
+		// remove listeners
+		PropertyChangeListener[] lis = this.listeners.getPropertyChangeListeners();
+		Iterator<String> its = this.agents.keySet().iterator();
+		Agent a = null;
+		for(String id = null; its.hasNext(); ){
+			id = its.next();
+			a = this.agents.remove(id);		
+			for(int i =0; i < lis.length; i++){				
+				a.removePropertyChangeListener(lis[i]);
+			}			
+			this.firePropertyChange(IConstants.PROPERTY_CHANGE_REM_AGENT, null,
+					a);
+		}
+		
+		// double safe lol
 		this.agents.clear();
+
 	}
 	
 	/**

@@ -76,7 +76,6 @@ public class TokenAgentProcessor extends AgentProcessor {
 		super.logAgentInfo();
 	}
 
-	@Override
 	public void displayStat() {
 		GraphStat gStat = this.graph.getStat();
 		Map<String, Agent> agents = this.graph.getAgents();

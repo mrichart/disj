@@ -88,7 +88,6 @@ public class BoardAgentProcessor extends AgentProcessor {
 
 	}
 	
-	@Override
 	public void displayStat() {
 		GraphStat gStat = this.graph.getStat();
 		Map<String, Agent> agents = this.graph.getAgents();

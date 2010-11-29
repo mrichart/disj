@@ -773,12 +773,10 @@ public class MsgPassingProcessor implements IProcessor {
 		return this.callingChain;
 	}
 
-	@Override
 	public Map<Integer, String> getStateFields() {
 		return this.stateFields;
 	}
 
-	@Override
 	public void displayStat() {
 		GraphStat gStat = this.graph.getStat();
 		Map<String, Node> nodes = this.graph.getNodes();
@@ -819,7 +817,6 @@ public class MsgPassingProcessor implements IProcessor {
 		}
 	}
 	 
-	@Override
 	public int getNetworkSize(){
 		int size = 0;
 		if(this.graph != null){

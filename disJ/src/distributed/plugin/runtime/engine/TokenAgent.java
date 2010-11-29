@@ -28,13 +28,11 @@ public abstract class TokenAgent extends AgentModel implements ITokenModel {
 		this.curToken = 0;
 	}
 
-	@Override
 	public final int countHostToken() {		
 		Node node = this.agentOwner.getCurNode();
 		return node.getNumToken();
 	}
 
-	@Override
 	public final int countMyToken() {
 		// This is just to make sure that NullPointerException is thrown
 		// when user calls it in constructor
@@ -43,7 +41,6 @@ public abstract class TokenAgent extends AgentModel implements ITokenModel {
 		return this.curToken;
 	}
 
-	@Override
 	public final void dropToken() {
 		Node node = this.agentOwner.getCurNode();
 		if(this.curToken > 0){			
@@ -64,7 +61,6 @@ public abstract class TokenAgent extends AgentModel implements ITokenModel {
 		}	
 	}
 
-	@Override
 	public final void pickupToken(int amount) {
 		int temp = this.countHostToken();
 		if(amount > temp){
@@ -113,7 +109,6 @@ public abstract class TokenAgent extends AgentModel implements ITokenModel {
 		this.curToken = this.maxToken;
 	}
 
-	@Override
 	public final int getMaxToken() {
 		return this.maxToken;
 	}

@@ -129,6 +129,10 @@ public class Agent implements Serializable{
 		listeners.addPropertyChangeListener(l);
 	}
 
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+		listeners.removePropertyChangeListener(l);
+	}
+	
 	public void firePropertyChange(String prop, Object old, Object newValue) {
 		listeners.firePropertyChange(prop, old, newValue);
 	}
@@ -165,6 +169,10 @@ public class Agent implements Serializable{
 	public int getCurState() {
 		return this.curState;
 	}
+	
+	public String getCurStateName(){
+		return this.getStateName(this.curState);
+	}
 
 	
 	public AgentStat getStat() {
@@ -182,9 +190,8 @@ public class Agent implements Serializable{
 			return;
 		}else{
 			this.curState = state;								
-			// FIXME
-			//this.firePropertyChange(IConstants.PROPERTY_CHANGE_NODE_STATE, null,
-			//		new Integer(this.curState));
+			this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATE_AGENT, null,
+					this);
 		
 			// it is not a reset action
 			if(this.curState != -1){
@@ -261,9 +268,15 @@ public class Agent implements Serializable{
 	public Node getCurNode() {
 		return curNode;
 	}
+	
+	public String getCurLocation() {
+		return curNode.getNodeId();
+	}
 
 	public void setCurNode(Node curNode) {
 		this.curNode = curNode;
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_LOC_AGENT, null,
+				this);
 	}
 
 	public String getAgentId() {

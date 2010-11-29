@@ -48,5 +48,4 @@ public class BiLinkElement extends LinkElement {
             return;
         this.getTarget().connectInLink(this);
     }
-
 }

@@ -10,6 +10,7 @@
 
 package distributed.plugin.ui.models;
 
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -125,7 +126,8 @@ public class GraphElement extends AdapterElement {
 
     private List<LinkElement> linkElements;
     
-
+    //transient private IUpdateListener viewListener;
+    
     /**
      * TODO it can create a graph with a given partName
      *
@@ -142,6 +144,11 @@ public class GraphElement extends AdapterElement {
         //System.out.println("[GraphElement] created "   + this.graph);
     }
     
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+		super.addPropertyChangeListener(listener);
+		this.graph.addPropertyChangeListener(listener);
+	}
+	
     /**
      * @return
      */

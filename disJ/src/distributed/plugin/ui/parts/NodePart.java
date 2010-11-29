@@ -301,7 +301,6 @@ public class NodePart extends AbstractGraphicalEditPart implements
 				display.asyncExec(ui);
 			}
 		} catch (RuntimeException e) {
-			// TODO ignore this
 			e.printStackTrace();
 		}
 	}

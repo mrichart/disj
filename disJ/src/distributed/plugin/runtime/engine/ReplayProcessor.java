@@ -17,8 +17,8 @@ import distributed.plugin.core.Edge;
 import distributed.plugin.core.Graph;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Logger;
-import distributed.plugin.core.Node;
 import distributed.plugin.core.Logger.logTag;
+import distributed.plugin.core.Node;
 import distributed.plugin.runtime.Event;
 import distributed.plugin.runtime.IMessage;
 import distributed.plugin.runtime.IProcessor;
@@ -117,7 +117,7 @@ public class ReplayProcessor implements IProcessor {
 	public void setSpeed(int speed) {
 		this.speed = speed;
 	}
-	@Override
+
 	public void cleanUp() {
 		// reset the flag the process is terminated
 		this.stop = true;
@@ -131,22 +131,18 @@ public class ReplayProcessor implements IProcessor {
 		this.graph = null;
 	}
 
-	@Override
 	public Map<Integer, String> getStateFields() {
 		return this.stateFields;
 	}
 
-	@Override
 	public MessageConsoleStream getSystemOut() {
 		return this.systemOut;
 	}
 
-	@Override
 	public void processReqeust(String sender, List<String> receivers,
 			IMessage message) throws DisJException {
 	}
 
-	@Override
 	public void run() {
 		try{
 			this.systemOut.println("\n Start REPLAY on graph " 
@@ -475,7 +471,6 @@ public class ReplayProcessor implements IProcessor {
 		}		
 	}
 	
-	@Override
 	public void displayStat() {
 		GraphStat gStat = this.graph.getStat();
 				
@@ -609,7 +604,6 @@ public class ReplayProcessor implements IProcessor {
 		}		
 	}
 	
-	@Override
 	public int getNetworkSize(){
 		int size = 0;
 		if(this.graph != null){
@@ -621,17 +615,14 @@ public class ReplayProcessor implements IProcessor {
 		return size;
 	}
 
-	@Override
 	public int getCurrentTime() {
 		return this.curTime;
 	}
 
-	@Override
 	public Graph getGraph() {
 		return this.graph;
 	}
 
-	@Override
 	public void pushEvents(List<Event> events) {}
 
 }

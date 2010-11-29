@@ -39,7 +39,6 @@ public abstract class Event implements IEvent<Event>, Serializable{
 		return this.execTime + this.eventType;
 	}
 
-	@Override
 	public int compareTo(Event e) {
 		if (this.execTime < e.getExecTime())
 			return -1;

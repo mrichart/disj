@@ -13,6 +13,7 @@ package distributed.plugin.ui;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -20,8 +21,12 @@ import org.osgi.framework.BundleContext;
  * The main plugin class to be used in the desktop.
  */
 public class GraphEditorPlugin extends AbstractUIPlugin {
+	
+	public static final String PLUGIN_ID = "disj";//"distributed.plugin.ui.editor.GraphEditor"; //$NON-NLS-1$
+	
 	//The shared instance.
 	private static GraphEditorPlugin plugin;
+	
 	//Resource bundle.
 	private ResourceBundle resourceBundle;
 	
@@ -78,4 +83,15 @@ public class GraphEditorPlugin extends AbstractUIPlugin {
 	public ResourceBundle getResourceBundle() {
 		return resourceBundle;
 	}
+	
+	/** Returns an image descriptor for the image file at the given
+	 * plug-in relative path
+	 *
+	 * @param path the path
+	 * @return the image descriptor
+	 */
+	public static ImageDescriptor getImageDescriptor(String path) {
+		return imageDescriptorFromPlugin(PLUGIN_ID, path);
+	}
+	 
 }

@@ -19,7 +19,6 @@ public abstract class BoardAgent extends AgentModel implements IBoardModel{
 		super(state);
 	}
 
-	@Override
 	public final List<String> readFromBoard(){
 		List<String> board = this.agentOwner.getCurNode().getWhiteboard();
 		List<String> temp = new ArrayList<String>();
@@ -38,7 +37,6 @@ public abstract class BoardAgent extends AgentModel implements IBoardModel{
 		return temp;
 	}
 	
-	@Override
 	public boolean removeRecord(String info){
 		List<String> board = this.agentOwner.getCurNode().getWhiteboard();
 		boolean b = board.remove(info);

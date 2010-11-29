@@ -104,4 +104,6 @@ public abstract class AdapterElement implements IPropertySource, Cloneable,
 		in.defaultReadObject();
 		listeners = new PropertyChangeSupport(this);
 	}
+
+	
 }
