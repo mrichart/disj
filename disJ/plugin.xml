@@ -1,28 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
-<plugin
-   id="org.carleton.scs.disj"
-   name="DisJ Simulator"
-   version="1.0.3"
-   provider-name="SCS Carleton University"
-   class="distributed.plugin.ui.GraphEditorPlugin">
-
-   <runtime>
-      <library name="disJ.jar">
-         <export name="*"/>
-      </library>
-   </runtime>
-
-   <requires>
-      <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.ui.ide"/>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.eclipse.ui.views"/>
-      <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.eclipse.ui.console"/>
-      <import plugin="org.eclipse.draw2d"/>
-   </requires>
+<plugin>
    <extension
          point="org.eclipse.ui.editors">
       <editor
@@ -33,6 +11,38 @@
             name="%editor.name.0"
             contributorClass="distributed.plugin.ui.actions.GraphEditorActionBarContributor"
             id="distributed.plugin.ui.editor.GraphEditor"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="org.carleton.scs.disj"
+            name="DisJ">
+      </category>
+      <view
+            category="org.carleton.scs.disj"
+            class="distributed.plugin.ui.view.DisJViewer"
+            icon="icons/editor.gif"
+            id="distributed.plugin.ui.view.DisJViewer"
+            name="DisJ View">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               id="distributed.plugin.ui.view.DisJViewer"
+               ratio="0.5"
+               relationship="right"
+               relative="org.eclipse.ui.views.TaskList">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.help.contexts">
+      <contexts
+            file="contexts.xml">
+      </contexts>
    </extension>
 
 </plugin>
