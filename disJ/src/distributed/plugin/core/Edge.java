@@ -10,6 +10,8 @@
 
 package distributed.plugin.core;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -57,7 +59,7 @@ public class Edge implements Serializable {
 
 	transient private EdgeStat stat;
 	
-	//private LinkElement linkElement;
+	protected PropertyChangeSupport listeners = new PropertyChangeSupport(this);
 	
 	/**
 	 * Constructor, create an edge with default values
@@ -111,6 +113,21 @@ public class Edge implements Serializable {
 		this.stat = new EdgeStat(this.edgeId);
 	}
 
+	
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+		listeners.addPropertyChangeListener(l);
+		this.stat.addPropertyChangeListener(l);
+	}
+
+	public void firePropertyChange(String prop, Object old, Object newValue) {
+		listeners.firePropertyChange(prop, old, newValue);
+	}
+	
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+		listeners.removePropertyChangeListener(l);
+		this.stat.removePropertyChangeListener(l);
+	}
+	
 	public void cleanUp(){
 		this.lastestMsgTimeForEnd = 0;
 		this.lastestMsgTimeForStart = 0;	

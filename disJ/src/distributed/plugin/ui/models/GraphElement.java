@@ -138,10 +138,6 @@ public class GraphElement extends AdapterElement {
         this.stateColors = new HashMap<Short, RGB>();
         this.nodeElements = new ArrayList<NodeElement>();
         this.linkElements = new ArrayList<LinkElement> ();
-        
-        // FIXME what is 99 state???
-		//this.stateColors.put((short)99, new RGB(100, 150, 50));		
-        //System.out.println("[GraphElement] created "   + this.graph);
     }
     
 	public void addPropertyChangeListener(PropertyChangeListener listener) {

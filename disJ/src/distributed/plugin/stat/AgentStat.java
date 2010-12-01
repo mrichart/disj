@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import distributed.plugin.core.IConstants;
+
 @SuppressWarnings("serial")
 public class AgentStat extends Statistic {
 
@@ -78,7 +80,9 @@ public class AgentStat extends Statistic {
 	}
 	
 	public void incMove(){
+		Integer old = this.numMove;
 		this.numMove++;
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_AGENT, old, this.numMove);
 	}
 
 	public int getNumBoardRead() {
@@ -86,7 +90,9 @@ public class AgentStat extends Statistic {
 	}
 	
 	public void incRead(){
+		Integer old = this.numBoardRead;
 		this.numBoardRead++;
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_AGENT, old, this.numBoardRead);
 	}
 
 	public int getNumBoardWrite() {
@@ -94,7 +100,9 @@ public class AgentStat extends Statistic {
 	}
 	
 	public void incWrite(){
+		Integer old = this.numBoardWrite;
 		this.numBoardWrite++;
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_AGENT, old, this.numBoardWrite);
 	}
 
 	public int getNumBoardDel() {
@@ -102,7 +110,9 @@ public class AgentStat extends Statistic {
 	}
 
 	public void incDelete(){
+		Integer old = this.numBoardDel;
 		this.numBoardDel++;
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_AGENT, old, this.numBoardDel);
 	}
 	
 	public int getNumTokPick() {
@@ -110,7 +120,9 @@ public class AgentStat extends Statistic {
 	}
 
 	public void incPick(){
+		Integer old = this.numTokPick;
 		this.numTokPick++;
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_AGENT, old, this.numTokPick);
 	}
 	
 	public int getNumTokDrop() {
@@ -118,7 +130,9 @@ public class AgentStat extends Statistic {
 	}
 
 	public void incDrop(){
+		Integer old = this.numTokDrop;
 		this.numTokDrop++;
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_AGENT, old, this.numTokDrop);
 	}
 	
 	public List<String> getPastStates() {
@@ -141,6 +155,7 @@ public class AgentStat extends Statistic {
 		}else{
 			this.nodeVisit.put(nodeId, 1);
 		}
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_AGENT, null, this.nodeVisit);
 	}
 
 	public Map<Integer, Integer> getStateMove() {
@@ -155,6 +170,7 @@ public class AgentStat extends Statistic {
 		}else{
 			this.stateMove.put(stateId, 1);
 		}
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_AGENT, null, this.stateMove);
 	}
 
 	public Map<String, Integer> getTokPick() {
@@ -169,6 +185,7 @@ public class AgentStat extends Statistic {
 		}else{
 			this.tokPick.put(nodeId, 1);
 		}
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_AGENT, null, this.tokPick);
 	}
 	
 	public Map<String, Integer> getTokDrop() {
@@ -183,6 +200,7 @@ public class AgentStat extends Statistic {
 		}else{
 			this.tokDrop.put(nodeId, 1);
 		}
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_AGENT, null, this.tokDrop);
 	}
 	
 }

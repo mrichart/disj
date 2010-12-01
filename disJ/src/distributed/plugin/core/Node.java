@@ -156,7 +156,9 @@ public class Node implements Serializable {
 	
 	private int maxY;
 	
-	
+	/*
+	 * Obeservers
+	 */
 	protected PropertyChangeSupport listeners = new PropertyChangeSupport(this);
 	
 	/**
@@ -216,12 +218,18 @@ public class Node implements Serializable {
 
 	public void addPropertyChangeListener(PropertyChangeListener l) {
 		listeners.addPropertyChangeListener(l);
+		this.stat.addPropertyChangeListener(l);
 	}
 
 	public void firePropertyChange(String prop, Object old, Object newValue) {
 		listeners.firePropertyChange(prop, old, newValue);
 	}
 
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+		listeners.removePropertyChangeListener(l);
+		this.stat.removePropertyChangeListener(l);
+	}
+	
 	/**
 	 * Get a unique ID for this node
 	 * 
@@ -750,7 +758,7 @@ public class Node implements Serializable {
 	
 		// it is not a reset action
 		if(this.curState != -1){
-			this.stat.addState(this.getStateName(state));
+			this.stat.addPastState(this.getStateName(state));			
 			if(log != null){
 				this.log.logNode(logTag.NODE_STATE, this.nodeId, this.curState+"");	
 			}
@@ -776,7 +784,7 @@ public class Node implements Serializable {
 
 	public void resetStateList() {
 		if(this.stat != null){
-			this.stat.clearState();
+			this.stat.clearPastState();
 		}
 	}
 

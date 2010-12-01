@@ -22,6 +22,7 @@ import java.util.Map;
 
 import distributed.plugin.random.IRandom;
 import distributed.plugin.stat.GraphStat;
+import distributed.plugin.ui.parts.GraphPart;
 
 /**
  * @author Me
@@ -86,6 +87,27 @@ public class Graph implements Serializable {
 
 	public void addPropertyChangeListener(PropertyChangeListener l) {
 		listeners.addPropertyChangeListener(l);
+		
+		
+		if(!(l instanceof GraphPart)){
+			// add view listener to each node
+			Node n = null;
+			Iterator<String> its = nodes.keySet().iterator();
+			for(String id = null; its.hasNext();){
+				id = its.next();
+				n = nodes.get(id);
+				n.addPropertyChangeListener(l);
+			}
+			
+			// add view listener to each edge
+			Edge e = null;
+			its = edges.keySet().iterator();
+			for(String id = null; its.hasNext();){
+				id = its.next();
+				e = edges.get(id);
+				e.addPropertyChangeListener(l);
+			}
+		}
 	}
 
 	public void firePropertyChange(String prop, Object old, Object newValue) {
@@ -105,9 +127,13 @@ public class Graph implements Serializable {
 	 * @throws DisJException
 	 */
 	public void addEdge(String id, Edge edge) throws DisJException {
-		if (!edges.containsKey(id))
+		if (!edges.containsKey(id)){
 			edges.put(id, edge);
-		else
+			PropertyChangeListener[] lis = this.listeners.getPropertyChangeListeners();
+			for(int i =0; i < lis.length; i++){				
+				edge.addPropertyChangeListener(lis[i]);
+			}
+		}else
 			throw new DisJException(IConstants.ERROR_2, id);
 	}
 
@@ -120,9 +146,13 @@ public class Graph implements Serializable {
 	 * @throws DisJException
 	 */
 	public void addNode(String id, Node node) throws DisJException {
-		if (!nodes.containsKey(id))
+		if (!nodes.containsKey(id)){
 			nodes.put(id, node);
-		else
+			PropertyChangeListener[] lis = this.listeners.getPropertyChangeListeners();
+			for(int i =0; i < lis.length; i++){				
+				node.addPropertyChangeListener(lis[i]);
+			}
+		} else
 			throw new DisJException(IConstants.ERROR_3, id);
 	}
 
@@ -140,9 +170,7 @@ public class Graph implements Serializable {
 			
 			// notify UI
 			this.firePropertyChange(IConstants.PROPERTY_CHANGE_ADD_AGENT, null,
-					agent);
-			
-			
+					agent);		
 		}
 	}
 	

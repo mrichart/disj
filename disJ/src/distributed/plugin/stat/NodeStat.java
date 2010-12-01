@@ -3,6 +3,8 @@ package distributed.plugin.stat;
 import java.util.ArrayList;
 import java.util.List;
 
+import distributed.plugin.core.IConstants;
+
 @SuppressWarnings("serial")
 public class NodeStat extends Statistic {
 	
@@ -14,7 +16,7 @@ public class NodeStat extends Statistic {
 
 	private String nodeId;	
 	private List<String> pastStates;
-	
+
 	/**
 	 * 
 	 * @param name
@@ -51,7 +53,9 @@ public class NodeStat extends Statistic {
 	}
 
 	public void incNumMsgRecv(){
+		Integer old = this.numMsgRecv;
 		this.numMsgRecv++;
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_NODE, old, this.numMsgRecv);
 	}
 	
 	public int getNumMsgSend() {
@@ -59,7 +63,9 @@ public class NodeStat extends Statistic {
 	}
 	
 	public void incNumMsgSend(){
+		Integer old = this.numMsgSend;
 		this.numMsgSend++;
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_NODE, old, this.numMsgSend);
 	}
 
 	public int getNumAgentVisit() {
@@ -67,7 +73,9 @@ public class NodeStat extends Statistic {
 	}
 
 	public void incNumAgentVisit(){
+		Integer old = this.numAgentVisit;
 		this.numAgentVisit++;
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_NODE, old, this.numAgentVisit);
 	}
 	
 	public int getNumTokDrop() {
@@ -75,7 +83,9 @@ public class NodeStat extends Statistic {
 	}
 	
 	public void incNumTokDrop(){
+		Integer old = this.numTokDrop;
 		this.numTokDrop++;
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_NODE, old, this.numTokDrop);
 	}
 
 	public int getNumTokPick() {
@@ -83,18 +93,21 @@ public class NodeStat extends Statistic {
 	}
 
 	public void incNumTokPick(){
+		Integer old = this.numTokPick;
 		this.numTokPick++;
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_NODE, old, this.numTokPick);
 	}
 	
 	public List<String> getPastStates() {
 		return pastStates;
 	}
 	
-	public void addState(String state){
+	public void addPastState(String state){
 		this.pastStates.add(state);
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_NODE, null, this.pastStates);
 	}
 
-	public void clearState(){
+	public void clearPastState(){
 		this.pastStates.clear();
 	}
 }

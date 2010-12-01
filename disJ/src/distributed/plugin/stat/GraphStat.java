@@ -36,7 +36,7 @@ public class GraphStat extends Statistic {
 	 * 
 	 * @return a map of state ID and count
 	 */
-	public Map<Integer, Integer> getNodeCurStateCount(Map<String, Node> nodes){
+	public static Map<Integer, Integer> getNodeCurStateCount(Map<String, Node> nodes){
 		int state = 0;
 		int c = 0;
 		Map<Integer, Integer> count = new HashMap<Integer, Integer>();
@@ -60,7 +60,7 @@ public class GraphStat extends Statistic {
 	 * @param nodes
 	 * @return
 	 */
-	public int getTotalMsgRecv(Map<String, Node> nodes){
+	public static int getTotalMsgRecv(Map<String, Node> nodes){
 		Iterator<String> its = nodes.keySet().iterator();
 		NodeStat stat = null;
 		int count = 0;
@@ -78,7 +78,7 @@ public class GraphStat extends Statistic {
 	 * @param nodes
 	 * @return
 	 */
-	public int getTotalMsgSent(Map<String, Node> nodes){
+	public static int getTotalMsgSent(Map<String, Node> nodes){
 		Iterator<String> its = nodes.keySet().iterator();
 		NodeStat stat = null;
 		int count = 0;
@@ -96,7 +96,7 @@ public class GraphStat extends Statistic {
 	 * @param agents
 	 * @return
 	 */
-	public int getTotalAgentMove(Map<String, Agent> agents){
+	public static int getTotalAgentMove(Map<String, Agent> agents){
 		Iterator<String> its = agents.keySet().iterator();
 		AgentStat stat = null;
 		int count = 0;
@@ -114,7 +114,7 @@ public class GraphStat extends Statistic {
 	 * @param agents
 	 * @return
 	 */
-	public Map<String, Integer> getTotalNodeVisit(Map<String, Agent> agents){
+	public static Map<String, Integer> getTotalNodeVisit(Map<String, Agent> agents){
 		Iterator<String> its = agents.keySet().iterator();		
 		Map<String, Integer> nodes = new HashMap<String, Integer>();
 		Map<String, Integer> tmp = null;
@@ -145,7 +145,7 @@ public class GraphStat extends Statistic {
 	 * @param agents
 	 * @return
 	 */
-	public Map<Integer, Integer> getTotalStateMove(Map<String, Agent> agents){
+	public static Map<Integer, Integer> getTotalStateMove(Map<String, Agent> agents){
 		Iterator<String> its = agents.keySet().iterator();
 		Map<Integer, Integer> states = new HashMap<Integer, Integer>();
 		Map<Integer, Integer> tmp = null;
@@ -176,7 +176,7 @@ public class GraphStat extends Statistic {
 	 * @param agents
 	 * @return
 	 */
-	public int getTotalBoardRead(Map<String, Agent> agents){
+	public static int getTotalBoardRead(Map<String, Agent> agents){
 		Iterator<String> its = agents.keySet().iterator();
 		AgentStat stat = null;
 		int count = 0;
@@ -194,7 +194,7 @@ public class GraphStat extends Statistic {
 	 * @param agents
 	 * @return
 	 */
-	public int getTotalBoardWrite(Map<String, Agent> agents){
+	public static int getTotalBoardWrite(Map<String, Agent> agents){
 		Iterator<String> its = agents.keySet().iterator();
 		AgentStat stat = null;
 		int count = 0;
@@ -212,7 +212,7 @@ public class GraphStat extends Statistic {
 	 * @param agents
 	 * @return
 	 */
-	public int getTotalBoardDel(Map<String, Agent> agents){
+	public static int getTotalBoardDel(Map<String, Agent> agents){
 		Iterator<String> its = agents.keySet().iterator();
 		AgentStat stat = null;
 		int count = 0;
@@ -230,7 +230,7 @@ public class GraphStat extends Statistic {
 	 * @param agents
 	 * @return
 	 */
-	public int getTotalTokPick(Map<String, Agent> agents){
+	public static int getTotalTokPick(Map<String, Agent> agents){
 		Iterator<String> its = agents.keySet().iterator();
 		AgentStat stat = null;
 		int count = 0;
@@ -248,7 +248,7 @@ public class GraphStat extends Statistic {
 	 * @param agents
 	 * @return
 	 */
-	public int getTotalTokDrop(Map<String, Agent> agents){
+	public static int getTotalTokDrop(Map<String, Agent> agents){
 		Iterator<String> its = agents.keySet().iterator();
 		AgentStat stat = null;
 		int count = 0;
@@ -266,7 +266,7 @@ public class GraphStat extends Statistic {
 	 * @param agents
 	 * @return
 	 */
-	public Map<String, Integer> getTotalNodeDrop(Map<String, Agent> agents){
+	public static Map<String, Integer> getTotalNodeDrop(Map<String, Agent> agents){
 		Iterator<String> its = agents.keySet().iterator();		
 		Map<String, Integer> nodes = new HashMap<String, Integer>();
 		Map<String, Integer> tmp = null;
@@ -297,7 +297,7 @@ public class GraphStat extends Statistic {
 	 * @param agents
 	 * @return
 	 */
-	public Map<String, Integer> getTotalNodePick(Map<String, Agent> agents){
+	public static Map<String, Integer> getTotalNodePick(Map<String, Agent> agents){
 		Iterator<String> its = agents.keySet().iterator();	
 		Map<String, Integer> nodes = new HashMap<String, Integer>();
 		Map<String, Integer> tmp = null;
@@ -328,7 +328,7 @@ public class GraphStat extends Statistic {
 	 * @param edge
 	 * @return
 	 */
-	public int getTotalEdgeDelay(Map<String, Edge> edges){
+	public static int getTotalEdgeDelay(Map<String, Edge> edges){
 		Iterator<String> its = edges.keySet().iterator();
 		EdgeStat stat = null;
 		int count = 0;
@@ -346,7 +346,7 @@ public class GraphStat extends Statistic {
 	 * @param edge
 	 * @return
 	 */
-	public int getTotalEnter(Map<String, Edge> edges){
+	public static int getTotalEnter(Map<String, Edge> edges){
 		Iterator<String> its = edges.keySet().iterator();
 		EdgeStat stat = null;
 		int count = 0;
@@ -364,7 +364,7 @@ public class GraphStat extends Statistic {
 	 * @param edge
 	 * @return
 	 */
-	public int getTotalLeave(Map<String, Edge> edges){
+	public static int getTotalLeave(Map<String, Edge> edges){
 		Iterator<String> its = edges.keySet().iterator();
 		EdgeStat stat = null;
 		int count = 0;
@@ -382,7 +382,7 @@ public class GraphStat extends Statistic {
 	 * @param edges
 	 * @return
 	 */
-	public Map<String, Integer> getTotalMsgTypeCount(Map<String, Edge> edges){
+	public static Map<String, Integer> getTotalMsgTypeCount(Map<String, Edge> edges){
 		Iterator<String> its = edges.keySet().iterator();	
 		Map<String, Integer> msgTypes = new HashMap<String, Integer>();
 		Map<String, Integer> tmp = null;

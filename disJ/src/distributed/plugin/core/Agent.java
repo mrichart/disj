@@ -127,16 +127,18 @@ public class Agent implements Serializable{
 	
 	public void addPropertyChangeListener(PropertyChangeListener l) {
 		listeners.addPropertyChangeListener(l);
+		this.stat.addPropertyChangeListener(l);
 	}
 
-	public void removePropertyChangeListener(PropertyChangeListener l) {
-		listeners.removePropertyChangeListener(l);
-	}
-	
 	public void firePropertyChange(String prop, Object old, Object newValue) {
 		listeners.firePropertyChange(prop, old, newValue);
 	}
 
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+		listeners.removePropertyChangeListener(l);
+		this.stat.removePropertyChangeListener(l);
+	}
+	
 	/**
 	 * Set a state-name pairs list of this node
 	 * 

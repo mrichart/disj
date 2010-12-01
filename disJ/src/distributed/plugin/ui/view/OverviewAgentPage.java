@@ -34,10 +34,8 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -46,14 +44,16 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.PlatformUI;
 
 import distributed.plugin.core.Agent;
+import distributed.plugin.core.Graph;
 import distributed.plugin.core.IConstants;
+import distributed.plugin.core.Node;
+import distributed.plugin.stat.GraphStat;
 import distributed.plugin.ui.Activator;
 import distributed.plugin.ui.models.GraphElement;
 
@@ -67,6 +67,7 @@ public class OverviewAgentPage extends DisJViewPage {
 	private CTabItem graphTab;
 	
 	private TableViewer viewer;
+	private Canvas canvas;
 	private Group group;
 	private org.eclipse.swt.widgets.List list;
 	
@@ -77,25 +78,6 @@ public class OverviewAgentPage extends DisJViewPage {
 	private GraphContentProvider prov;
 	private NameSorter sorter;
 	private AgentComparator compare;
-
-	
-	/**
-	 * Note: An image registry owns all of the image objects registered with it,
-	 * and automatically disposes of them the SWT Display is disposed.
-	 * 
-		private static ImageRegistry IMAGE_REGISTRY = new ImageRegistry();
-		private static final String AGENT_GIF 	= "Agent";
-		static {
-			String iconPath = "icons/"; 
-			IMAGE_REGISTRY.put(AGENT_GIF, ImageDescriptor.createFromFile(
-					OverviewAgentPage.class, 
-					iconPath + "agent.png"
-					)
-				);		
-		}
-			//private static final Image IMG_AGENT = GraphEditorPlugin.imageDescriptorFromPlugin(pluginId, imageFilePath)
-	//"icons/agent.png").createImage();
-	*/
 	
 	private static Image IMG_AGENT;
 	private static Image IMG_STAT;
@@ -121,11 +103,8 @@ public class OverviewAgentPage extends DisJViewPage {
 			
 		}
 
-		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {			
-/*			System.out.println("inputChanged: " + newInput);
-			TableViewer table = (TableViewer)viewer;
-			table.add(newInput);
-*/		}
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {	
+		}
 
 		public Object[] getElements(Object inputElement) {
 			System.out.println("getElement() " + inputElement);
@@ -139,7 +118,7 @@ public class OverviewAgentPage extends DisJViewPage {
 			Display display = Display.getCurrent();
 	        Runnable ui = null;
 	        
-	        System.out.println("propertyChange: " + prop);
+	        System.out.println("ContentProvider: PropertyChange: " + prop);
 	        
 	        //this.inputChanged(viewer, evt.getOldValue(), evt.getNewValue());
 			final Object o = evt.getNewValue();
@@ -174,6 +153,14 @@ public class OverviewAgentPage extends DisJViewPage {
 					ui = new Runnable() {
 						public void run() {
 							viewer.update(o, null);
+						}
+					};
+				} 
+			} else if (prop.equals(IConstants.PROPERTY_CHANGE_STATISTIC_NODE)){
+				if (display == null) {
+					ui = new Runnable() {
+						public void run() {
+							canvas.redraw();
 						}
 					};
 				} 
@@ -324,32 +311,48 @@ public class OverviewAgentPage extends DisJViewPage {
 		this.statTab.setText("Statistic View");
 		this.statTab.setImage(IMG_STAT);
 		
-		// set layout
+		// create main composite of the page
 		Composite com = new Composite(this.folder, SWT.NONE);
-		RowLayout rowLayout = new RowLayout();
-		rowLayout.wrap = false;
-		rowLayout.pack = false;
-		com.setLayout(rowLayout);
 		
-		Text tmp = new Text(com, SWT.MULTI);
-		tmp.setText("here the stat");
-		
-		// create canvas and lightweight system
-        final Button cav = new Button(com, SWT.PUSH);
-        cav.setSize(500, 500);
-        cav.addListener(SWT.Paint, new Listener () {
-		public void handleEvent (Event event) {
-			Rectangle rect = cav.getBounds();
-			event.gc.drawOval(0, 0, rect.width - 1, rect.height - 1);
-		}
-	});
-        //LightweightSystem lws = new LightweightSystem(cav); 
-        GC gc = new GC(cav);     
-        gc.drawOval(0, 0, 100, 100);
-		
-		
+		// create canvas
+		canvas = new Canvas(com, SWT.NONE);
+		canvas.setBackground(com.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+	    canvas.setSize(500, 500);  
+        canvas.addListener(SWT.Paint, new Listener () {
+        	public void handleEvent (Event event) {
+        		redrawStatistic(event.gc);		    
+			}
+        });    
         this.statTab.setControl(com);
 		
+	}
+	
+	private void redrawStatistic(GC gc){
+		
+		// read info from model
+		Graph graph = this.contents.getGraph();
+		Map<String, Node> nodes = graph.getNodes();
+		Map<String, Agent> agents = graph.getAgents();
+		GraphStat st = graph.getStat();
+		
+		Map<Integer, Integer> ns = st.getNodeCurStateCount(nodes);
+		gc.setLineWidth(4);
+		int[] tmp = new int[(ns.size()+1)*2];
+		tmp[0] = 0;
+		tmp[1] = 0;
+		Iterator<Integer> it = ns.keySet().iterator();
+		int  k = 2;
+		for(int j = 0; it.hasNext();k += 2){
+			j = ns.get(it.next());			
+			tmp[k] = j*10;
+			tmp[k+1] = k;
+		}
+		gc.drawPolyline(tmp);
+	    //gc.drawRectangle(10, 10, 40, 45);
+	    //gc.drawOval(65, 10, 30, 35);
+	    //gc.drawLine(130, 10, 90, 80);
+	    gc.drawPolygon(new int[] { 20, 70, 45, 90, 70, 70 });
+	    gc.drawPolyline(new int[] { 10, 120, 70, 100, 100, 130, 130, 75 });
 	}
 	
 	private void creatAgentView(){		
