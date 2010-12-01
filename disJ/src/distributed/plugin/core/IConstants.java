@@ -122,6 +122,8 @@ public interface IConstants {
     public static final String PROPERTY_CHANGE_REM_AGENT = "rem_agent";
     public static final String PROPERTY_CHANGE_STATE_AGENT = "agent_state_changed";
     public static final String PROPERTY_CHANGE_LOC_AGENT = "agent_location_changed";
+    
+    public static final String PROPERTY_CHANGE_STATISTIC = "update statistic";
 	
 	
 	
