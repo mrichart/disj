@@ -34,7 +34,7 @@ public class GraphStat extends Statistic {
 	/**
 	 * Get a list of every node and it current state
 	 * 
-	 * @return
+	 * @return a map of state ID and count
 	 */
 	public Map<Integer, Integer> getNodeCurStateCount(Map<String, Node> nodes){
 		int state = 0;
