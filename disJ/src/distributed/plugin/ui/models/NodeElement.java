@@ -126,10 +126,6 @@ public class NodeElement extends AdapterElement {
 
 	transient private Node node;
 
-	//private Node orgNode;
-
-	//private Map<Integer, Object> hmProperties = new HashMap<Integer, Object>();
-
 	/**
 	 * Constructor
 	 */
