@@ -60,6 +60,8 @@ public class Graph implements Serializable {
 	
 	transient private GraphStat stat;
 	
+	transient private Map<Integer, String> stateFields;
+	
 	protected PropertyChangeSupport listeners;
 	
 	public Graph() {
@@ -76,6 +78,7 @@ public class Graph implements Serializable {
 		this.protocol = "";
 		this.modelId = -1;
 		this.maxToken = IConstants.DEFAULT_MAX_NUM_TOKEN;
+        this.stateFields = null;
 		this.stat = new GraphStat(this.graphId);
 		
 		this.listeners = new PropertyChangeSupport(this);
@@ -118,6 +121,14 @@ public class Graph implements Serializable {
 		return stat;
 	}
 
+	public Map<Integer, String> getStateFields(){
+		return this.stateFields;
+	}
+	
+    public void setStateFields(Map<Integer, String> stateFields){
+    	this.stateFields = stateFields;
+    }
+   
 	/**
 	 * Add a link that used in this graph
 	 * 
@@ -436,6 +447,7 @@ public class Graph implements Serializable {
     	 os.defaultReadObject(); 
     	 this.agents = new HashMap<String, Agent>();
     	 this.stat = new GraphStat(this.graphId);
+    	 this.stateFields = null;
      	 this.clientRandom = null;
     }
 

@@ -202,6 +202,7 @@ public class MsgPassingProcessor implements IProcessor {
 		} catch (Exception e){
 			this.systemOut.println(e.toString());
 		}
+		this.graph.setStateFields(this.stateFields);
 	}
 
 	// FIXME need to do something here!!!
@@ -430,11 +431,9 @@ public class MsgPassingProcessor implements IProcessor {
 				try{
 					Thread.sleep(3000);
 				}catch(Exception e){}
-			}
-			
+			}			
 		} catch (Exception e) {
 			e.printStackTrace();
-			this.systemOut.println(e.toString());
 			
 		} finally {
 			

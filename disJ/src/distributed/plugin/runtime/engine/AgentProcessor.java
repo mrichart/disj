@@ -527,11 +527,9 @@ public abstract class AgentProcessor implements IProcessor {
 				try{
 					Thread.sleep(3000);
 				}catch(Exception e){}
-			}
-			
+			}			
 		} catch (Exception e) {
 			e.printStackTrace();
-			this.systemOut.println(e.toString());
 			
 		} finally {
 			

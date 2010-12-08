@@ -85,8 +85,8 @@ public class SimulatorEngine {
      */
     public void execute(Graph graph, Class client, Class<IRandom> clientRandom) {
         try {
-
            this.graphId = graph.getId();
+           
            if(Entity.class.isAssignableFrom(client)){
         	   Class<Entity> c = (Class<Entity>) client;
         	   this.proc = new MsgPassingProcessor(graph, c, clientRandom, this.outLocation);
@@ -120,6 +120,8 @@ public class SimulatorEngine {
     
     public void replay(Graph graph, String fileName){
     	try{
+    		this.graphId = graph.getId();
+    		
 	    	this.proc = new ReplayProcessor(graph, fileName);
 	    	
 	    	// FIXME holder needs to be a pool of processors

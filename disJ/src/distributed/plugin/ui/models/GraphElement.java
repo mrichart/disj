@@ -120,7 +120,7 @@ public class GraphElement extends AdapterElement {
     
     private Graph graph;
 
-    private Map<Short, RGB> stateColors;
+    private Map<Integer, RGB> stateColors;  
     
     private List<NodeElement> nodeElements;
 
@@ -135,7 +135,7 @@ public class GraphElement extends AdapterElement {
     public GraphElement() {
         this.graph = GraphFactory.createGraph();
         this.graphId = "";
-        this.stateColors = new HashMap<Short, RGB>();
+        this.stateColors = new HashMap<Integer, RGB>();
         this.nodeElements = new ArrayList<NodeElement>();
         this.linkElements = new ArrayList<LinkElement> ();
     }
@@ -162,7 +162,7 @@ public class GraphElement extends AdapterElement {
 		}
 //        System.err.println("[GraphElement] setGraphId " + this.graph + " <" + this.graph.getId() + ">");
     }
-    
+  
     public Graph getGraph(){   	
         return this.graph;
     }
@@ -222,11 +222,11 @@ public class GraphElement extends AdapterElement {
         }
     }
     
-    public void addStateColor(Map<Short, RGB> stateMap){
+    public void addStateColor(Map<Integer, RGB> stateMap){
         this.stateColors.putAll(stateMap);		
     }
     
-    public void setStateColor(Map<Short, RGB> stateMap){
+    public void setStateColor(Map<Integer, RGB> stateMap){
        this.stateColors = stateMap;
     }
 
@@ -251,7 +251,7 @@ public class GraphElement extends AdapterElement {
         }
     }
     
-    public void removeStateColor(Short state){      
+    public void removeStateColor(Integer state){      
        this.stateColors.remove(state);
     }
     
@@ -267,11 +267,11 @@ public class GraphElement extends AdapterElement {
         return this.linkElements;
     }
     
-    public Map<Short, RGB> getStateColors(){
+    public Map<Integer, RGB> getStateColors(){
         return this.stateColors;
     }
     
-    public Color getColor(Short state){
+    public Color getColor(Integer state){
         RGB rgb = this.stateColors.get(state);
         if(rgb != null){
             return  new Color(this.shell.getDisplay(), rgb);

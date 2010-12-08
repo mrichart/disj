@@ -433,11 +433,9 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 	public GraphElement getGraphElement() {
 		if(this.graphElement == null){
-			GraphElement e = (GraphElement)this.getContent();
-			return e;
-		}else{
-			return this.graphElement;
-		}		
+			this.graphElement = (GraphElement)this.getContent();
+		}
+		return this.graphElement;	
 	}
 
 	/**

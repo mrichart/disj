@@ -36,21 +36,21 @@ import org.eclipse.swt.widgets.TableItem;
  */
 public class RemoveStatesDialog extends Dialog {
 
-	private Map<Short, RGB> stateColr;
+	private Map<Integer, RGB> stateColr;
 
 	private boolean response;
 	
 	/**
 	 * @param arg0
 	 */
-	public RemoveStatesDialog(Shell arg0, Map<Short, RGB> stateColr) {
+	public RemoveStatesDialog(Shell arg0, Map<Integer, RGB> stateColr) {
 		super(arg0);
 		setText("View/Remove State Dialog");
 		this.stateColr = stateColr;
 		this.response = false;
 	}
 
-	public Map<Short, RGB> open() {
+	public Map<Integer, RGB> open() {
 		final Shell shell = new Shell(getParent(), SWT.DIALOG_TRIM
 				| SWT.APPLICATION_MODAL);
 		shell.setText(getText());
@@ -70,12 +70,12 @@ public class RemoveStatesDialog extends Dialog {
 		colour.setWidth(50);
 		
 		// display existing colors
-		List<Short> temp = new ArrayList<Short>();
-		for (Short state : this.stateColr.keySet()) {
+		List<Integer> temp = new ArrayList<Integer>();
+		for (Integer state : this.stateColr.keySet()) {
 			temp.add(state);
 		}
 		Collections.sort(temp);
-		for (Short num : temp) {
+		for (Integer num : temp) {
 			// FIXME why is 99???? use constant!!
 			if (num != 99) {
 				Color color = new Color(getParent().getDisplay(),

@@ -70,6 +70,7 @@ public class BoardAgentProcessor extends AgentProcessor {
 		} catch (Exception e){
 			this.systemOut.println("@initClientStateVariables() " + e.toString());
 		}
+		this.graph.setStateFields(this.stateFields);
 	}
 	
 	protected AgentModel createClientAgent() throws Exception{

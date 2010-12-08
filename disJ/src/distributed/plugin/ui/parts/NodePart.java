@@ -306,9 +306,8 @@ public class NodePart extends AbstractGraphicalEditPart implements
 	}
 
 	private void refreshStateColor(Integer newState) {
-		Short state = new Short(newState.shortValue());
 		GraphElement g = (GraphElement) this.getGraphicalParent().getModel();
-		Color color = g.getColor(state);		
+		Color color = g.getColor(newState);		
 		this.getNodeFigure().setBackgroundColor(color);
 		this.refreshVisuals();
 	}

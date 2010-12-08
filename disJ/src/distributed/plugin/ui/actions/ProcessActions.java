@@ -285,10 +285,12 @@ public class ProcessActions extends WorkbenchPartAction {
 		dialog.setFilterExtensions(new String[]{"*.rec"});		
 		String fileName = dialog.open();	
 
-		// double check graph instance
-		Graph graph = this.doubleCheck();
-		this.engine.replay(graph, fileName);
-	
+		// validate input
+		if(fileName != null){
+			// double check graph instance
+			Graph graph = this.doubleCheck();
+			this.engine.replay(graph, fileName);
+		}
 	}
 	
 	private void executeSaveRecord(){

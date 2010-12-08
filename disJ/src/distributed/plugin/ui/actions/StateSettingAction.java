@@ -81,7 +81,7 @@ public class StateSettingAction extends WorkbenchPartAction {
     private void executeAddState() {
     	GraphEditor editor = (GraphEditor) getWorkbenchPart();
     	GraphElement ge = editor.getGraphElement();
-    	Map<Short, RGB> stateColr = ge.getStateColors();
+    	Map<Integer, RGB> stateColr = ge.getStateColors();
     	
     	 // display existing colors
         AddStatesDialog dialog = new AddStatesDialog(this.getShell(), stateColr);
@@ -104,7 +104,7 @@ public class StateSettingAction extends WorkbenchPartAction {
     private void executeRemoveStates() {
     	GraphEditor editor = (GraphEditor) getWorkbenchPart();
     	GraphElement ge = editor.getGraphElement();
-    	Map<Short, RGB> stateColr = ge.getStateColors();
+    	Map<Integer, RGB> stateColr = ge.getStateColors();
     	
    	 	// display existing colors
         RemoveStatesDialog dialog = new RemoveStatesDialog(this.getShell(),

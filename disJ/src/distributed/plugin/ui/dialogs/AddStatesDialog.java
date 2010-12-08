@@ -42,21 +42,21 @@ public class AddStatesDialog extends Dialog {
 
 	// a pair of state and color {Short, RGB};
 
-	private Map<Short, RGB> stateColr;
+	private Map<Integer, RGB> stateColr;
 
 	private boolean response;
 
 	/**
 	 * @param arg0
 	 */
-	public AddStatesDialog(Shell arg0, Map<Short, RGB> stateColr) {
+	public AddStatesDialog(Shell arg0, Map<Integer, RGB> stateColr) {
 		super(arg0);
 		setText("Add State Color Dialog");
 		this.response = false;
 		this.stateColr = stateColr;
 	}
 
-	public Map<Short, RGB> open() {
+	public Map<Integer, RGB> open() {
 
 		final Shell shell = new Shell(getParent(), SWT.DIALOG_TRIM
 				| SWT.APPLICATION_MODAL);
@@ -122,12 +122,12 @@ public class AddStatesDialog extends Dialog {
 		colour.setWidth(100);
 
 		// display existing colors
-		List<Short> temp = new ArrayList<Short>();
-		for (Short state : this.stateColr.keySet()) {
+		List<Integer> temp = new ArrayList<Integer>();
+		for (Integer state : this.stateColr.keySet()) {
 			temp.add(state);
 		}
 		Collections.sort(temp);
-		for (Short num : temp) {
+		for (Integer num : temp) {
 			// FIXME why is 99???? use constant!!
 			if (num != 99) {
 				Color color = new Color(getParent().getDisplay(),
@@ -155,7 +155,7 @@ public class AddStatesDialog extends Dialog {
 								color));
 
 				// validate input
-				short state;
+				int state;
 				 String res = validateInput(txtResponse.getText());
                  if(res != null){
                      MessageDialog.openError(getParent(), "Invalid Input",
@@ -170,13 +170,13 @@ public class AddStatesDialog extends Dialog {
 				}
 				
 				// add color and state into table
-				List<Short> temp = new ArrayList<Short>();
-				for (Short s : stateColr.keySet()) {
+				List<Integer> temp = new ArrayList<Integer>();
+				for (Integer s : stateColr.keySet()) {
 					temp.add(s);
 				}
 				Collections.sort(temp);
 				colorTable.removeAll();
-				for (Short num : temp) {
+				for (Integer num : temp) {
 					// FIXME why is 99???? use constant!!
 					if (num != 99) {
 						Color aColor = new Color(getParent().getDisplay(),

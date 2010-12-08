@@ -61,6 +61,7 @@ public class OverviewAgentPage extends DisJViewPage {
 
 	private GraphElement contents;
 	
+	private List<Agent> agents; 
 	private CTabFolder folder;
 	private CTabItem agentTab;
 	private CTabItem statTab;
@@ -108,8 +109,7 @@ public class OverviewAgentPage extends DisJViewPage {
 
 		public Object[] getElements(Object inputElement) {
 			System.out.println("getElement() " + inputElement);
-			Object[] obj = getAgents().toArray();
-			return obj;
+			return agents.toArray();
 			
 		}
 
@@ -118,7 +118,7 @@ public class OverviewAgentPage extends DisJViewPage {
 			Display display = Display.getCurrent();
 	        Runnable ui = null;
 	        
-	        System.out.println("ContentProvider: PropertyChange: " + prop);
+	        //System.out.println("ContentProvider: PropertyChange: " + prop);
 	        
 	        //this.inputChanged(viewer, evt.getOldValue(), evt.getNewValue());
 			final Object o = evt.getNewValue();
@@ -265,10 +265,10 @@ public class OverviewAgentPage extends DisJViewPage {
 			}
 			return rc;
 		}
-
 	}
 
 	public OverviewAgentPage(GraphElement contents){
+		this.agents = new ArrayList<Agent>();
 		this.prov = new GraphContentProvider();
 		this.compare = new AgentComparator();
 		this.setContents(contents);
@@ -279,8 +279,25 @@ public class OverviewAgentPage extends DisJViewPage {
 		this.contents.addPropertyChangeListener(this.prov);
 	}
 
+	private void loadAgents(){
+		Map<String, Agent> maps = this.contents.getGraph().getAgents();
+		if(this.agents.isEmpty()){
+			Iterator<String> it = maps.keySet().iterator();
+			for(String id = null; it.hasNext();){
+				id = it.next();
+				this.agents.add(maps.get(id));
+			}
+		}
+	}
 	private List<Agent> getAgents(){
 		Map<String, Agent> maps = this.contents.getGraph().getAgents();
+		if(this.agents.isEmpty()){
+			Iterator<String> it = maps.keySet().iterator();
+			for(String id = null; it.hasNext();){
+				id = it.next();
+				this.agents.add(maps.get(id));
+			}
+		}
 		List<Agent> list = new ArrayList<Agent>();
 		Iterator<String> it = maps.keySet().iterator();
 		for(String id = null; it.hasNext();){
@@ -334,6 +351,7 @@ public class OverviewAgentPage extends DisJViewPage {
 		Map<String, Node> nodes = graph.getNodes();
 		Map<String, Agent> agents = graph.getAgents();
 		GraphStat st = graph.getStat();
+		Map<Integer, String> states = graph.getStateFields();
 		
 		Map<Integer, Integer> ns = st.getNodeCurStateCount(nodes);
 		gc.setLineWidth(4);

@@ -144,38 +144,50 @@ public class ReplayProcessor implements IProcessor {
 	}
 
 	public void run() {
-		try{
+		boolean ran = false;
+		String gId = this.graph.getId();
+		try{		
+			if(this.fileName == null){
+				// no file selected
+				return;
+			}
+			ran = true;
 			this.systemOut.println("\n Start REPLAY on graph " 
-					+ this.graph.getId());
-			
+					+ gId);
+		
 			this.stop = false;
 			this.executeReplay();
-			
 			this.systemOut.println("\n*****Replay protocol " 
 					+ this.userClassName
-					+ " on graph " + this.graph.getId() 
-					+ " is successfully over.*****");
+					+ " on graph " + gId 
+					+ " is successfully over.*****");			
 			
-		}catch(Exception e){
-			e.printStackTrace();
-			this.systemOut.println(e.toString());
-			
-		}finally{
+
 			// display statistic report
 			this.displayStat();
+		
+			while(stop == false){
+				try{
+					Thread.sleep(3000);
+				}catch(Exception e){}
+			}			
+		}catch(Exception e){
+			e.printStackTrace();			
 			
-			// clean up necessary data
-			this.cleanUp();
-			
-			this.systemOut.println("\n*****Replay on graph " 
-					+ this.graph.getId() 
-					+ " is terminated*****");
+		}finally{
+			if(ran == true){			
+				// clean up necessary data
+				this.cleanUp();
+				
+				this.systemOut.println("\n*****Replay on graph " 
+						+ gId + " is terminated*****");
+			}
 		}	
 	}
 	
 	private void executeReplay() throws Exception {
 		Scanner sc = null;
-		try {
+		try {			
 			sc = new Scanner(new FileReader(this.fileName));
 			String line = null;
 			String[] value = null;
@@ -208,7 +220,8 @@ public class ReplayProcessor implements IProcessor {
 				if(first){
 					// get state list from first line
 					this.stateFields = Logger.readStates(line);
-
+					this.graph.setStateFields(this.stateFields);
+					
 					// init node
 					this.loadNode();				
 					
