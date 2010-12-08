@@ -105,12 +105,15 @@ public class OverviewAgentPage extends DisJViewPage {
 		}
 
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {	
+			//System.out.println("inputchange() old: " + oldInput + " new: " + newInput);
 		}
 
 		public Object[] getElements(Object inputElement) {
-			System.out.println("getElement() " + inputElement);
-			return agents.toArray();
+			//System.out.println("getElement() " + inputElement);
 			
+			// inputElement is array of objects from view
+			
+			return agents.toArray();			
 		}
 
 		public void propertyChange(java.beans.PropertyChangeEvent evt) {
@@ -124,13 +127,16 @@ public class OverviewAgentPage extends DisJViewPage {
 			final Object o = evt.getNewValue();
 			
 			if (prop.equals(IConstants.PROPERTY_CHANGE_ADD_AGENT)) {
-		        if (display == null) {
-					ui = new Runnable() {
-						public void run() {
-							viewer.add(o);
-						}
-					};
-				} 
+				if(o instanceof Agent){
+					agents.add((Agent)o);
+			        if (display == null) {
+						ui = new Runnable() {
+							public void run() {
+								viewer.add(o);
+							}
+						};
+					} 
+				}
 		        
 			} else if (prop.equals(IConstants.PROPERTY_CHANGE_STATE_AGENT)){
 				if (display == null) {
@@ -289,25 +295,6 @@ public class OverviewAgentPage extends DisJViewPage {
 			}
 		}
 	}
-	private List<Agent> getAgents(){
-		Map<String, Agent> maps = this.contents.getGraph().getAgents();
-		if(this.agents.isEmpty()){
-			Iterator<String> it = maps.keySet().iterator();
-			for(String id = null; it.hasNext();){
-				id = it.next();
-				this.agents.add(maps.get(id));
-			}
-		}
-		List<Agent> list = new ArrayList<Agent>();
-		Iterator<String> it = maps.keySet().iterator();
-		for(String id = null; it.hasNext();){
-			id = it.next();
-			list.add(maps.get(id));
-		}
-		System.out.println("@getAgents() Total agent: " + list.size());
-		return list;
-	}
-	
 
 	public void createControl(Composite parent) {		
 		
@@ -315,8 +302,7 @@ public class OverviewAgentPage extends DisJViewPage {
 		this.folder = new CTabFolder(parent, SWT.BORDER);
 		this.creatAgentView();
 		this.createStatView();
-	
-		
+			
 		makeActions();
 		//hookContextMenu();
 		hookDoubleClickAction();
@@ -388,37 +374,31 @@ public class OverviewAgentPage extends DisJViewPage {
 		viewer = new TableViewer(com, SWT.MULTI | SWT.H_SCROLL
 				| SWT.V_SCROLL | SWT.FULL_SELECTION );
 		
-//		GridData gridData = new GridData(GridData.FILL_BOTH);
-//		gridData.grabExcessVerticalSpace = true;
-//		gridData.horizontalSpan = 3;
-//		viewer.setLayoutData(gridData);	
 		
 		this.createColumns();
-		// viewer.setContentProvider(pv);
-		//viewer.setContentProvider(new ArrayContentProvider());
 		
 		viewer.setContentProvider(prov);
 		viewer.setLabelProvider(new ViewLabelProvider());
-		this.sorter = new NameSorter();
-		viewer.setSorter(this.sorter);		
-		//viewer.setInput(this.getAgents());
-		// viewer.setSorter(sorter);
 
+		// upload agents
+		this.loadAgents();
+		viewer.setInput(this.agents);
+
+		this.sorter = new NameSorter();
+		viewer.setSorter(this.sorter);
+			
 		// add text display
-		// Composite c = new Composite(parent, SWT.NONE);
 		group = new Group(com, SWT.SHADOW_ETCHED_IN);
 		group.setText("Agent Suitecase");
 		FillLayout r = new FillLayout(SWT.VERTICAL);
 		group.setLayout(r);
 
-		// label = new Label(group, SWT.NONE);
-		// label.setText("xxxxxxx");
-		// label.setLocation(20,20);
 		list = new org.eclipse.swt.widgets.List(group, SWT.BORDER
 				| SWT.SCROLL_LINE);
 		list.add("info is here");	
 		
 		this.agentTab.setControl(com);
+		
 	}
 
 	// This will create the columns for the table
