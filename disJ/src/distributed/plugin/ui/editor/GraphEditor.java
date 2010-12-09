@@ -115,7 +115,7 @@ import distributed.plugin.ui.models.GraphElement;
 import distributed.plugin.ui.models.GraphElementFactory;
 import distributed.plugin.ui.parts.GraphEditPartFactory;
 import distributed.plugin.ui.view.IDisJViewable;
-import distributed.plugin.ui.view.OverviewAgentPage;
+import distributed.plugin.ui.view.OverviewDisjPage;
 import distributed.plugin.ui.view.OverviewOutlinePage;
 
 /**
@@ -157,7 +157,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 	private OverviewOutlinePage overviewOutlinePage;
 	
-	private OverviewAgentPage agentViewPage;
+	private OverviewDisjPage agentViewPage;
 
 	private List<String> commandStackActionIDs;
 
@@ -1035,9 +1035,9 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		return overviewOutlinePage;
 	}
 
-	private OverviewAgentPage getAgentPage() {
+	private OverviewDisjPage getAgentPage() {
 		if (agentViewPage == null) {
-			agentViewPage = new OverviewAgentPage(this.getGraphElement());
+			agentViewPage = new OverviewDisjPage(this.getGraphElement());
 			//GraphElement ge = this.getGraphElement();
 			//ge.setViewListener(this.agentViewPage);
 		}

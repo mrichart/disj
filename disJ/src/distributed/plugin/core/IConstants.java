@@ -123,6 +123,12 @@ public interface IConstants {
     public static final String PROPERTY_CHANGE_STATE_AGENT = "agent_state_changed";
     public static final String PROPERTY_CHANGE_LOC_AGENT = "agent_location_changed";
     
+    public static final String PROPERTY_CHANGE_AGENT_ARRIVE = "agent_arrived";
+    public static final String PROPERTY_CHANGE_AGENT_LEAVE = "agent_leaved";
+    public static final String PROPERTY_CHANGE_TOKEN_DROP = "agent_drop_token";
+    public static final String PROPERTY_CHANGE_TOKEN_PICK = "agent_pick_token";   
+    public static final String PROPERTY_CHANGE_AGENT_BOARD = "agent_access_board";
+    
     public static final String PROPERTY_CHANGE_STATISTIC_AGENT = "update agent statistic";
     public static final String PROPERTY_CHANGE_STATISTIC_NODE = "update node statistic";
     public static final String PROPERTY_CHANGE_STATISTIC_EDGE = "update edge statistic";

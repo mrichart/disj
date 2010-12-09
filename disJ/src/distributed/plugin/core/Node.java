@@ -739,6 +739,14 @@ public class Node implements Serializable {
 	public int getCurState() {
 		return this.curState;
 	}
+	
+	/**
+	 * Get a current state name
+	 * @return
+	 */
+	public String getCurStateName(){
+		return this.getStateName(this.curState);
+	}
 
 	/**
 	 * Add a new state into the last element of the list

@@ -1,7 +1,5 @@
 package distributed.plugin.ui.view;
 
-import java.beans.PropertyChangeListener;
-
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.jface.util.SafeRunnable;
@@ -165,3 +163,4 @@ public abstract class DisJViewPage extends Page implements IDisJViewable,
 		}
     }
 }
+
