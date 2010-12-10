@@ -45,20 +45,23 @@ public abstract class LinkElement extends AdapterElement {
 	static final long serialVersionUID = IConstants.SERIALIZE_VERSION;
 	
 	private static final String PROPERTY_EDGE_ID = "L00 Edge ID";
-	private static final String PROPERTY_DIRECTION_TYPE = "L01 Type of Direction";   
-	private static final String PROPERTY_START_PORT = "L02 Source Port Name";   
-	private static final String PROPERTY_END_PORT = "L03 Target Port Name";
-	private static final String PROPERTY_MSG_FLOW_TYPE = "L04 Message Flow Type";
-	private static final String PROPERTY_DELAY_TYPE = "L05 Delay Type";   
-	private static final String PROPERTY_DELAY_SEED = "L06 Delay Seed";   
-	private static final String PROPERTY_RELIABLE = "L07 Reliable";   
-	private static final String PROPERTY_PROB_FAILURE = "L08 Probability of Failure";
-	private static final String PROPERTY_TOTAL_MSG = "L09 Total Traffic";
+	private static final String PROPERTY_DIRECTION_TYPE = "L01 Type of Direction"; 
+	private static final String PROPERTY_SOURCE = "L02 Source";
+	private static final String PROPERTY_START_PORT = "L03 Source Port Name"; 
+	private static final String PROPERTY_TARGET = "L04 Target";  
+	private static final String PROPERTY_END_PORT = "L05 Target Port Name";
+	private static final String PROPERTY_MSG_FLOW_TYPE = "L06 Message Flow Type";
+	private static final String PROPERTY_DELAY_TYPE = "L07 Delay Type";   
+	private static final String PROPERTY_DELAY_SEED = "L08 Delay Seed";   
+	private static final String PROPERTY_RELIABLE = "L09 Reliable";   
+	private static final String PROPERTY_PROB_FAILURE = "L10 Probability of Failure";
+	private static final String PROPERTY_TOTAL_MSG = "L11 Total Traffic";
 
 	private static final String[] propertyArray = {PROPERTY_DIRECTION_TYPE, 
 		PROPERTY_START_PORT, PROPERTY_END_PORT, PROPERTY_MSG_FLOW_TYPE, 
 		PROPERTY_DELAY_TYPE, PROPERTY_DELAY_SEED, PROPERTY_RELIABLE,
-		PROPERTY_PROB_FAILURE,PROPERTY_TOTAL_MSG, PROPERTY_EDGE_ID};
+		PROPERTY_PROB_FAILURE,PROPERTY_TOTAL_MSG, PROPERTY_EDGE_ID,
+		PROPERTY_SOURCE, PROPERTY_TARGET};
 
 	private static final int NUM_PROPERTIES = propertyArray.length;
 
@@ -120,6 +123,12 @@ public abstract class LinkElement extends AdapterElement {
 
         descriptors[9] = new PropertyDescriptor(
                 PROPERTY_EDGE_ID, PROPERTY_EDGE_ID);
+        
+        descriptors[10] = new PropertyDescriptor(PROPERTY_SOURCE,
+        		PROPERTY_SOURCE);       
+
+        descriptors[11] = new PropertyDescriptor(PROPERTY_TARGET,
+        		PROPERTY_TARGET);
         
     }
 
@@ -206,11 +215,29 @@ public abstract class LinkElement extends AdapterElement {
         } else if (propName.equals(PROPERTY_DELAY_SEED)) {
             return "" + this.edge.getDelaySeed();
 
-        } else if (propName.equals(PROPERTY_START_PORT)) {
+        } else if (propName.equals(PROPERTY_SOURCE)) {
             Object val = "unknown";
             try {
-                val = this.edge.getStart().getPortLabel(this.edge);
-            } catch (DisJException ignore) {
+                val = this.edge.getStart().getName();
+            } catch (Exception ignore) {
+                System.err.println("[LinkElement].getPropertyValue " + ignore);
+            }
+            return val;
+
+        } else if (propName.equals(PROPERTY_TARGET)) {
+            Object val = "unknown";
+            try {
+                val = this.edge.getEnd().getName();
+            } catch (Exception ignore) {
+                System.err.println("[LinkElement].getPropertyValue " + ignore);
+            }
+            return val;
+
+        }  else if (propName.equals(PROPERTY_START_PORT)) {
+            Object val = "unknown";
+            try {
+                val = this.edge.getStart().getPortLabel(edge);
+            } catch (Exception ignore) {
                 System.err.println("[LinkElement].getPropertyValue " + ignore);
             }
             return val;
@@ -218,8 +245,8 @@ public abstract class LinkElement extends AdapterElement {
         } else if (propName.equals(PROPERTY_END_PORT)) {
             Object val = "unknown";
             try {
-                val = this.edge.getEnd().getPortLabel(this.edge);
-            } catch (DisJException ignore) {
+                val = this.edge.getEnd().getPortLabel(edge);
+            } catch (Exception ignore) {
                 System.err.println("[LinkElement].getPropertyValue " + ignore);
             }
             return val;

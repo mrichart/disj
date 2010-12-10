@@ -36,6 +36,8 @@ public class HyperCube extends AbstractGraph {
     private static final int OUT_GAP = IGraphEditorConstants.NODE_SIZE * 7;
     private static final int INTER_GAP = OUT_GAP + IN_GAP;
 
+    private boolean isOriented;
+    
     private int next1;
     
     private int next2;
@@ -51,6 +53,7 @@ public class HyperCube extends AbstractGraph {
      */
     public HyperCube(GraphElementFactory factory, Shell shell) {
     	super(factory, shell);
+    	this.isOriented = false;
         this.next1 = -1;
         this.next2 = -1;         
     	this.dimension = 0;  	
@@ -78,6 +81,7 @@ public class HyperCube extends AbstractGraph {
 	        this.numLink = (this.numNode * this.dimension) / 2;
 	        this.linkType = dialog.getLinkType();
 	        this.numInit = dialog.getNumInit();
+	        this.isOriented = dialog.isOriented();
         
 	        for (int i = 0; i < this.numNode; i++) {
 	            this.nodes.add(this.factory.createNodeElement());
@@ -311,7 +315,7 @@ public class HyperCube extends AbstractGraph {
     }
     
     private void connect2D(NodeElement[][] pack){
-        for(int i=0; i < pack.length; i++)
+        for(int i=0; i < pack.length; i++){
             for(int j=0; j < pack[i].length-1; j++){
                 LinkElement link = this.nextLink();
                 link.setSource(pack[i][j]);
@@ -319,8 +323,9 @@ public class HyperCube extends AbstractGraph {
                 link.setTarget(pack[i][j + 1]);
                 link.attachTarget();
             }
+        }
         
-        for(int i=0; i < pack.length-1; i++)
+        for(int i=0; i < pack.length-1; i++){
             for(int j=0; j < pack[i].length; j++){
                 LinkElement link = this.nextLink();
                 link.setSource(pack[i][j]);
@@ -328,6 +333,7 @@ public class HyperCube extends AbstractGraph {
                 link.setTarget(pack[i+1][j]);
                 link.attachTarget();
             }  
+        }
     }
     
     private void connect3D(NodeElement[][] out, NodeElement[][] in){

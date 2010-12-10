@@ -17,6 +17,7 @@ import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.swt.widgets.Shell;
 
+import distributed.plugin.core.Node;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.dialogs.MeshDialog;
 import distributed.plugin.ui.models.GraphElementFactory;
@@ -33,6 +34,8 @@ public class Mesh extends AbstractGraph {
 
     private static final int GAP = IGraphEditorConstants.NODE_SIZE * 3;
 
+    private boolean isOriented;
+    
     private int cols;
 
     private int rows;
@@ -45,7 +48,8 @@ public class Mesh extends AbstractGraph {
      * Constructor
      */
     public Mesh(GraphElementFactory factory, Shell shell) {
-    	super(factory, shell);       
+    	super(factory, shell);   
+    	this.isOriented = false;
         this.rows = 0;
         this.cols = 0;
         this.linkType = IGraphEditorConstants.BI;
@@ -73,6 +77,7 @@ public class Mesh extends AbstractGraph {
             this.linkType = dialog.getLinkType();
             this.nodes = new NodeElement[this.rows][this.cols];
             this.numInit = dialog.getNumInit();
+            this.isOriented = dialog.isOriented();
             
 	        for (int i = 0; i < this.rows; i++) {
 	            for (int j = 0; j < this.cols; j++) {
@@ -163,8 +168,21 @@ public class Mesh extends AbstractGraph {
                 LinkElement link = (LinkElement) this.links.get(++count);
                 link.setSource(this.nodes[i][j]);
                 link.attachSource();
+                
                 link.setTarget(this.nodes[i][j + 1]);
                 link.attachTarget();
+                
+                if(this.isOriented){
+                	try{
+    	            	Node s = this.nodes[i][j].getNode();
+    	            	Node t = this.nodes[i][j+1].getNode();
+    	            	s.setPortLable("east", link.getEdge());
+    	            	t.setPortLable("west", link.getEdge());
+    	            	
+                	}catch(Exception e){
+                		System.err.println("@Mesh.setConnections() Cannot do oriented horizontal " + e);
+                	}
+                }
             }
         }
         // last row
@@ -175,6 +193,18 @@ public class Mesh extends AbstractGraph {
                 link.attachSource();
                 link.setTarget(this.nodes[i][j - 1]);
                 link.attachTarget();
+                
+                if(this.isOriented){
+                	try{
+    	            	Node s = this.nodes[i][j].getNode();
+    	            	Node t = this.nodes[i][j-1].getNode();
+    	            	s.setPortLable("west", link.getEdge());
+    	            	t.setPortLable("east", link.getEdge());
+    	            	
+                	}catch(Exception e){
+                		System.err.println("@Mesh.setConnections() Cannot do oriented horizontal " + e);
+                	}
+                }
             }
         }
 
@@ -187,6 +217,18 @@ public class Mesh extends AbstractGraph {
                 link.attachSource();
                 link.setTarget(this.nodes[j - 1][i]);
                 link.attachTarget();
+                
+                if(this.isOriented){
+                	try{
+    	            	Node s = this.nodes[i][j].getNode();
+    	            	Node t = this.nodes[i][j+1].getNode();
+    	            	s.setPortLable("south", link.getEdge());
+    	            	t.setPortLable("north", link.getEdge());
+    	            	
+                	}catch(Exception e){
+                		System.err.println("@Mesh.setConnections() Cannot do oriented vertical " + e);
+                	}
+                }
             }
         }
         for (int i = 1; i < this.cols; i++) {
@@ -196,6 +238,18 @@ public class Mesh extends AbstractGraph {
                 link.attachSource();
                 link.setTarget(this.nodes[j + 1][i]);
                 link.attachTarget();
+                
+                if(this.isOriented){
+                	try{
+    	            	Node s = this.nodes[i][j].getNode();
+    	            	Node t = this.nodes[i][j+1].getNode();
+    	            	s.setPortLable("north", link.getEdge());
+    	            	t.setPortLable("south", link.getEdge());
+    	            	
+                	}catch(Exception e){
+                		System.err.println("@Mesh.setConnections() Cannot do oriented vertical " + e);
+                	}
+                }
             }
         }
 

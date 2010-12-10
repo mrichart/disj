@@ -73,10 +73,10 @@ public interface IGraphEditorConstants {
 	public static final String TORUS_2_DESC = "Draw a Torus network";
 	public static final String RANDOM_STACK = "Random Generic";
 	public static final String RANDOM_STACK_DESC = "Draw random generic graph network";
-	public static final String GENERIC = "Generic";
-	public static final String GENERIC_DESC = "Draw a random network";
-	public static final String GENERIC_C = "Connected";
-	public static final String GENERIC_C_DESC = "Draw a random connected network";
+	public static final String FORREST = "Forrest";
+	public static final String FORREST_DESC = "Draw a random forrest network";
+	public static final String CONNECTED = "Connected";
+	public static final String CONNECTED_DESC = "Draw a random connected network";
 	public static final String SPATIAL = "Spatial";
 	public static final String SPATIAL_DESC = "Draw a random spatial triangulation polygon";
 	

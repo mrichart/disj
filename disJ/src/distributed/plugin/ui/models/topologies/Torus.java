@@ -17,6 +17,7 @@ import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.swt.widgets.Shell;
 
+import distributed.plugin.core.Node;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.dialogs.TorusDialog;
 import distributed.plugin.ui.models.GraphElementFactory;
@@ -33,6 +34,8 @@ public class Torus extends AbstractGraph {
 
     private static final int GAP = IGraphEditorConstants.NODE_SIZE * 3;
 
+    private boolean isOriented;
+    
     private int cols;
 
     private int rows;
@@ -47,7 +50,8 @@ public class Torus extends AbstractGraph {
      * Constructor
      */
     public Torus(GraphElementFactory factory, Shell shell, String type) {
-    	super(factory, shell);       
+    	super(factory, shell); 
+    	this.isOriented = false;
         this.type = type;
         this.rows = 0;
         this.cols = 0;
@@ -180,6 +184,18 @@ public class Torus extends AbstractGraph {
                 link.attachSource();
                 link.setTarget(this.nodes[i][(j + 1)%this.cols]);
                 link.attachTarget();
+                
+                if(this.isOriented){
+                	try{
+    	            	Node s = this.nodes[i][j].getNode();
+    	            	Node t = this.nodes[i][j+1].getNode();
+    	            	s.setPortLable("east", link.getEdge());
+    	            	t.setPortLable("west", link.getEdge());
+    	            	
+                	}catch(Exception e){
+                		System.err.println("@Torus.setConnections() Cannot do oriented horizontal " + e);
+                	}
+                }
             }
         }
 
@@ -191,6 +207,18 @@ public class Torus extends AbstractGraph {
                 link.attachSource();
                 link.setTarget(this.nodes[(j + 1)%this.rows][i]);
                 link.attachTarget();
+                
+                if(this.isOriented){
+                	try{
+    	            	Node s = this.nodes[i][j].getNode();
+    	            	Node t = this.nodes[i][j+1].getNode();
+    	            	s.setPortLable("south", link.getEdge());
+    	            	t.setPortLable("north", link.getEdge());
+    	            	
+                	}catch(Exception e){
+                		System.err.println("@Torus.setConnections() Cannot do oriented vertical " + e);
+                	}
+                }
             }
         }
     }

@@ -33,6 +33,7 @@ import distributed.plugin.ui.IGraphEditorConstants;
 public class HyperCubeDialog extends Dialog {
 
 	private boolean cancel;
+	private boolean isOriented;
     private int dimension;
     private int numInit;
     private String linkType;
@@ -44,6 +45,7 @@ public class HyperCubeDialog extends Dialog {
         super(arg0);
         setText("HyperCube Dialog");
         this.cancel = true;
+        this.isOriented = false;
         this.dimension = 0;
         this.numInit = 0;
         this.linkType = null;
@@ -88,6 +90,13 @@ public class HyperCubeDialog extends Dialog {
         type.setLocation(130, 70);
         type.setSize(160, 25);
         
+        // orientation type
+        final Button box = new Button(shell, SWT.CHECK);
+        box.setText(" Oriented");
+        box.setSelection(true);
+        box.setLocation(25, 100);
+        box.setSize(160, 25);
+       
         // final button
         final Button btnOkay = new Button(shell, SWT.PUSH);
         btnOkay.setText("Ok");
@@ -125,6 +134,7 @@ public class HyperCubeDialog extends Dialog {
                     }                                  
                     
                     linkType = type.getText();
+                    isOriented = box.getSelection();
                     cancel = false;
                 } 
                 shell.close();
@@ -168,6 +178,9 @@ public class HyperCubeDialog extends Dialog {
             return "Input must be an integer number";
         }
         
+    }
+    public boolean isOriented(){
+        return this.isOriented;
     }
     
     public String getLinkType() {

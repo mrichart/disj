@@ -33,6 +33,7 @@ import distributed.plugin.ui.IGraphEditorConstants;
 public class RingDialog extends Dialog {
 
 	private boolean cancel;
+	private boolean isOriented;
     private int numNode;
     private int numInit;
     private String linkType;
@@ -43,6 +44,7 @@ public class RingDialog extends Dialog {
     public RingDialog(Shell arg0) {
         super(arg0);
         setText("Ring Dialog");
+        this.isOriented = true;
         this.cancel = true;
         this.numNode = 0;
         this.numInit = 0;
@@ -88,15 +90,23 @@ public class RingDialog extends Dialog {
         type.setLocation(130, 70);
         type.setSize(160, 25);
         
+        // orientation type
+        final Button box = new Button(shell, SWT.CHECK);
+        box.setText(" Oriented");
+        box.setSelection(true);
+        box.setLocation(25, 100);
+        box.setSize(160, 25);
+
+        
         // final button
         final Button btnOkay = new Button(shell, SWT.PUSH);
         btnOkay.setText("Ok");
-        btnOkay.setLocation(40, 120);
+        btnOkay.setLocation(40, 130);
         btnOkay.setSize(100, 30);
 
         final Button btnCancel = new Button(shell, SWT.PUSH);
         btnCancel.setText("Cancel");
-        btnCancel.setLocation(160, 120);
+        btnCancel.setLocation(160, 130);
         btnCancel.setSize(100, 30);
         btnCancel.setSelection(true);
         
@@ -125,6 +135,7 @@ public class RingDialog extends Dialog {
                     }                                  
                     
                     linkType = type.getText();
+                    isOriented = box.getSelection();
                     cancel = false;
                 }                
                 shell.close();
@@ -179,6 +190,10 @@ public class RingDialog extends Dialog {
    
     public boolean isCancel(){
     	return this.cancel;
+    }
+    
+    public boolean isOriented(){
+        return this.isOriented;
     }
     
 }

@@ -878,8 +878,8 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 				IGraphEditorConstants.RANDOM_STACK_DESC, null);
 		
 		combined = new CombinedTemplateCreationEntry(
-				IGraphEditorConstants.GENERIC_C,
-				IGraphEditorConstants.GENERIC_C_DESC,
+				IGraphEditorConstants.CONNECTED,
+				IGraphEditorConstants.CONNECTED_DESC,
 				IGraphEditorConstants.TEMPLATE_CONNECTED, this
 						.getFactory(IGraphEditorConstants.TEMPLATE_CONNECTED),
 						ImageDescriptor.createFromURL(imageUrl), //$NON-NLS-1$
@@ -893,8 +893,8 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 			e.printStackTrace();
 		}
 		combined = new CombinedTemplateCreationEntry(
-				IGraphEditorConstants.GENERIC,
-				IGraphEditorConstants.GENERIC_DESC,
+				IGraphEditorConstants.FORREST,
+				IGraphEditorConstants.FORREST_DESC,
 				IGraphEditorConstants.TEMPLATE_GENERIC, this
 						.getFactory(IGraphEditorConstants.TEMPLATE_GENERIC),
 						ImageDescriptor.createFromURL(imageUrl), //$NON-NLS-1$

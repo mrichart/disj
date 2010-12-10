@@ -33,6 +33,7 @@ import distributed.plugin.ui.IGraphEditorConstants;
 public class MeshDialog extends Dialog {
 
 	private boolean cancel;	
+	private boolean isOriented;
     private int numRows;
     private int numCols;
     private int numInit;
@@ -45,6 +46,7 @@ public class MeshDialog extends Dialog {
         super(arg0);
         setText("Mesh Dialog");
         this.cancel = true;
+        this.isOriented = false;
         this.numRows = 0;
         this.numCols = 0;
         this.linkType = null;
@@ -99,15 +101,22 @@ public class MeshDialog extends Dialog {
         type.setLocation(130, 100);
         type.setSize(150, 25);
 
+        // orientation type
+        final Button box = new Button(shell, SWT.CHECK);
+        box.setText(" Oriented");
+        box.setSelection(true);
+        box.setLocation(25, 130);
+        box.setSize(160, 25);
+        
         // final button
         final Button btnOkay = new Button(shell, SWT.PUSH);
         btnOkay.setText("Ok");
-        btnOkay.setLocation(40, 140);
+        btnOkay.setLocation(40, 160);
         btnOkay.setSize(100, 30);
 
         final Button btnCancel = new Button(shell, SWT.PUSH);
         btnCancel.setText("Cancel");
-        btnCancel.setLocation(160, 140);
+        btnCancel.setLocation(160, 160);
         btnCancel.setSize(100, 30);
         btnCancel.setSelection(true);
 
@@ -146,6 +155,7 @@ public class MeshDialog extends Dialog {
                     }   
                     
                     linkType = type.getText();
+                    isOriented = box.getSelection();
                     cancel = false;
                 }
                 shell.close();
@@ -219,6 +229,9 @@ public class MeshDialog extends Dialog {
     
     public boolean isCancel(){
     	return this.cancel;
+    }
+    public boolean isOriented(){
+        return this.isOriented;
     }
     
 }

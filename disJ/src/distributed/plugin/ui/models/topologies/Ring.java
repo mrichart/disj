@@ -14,6 +14,7 @@ import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.swt.widgets.Shell;
 
+import distributed.plugin.core.Node;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.dialogs.RingDialog;
 import distributed.plugin.ui.models.GraphElementFactory;
@@ -35,12 +36,15 @@ public class Ring extends AbstractGraph {
     private int radius;
 
     private String linkType;
+    
+    private boolean isOriented;
 
     /**
      * Constructor;
      */
     public Ring(GraphElementFactory factory, Shell shell) {
-    	super(factory, shell);      
+    	super(factory, shell);
+    	this.isOriented = false;
         this.radius = 0;
         this.linkType = IGraphEditorConstants.BI;      
       
@@ -68,6 +72,7 @@ public class Ring extends AbstractGraph {
 	        this.numNode = dialog.getNumNode();
 	        this.linkType = dialog.getLinkType();
 	        this.numInit = dialog.getNumInit();
+	        this.isOriented = dialog.isOriented();
 	        this.radius = this.calculateRadius(this.numNode);
 	        
 	        // Ring: num of link == num of node
@@ -134,11 +139,23 @@ public class Ring extends AbstractGraph {
             NodeElement source = (NodeElement)this.nodes.get(i);
             
             link.setSource(source);
-            link.attachSource();
+            link.attachSource();          
             
             NodeElement target = (NodeElement)this.nodes.get((i+1)%this.nodes.size());
             link.setTarget(target);
             link.attachTarget();
+            
+            if(this.isOriented){
+            	try{
+	            	Node s = source.getNode();
+	            	Node t = target.getNode();
+	            	s.setPortLable("right", link.getEdge());
+	            	t.setPortLable("left", link.getEdge());
+	            	
+            	}catch(Exception e){
+            		System.err.println("@Ring.setConnections() Cannot do oriented " + e);
+            	}
+            }            
         }
     }
 

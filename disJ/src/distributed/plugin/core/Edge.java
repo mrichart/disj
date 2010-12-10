@@ -315,7 +315,7 @@ public class Edge implements Serializable {
 	public Node getStart() {
 		return start;
 	}
-
+	
 	/**
 	 * @return Returns the numMsg.
 	 */
