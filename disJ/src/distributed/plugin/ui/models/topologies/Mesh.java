@@ -220,10 +220,10 @@ public class Mesh extends AbstractGraph {
                 
                 if(this.isOriented){
                 	try{
-    	            	Node s = this.nodes[i][j].getNode();
-    	            	Node t = this.nodes[i][j+1].getNode();
-    	            	s.setPortLable("south", link.getEdge());
-    	            	t.setPortLable("north", link.getEdge());
+    	            	Node s = this.nodes[j][i].getNode();
+    	            	Node t = this.nodes[j-1][i].getNode();
+    	            	s.setPortLable("north", link.getEdge());
+    	            	t.setPortLable("south", link.getEdge());
     	            	
                 	}catch(Exception e){
                 		System.err.println("@Mesh.setConnections() Cannot do oriented vertical " + e);
@@ -241,10 +241,10 @@ public class Mesh extends AbstractGraph {
                 
                 if(this.isOriented){
                 	try{
-    	            	Node s = this.nodes[i][j].getNode();
-    	            	Node t = this.nodes[i][j+1].getNode();
-    	            	s.setPortLable("north", link.getEdge());
-    	            	t.setPortLable("south", link.getEdge());
+    	            	Node s = this.nodes[j][i].getNode();
+    	            	Node t = this.nodes[j+1][i].getNode();
+    	            	s.setPortLable("south", link.getEdge());
+    	            	t.setPortLable("north", link.getEdge());
     	            	
                 	}catch(Exception e){
                 		System.err.println("@Mesh.setConnections() Cannot do oriented vertical " + e);

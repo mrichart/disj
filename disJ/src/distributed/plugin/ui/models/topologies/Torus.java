@@ -79,17 +79,18 @@ public class Torus extends AbstractGraph {
 			this.cols = dialog.getNumCols();
 			this.linkType = dialog.getLinkType();
 			this.numInit = dialog.getNumInit();
+			this.isOriented = dialog.isOriented();
 			this.nodes = new NodeElement[this.rows][this.cols];
-			
+						
 			for (int i = 0; i < this.rows; i++) {
-				for (int j = 0; j < this.cols; j++) {
-					this.nodes[i][j] = this.factory.createNodeElement();
+				for (int k = 0; k < this.cols; k++) {
+					this.nodes[i][k] = this.factory.createNodeElement();
 				}
 			}
 
 			// links for horizontal directions
 			for (int i = 0; i < this.rows; i++) {
-				for (int j = 0; j < this.cols; j++) {
+				for (int k = 0; k < this.cols; k++) {
 					LinkElement link;
 					if (this.linkType.equals(IGraphEditorConstants.UNI))
 						link = this.factory.createUniLinkElement();
@@ -130,8 +131,8 @@ public class Torus extends AbstractGraph {
     public List<NodeElement> getAllNodes() {
         List<NodeElement> tmp = new ArrayList<NodeElement>();
         for (int i = 0; i < this.rows; i++) {
-            for (int j = 0; j < this.cols; j++) {
-                tmp.add(this.nodes[i][j]);
+            for (int k = 0; k < this.cols; k++) {
+                tmp.add(this.nodes[i][k]);
             }
         }
         return tmp;
@@ -151,10 +152,10 @@ public class Torus extends AbstractGraph {
         int x = point.x;
         int y = point.y;
         for (int i = 0; i < this.rows; i++) {
-            for (int j = 0; j < this.cols; j++) {
-                Point p = new Point(x + (j * GAP), y + (i * GAP));
-                this.nodes[i][j].setLocation(p);
-                this.nodes[i][j].setSize(new Dimension(
+            for (int k = 0; k < this.cols; k++) {
+                Point p = new Point(x + (k * GAP), y + (i * GAP));
+                this.nodes[i][k].setLocation(p);
+                this.nodes[i][k].setSize(new Dimension(
                         IGraphEditorConstants.NODE_SIZE,
                         IGraphEditorConstants.NODE_SIZE));
             }
@@ -176,24 +177,24 @@ public class Torus extends AbstractGraph {
     
     private void connectType1(){
         int count = -1;
-        // horizental connections
+        // horizontal connections
         for (int i = 0; i < this.rows; i++) {
-            for (int j = 0; j < this.cols; j++) {
+            for (int k = 0; k < this.cols; k++) {
                 LinkElement link = (LinkElement) this.links.get(++count);
-                link.setSource(this.nodes[i][j]);
+                link.setSource(this.nodes[i][k]);
                 link.attachSource();
-                link.setTarget(this.nodes[i][(j + 1)%this.cols]);
+                link.setTarget(this.nodes[i][(k + 1)%this.cols]);
                 link.attachTarget();
                 
                 if(this.isOriented){
                 	try{
-    	            	Node s = this.nodes[i][j].getNode();
-    	            	Node t = this.nodes[i][j+1].getNode();
+    	            	Node s = this.nodes[i][k].getNode();
+    	            	Node t = this.nodes[i][(k + 1)%this.cols].getNode();
     	            	s.setPortLable("east", link.getEdge());
     	            	t.setPortLable("west", link.getEdge());
     	            	
                 	}catch(Exception e){
-                		System.err.println("@Torus.setConnections() Cannot do oriented horizontal " + e);
+                		System.err.println("@Torus.setConnections1() Cannot do oriented horizontal " + e);
                 	}
                 }
             }
@@ -201,22 +202,22 @@ public class Torus extends AbstractGraph {
 
         // vertical connections
         for (int i = 0; i < this.cols; i++) {
-            for (int j = 0; j < this.rows; j++) {
+            for (int k = 0; k < this.rows; k++) {
                 LinkElement link = (LinkElement) this.links.get(++count);
-                link.setSource(this.nodes[j][i]);
+                link.setSource(this.nodes[k][i]);
                 link.attachSource();
-                link.setTarget(this.nodes[(j + 1)%this.rows][i]);
+                link.setTarget(this.nodes[(k + 1)%this.rows][i]);
                 link.attachTarget();
                 
                 if(this.isOriented){
                 	try{
-    	            	Node s = this.nodes[i][j].getNode();
-    	            	Node t = this.nodes[i][j+1].getNode();
-    	            	s.setPortLable("south", link.getEdge());
-    	            	t.setPortLable("north", link.getEdge());
+    	            	Node s = this.nodes[k][i].getNode();
+    	            	Node t = this.nodes[(k + 1)%this.rows][i].getNode();
+    	            	s.setPortLable("north", link.getEdge());
+    	            	t.setPortLable("south", link.getEdge());
     	            	
                 	}catch(Exception e){
-                		System.err.println("@Torus.setConnections() Cannot do oriented vertical " + e);
+                		System.err.println("@Torus.setConnections1() Cannot do oriented vertical " + e);
                 	}
                 }
             }
@@ -225,35 +226,72 @@ public class Torus extends AbstractGraph {
 
     private void connectType2(){
         int count = -1;
-        // horizental connections
+        // horizontal connections
         for (int i = 0; i < this.rows; i++) {
-            for (int j = 0; j < this.cols; j++) {
+            for (int k = 0; k < this.cols; k++) {
                 LinkElement link = (LinkElement) this.links.get(++count);
-                link.setSource(this.nodes[i][j]);
+                link.setSource(this.nodes[i][k]);
                 link.attachSource();
-                if(j == this.cols-1)
+                if(k == this.cols-1){
                     link.setTarget(this.nodes[(i+1)%this.rows][0]);
-                else
-                    link.setTarget(this.nodes[i][j + 1]);
+                }else{
+                    link.setTarget(this.nodes[i][k + 1]);
+                }
                 link.attachTarget();
+                
+                if(this.isOriented){
+                	try{
+    	            	Node s = this.nodes[i][k].getNode();
+    	            	Node t = null;
+    	            	if(k == this.cols-1){
+    	            		t = this.nodes[(i+1)%this.rows][0].getNode();
+    	            	}else{
+    	            		t = this.nodes[i][k+1].getNode();
+    	            	}
+    	            	s.setPortLable("east", link.getEdge());
+    	            	t.setPortLable("west", link.getEdge());
+    	            	
+                	}catch(Exception e){
+                		System.err.println("@Torus.setConnections2() Cannot do oriented horizontal " + e);
+                	}
+                }
             }
         }
 
         // vertical connections
         for (int i = 0; i < this.cols; i++) {
-            for (int j = 0; j < this.rows; j++) {
+            for (int k = 0; k < this.rows; k++) {
                 // ignore a repeated link at a bottom end 
-                if(i == this.cols-1 && j == this.rows -1)
+                if(i == this.cols-1 && k == this.rows -1){
                     break;
+                }
                 
                 LinkElement link = (LinkElement) this.links.get(++count);
-                link.setSource(this.nodes[j][i]);
+                link.setSource(this.nodes[k][i]);
                 link.attachSource();
-                if(j == this.rows -1)
+                if(k == this.rows -1){
                     link.setTarget(this.nodes[0][(i+1)%this.cols]);
-                else
-                    link.setTarget(this.nodes[(j + 1)%this.rows][i]);
+                }else{
+                    link.setTarget(this.nodes[(k + 1)%this.rows][i]);
+                }
                 link.attachTarget();
+                
+                if(this.isOriented){
+                	try{
+    	            	Node s = this.nodes[k][i].getNode();
+    	            	Node t = null;
+    	            	if(k == this.rows -1){
+    	            		t = this.nodes[0][(i+1)%this.cols].getNode();
+    	            	}else{
+    	            		t = this.nodes[(k + 1)%this.rows][i].getNode();
+    	            	}
+    	            	s.setPortLable("south", link.getEdge());
+    	            	t.setPortLable("north", link.getEdge());
+    	            	
+                	}catch(Exception e){
+                		System.err.println("@Torus.setConnections2() Cannot do oriented vertical " + e);
+                	}
+                }
             }
         }
     }

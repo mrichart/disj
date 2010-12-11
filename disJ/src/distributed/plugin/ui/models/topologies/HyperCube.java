@@ -17,6 +17,7 @@ import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.swt.widgets.Shell;
 
+import distributed.plugin.core.Node;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.dialogs.HyperCubeDialog;
 import distributed.plugin.ui.models.GraphElementFactory;
@@ -145,9 +146,9 @@ public class HyperCube extends AbstractGraph {
     private NodeElement[][] get2DPack() {
         NodeElement[][] pack = new NodeElement[2][2];
         for (int i = 0; i < pack.length; i++)
-            for (int j = 0; j < pack[i].length; j++) {
-                pack[i][j] = this.nextNode();
-                pack[i][j].setSize(new Dimension(
+            for (int k = 0; k < pack[i].length; k++) {
+                pack[i][k] = this.nextNode();
+                pack[i][k].setSize(new Dimension(
                         IGraphEditorConstants.NODE_SIZE,
                         IGraphEditorConstants.NODE_SIZE));
             }
@@ -156,9 +157,9 @@ public class HyperCube extends AbstractGraph {
 
     private void draw2Dimension(Point point, int gap, NodeElement[][] pack) {
         for (int i = 0; i < pack.length; i++)
-            for (int j = 0; j < pack[i].length; j++) {
-                Point p = new Point(point.x + (i * gap), point.y + (j * gap));
-                pack[i][j].setLocation(p);
+            for (int k = 0; k < pack[i].length; k++) {
+                Point p = new Point(point.x + (i * gap), point.y + (k * gap));
+                pack[i][k].setLocation(p);
             }
     }
 
@@ -188,6 +189,7 @@ public class HyperCube extends AbstractGraph {
         this.draw4Dimension(p);
     }
 
+    // FIXME the gap is wrong (probably)
     private void draw6Dimension(Point point) {
         this.draw5Dimension(point);
 
@@ -236,7 +238,7 @@ public class HyperCube extends AbstractGraph {
         NodeElement[][] in2  = this.packs3D.get(i3);
         this.connect3D(out2, in2);  
         
-        this.connecXD(out1, in1, out2, in2);
+        this.connecXD(4, out1, in1, out2, in2);
         
         List<NodeElement[][]> list = new ArrayList<NodeElement[][]>();
         list.add(out1);
@@ -259,8 +261,8 @@ public class HyperCube extends AbstractGraph {
         NodeElement[][] out4 = part2.get(2);
         NodeElement[][] in4 = part2.get(3);
         
-        this.connecXD(out1,in1, out3, in3);
-        this.connecXD(out2, in2, out4, in4);
+        this.connecXD(5, out1,in1, out3, in3);
+        this.connecXD(5, out2, in2, out4, in4);
         
         List<NodeElement[][]> list = new ArrayList<NodeElement[][]>();
         list.add(out1);
@@ -296,10 +298,10 @@ public class HyperCube extends AbstractGraph {
         NodeElement[][] out8 = part2.get(6);
         NodeElement[][] in8 = part2.get(7);
         
-        this.connecXD(out1,in1, out5, in5);
-        this.connecXD(out2, in2, out6, in6);
-        this.connecXD(out3,in3, out7, in7);
-        this.connecXD(out4, in4, out8, in8);
+        this.connecXD(6, out1, in1, out5, in5);
+        this.connecXD(6, out2, in2, out6, in6);
+        this.connecXD(6, out3, in3, out7, in7);
+        this.connecXD(6, out4, in4, out8, in8);
         
         List<NodeElement[][]> list = new ArrayList<NodeElement[][]>();
         list.add(out1);
@@ -310,28 +312,60 @@ public class HyperCube extends AbstractGraph {
         list.add(in3);
         list.add(out4);
         list.add(in4);
+        list.add(out5);
+        list.add(in5);
+        list.add(out6);
+        list.add(in6);
+        list.add(out7);
+        list.add(in7);
+        list.add(out8);
+        list.add(in8);
         
         return list;       
     }
     
     private void connect2D(NodeElement[][] pack){
         for(int i=0; i < pack.length; i++){
-            for(int j=0; j < pack[i].length-1; j++){
+            for(int k=0; k < pack[i].length-1; k++){
                 LinkElement link = this.nextLink();
-                link.setSource(pack[i][j]);
+                link.setSource(pack[i][k]);
                 link.attachSource();
-                link.setTarget(pack[i][j + 1]);
+                link.setTarget(pack[i][k + 1]);
                 link.attachTarget();
+                
+                if(this.isOriented){
+                	try{
+    	            	Node s = pack[i][k].getNode();
+    	            	Node t = pack[i][k+1].getNode();
+    	            	s.setPortLable("d1", link.getEdge());
+    	            	t.setPortLable("d1", link.getEdge());
+    	            	
+                	}catch(Exception e){
+                		System.err.println("@Hypercube.setConnections() Cannot do oriented " + e);
+                	}
+                }   
             }
         }
         
         for(int i=0; i < pack.length-1; i++){
-            for(int j=0; j < pack[i].length; j++){
+            for(int k=0; k < pack[i].length; k++){
                 LinkElement link = this.nextLink();
-                link.setSource(pack[i][j]);
+                link.setSource(pack[i][k]);
                 link.attachSource();
-                link.setTarget(pack[i+1][j]);
+                link.setTarget(pack[i+1][k]);
                 link.attachTarget();
+                
+                if(this.isOriented){
+                	try{
+    	            	Node s = pack[i][k].getNode();
+    	            	Node t = pack[i+1][k].getNode();
+    	            	s.setPortLable("d2", link.getEdge());
+    	            	t.setPortLable("d2", link.getEdge());
+    	            	
+                	}catch(Exception e){
+                		System.err.println("@Hypercube.setConnections2() Cannot do oriented " + e);
+                	}
+                }
             }  
         }
     }
@@ -341,32 +375,70 @@ public class HyperCube extends AbstractGraph {
         this.connect2D(in);
         
         for(int i=0; i < out.length; i++)
-            for(int j =0; j < out[i].length; j++){
+            for(int k =0; k < out[i].length; k++){
                 LinkElement link = this.nextLink();
-                link.setSource(out[i][j]);
+                link.setSource(out[i][k]);
                 link.attachSource();
-                link.setTarget(in[i][j]);
+                link.setTarget(in[i][k]);
                 link.attachTarget();
+                
+                if(this.isOriented){
+                	try{
+    	            	Node s = out[i][k].getNode();
+    	            	Node t = in[i][k].getNode();
+    	            	s.setPortLable("d3", link.getEdge());
+    	            	t.setPortLable("d3", link.getEdge());
+    	            	
+                	}catch(Exception e){
+                		System.err.println("@Hypercube.setConnections3() Cannot do oriented " + e);
+                	}
+                }
             }
     }
     
-    private void connecXD(NodeElement[][] out1, NodeElement[][] in1, NodeElement[][] out2, NodeElement[][] in2){
+    private void connecXD(int dimention, NodeElement[][] out1, NodeElement[][] in1, 
+    		NodeElement[][] out2, NodeElement[][] in2){
+    	String dim = "d"+dimention;
         for(int i=0; i < out1.length; i++)
-            for(int j =0; j < out1[i].length; j++){
+            for(int k =0; k < out1[i].length; k++){
                 LinkElement link = this.nextLink();
-                link.setSource(out1[i][j]);
+                link.setSource(out1[i][k]);
                 link.attachSource();
-                link.setTarget(out2[i][j]);
+                link.setTarget(out2[i][k]);
                 link.attachTarget();
+                
+                if(this.isOriented){
+                	try{
+    	            	Node s = out1[i][k].getNode();
+    	            	Node t = out2[i][k].getNode();
+    	            	s.setPortLable(dim, link.getEdge());
+    	            	t.setPortLable(dim, link.getEdge());
+    	            	
+                	}catch(Exception e){
+                		System.err.println("@Hypercube.setConnections4() Cannot do oriented " + e);
+                	}
+                }
             }
         
         for(int i=0; i < in1.length; i++)
-            for(int j =0; j < in1[i].length; j++){
+            for(int k =0; k < in1[i].length; k++){
                 LinkElement link = this.nextLink();
-                link.setSource(in1[i][j]);
+                link.setSource(in1[i][k]);
                 link.attachSource();
-                link.setTarget(in2[i][j]);
+                link.setTarget(in2[i][k]);
                 link.attachTarget();
+                
+                if(this.isOriented){
+                	try{
+    	            	Node s = in1[i][k].getNode();
+    	            	Node t = in2[i][k].getNode();
+    	            	s.setPortLable(dim, link.getEdge());
+    	            	t.setPortLable(dim, link.getEdge());
+    	            	
+                	}catch(Exception e){
+                		System.err.println("@Hypercube.setConnections4() Cannot do oriented " + e);
+                	}
+                }
             }
     }
 
