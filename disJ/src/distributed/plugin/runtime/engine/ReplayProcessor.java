@@ -402,9 +402,11 @@ public class ReplayProcessor implements IProcessor {
 			
 		} else if (tag == logTag.AGENT_READ_TO_BOARD){
 			String nodeId = value[3];
+			Node node = this.nodes.get(nodeId);
 			
 			// update statistic
 			agent.getStat().incRead();
+			node.getStat().incNumBoardRead();
 			
 		} else if (tag == logTag.AGENT_WRITE_TO_BOARD){
 			String nodeId = value[3];
@@ -416,6 +418,7 @@ public class ReplayProcessor implements IProcessor {
 			
 			// update statistic
 			agent.getStat().incWrite();
+			node.getStat().incNumBoardWrite();
 			
 		} else if (tag == logTag.AGENT_DELETE_FROM_BOARD){
 			String nodeId = value[3];
@@ -427,6 +430,7 @@ public class ReplayProcessor implements IProcessor {
 			
 			// update statistic
 			agent.getStat().incDelete();
+			node.getStat().incNumBoardDel();
 			
 		} else if (tag == logTag.AGENT_DROP_TOKEN){
 			String nodeId = value[3];
@@ -488,133 +492,177 @@ public class ReplayProcessor implements IProcessor {
 		GraphStat gStat = this.graph.getStat();
 				
 		if(this.modelType == logTag.MODEL_MSG_PASS){
-			Map<String, Node> nodes = this.graph.getNodes();
-			Map<String, Edge> edges = this.graph.getEdges();
-			
-			int totalRecv = gStat.getTotalMsgRecv(nodes);
-			int totalSent = gStat.getTotalMsgSent(nodes);
-			int totalEnter = gStat.getTotalEnter(edges);
-			int totalLeave = gStat.getTotalLeave(edges);
-			int timeUse = gStat.getTotalEdgeDelay(edges);
-			
-			Map<Integer, Integer> nodeState = gStat.getNodeCurStateCount(nodes);
-			Map<String, Integer> msgTypes = gStat.getTotalMsgTypeCount(edges);
-			
-			System.out.println("************** STATISTIC REPORT **************");
-			System.out.println("Total Message has been sent: " + totalSent);
-			System.out.println("Total Message has been received: " + totalRecv);
-			System.out.println("Total Message has entered link: " + totalEnter);
-			System.out.println("Total Message has leaved link: " + totalLeave);
-			System.out.println("Total Dealy time has been accumulated: " + timeUse);
-			
-			System.out.println();
-			Iterator<Integer> its = nodeState.keySet().iterator();
-			int count = 0;
-			for(int stateId = 0; its.hasNext();){
-				stateId = its.next();
-				count = nodeState.get(stateId);
-				System.out.println("Stat " + this.stateFields.get(stateId) + " has " + count);
-			}
-			
-			System.out.println();
-			Iterator<String> it = msgTypes.keySet().iterator();
-			count = 0;
-			for(String type = null; it.hasNext();){
-				type = it.next();
-				count = msgTypes.get(type);
-				System.out.println("Message " + type + " has been created " + count);
-			}			
+			this.displayMsgPassingStat(gStat);			
 		} else if (this.modelType == logTag.MODEL_AGENT_BOARD){
-			Map<String, Agent> agents = this.graph.getAgents();
-			Map<String, Edge> edges = this.graph.getEdges();
+			this.displayAgentBoardStat(gStat);			
 			
-			int totalMove = gStat.getTotalAgentMove(agents);
-			int totalRead = gStat.getTotalBoardRead(agents);
-			int totalWrite = gStat.getTotalBoardWrite(agents);
-			int totalDel = gStat.getTotalBoardDel(agents);
-			int timeUse = gStat.getTotalEdgeDelay(edges);
-			
-			Map<String, Integer> nodeState = gStat.getTotalNodeVisit(agents);
-			Map<Integer, Integer> stateMove = gStat.getTotalStateMove(agents);
-			
-			System.out.println("************** STATISTIC REPORT **************");
-			System.out.println("Total Agents moved: " + totalMove);
-			System.out.println("Total Board read: " + totalRead);
-			System.out.println("Total Board write: " + totalWrite);
-			System.out.println("Total Board delete: " + totalDel);
-			System.out.println("Total Dealy time has been accumulated: " + timeUse);
-			
-			System.out.println();
-			Iterator<Integer> its = stateMove.keySet().iterator();
-			int count = 0;
-			for(int stateId = 0; its.hasNext();){
-				stateId = its.next();
-				count = stateMove.get(stateId);
-				System.out.println("Stat " + this.stateFields.get(stateId) + " moved " + count);
-			}
-			
-			System.out.println();
-			Iterator<String> it = nodeState.keySet().iterator();
-			count = 0;
-			for(String nodeId = null; it.hasNext();){
-				nodeId = it.next();
-				count = nodeState.get(nodeId);
-				System.out.println("Node " + nodeId + " has been visited " + count);
-			}
 		} else if (this.modelType == logTag.MODEL_AGENT_TOKEN){
-			Map<String, Agent> agents = this.graph.getAgents();
-			Map<String, Edge> edges = this.graph.getEdges();
-			
-			int totalPick = gStat.getTotalTokPick(agents);
-			int totalDrop = gStat.getTotalTokDrop(agents);
-			int timeUse = gStat.getTotalEdgeDelay(edges);
-			
-			Map<String, Integer> nodeState = gStat.getTotalNodeVisit(agents);
-			Map<Integer, Integer> stateMove = gStat.getTotalStateMove(agents);
-			Map<String, Integer> nodeDrop = gStat.getTotalNodeDrop(agents);
-			Map<String, Integer> nodePick = gStat.getTotalNodePick(agents);
-			
-			System.out.println("************** STATISTIC REPORT **************");
-			System.out.println("Total Token has been picked: " + totalPick);
-			System.out.println("Total Token has been dropped: " + totalDrop);
-			System.out.println("Total Dealy time has been accumulated: " + timeUse);
-			
-			System.out.println();
-			Iterator<Integer> its = stateMove.keySet().iterator();
-			int count = 0;
-			for(int stateId = 0; its.hasNext();){
-				stateId = its.next();
-				count = stateMove.get(stateId);
-				System.out.println("Stat " + this.stateFields.get(stateId) + " moved " + count);
-			}
-			
-			System.out.println();
-			Iterator<String> it = nodeState.keySet().iterator();
-			count = 0;
-			for(String nodeId = null; it.hasNext();){
-				nodeId = it.next();
-				count = nodeState.get(nodeId);
-				System.out.println("Node " + nodeId + " has been visited " + count);
-			}
-			
-			System.out.println();
-			it = nodeDrop.keySet().iterator();
-			count = 0;
-			for(String nodeId = null; it.hasNext();){
-				nodeId = it.next();
-				count = nodeDrop.get(nodeId);
-				System.out.println("Node " + nodeId + " Token has been dropped " + count);
-			}
-			
-			System.out.println();
-			it = nodePick.keySet().iterator();
-			count = 0;
-			for(String nodeId = null; it.hasNext();){
-				nodeId = it.next();
-				count = nodePick.get(nodeId);
-				System.out.println("Node " + nodeId + " Token has been picked " + count);
-			}
+			this.displayAgentTokStat(gStat);
 		}		
+	}
+
+	private void displayMsgPassingStat(GraphStat gStat) {
+		Map<String, Node> nodes = this.graph.getNodes();
+		Map<String, Edge> edges = this.graph.getEdges();
+		
+		int totalRecv = gStat.getTotalMsgRecv(nodes);
+		int totalSent = gStat.getTotalMsgSent(nodes);
+		int totalEnter = gStat.getTotalEnter(edges);
+		int totalLeave = gStat.getTotalLeave(edges);
+		int timeUse = gStat.getAverageEdgeDelay(edges);
+		
+		Map<Integer, Integer> nodeState = gStat.getNodeCurStateCount(nodes);
+		Map<String, Integer> msgTypes = gStat.getTotalMsgTypeCount(edges);
+		
+		System.out.println("************** STATISTIC REPORT **************");
+		System.out.println("Total Message has been sent: " + totalSent);
+		System.out.println("Total Message has been received: " + totalRecv);
+		System.out.println("Total Message has entered link: " + totalEnter);
+		System.out.println("Total Message has leaved link: " + totalLeave);
+		System.out.println("Total Average delay time has been accumulated: " + timeUse);
+		
+		System.out.println();
+		Iterator<Integer> its = nodeState.keySet().iterator();
+		int count = 0;
+		for(int stateId = 0; its.hasNext();){
+			stateId = its.next();
+			count = nodeState.get(stateId);
+			System.out.println("Stat " + this.stateFields.get(stateId) + " has " + count);
+		}
+		
+		System.out.println();
+		Iterator<String> it = msgTypes.keySet().iterator();
+		count = 0;
+		for(String type = null; it.hasNext();){
+			type = it.next();
+			count = msgTypes.get(type);
+			System.out.println("Message " + type + " has been created " + count + " time(s)");
+		}
+	}
+
+	private void displayAgentTokStat(GraphStat gStat) {
+		Map<String, Agent> agents = this.graph.getAgents();
+		Map<String, Edge> edges = this.graph.getEdges();
+		
+		int totalPick = gStat.getTotalTokPick(agents);
+		int totalDrop = gStat.getTotalTokDrop(agents);
+		int timeUse = gStat.getAverageEdgeDelay(edges);
+		
+		Map<String, Integer> nodeVisit = gStat.getTotalNodeVisit(agents);
+		Map<Integer, Integer> stateCount = gStat.getFinalStateCount(agents);
+
+		Map<Integer, Integer> stateMove = gStat.getTotalStateMove(agents);
+		Map<String, Integer> nodeDrop = gStat.getTotalNodeDrop(agents);
+		Map<String, Integer> nodePick = gStat.getTotalNodePick(agents);
+		Map<String, Integer> tokenHold = gStat.getTotalTokHold(agents);
+		
+		System.out.println("************** STATISTIC REPORT **************");
+		System.out.println("Total Token has been picked by all agents: " + totalPick);
+		System.out.println("Total Token has been dropped by all agents: " + totalDrop);
+		System.out.println("Total Average delay time has been accumulated: " + timeUse);
+		
+		System.out.println();
+		Iterator<Integer> its = stateMove.keySet().iterator();
+		int count = 0;
+		for(int stateId = 0; its.hasNext();){
+			stateId = its.next();
+			count = stateMove.get(stateId);
+			System.out.println("Stat " + this.stateFields.get(stateId) + " moved " + count);
+		}
+		
+		System.out.println();
+		its = stateCount.keySet().iterator();
+		count = 0;
+		for(int stateId = 0; its.hasNext();){
+			stateId = its.next();
+			count = stateCount.get(stateId);
+			System.out.println("Agent State " + this.stateFields.get(stateId) + " count " + count);
+		}
+		
+		System.out.println();
+		Iterator<String> it = nodeVisit.keySet().iterator();
+		count = 0;
+		for(String nodeId = null; it.hasNext();){
+			nodeId = it.next();
+			count = nodeVisit.get(nodeId);
+			System.out.println("Node " + nodeId + " has been visited " + count + " time(s)");
+		}
+		
+		System.out.println();
+		it = nodeDrop.keySet().iterator();
+		count = 0;
+		for(String nodeId = null; it.hasNext();){
+			nodeId = it.next();
+			count = nodeDrop.get(nodeId);
+			System.out.println("Node " + nodeId + " Token has been dropped " + count + " time(s)");
+		}
+		
+		System.out.println();
+		it = nodePick.keySet().iterator();
+		count = 0;
+		for(String nodeId = null; it.hasNext();){
+			nodeId = it.next();
+			count = nodePick.get(nodeId);
+			System.out.println("Node " + nodeId + " Token has been picked " + count + " time(s)");
+		}
+		
+		System.out.println();
+		it = tokenHold.keySet().iterator();
+		count = 0;
+		for(String agentId = null; it.hasNext();){
+			agentId = it.next();
+			count = tokenHold.get(agentId);
+			System.out.println("Agent " + agentId + " hold " + count + " token(s)" + " time(s)");
+		}
+	}
+
+	private void displayAgentBoardStat(GraphStat gStat) {
+		Map<String, Agent> agents = this.graph.getAgents();
+		Map<String, Edge> edges = this.graph.getEdges();
+		
+		int totalMove = gStat.getTotalAgentMove(agents);
+		int totalRead = gStat.getTotalBoardRead(agents);
+		int totalWrite = gStat.getTotalBoardWrite(agents);
+		int totalDel = gStat.getTotalBoardDel(agents);
+		int timeUse = gStat.getAverageEdgeDelay(edges);
+		
+		Map<String, Integer> nodeVisit = gStat.getTotalNodeVisit(agents);
+		Map<Integer, Integer> stateMove = gStat.getTotalStateMove(agents);
+		Map<Integer, Integer> stateCount = gStat.getFinalStateCount(agents);
+
+		System.out.println("************** STATISTIC REPORT **************");
+		System.out.println("Total Agents moved: " + totalMove);
+		System.out.println("Total Board read: " + totalRead);
+		System.out.println("Total Board write: " + totalWrite);
+		System.out.println("Total Board delete: " + totalDel);
+		System.out.println("Total Average delay time has been accumulated: " + timeUse);
+		
+		System.out.println();
+		Iterator<Integer> its = stateMove.keySet().iterator();
+		int count = 0;
+		for(int stateId = 0; its.hasNext();){
+			stateId = its.next();
+			count = stateMove.get(stateId);
+			System.out.println("Stat " + this.stateFields.get(stateId) + " moved " + count + " time(s)");
+		}
+		
+		System.out.println();
+		Iterator<String> it = nodeVisit.keySet().iterator();
+		count = 0;
+		for(String nodeId = null; it.hasNext();){
+			nodeId = it.next();
+			count = nodeVisit.get(nodeId);
+			System.out.println("Node " + nodeId + " has been visited " + count + " time(s)");
+		}
+
+		System.out.println();
+		its = stateCount.keySet().iterator();
+		count = 0;
+		for(int stateId = 0; its.hasNext();){
+			stateId = its.next();
+			count = stateCount.get(stateId);
+			System.out.println("Agent State " + this.stateFields.get(stateId) + " count " + count);
+		}
 	}
 	
 	public int getNetworkSize(){

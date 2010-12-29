@@ -49,6 +49,8 @@ import org.eclipse.ui.PlatformUI;
 import distributed.plugin.core.Agent;
 import distributed.plugin.core.Graph;
 import distributed.plugin.core.Node;
+import distributed.plugin.runtime.engine.AgentModel;
+import distributed.plugin.runtime.engine.TokenAgent;
 import distributed.plugin.stat.GraphStat;
 import distributed.plugin.ui.Activator;
 import distributed.plugin.ui.models.GraphElement;
@@ -129,7 +131,17 @@ public class OverviewDisjPage extends DisJViewPage {
 				} else if (index == 3) {
 					return a.getCurLocation();
 
-				}
+				} else if (index == 4) {
+					AgentModel a1 = a.getClientEntity();
+					if(a1 instanceof TokenAgent){
+						TokenAgent t1 = (TokenAgent)a1;
+						return(t1.countMyToken()+"");
+					}
+					return 0+"";
+					
+				} else if (index == 5) {
+					return a.getPastStates().toString();
+				} 
 			}
 			return null;
 		}
@@ -232,7 +244,20 @@ public class OverviewDisjPage extends DisJViewPage {
 				break;
 			case 3:
 				rc = p1.getCurLocation().compareTo(p2.getCurLocation());
+			case 4:
+				AgentModel a = p1.getClientEntity();
+				AgentModel b = p2.getClientEntity();
+				if(a instanceof TokenAgent){
+					TokenAgent t1 = (TokenAgent)a;
+					TokenAgent t2 = (TokenAgent)b;
+					rc = (t1.countMyToken()+"").compareTo(t2.countMyToken()+"");
+				}else{
+					rc = 0;
+				}				
 				break;
+			case 5:
+				// No comparison for a list of state string
+				rc = 0;
 			default:
 				rc = 0;
 			}
@@ -485,8 +510,8 @@ public class OverviewDisjPage extends DisJViewPage {
 	// This will create the columns for the table
 	private void createAgentColumns() {
 
-		String[] titles = { "Agent", "isAlive", "State", "Location" };
-		int[] bounds = { 100, 100, 100, 100 };
+		String[] titles = { "Agent", "isAlive", "Current State", "Location", "#Token", "State List" };
+		int[] bounds = {100, 100, 100, 100, 100, 100};
 
 		// create each and every column into a TableViewer
 		TableViewerColumn column;

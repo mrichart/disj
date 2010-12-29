@@ -84,17 +84,19 @@ public class TokenAgentProcessor extends AgentProcessor {
 		
 		int totalPick = gStat.getTotalTokPick(agents);
 		int totalDrop = gStat.getTotalTokDrop(agents);
-		int timeUse = gStat.getTotalEdgeDelay(edges);
+		int timeUse = gStat.getAverageEdgeDelay(edges);
 		
-		Map<String, Integer> nodeState = gStat.getTotalNodeVisit(agents);
+		Map<String, Integer> nodeVisit = gStat.getTotalNodeVisit(agents);
 		Map<Integer, Integer> stateMove = gStat.getTotalStateMove(agents);
 		Map<String, Integer> nodeDrop = gStat.getTotalNodeDrop(agents);
 		Map<String, Integer> nodePick = gStat.getTotalNodePick(agents);
+		Map<String, Integer> tokenHold = gStat.getTotalTokHold(agents);
+		Map<Integer, Integer> stateCount = gStat.getFinalStateCount(agents);
 		
 		System.out.println("************** STATISTIC REPORT **************");
-		System.out.println("Total Token has been picked: " + totalPick);
-		System.out.println("Total Token has been dropped: " + totalDrop);
-		System.out.println("Total Dealy time has been accumulated: " + timeUse);
+		System.out.println("Total Token has been picked by all agents: " + totalPick);
+		System.out.println("Total Token has been dropped by all agents: " + totalDrop);
+		System.out.println("Total Average delay time has been accumulated: " + timeUse);
 		
 		System.out.println();
 		Iterator<Integer> its = stateMove.keySet().iterator();
@@ -102,16 +104,25 @@ public class TokenAgentProcessor extends AgentProcessor {
 		for(int stateId = 0; its.hasNext();){
 			stateId = its.next();
 			count = stateMove.get(stateId);
-			System.out.println("State " + this.stateFields.get(stateId) + " moved " + count);
+			System.out.println("State " + this.stateFields.get(stateId) + " moved " + count + " time(s)");
 		}
 		
 		System.out.println();
-		Iterator<String> it = nodeState.keySet().iterator();
+		its = stateCount.keySet().iterator();
+		count = 0;
+		for(int stateId = 0; its.hasNext();){
+			stateId = its.next();
+			count = stateCount.get(stateId);
+			System.out.println("Agent State " + this.stateFields.get(stateId) + " count " + count);
+		}
+		
+		System.out.println();
+		Iterator<String> it = nodeVisit.keySet().iterator();
 		count = 0;
 		for(String nodeId = null; it.hasNext();){
 			nodeId = it.next();
-			count = nodeState.get(nodeId);
-			System.out.println("Node " + nodeId + " has been visited " + count);
+			count = nodeVisit.get(nodeId);
+			System.out.println("Node " + nodeId + " has been visited " + count + " time(s)");
 		}
 		
 		System.out.println();
@@ -120,7 +131,7 @@ public class TokenAgentProcessor extends AgentProcessor {
 		for(String nodeId = null; it.hasNext();){
 			nodeId = it.next();
 			count = nodeDrop.get(nodeId);
-			System.out.println("Node " + nodeId + " Token has been dropped " + count);
+			System.out.println("Node " + nodeId + " Token has been dropped " + count + " time(s)");
 		}
 		
 		System.out.println();
@@ -129,8 +140,19 @@ public class TokenAgentProcessor extends AgentProcessor {
 		for(String nodeId = null; it.hasNext();){
 			nodeId = it.next();
 			count = nodePick.get(nodeId);
-			System.out.println("Node " + nodeId + " Token has been picked " + count);
+			System.out.println("Node " + nodeId + " Token has been picked " + count + " time(s)");
 		}
+		
+		System.out.println();
+		it = tokenHold.keySet().iterator();
+		count = 0;
+		for(String agentId = null; it.hasNext();){
+			agentId = it.next();
+			count = tokenHold.get(agentId);
+			System.out.println("Agent " + agentId + " hold " + count + " token(s)");
+		}
+		
+		
 	}
 
 }

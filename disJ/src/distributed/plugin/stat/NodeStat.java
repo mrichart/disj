@@ -13,6 +13,9 @@ public class NodeStat extends Statistic {
 	private int numAgentVisit;
 	private int numTokDrop;
 	private int numTokPick;
+	private int numBoardRead;
+	private int numBoardWrite;
+	private int numBoardDel;
 
 	private String nodeId;	
 	private List<String> pastStates;
@@ -28,6 +31,9 @@ public class NodeStat extends Statistic {
 		this.numMsgSend = 0;
 		this.numTokDrop = 0;
 		this.numTokPick = 0;
+		this.numBoardDel = 0;
+		this.numBoardRead = 0;
+		this.numBoardWrite = 0;
 		
 		this.pastStates = new ArrayList<String>();
 	}
@@ -96,6 +102,36 @@ public class NodeStat extends Statistic {
 		Integer old = this.numTokPick;
 		this.numTokPick++;
 		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_NODE, old, this.numTokPick);
+	}
+		
+	public int getNumBoardRead() {
+		return numBoardRead;
+	}
+
+	public void incNumBoardRead(){
+		Integer old = this.numBoardRead;
+		this.numBoardRead++;
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_NODE, old, this.numBoardRead);
+	}
+	
+	public int getNumBoardWrite() {
+		return numBoardWrite;
+	}
+
+	public void incNumBoardWrite(){
+		Integer old = this.numBoardWrite;
+		this.numBoardWrite++;
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_NODE, old, this.numBoardWrite);
+	}
+	
+	public int getNumBoardDel() {
+		return numBoardDel;
+	}
+
+	public void incNumBoardDel(){
+		Integer old = this.numBoardDel;
+		this.numBoardDel++;
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_NODE, old, this.numBoardDel);
 	}
 	
 	public List<String> getPastStates() {

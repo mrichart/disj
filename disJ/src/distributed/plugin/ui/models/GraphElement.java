@@ -55,12 +55,13 @@ public class GraphElement extends AdapterElement {
 	private static final String PROPERTY_GLOBAL_DELAY_SEED = "G07 Global Delay Seed";
 	private static final String PROPERTY_PROTOCOL = "G08 Protocol";
 	private static final String PROPERTY_MAX_TOKEN = "G09 Maximum Token Agent can Carry";
-	private static final String PROPERTY_TOTAL_AGENT = "G10 Total Agent in Network";
+	private static final String PROPERTY_TOTAL_AGENT = "G10 Number of Agent at Start";
+	private static final String PROPERTY_TOTAL_ALIVE_AGENT = "G11 Current Number of Agent";
     
 	private static final String[] propertyArray = {PROPERTY_NAME, PROPERTY_TOTAL_NODE,
 		PROPERTY_TOTAL_LINK, PROPERTY_TOTAL_MSG_RECV, PROPERTY_TOTAL_MSG_SENT,
 		PROPERTY_GLOBAL_MSG_FLOW_TYPE, PROPERTY_GLOBAL_DELAY_TYPE, PROPERTY_GLOBAL_DELAY_SEED, 
-		PROPERTY_PROTOCOL, PROPERTY_MAX_TOKEN, PROPERTY_TOTAL_AGENT};
+		PROPERTY_PROTOCOL, PROPERTY_MAX_TOKEN, PROPERTY_TOTAL_AGENT, PROPERTY_TOTAL_ALIVE_AGENT};
 	
 	private static final int NUM_PROPERTIES = propertyArray.length;
 	
@@ -111,7 +112,9 @@ public class GraphElement extends AdapterElement {
         ((PropertyDescriptor) descriptors[9])
         		.setValidator(NumberCellEditorValidator.instance());
         
-        descriptors[10] = new PropertyDescriptor(PROPERTY_TOTAL_AGENT,PROPERTY_TOTAL_AGENT);
+        descriptors[10] = new PropertyDescriptor(PROPERTY_TOTAL_AGENT, PROPERTY_TOTAL_AGENT);
+        
+        descriptors[11] = new PropertyDescriptor(PROPERTY_TOTAL_ALIVE_AGENT, PROPERTY_TOTAL_ALIVE_AGENT);
     }
     
     private String graphId;
@@ -340,6 +343,9 @@ public class GraphElement extends AdapterElement {
             return "" + this.graph.getMaxToken();
             
         } else if (propName.equals(PROPERTY_TOTAL_AGENT)) {
+            return "" + graph.getStat().getTotalAgent();
+            
+        } else if (propName.equals(PROPERTY_TOTAL_ALIVE_AGENT)) {
             return "" + graph.getAgents().size();
             
         } else {

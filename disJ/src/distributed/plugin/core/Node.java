@@ -57,7 +57,7 @@ public class Node implements Serializable {
 	/*
 	 * Number of agent to be started at this node
 	 */
-	private int numInitAgent;
+	private int numAgent;
 	
 	/*
 	 * State indicates whether this node is a host/initializer
@@ -194,7 +194,7 @@ public class Node implements Serializable {
 		this.name = name;
 		this.breakpoint = false;
 		this.isInit = isInit;
-		this.numInitAgent = 0;		
+		this.numAgent = 0;		
 		this.initExec = false;
 		this.isAlive = isStartHost;
 		this.numToken = 0;
@@ -683,21 +683,21 @@ public class Node implements Serializable {
 	}
 	
 	/**
-	 * Get number of initializer of this node
+	 * Get number of agent of this node
 	 * @return
 	 */
-	public int getNumInitAgent() {
-		return numInitAgent;
+	public int getNumAgent() {
+		return numAgent;
 	}
 	
 	/**
-	 * Set number of initializer to this node
-	 * @param numInit number of init agent to
+	 * Set number of agent at this node
+	 * @param numAgent number of agent to
 	 * be started at this node
 	 *            
 	 */
-	public void setNumInitAgent(int numInit) {
-		this.numInitAgent = numInit;
+	public void setNumAgent(int numAgent) {
+		this.numAgent = numAgent;
 	}
 
 	public void setGraphId(String id) {

@@ -33,6 +33,7 @@ public abstract class BoardAgent extends AgentModel implements IBoardModel{
 		
 		// update statistic
 		this.agentOwner.getStat().incRead();
+		this.agentOwner.getCurNode().getStat().incNumBoardRead();
 		
 		return temp;
 	}
@@ -50,6 +51,7 @@ public abstract class BoardAgent extends AgentModel implements IBoardModel{
 		
 		// update statistic
 		this.agentOwner.getStat().incDelete();
+		this.agentOwner.getCurNode().getStat().incNumBoardDel();
 		
 		return b; 
 	}
@@ -68,6 +70,7 @@ public abstract class BoardAgent extends AgentModel implements IBoardModel{
 		
 		// update statistic
 		this.agentOwner.getStat().incWrite();
+		this.agentOwner.getCurNode().getStat().incNumBoardWrite();
 	}	
 	
 }

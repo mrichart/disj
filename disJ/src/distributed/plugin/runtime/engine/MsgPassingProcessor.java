@@ -234,7 +234,7 @@ public class MsgPassingProcessor implements IProcessor {
 			// update statistic
 			sNode.getStat().incNumMsgSend();
 			recvEdge.getStat().incEnterEdge();
-			recvEdge.getStat().incMsgCreatCount(msgLabel);
+			recvEdge.getStat().incMsgTypeCount(msgLabel);
 			recvEdge.recMsgPassed(msgLabel, sender);
 			
 			// validate the probability of failure
@@ -785,7 +785,7 @@ public class MsgPassingProcessor implements IProcessor {
 		int totalSent = gStat.getTotalMsgSent(nodes);
 		int totalEnter = gStat.getTotalEnter(edges);
 		int totalLeave = gStat.getTotalLeave(edges);
-		int timeUse = gStat.getTotalEdgeDelay(edges);
+		int timeUse = gStat.getAverageEdgeDelay(edges);
 		
 		Map<Integer, Integer> nodeState = gStat.getNodeCurStateCount(nodes);
 		Map<String, Integer> msgTypes = gStat.getTotalMsgTypeCount(edges);
@@ -795,7 +795,7 @@ public class MsgPassingProcessor implements IProcessor {
 		System.out.println("Total Message has been received: " + totalRecv);
 		System.out.println("Total Message has entered link: " + totalEnter);
 		System.out.println("Total Message has leaved link: " + totalLeave);
-		System.out.println("Total Dealy time has been accumulated: " + timeUse);
+		System.out.println("Total Average delay time has been accumulated: " + timeUse);
 		
 		System.out.println();
 		Iterator<Integer> its = nodeState.keySet().iterator();

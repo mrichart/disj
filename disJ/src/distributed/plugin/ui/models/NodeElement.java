@@ -324,7 +324,7 @@ public class NodeElement extends AdapterElement {
 			return this.node.getStateList();
 
 		} else if (propName.equals(PROPERTY_NUM_INIT_AGENT)) {
-			return "" + this.node.getNumInitAgent();
+			return "" + this.node.getNumAgent();
 
 		} else if (propName.equals(PROPERTY_NUM_AGENT)) {
 			return "" + this.node.getAllAgents().size();
@@ -393,10 +393,10 @@ public class NodeElement extends AdapterElement {
 			}
 			if(this.node.isInitializer()){				
 				if(this.node.getStateList().isEmpty()){			
-					this.node.setNumInitAgent(numAgent);
+					this.node.setNumAgent(numAgent);
 				}				
 			}else{				
-				this.node.setNumInitAgent(0);
+				this.node.setNumAgent(0);
 			}
 		} else {
 			return;

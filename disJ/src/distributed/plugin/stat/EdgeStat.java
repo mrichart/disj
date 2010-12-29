@@ -83,7 +83,7 @@ public class EdgeStat extends Statistic {
 		return msgCreateTypes;
 	}
 	
-	public void incMsgCreatCount(String msgType){
+	public void incMsgTypeCount(String msgType){
 		if(this.msgCreateTypes.containsKey(msgType)){
 			int count = this.msgCreateTypes.get(msgType);
 			count++;

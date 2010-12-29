@@ -28,6 +28,7 @@ import distributed.plugin.runtime.IMessage;
 import distributed.plugin.runtime.IProcessor;
 import distributed.plugin.runtime.adversary.AgentControl;
 import distributed.plugin.runtime.engine.AgentModel.NotifyType;
+import distributed.plugin.stat.GraphStat;
 import distributed.plugin.ui.IGraphEditorConstants;
 
 public abstract class AgentProcessor implements IProcessor {
@@ -198,13 +199,15 @@ public abstract class AgentProcessor implements IProcessor {
 	private void loadAgent() throws DisJException {
 
 		int agentId = 0;
+		int totalAgent = 0;
 		String[] suitcase;
 		List<Node> hosts = GraphLoader.getInitNodes(this.graph);
 		try {
 			// load host nodes that contain agent(s)
 			for (int i = 0; i < hosts.size(); i++) {
 				Node host = hosts.get(i);
-				int numAgent = host.getNumInitAgent();
+				int numAgent = host.getNumAgent();
+				totalAgent += numAgent;
 				for(int j = 0; j < numAgent; j++){
 					// create and initialize new agent instance that 
 					// belong to each host
@@ -232,7 +235,17 @@ public abstract class AgentProcessor implements IProcessor {
 					this.systemOut.println("@loadAgent() " + agent.getAgentId());
 				}
 			}
+			// record graph statistic info
+			// NOTE: currently every agent is init agent
+			GraphStat stat = this.graph.getStat();
+			stat.setTotalNode(this.graph.getNodes().size());
+			stat.setTotalInitNode(hosts.size());			
+			stat.setTotalAgent(totalAgent);
+			stat.setTotalInitAgent(totalAgent);
 			
+			
+			
+						
 			// create a set of init events
 			int execTime;
 			IMessage msg;

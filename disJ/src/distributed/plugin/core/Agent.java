@@ -206,7 +206,7 @@ public class Agent implements Serializable{
 		}
 	}
 
-	public List<String> getStateList() {
+	public List<String> getPastStates() {
 		return this.stat.getPastStates();
 	}
 

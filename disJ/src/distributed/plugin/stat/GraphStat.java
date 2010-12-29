@@ -1,17 +1,33 @@
 package distributed.plugin.stat;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import distributed.plugin.core.Agent;
 import distributed.plugin.core.Edge;
 import distributed.plugin.core.Node;
+import distributed.plugin.runtime.engine.AgentModel;
+import distributed.plugin.runtime.engine.TokenAgent;
 
 @SuppressWarnings("serial")
 public class GraphStat extends Statistic {
 	
 	private String graphId;
+	
+	// total number agent at start of simulation
+	private int totalAgent;
+	
+	// total number node at start of simulation
+	private int totalNode;
+	
+	// total number init agent at start of simulation
+	private int totalInitAgent;
+	
+	// total number init node at start of simulation
+	private int totalInitNode;
 		
 	/**
 	 * 
@@ -19,11 +35,47 @@ public class GraphStat extends Statistic {
 	 */
 	public GraphStat(String name) {
 		this.graphId = name;
+		this.totalAgent = 0;
+		this.totalNode = 0;
+		this.totalInitAgent = 0;
+		this.totalInitNode = 0;
 	}
 
 	@Override
 	public String getName() {
 		return this.graphId;
+	}
+
+	public int getTotalAgent() {
+		return totalAgent;
+	}
+
+	public void setTotalAgent(int totalAgent) {
+		this.totalAgent = totalAgent;
+	}
+
+	public int getTotalNode() {
+		return totalNode;
+	}
+
+	public void setTotalNode(int totalNode) {
+		this.totalNode = totalNode;
+	}
+
+	public int getTotalInitAgent() {
+		return totalInitAgent;
+	}
+
+	public void setTotalInitAgent(int totalInitAgent) {
+		this.totalInitAgent = totalInitAgent;
+	}
+
+	public int getTotalInitNode() {
+		return totalInitNode;
+	}
+
+	public void setTotalInitNode(int totalInitNode) {
+		this.totalInitNode = totalInitNode;
 	}
 
 	@Override
@@ -88,6 +140,295 @@ public class GraphStat extends Statistic {
 			count += stat.getNumMsgSend();
 		}
 		return count;
+	}
+	
+	/**
+	 * Get nodes that received message the most
+	 * 
+	 * @param nodes
+	 * @return
+	 */
+	public static List<Node> getMaxMsgRecv(Map<String, Node> nodes){
+		Iterator<String> its = nodes.keySet().iterator();
+		NodeStat stat = null;
+		List<Node> list = new ArrayList<Node>();
+		
+		// find a max number
+		int max = 0;
+		int tmp= 0;
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumMsgRecv();
+			if(max < tmp){
+				max = tmp;
+			}
+		}
+		
+		// find a node that has max number
+		its = nodes.keySet().iterator();
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumMsgRecv();
+			if(tmp == max){
+				list.add(n);
+			}
+		}
+		return list;
+	}
+	
+	/**
+	 * Get nodes that sent message the most
+	 * 
+	 * @param nodes
+	 * @return
+	 */
+	public static List<Node> getMaxMsgSent(Map<String, Node> nodes){
+		Iterator<String> its = nodes.keySet().iterator();
+		NodeStat stat = null;
+		List<Node> list = new ArrayList<Node>();
+		
+		// find a max number
+		int max = 0;
+		int tmp= 0;
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumMsgSend();
+			if(max < tmp){
+				max = tmp;
+			}
+		}
+		
+		// find a node that has max number
+		its = nodes.keySet().iterator();
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumMsgSend();
+			if(tmp == max){
+				list.add(n);
+			}
+		}
+		return list;
+	}
+	
+	/**
+	 * Get nodes that received message the most
+	 * 
+	 * @param nodes
+	 * @return
+	 */
+	public static List<Node> getMinMsgRecv(Map<String, Node> nodes){
+		Iterator<String> its = nodes.keySet().iterator();
+		NodeStat stat = null;
+		List<Node> list = new ArrayList<Node>();
+		
+		// find a min number
+		int min = -1;
+		int tmp = 0;
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumMsgRecv();
+			if(min > tmp || min < 0){
+				min = tmp;
+			}
+		}
+		
+		// find a node that has min number
+		its = nodes.keySet().iterator();
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumMsgRecv();
+			if(tmp == min){
+				list.add(n);
+			}
+		}
+		return list;
+	}
+	
+	/**
+	 * Get nodes that sent message the most
+	 * 
+	 * @param nodes
+	 * @return
+	 */
+	public static List<Node> getMinMsgSent(Map<String, Node> nodes){
+		Iterator<String> its = nodes.keySet().iterator();
+		NodeStat stat = null;
+		List<Node> list = new ArrayList<Node>();
+		
+		// find a min number
+		int min = -1;
+		int tmp= 0;
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumMsgSend();
+			if(min > tmp || min < 0){
+				min = tmp;
+			}
+		}
+		
+		// find a node that has min number
+		its = nodes.keySet().iterator();
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumMsgSend();
+			if(tmp == min){
+				list.add(n);
+			}
+		}
+		return list;
+	}
+	
+	/**
+	 * Get nodes that its board has been read the most
+	 * 
+	 * @param nodes
+	 * @return
+	 */
+	public static List<Node> getMaxBoardRead(Map<String, Node> nodes){
+		Iterator<String> its = nodes.keySet().iterator();
+		NodeStat stat = null;
+		List<Node> list = new ArrayList<Node>();
+		
+		// find a max number
+		int max = 0;
+		int tmp= 0;
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumBoardRead();
+			if(max > tmp){
+				max = tmp;
+			}
+		}
+		
+		// find a node that has max number
+		its = nodes.keySet().iterator();
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumBoardRead();
+			if(tmp == max){
+				list.add(n);
+			}
+		}
+		return list;
+	}
+	
+
+	/**
+	 * Get nodes that its board has been written the most
+	 * 
+	 * @param nodes
+	 * @return
+	 */
+	public static List<Node> getMaxBoardWrite(Map<String, Node> nodes){
+		Iterator<String> its = nodes.keySet().iterator();
+		NodeStat stat = null;
+		List<Node> list = new ArrayList<Node>();
+		
+		// find a max number
+		int max = 0;
+		int tmp= 0;
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumBoardWrite();
+			if(max < tmp){
+				max = tmp;
+			}
+		}
+		
+		// find a node that has max number
+		its = nodes.keySet().iterator();
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumBoardWrite();
+			if(tmp == max){
+				list.add(n);
+			}
+		}
+		return list;
+	}
+	
+	/**
+	 * Get nodes that its board has been written the least
+	 * 
+	 * @param nodes
+	 * @return
+	 */
+	public static List<Node> getMinBoardWrite(Map<String, Node> nodes){
+		Iterator<String> its = nodes.keySet().iterator();
+		NodeStat stat = null;
+		List<Node> list = new ArrayList<Node>();
+		
+		// find a min number
+		int min = -1;
+		int tmp= 0;
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumBoardWrite();
+			if(min > tmp || min < 0){
+				min = tmp;
+			}
+		}
+		
+		// find a node that has min number
+		its = nodes.keySet().iterator();
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumBoardWrite();
+			if(tmp == min){
+				list.add(n);
+			}
+		}
+		return list;
+	}
+	
+	/**
+	 * Get nodes that its board has been read the least
+	 * 
+	 * @param nodes
+	 * @return
+	 */
+	public static List<Node> getMinBoardRead(Map<String, Node> nodes){
+		Iterator<String> its = nodes.keySet().iterator();
+		NodeStat stat = null;
+		List<Node> list = new ArrayList<Node>();
+		
+		// find a min number
+		int min = -1;
+		int tmp= 0;
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumBoardRead();
+			if(min > tmp || min < 0){
+				min = tmp;
+			}
+		}
+		
+		// find a node that has min number
+		its = nodes.keySet().iterator();
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumBoardRead();
+			if(tmp == min){
+				list.add(n);
+			}
+		}
+		return list;
 	}
 	
 	/**
@@ -171,6 +512,31 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
+	 * Get final number of agent count corresponding to each state
+	 * 
+	 * @param agents
+	 * @return
+	 */
+	public static Map<Integer, Integer> getFinalStateCount(Map<String, Agent> agents){
+		Iterator<String> its = agents.keySet().iterator();
+		Map<Integer, Integer> states = new HashMap<Integer, Integer>();
+		int stateId = -1;
+		int count = 0;
+		for(Agent n = null; its.hasNext();){
+			n = agents.get(its.next());
+			stateId = n.getCurState();			
+			if(states.containsKey(stateId)){
+				count = states.get(stateId);
+				count++;					
+			}else{
+				count = 1;
+			}
+			states.put(stateId, count);		
+		}
+		return states;
+	}
+	
+	/**
 	 * Get total number of board read access that every agents did
 	 * 
 	 * @param agents
@@ -240,6 +606,27 @@ public class GraphStat extends Statistic {
 			count += stat.getNumTokPick();
 		}
 		return count;
+	}
+	
+	/**
+	 * Get total number of token is carried by each agent
+	 * at the end
+	 * 
+	 * @param agents
+	 * @return
+	 */
+	public static Map<String, Integer> getTotalTokHold(Map<String, Agent> agents){
+		Iterator<String> its = agents.keySet().iterator();
+		Map<String, Integer> counts = new HashMap<String, Integer>();
+		for(Agent n = null; its.hasNext();){
+			n = agents.get(its.next());
+			AgentModel a = n.getClientEntity();
+			if(a instanceof TokenAgent){
+				TokenAgent t = (TokenAgent)a;
+				counts.put(a.getAgentId(), t.countMyToken());
+			}			
+		}
+		return counts;
 	}
 	
 	/**
@@ -323,12 +710,12 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
-	 * Get total delay time of message traveled in every links
+	 * Get average delay time of message traveled in every links
 	 * 
 	 * @param edge
 	 * @return
 	 */
-	public static int getTotalEdgeDelay(Map<String, Edge> edges){
+	public static int getAverageEdgeDelay(Map<String, Edge> edges){
 		Iterator<String> its = edges.keySet().iterator();
 		EdgeStat stat = null;
 		int count = 0;
@@ -337,7 +724,43 @@ public class GraphStat extends Statistic {
 			stat = n.getStat();
 			count += stat.getTotalTimeUse();
 		}
-		return count;
+		return count/edges.size();
+	}
+	
+	/**
+	 * Get a max delay time of message traveled and link 
+	 * 
+	 * @param edge
+	 * @return
+	 */
+	public static List<Edge> getMaxEdgeDelay(Map<String, Edge> edges){
+		Iterator<String> its = edges.keySet().iterator();
+		EdgeStat stat = null;
+		List<Edge> list = new ArrayList<Edge>();
+		
+		// find max delay time
+		int max = 0;
+		int tmp = 0;
+		for(Edge n = null; its.hasNext();){
+			n = edges.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getTotalTimeUse();
+			if(max < tmp){
+				max = tmp;
+			}
+		}
+		
+		its = edges.keySet().iterator();
+		for(Edge n = null; its.hasNext();){
+			n = edges.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getTotalTimeUse();
+			if(tmp == max){
+				list.add(n);
+			}
+		}
+		
+		return list;
 	}
 	
 	/**
