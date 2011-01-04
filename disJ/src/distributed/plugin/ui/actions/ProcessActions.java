@@ -39,6 +39,7 @@ import org.eclipse.ui.IFileEditorInput;
 import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
 import distributed.plugin.core.Graph;
+import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
 import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.engine.BoardAgent;
@@ -586,14 +587,18 @@ public class ProcessActions extends WorkbenchPartAction {
 	}
 
 	private void executeSpeed() {
+		int speed = IConstants.SPEED_DEFAULT_RATE;
 		try{
+			speed = this.engine.getSpeed();
 			SpeedDialog dialog = new SpeedDialog(getWorkbenchPart().getSite()
-					.getShell(), this.engine.getSpeed());
-			int newSpeed = dialog.open();
-			this.engine.setSpeed(newSpeed);			
+					.getShell(), speed);
+			speed = dialog.open();
+			this.engine.setSpeed(speed);
+			
 		}catch(DisJException e){
-			e.printStackTrace();
+			this.missUseActionMsg("Processor has not yet created");	
 		}
+			
 	}
 
 

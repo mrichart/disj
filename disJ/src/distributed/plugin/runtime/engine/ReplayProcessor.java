@@ -20,6 +20,7 @@ import distributed.plugin.core.Logger;
 import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.core.Node;
 import distributed.plugin.runtime.Event;
+import distributed.plugin.runtime.GraphLoader;
 import distributed.plugin.runtime.IMessage;
 import distributed.plugin.runtime.IProcessor;
 import distributed.plugin.runtime.engine.AgentModel.NotifyType;
@@ -187,6 +188,7 @@ public class ReplayProcessor implements IProcessor {
 	
 	private void executeReplay() throws Exception {
 		Scanner sc = null;
+		int sleepTime = 0;
 		try {			
 			sc = new Scanner(new FileReader(this.fileName));
 			String line = null;
@@ -197,10 +199,9 @@ public class ReplayProcessor implements IProcessor {
 				
 				// Slow down the simulation speed
 				try {
-					Thread.sleep(this.speed);
-				} catch (InterruptedException ignore) {
-					//this.systemOut.println("@ReplayProcessor.executeEvent() " +
-					//		"Slow down process with speed: " + this.speed);
+					sleepTime = GraphLoader.speedConverter(this.speed);
+					Thread.sleep(sleepTime);
+				} catch (InterruptedException ignore) {					
 				}
 				
 				while (this.pause && this.stop == false) {					

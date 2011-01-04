@@ -502,15 +502,14 @@ public class MsgPassingProcessor implements IProcessor {
 	 * Start executing event in the queue
 	 */
 	private void executeEvents() throws Exception {
-
+		int sleepTime = 0;
 		while (!this.queue.isEmpty() && this.stop == false) {
 			
 			// Slow down the simulation speed
 			try {
-				Thread.sleep(this.speed);
+				sleepTime = GraphLoader.speedConverter(this.speed);
+				Thread.sleep(sleepTime);
 			} catch (InterruptedException ignore) {
-				//this.systemOut.println("@MsgPassingProcessor.executeEvent() " +
-				//		"Slow down process with speed: " + this.speed);
 			}
 			
 			while (this.pause && this.stop == false) {				

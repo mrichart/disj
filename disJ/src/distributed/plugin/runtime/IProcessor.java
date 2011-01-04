@@ -93,5 +93,4 @@ public interface IProcessor extends Runnable {
 	public void cleanUp();
 	
 	
-	
 }

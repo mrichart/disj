@@ -561,15 +561,14 @@ public abstract class AgentProcessor implements IProcessor {
 	 * Start executing event in the queue
 	 */
 	private void executeEvents() throws DisJException {
-
+		int sleepTime = 0;
 		while (!this.queue.isEmpty() && this.stop == false) {
 		
 			// Slow down the simulation speed
 			try {
-				Thread.sleep(this.speed);
+				sleepTime = GraphLoader.speedConverter(this.speed);
+				Thread.sleep(sleepTime);
 			} catch (InterruptedException ignore) {
-				//this.systemOut.println("@AgentProcessor.executeEvent() " +
-				//		"Slow down process with speed: " + this.speed);
 			}
 			
 			while (this.pause && this.stop == false) {				

@@ -239,11 +239,10 @@ public class SimulatorEngine {
         return this.proc.getSpeed();
     }
 
-    public void setSpeed(int speed)throws DisJException {
-    	 if (this.proc == null)
-             throw new DisJException(IConstants.ERROR_19);
-
-    	this.proc.setSpeed(speed);
+    public void setSpeed(int speed) {
+    	 if (this.proc != null){    		 	
+    		 this.proc.setSpeed(speed);
+    	 }
     }
     
     public void setOutputLocation(URL location){

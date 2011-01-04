@@ -204,5 +204,27 @@ public class GraphLoader {
                 ois.close();
         }
     }
+    /**
+     * Covert a percentage of execution speed into a sleeping time of 
+     * processor
+     * 
+     * @param per A percentage value of [0-100] inclusive
+     * 
+     * @return a millisecond of processor to be sleeping between 
+     * [0 - 10000] milliseconds inclusive
+     */
+    public static int speedConverter(int per){
+    	int min = 10000;
+    	
+    	if(per < 0){
+    		per = 0;
+    	}
+    	if(per > 100){
+    		per = 100;
+    	}
+    	int sleeping = min - ((per * min)/100);
+    	
+    	return sleeping;
+    }
 
 }

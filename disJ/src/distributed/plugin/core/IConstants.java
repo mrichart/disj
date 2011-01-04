@@ -85,8 +85,8 @@ public interface IConstants {
 	// general constants
 	public static final int DEFAULT_MAX_NUM_TOKEN = 20;
 	public static final int SPEED_MAX_RATE = 100;
-	public static final int SPEED_MIN_RATE = 10000;
-	public static final int SPEED_DEFAULT_RATE = 1000;
+	public static final int SPEED_MIN_RATE = 0;
+	public static final int SPEED_DEFAULT_RATE = 20;
 	public static final long SERIALIZE_VERSION = 1;
 	public static final int MAX_RANDOM_RANGE = 32;
 	public static final String DELIMETER = "[=]";
