@@ -16,6 +16,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +34,7 @@ import distributed.plugin.core.Graph;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
 import distributed.plugin.runtime.GraphFactory;
+import distributed.plugin.stat.GraphStat;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.validators.NumberCellEditorValidator;
 
@@ -320,11 +322,11 @@ public class GraphElement extends AdapterElement {
             return this.linkElements.size();
             
         } else if (propName.equals(PROPERTY_TOTAL_MSG_RECV)) {           
-        	int sum = this.graph.getStat().getTotalMsgRecv(this.graph.getNodes());           
+        	int sum = GraphStat.getTotalMsgRecv(this.graph.getNodes());           
             return sum;
             
         } else if (propName.equals(PROPERTY_TOTAL_MSG_SENT)) {
-        	int sum = this.graph.getStat().getTotalMsgSent(this.graph.getNodes());           
+        	int sum = GraphStat.getTotalMsgSent(this.graph.getNodes());           
             return sum;
             
         } else if (propName.equals(PROPERTY_GLOBAL_MSG_FLOW_TYPE)) {
@@ -343,14 +345,35 @@ public class GraphElement extends AdapterElement {
             return "" + this.graph.getMaxToken();
             
         } else if (propName.equals(PROPERTY_TOTAL_AGENT)) {
-            return "" + graph.getStat().getTotalAgent();
+        	int count = graph.getStat().getTotalAgent();
+        	
+        	// process hasn't started yet
+        	if(count == 0){       		
+        		// then read from GUI
+        		count = this.getNumAgents();
+        	}
+            return "" + count;
             
-        } else if (propName.equals(PROPERTY_TOTAL_ALIVE_AGENT)) {
+        } else if (propName.equals(PROPERTY_TOTAL_ALIVE_AGENT)) {        	
             return "" + graph.getAgents().size();
             
         } else {
             return  propName;
         }
+    }
+    
+    /*
+     * Get number of agent from node that receives directly
+     * from GUI properties view
+     */
+    private int getNumAgents(){
+    	Map<String, Node> map = this.graph.getNodes();
+    	int count = 0;
+    	for (String id : map.keySet()) {
+			Node n = map.get(id);
+			count += n.getNumAgent();
+		}
+    	return count;
     }
     
     /**

@@ -83,10 +83,10 @@ public interface IConstants {
 	public static final String RUNTIME_ERROR_0 = "Parameter cannot be null";
 
 	// general constants
-	public static final int DEFAULT_MAX_NUM_TOKEN = 20;
+	public static final int DEFAULT_MAX_NUM_TOKEN = 1;
 	public static final int SPEED_MAX_RATE = 100;
 	public static final int SPEED_MIN_RATE = 0;
-	public static final int SPEED_DEFAULT_RATE = 20;
+	public static final int SPEED_DEFAULT_RATE = 50;
 	public static final long SERIALIZE_VERSION = 1;
 	public static final int MAX_RANDOM_RANGE = 32;
 	public static final String DELIMETER = "[=]";

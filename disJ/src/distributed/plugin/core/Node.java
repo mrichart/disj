@@ -114,7 +114,7 @@ public class Node implements Serializable {
 	transient private Map<String, List<Event>> blockedEvents;
 	
 	/*
-	 * a list of blocking state of each port{port label,boolean}
+	 * a list of blocking state of each port{port label, boolean}
 	 */
 	transient private Map<String, Boolean> portStates;
 

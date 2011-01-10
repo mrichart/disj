@@ -65,7 +65,6 @@ public class SpeedDialog extends Dialog {
 		 speedScale.addSelectionListener(new SelectionAdapter() {
 			 public void widgetSelected(SelectionEvent e) {
 				 speed = speedScale.getSelection();
-				 System.out.println(speed);
 			 }
 		 });
 				
