@@ -86,7 +86,7 @@ public class GraphStat extends Statistic {
 	/**
 	 * Get a list of every node and it current state
 	 * 
-	 * @return a map of state ID and count
+	 * @return {NodeStateId, count}
 	 */
 	public static Map<Integer, Integer> getNodeCurStateCount(Map<String, Node> nodes){
 		int state = 0;
@@ -215,7 +215,7 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
-	 * Get nodes that received message the most
+	 * Get nodes that received message the least
 	 * 
 	 * @param nodes
 	 * @return
@@ -251,7 +251,7 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
-	 * Get nodes that sent message the most
+	 * Get nodes that sent message the least
 	 * 
 	 * @param nodes
 	 * @return
@@ -432,7 +432,80 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
-	 * Get total number of move that every agents did
+	 * Get nodes with max number of tokens have been
+	 * dropped
+	 * 
+	 * @param nodes
+	 * @return
+	 */
+	public static List<Node> getNodeMaxTokDrop(Map<String, Node> nodes){
+		Iterator<String> its = nodes.keySet().iterator();
+		NodeStat stat = null;
+		List<Node> list = new ArrayList<Node>();
+		
+		// find a max number
+		int max = 0;
+		int tmp= 0;
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumTokDrop();
+			if(max < tmp){
+				max = tmp;
+			}
+		}
+		
+		// find a node that has max number
+		its = nodes.keySet().iterator();
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumTokDrop();
+			if(tmp == max){
+				list.add(n);
+			}
+		}
+		return list;
+	}
+	
+	/**
+	 * Get nodes with max number of tokens have been picked
+	 * 
+	 * @param nodes
+	 * @return
+	 */
+	public static List<Node> getNodeMaxTokPick(Map<String, Node> nodes){
+		Iterator<String> its = nodes.keySet().iterator();
+		NodeStat stat = null;
+		List<Node> list = new ArrayList<Node>();
+		
+		// find a max number
+		int max = 0;
+		int tmp= 0;
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumTokPick();
+			if(max < tmp){
+				max = tmp;
+			}
+		}
+		
+		// find a node that has max number
+		its = nodes.keySet().iterator();
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumTokPick();
+			if(tmp == max){
+				list.add(n);
+			}
+		}
+		return list;
+	}
+	
+	/**
+	 * Get total number of move of every agents
 	 * 
 	 * @param agents
 	 * @return
@@ -450,12 +523,12 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
-	 * Get total number of agent visited at each node
+	 * Get list of nodes with number of agent visited
 	 * 
 	 * @param agents
-	 * @return
+	 * @return {nodeId, count}
 	 */
-	public static Map<String, Integer> getTotalNodeVisit(Map<String, Agent> agents){
+	public static Map<String, Integer> getNodeVisitCount(Map<String, Agent> agents){
 		Iterator<String> its = agents.keySet().iterator();		
 		Map<String, Integer> nodes = new HashMap<String, Integer>();
 		Map<String, Integer> tmp = null;
@@ -481,12 +554,12 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
-	 * Get total number of agent move at each state
+	 * Get list of agent's states with number of move
 	 * 
 	 * @param agents
-	 * @return
+	 * @return {AgentStateId, count}
 	 */
-	public static Map<Integer, Integer> getTotalStateMove(Map<String, Agent> agents){
+	public static Map<Integer, Integer> getStateMoveCount(Map<String, Agent> agents){
 		Iterator<String> its = agents.keySet().iterator();
 		Map<Integer, Integer> states = new HashMap<Integer, Integer>();
 		Map<Integer, Integer> tmp = null;
@@ -512,12 +585,12 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
-	 * Get final number of agent count corresponding to each state
+	 * Get a list of agent's state count
 	 * 
 	 * @param agents
-	 * @return
+	 * @return {AgentStateId, count}
 	 */
-	public static Map<Integer, Integer> getFinalStateCount(Map<String, Agent> agents){
+	public static Map<Integer, Integer> getAgentStateCount(Map<String, Agent> agents){
 		Iterator<String> its = agents.keySet().iterator();
 		Map<Integer, Integer> states = new HashMap<Integer, Integer>();
 		int stateId = -1;
@@ -537,7 +610,7 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
-	 * Get total number of board read access that every agents did
+	 * Get total number of board read access by all agents
 	 * 
 	 * @param agents
 	 * @return
@@ -555,7 +628,7 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
-	 * Get total number of board write access that every agents did
+	 * Get total number of board write access by all agents
 	 * 
 	 * @param agents
 	 * @return
@@ -573,7 +646,7 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
-	 * Get total number of board remove access that every agents did
+	 * Get total number of board remove access by all agents
 	 * 
 	 * @param agents
 	 * @return
@@ -591,7 +664,7 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
-	 * Get total number of token picked by every agents
+	 * Get total number of token picked by all agents
 	 * 
 	 * @param agents
 	 * @return
@@ -609,28 +682,7 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
-	 * Get total number of token is carried by each agent
-	 * at the end
-	 * 
-	 * @param agents
-	 * @return
-	 */
-	public static Map<String, Integer> getTotalTokHold(Map<String, Agent> agents){
-		Iterator<String> its = agents.keySet().iterator();
-		Map<String, Integer> counts = new HashMap<String, Integer>();
-		for(Agent n = null; its.hasNext();){
-			n = agents.get(its.next());
-			AgentModel a = n.getClientEntity();
-			if(a instanceof TokenAgent){
-				TokenAgent t = (TokenAgent)a;
-				counts.put(a.getAgentId(), t.countMyToken());
-			}			
-		}
-		return counts;
-	}
-	
-	/**
-	 * Get total number of token dropped by every agents
+	 * Get total number of token dropped by all agents
 	 * 
 	 * @param agents
 	 * @return
@@ -646,14 +698,34 @@ public class GraphStat extends Statistic {
 		}
 		return count;
 	}
+
+	/**
+	 * Get list of agent with number of token its currently carrying
+	 * 
+	 * @param agents 
+	 * @return {AgentId, count}
+	 */
+	public static Map<String, Integer> getAgentTokHoldCount(Map<String, Agent> agents){
+		Iterator<String> its = agents.keySet().iterator();
+		Map<String, Integer> counts = new HashMap<String, Integer>();
+		for(Agent n = null; its.hasNext();){
+			n = agents.get(its.next());
+			AgentModel a = n.getClientEntity();
+			if(a instanceof TokenAgent){
+				TokenAgent t = (TokenAgent)a;
+				counts.put(a.getAgentId(), t.countMyToken());
+			}			
+		}
+		return counts;
+	}
 	
 	/**
-	 * Get total number of token has been dropped at each node
+	 * Get a list of node with number of token has been dropped
 	 * 
 	 * @param agents
-	 * @return
+	 * @return {NodeId, count}
 	 */
-	public static Map<String, Integer> getTotalNodeDrop(Map<String, Agent> agents){
+	public static Map<String, Integer> getNodeTokDropCount(Map<String, Agent> agents){
 		Iterator<String> its = agents.keySet().iterator();		
 		Map<String, Integer> nodes = new HashMap<String, Integer>();
 		Map<String, Integer> tmp = null;
@@ -679,12 +751,12 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
-	 * Get total number of token has been picked at each node
+	 * Get a list of node with number of token has been picked
 	 * 
 	 * @param agents
-	 * @return
+	 * @return {nodeId, count}
 	 */
-	public static Map<String, Integer> getTotalNodePick(Map<String, Agent> agents){
+	public static Map<String, Integer> getNodeTokPickCount(Map<String, Agent> agents){
 		Iterator<String> its = agents.keySet().iterator();	
 		Map<String, Integer> nodes = new HashMap<String, Integer>();
 		Map<String, Integer> tmp = null;
@@ -710,6 +782,153 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
+	 * Get agents with highest number of token picked
+	 * 
+	 * @param agents
+	 * @return 
+	 */
+	public static List<Agent> getAgentMaxTokPick(Map<String, Agent> agents){
+		List<Agent> list = new ArrayList<Agent>();
+		Iterator<String> its = agents.keySet().iterator();
+		AgentStat stat = null;
+
+		// find a max number
+		int max = 0;
+		int tmp= 0;
+		for(Agent n = null; its.hasNext();){
+			n = agents.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumTokPick();
+			if(max < tmp){
+				max = tmp;
+			}
+		}
+		
+		// find an agent that has max number
+		its = agents.keySet().iterator();
+		for(Agent n = null; its.hasNext();){
+			n = agents.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumTokPick();
+			if(tmp == max){
+				list.add(n);
+			}
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Get agents with lowest number of token picked
+	 * 
+	 * @param agents
+	 * @return 
+	 */
+	public static List<Agent> getAgentMinTokPick(Map<String, Agent> agents){
+		List<Agent> list = new ArrayList<Agent>();
+		Iterator<String> its = agents.keySet().iterator();
+		AgentStat stat = null;
+
+		// find a min number
+		int min = -1;
+		int tmp = 0;
+		for(Agent n = null; its.hasNext();){
+			n = agents.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumTokPick();
+			if(min > tmp || min < 0){
+				min = tmp;
+			}
+		}
+		
+		// find an agent that has min number
+		its = agents.keySet().iterator();
+		for(Agent n = null; its.hasNext();){
+			n = agents.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumTokPick();
+			if(tmp == min){
+				list.add(n);
+			}
+		}
+		return list;
+	}
+	
+	/**
+	 * Get agents with highest number of token dropped
+	 * 
+	 * @param agents
+	 * @return 
+	 */
+	public static List<Agent> getAgentMaxTokDrop(Map<String, Agent> agents){
+		List<Agent> list = new ArrayList<Agent>();
+		Iterator<String> its = agents.keySet().iterator();
+		AgentStat stat = null;
+
+		// find a max number
+		int max = 0;
+		int tmp= 0;
+		for(Agent n = null; its.hasNext();){
+			n = agents.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumTokDrop();
+			if(max < tmp){
+				max = tmp;
+			}
+		}
+		
+		// find an agent that has max number
+		its = agents.keySet().iterator();
+		for(Agent n = null; its.hasNext();){
+			n = agents.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumTokDrop();
+			if(tmp == max){
+				list.add(n);
+			}
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * Get agents with lowest number of token dropped
+	 * 
+	 * @param agents
+	 * @return 
+	 */
+	public static List<Agent> getAgentMinTokDrop(Map<String, Agent> agents){
+		List<Agent> list = new ArrayList<Agent>();
+		Iterator<String> its = agents.keySet().iterator();
+		AgentStat stat = null;
+
+		// find a min number
+		int min = -1;
+		int tmp = 0;
+		for(Agent n = null; its.hasNext();){
+			n = agents.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumTokDrop();
+			if(min > tmp || min < 0){
+				min = tmp;
+			}
+		}
+		
+		// find an agent that has min number
+		its = agents.keySet().iterator();
+		for(Agent n = null; its.hasNext();){
+			n = agents.get(its.next());
+			stat = n.getStat();
+			tmp = stat.getNumTokDrop();
+			if(tmp == min){
+				list.add(n);
+			}
+		}
+		return list;
+	}
+	
+	
+	/**
 	 * Get average delay time of message traveled in every links
 	 * 
 	 * @param edge
@@ -728,7 +947,7 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
-	 * Get a max delay time of message traveled and link 
+	 * Get link(s) with a max delay time of message traveled
 	 * 
 	 * @param edge
 	 * @return
@@ -800,10 +1019,10 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
-	 * Get total number of message has been send in difference message type
+	 * Get list of message type with number of message has been sent
 	 * 
 	 * @param edges
-	 * @return
+	 * @return {messageType, count}
 	 */
 	public static Map<String, Integer> getTotalMsgTypeCount(Map<String, Edge> edges){
 		Iterator<String> its = edges.keySet().iterator();	

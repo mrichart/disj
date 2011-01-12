@@ -86,12 +86,12 @@ public class TokenAgentProcessor extends AgentProcessor {
 		int totalDrop = gStat.getTotalTokDrop(agents);
 		int timeUse = gStat.getAverageEdgeDelay(edges);
 		
-		Map<String, Integer> nodeVisit = gStat.getTotalNodeVisit(agents);
-		Map<Integer, Integer> stateMove = gStat.getTotalStateMove(agents);
-		Map<String, Integer> nodeDrop = gStat.getTotalNodeDrop(agents);
-		Map<String, Integer> nodePick = gStat.getTotalNodePick(agents);
-		Map<String, Integer> tokenHold = gStat.getTotalTokHold(agents);
-		Map<Integer, Integer> stateCount = gStat.getFinalStateCount(agents);
+		Map<String, Integer> nodeVisit = gStat.getNodeVisitCount(agents);
+		Map<Integer, Integer> stateMove = gStat.getStateMoveCount(agents);
+		Map<String, Integer> nodeDrop = gStat.getNodeTokDropCount(agents);
+		Map<String, Integer> nodePick = gStat.getNodeTokPickCount(agents);
+		Map<String, Integer> tokenHold = gStat.getAgentTokHoldCount(agents);
+		Map<Integer, Integer> stateCount = gStat.getAgentStateCount(agents);
 		
 		System.out.println("************** STATISTIC REPORT **************");
 		System.out.println("Total Token has been picked by all agents: " + totalPick);
