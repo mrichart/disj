@@ -252,14 +252,14 @@ public class Node implements Serializable {
 		this.stateNames = states;
 	}
 
-	/*
+	/**
 	 * Return a state's name corresponding to a given state if the state's name
 	 * does not find it will return "state not found"
 	 * 
 	 * @param state
 	 * @return
 	 */
-	private String getStateName(int state) {
+	public String getStateName(int state) {
 		if (this.stateNames.containsKey(state)) {
 			return this.stateNames.get(state);
 		} else {
@@ -632,7 +632,8 @@ public class Node implements Serializable {
 	 * 
 	 */
 	public void incMsgSend() {
-		this.stat.incNumMsgSend();
+		this.stat.incNumMsgSent();
+		this.stat.incStateMsgSent(this.curState);
 	}
 
 	/**
@@ -655,7 +656,7 @@ public class Node implements Serializable {
 	 * @return Returns the numMsgSend.
 	 */
 	public int getNumMsgSend() {
-		return this.stat.getNumMsgSend();
+		return this.stat.getNumMsgSent();
 	}
 
 	/**

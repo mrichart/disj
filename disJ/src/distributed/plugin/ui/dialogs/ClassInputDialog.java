@@ -8,7 +8,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import distributed.plugin.ui.IGraphEditorConstants;
+import distributed.plugin.core.IConstants;
 
 public class ClassInputDialog extends Dialog {
 
@@ -56,11 +56,11 @@ public class ClassInputDialog extends Dialog {
 	protected void okPressed() {
 		int returnCode = -1;
 		if (this.msgPassing.getSelection()){
-			returnCode = IGraphEditorConstants.MODEL_MESSAGE_PASSING;
+			returnCode = IConstants.MODEL_MESSAGE_PASSING;
 		}else if (this.boardAgent.getSelection()){
-			returnCode = IGraphEditorConstants.MODEL_AGENT_WHITEBOARD;
+			returnCode = IConstants.MODEL_AGENT_WHITEBOARD;
 		}else if (this.boardToken.getSelection()){
-			returnCode = IGraphEditorConstants.MODEL_AGENT_TOKEN;
+			returnCode = IConstants.MODEL_AGENT_TOKEN;
 		}		
 		setReturnCode(returnCode);
 		this.value = this.className.getText();

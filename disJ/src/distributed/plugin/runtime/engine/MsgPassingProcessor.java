@@ -232,7 +232,8 @@ public class MsgPassingProcessor implements IProcessor {
 			this.updateSentLog(sNode, port, message);			
 						
 			// update statistic
-			sNode.getStat().incNumMsgSend();
+			sNode.getStat().incNumMsgSent();
+			sNode.getStat().incStateMsgSent(sNode.getCurState());
 			recvEdge.getStat().incEnterEdge();
 			recvEdge.getStat().incMsgTypeCount(msgLabel);
 			recvEdge.recMsgPassed(msgLabel, sender);
@@ -426,7 +427,7 @@ public class MsgPassingProcessor implements IProcessor {
 			
 			// display statistic report
 			this.displayStat();
-
+						
 			while(stop == false){
 				try{
 					Thread.sleep(3000);
@@ -776,6 +777,10 @@ public class MsgPassingProcessor implements IProcessor {
 	}
 
 	public void displayStat() {
+		
+		// signal UI to display one time final graph report
+		this.graph.signalFinalReportDisplay(IConstants.MODEL_MESSAGE_PASSING);
+
 		GraphStat gStat = this.graph.getStat();
 		Map<String, Node> nodes = this.graph.getNodes();
 		Map<String, Edge> edges = this.graph.getEdges();

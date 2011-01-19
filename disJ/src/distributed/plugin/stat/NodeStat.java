@@ -1,7 +1,9 @@
 package distributed.plugin.stat;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import distributed.plugin.core.IConstants;
 
@@ -9,7 +11,7 @@ import distributed.plugin.core.IConstants;
 public class NodeStat extends Statistic {
 	
 	private int numMsgRecv;
-	private int numMsgSend;	
+	private int numMsgSent;	
 	private int numAgentVisit;
 	private int numTokDrop;
 	private int numTokPick;
@@ -20,6 +22,9 @@ public class NodeStat extends Statistic {
 	private String nodeId;	
 	private List<String> pastStates;
 
+	// number of message sent at different state
+	private Map<Integer, Integer> stateMsgSent;
+	
 	/**
 	 * 
 	 * @param name
@@ -28,7 +33,7 @@ public class NodeStat extends Statistic {
 		this.nodeId = name;
 		this.numAgentVisit = 0;
 		this.numMsgRecv = 0;
-		this.numMsgSend = 0;
+		this.numMsgSent = 0;
 		this.numTokDrop = 0;
 		this.numTokPick = 0;
 		this.numBoardDel = 0;
@@ -36,17 +41,19 @@ public class NodeStat extends Statistic {
 		this.numBoardWrite = 0;
 		
 		this.pastStates = new ArrayList<String>();
+		this.stateMsgSent = new HashMap<Integer, Integer>();
 	}
 	
 	@Override
 	public void reset(){
 		this.numAgentVisit = 0;
 		this.numMsgRecv = 0;
-		this.numMsgSend = 0;
+		this.numMsgSent = 0;
 		this.numTokDrop = 0;
 		this.numTokPick = 0;
 		
 		this.pastStates = new ArrayList<String>();
+		this.stateMsgSent = new HashMap<Integer, Integer>();
 	}
 
 	@Override
@@ -64,14 +71,29 @@ public class NodeStat extends Statistic {
 		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_NODE, old, this.numMsgRecv);
 	}
 	
-	public int getNumMsgSend() {
-		return numMsgSend;
+	public int getNumMsgSent() {
+		return numMsgSent;
 	}
 	
-	public void incNumMsgSend(){
-		Integer old = this.numMsgSend;
-		this.numMsgSend++;
-		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_NODE, old, this.numMsgSend);
+	public void incNumMsgSent(){
+		Integer old = this.numMsgSent;
+		this.numMsgSent++;		
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_NODE, old, this.numMsgSent);
+	}
+	
+	public Map<Integer, Integer> getStateMsgSent() {
+		return this.stateMsgSent;
+	}
+	
+	public void incStateMsgSent(int stateId){
+		if(this.stateMsgSent.containsKey(stateId)){
+			int count = this.stateMsgSent.get(stateId);
+			count++;
+			this.stateMsgSent.put(stateId, count);
+		}else{
+			this.stateMsgSent.put(stateId, 1);
+		}
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_NODE, null, this.stateMsgSent);
 	}
 
 	public int getNumAgentVisit() {

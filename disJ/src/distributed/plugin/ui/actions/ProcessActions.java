@@ -420,13 +420,13 @@ public class ProcessActions extends WorkbenchPartAction {
 			// load client class
 			Class client = this.loader.loadClass(protocol);
 
-			if(model == IGraphEditorConstants.MODEL_MESSAGE_PASSING){
+			if(model == IConstants.MODEL_MESSAGE_PASSING){
 				if (!Entity.class.isAssignableFrom(client)) {
 					MessageDialog.openError(parent, "Cannot load Client Class Error",
 							"Class must extends Entity");
 					return;
 				}
-			}else if (model == IGraphEditorConstants.MODEL_AGENT_WHITEBOARD){
+			}else if (model == IConstants.MODEL_AGENT_WHITEBOARD){
 				if (!BoardAgent.class.isAssignableFrom(client)) {
 					MessageDialog.openError(parent, "Cannot load Client Class Error",
 							"Class must extends BoardAgent");

@@ -8,6 +8,7 @@ import java.util.Map;
 
 import distributed.plugin.core.Agent;
 import distributed.plugin.core.Edge;
+import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
 import distributed.plugin.runtime.engine.AgentModel;
 import distributed.plugin.runtime.engine.TokenAgent;
@@ -107,6 +108,37 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
+	 * Get a list state verses number of messages sent
+	 * 
+	 * @return {NodeStateId, count}
+	 */
+	public static Map<Integer, Integer> getNodeStateMsgSentCount(Map<String, Node> nodes){
+		int temp = 0;
+		int c = 0;
+		
+		// iterate through each node
+		Map<Integer, Integer> count = new HashMap<Integer, Integer>();
+		for (String id : nodes.keySet()) {
+			Node n = nodes.get(id);
+			
+			// count each sent per state of a node
+			Map<Integer, Integer> msg = n.getStat().getStateMsgSent();			
+			for (Integer stateId : msg.keySet()) {
+				temp = msg.get(stateId);
+				if(count.containsKey(stateId)){
+					c = count.get(stateId);
+					c += temp;
+				}else{
+					c = temp;
+				}
+				count.put(stateId, c);
+			}
+		}
+		return count;
+	}
+	
+	
+	/**
 	 * Get total number of message that every nodes received
 	 * 
 	 * @param nodes
@@ -137,7 +169,7 @@ public class GraphStat extends Statistic {
 		for(Node n = null; its.hasNext();){
 			n = nodes.get(its.next());
 			stat = n.getStat();
-			count += stat.getNumMsgSend();
+			count += stat.getNumMsgSent();
 		}
 		return count;
 	}
@@ -195,7 +227,7 @@ public class GraphStat extends Statistic {
 		for(Node n = null; its.hasNext();){
 			n = nodes.get(its.next());
 			stat = n.getStat();
-			tmp = stat.getNumMsgSend();
+			tmp = stat.getNumMsgSent();
 			if(max < tmp){
 				max = tmp;
 			}
@@ -206,7 +238,7 @@ public class GraphStat extends Statistic {
 		for(Node n = null; its.hasNext();){
 			n = nodes.get(its.next());
 			stat = n.getStat();
-			tmp = stat.getNumMsgSend();
+			tmp = stat.getNumMsgSent();
 			if(tmp == max){
 				list.add(n);
 			}
@@ -267,7 +299,7 @@ public class GraphStat extends Statistic {
 		for(Node n = null; its.hasNext();){
 			n = nodes.get(its.next());
 			stat = n.getStat();
-			tmp = stat.getNumMsgSend();
+			tmp = stat.getNumMsgSent();
 			if(min > tmp || min < 0){
 				min = tmp;
 			}
@@ -278,7 +310,7 @@ public class GraphStat extends Statistic {
 		for(Node n = null; its.hasNext();){
 			n = nodes.get(its.next());
 			stat = n.getStat();
-			tmp = stat.getNumMsgSend();
+			tmp = stat.getNumMsgSent();
 			if(tmp == min){
 				list.add(n);
 			}
@@ -504,6 +536,53 @@ public class GraphStat extends Statistic {
 		return list;
 	}
 	
+
+	/**
+	 * Get a count of different type of board access of every board
+	 * 
+	 * @return {AccessType, count}
+	 */
+	public static Map<Integer, Integer> getBoardAccessCount(Map<String, Node> nodes){
+		int c = 0;
+		Map<Integer, Integer> count = new HashMap<Integer, Integer>();
+		for (String id : nodes.keySet()) {
+			Node n = nodes.get(id);
+			int del = n.getStat().getNumBoardDel();
+			int wrt = n.getStat().getNumBoardWrite();
+			int rea = n.getStat().getNumBoardRead();
+			
+			// delete		
+			if(count.containsKey(IConstants.BOARD_DEL)){
+				c = count.get(IConstants.BOARD_DEL);
+				c += del;
+			}else{
+				c = del;
+			}
+			count.put(IConstants.BOARD_DEL, c);
+			
+			// write			
+			if(count.containsKey(IConstants.BOARD_WRITE)){
+				c = count.get(IConstants.BOARD_WRITE);
+				c += wrt;
+			}else{
+				c = wrt;
+			}
+			count.put(IConstants.BOARD_WRITE, c);
+			
+			// read			
+			if(count.containsKey(IConstants.BOARD_READ)){
+				c = count.get(IConstants.BOARD_READ);
+				c += rea;
+			}else{
+				c = rea;
+			}
+			count.put(IConstants.BOARD_READ, c);
+			
+		}
+		return count;
+	}
+	
+	
 	/**
 	 * Get total number of move of every agents
 	 * 
@@ -715,6 +794,60 @@ public class GraphStat extends Statistic {
 				TokenAgent t = (TokenAgent)a;
 				counts.put(a.getAgentId(), t.countMyToken());
 			}			
+		}
+		return counts;
+	}
+	
+	/**
+	 * Get list of agent states with number of all tokens have been picked
+	 * 
+	 * @param agents 
+	 * @return {AgentStateId, count}
+	 */
+	public static Map<Integer, Integer> getStateTokenPickCount(Map<String, Agent> agents){
+		Map<Integer, Integer> res;
+		Iterator<String> its = agents.keySet().iterator();
+		Map<Integer, Integer> counts = new HashMap<Integer, Integer>();
+		int c = 0;
+		for(Agent n = null; its.hasNext();){
+			n = agents.get(its.next());
+			res = n.getStat().getStatePick();
+			for (Integer stateId : res.keySet()) {
+				if (counts.containsKey(stateId)){
+					c = counts.get(stateId);
+					c += res.get(stateId);
+				}else{
+					c = res.get(stateId);
+				}
+				counts.put(stateId, c);
+			}
+		}
+		return counts;
+	}
+	
+	/**
+	 * Get list of agent states with number of all tokens have been dropped
+	 * 
+	 * @param agents 
+	 * @return {AgentStateId, count}
+	 */
+	public static Map<Integer, Integer> getStateTokenDropCount(Map<String, Agent> agents){
+		Map<Integer, Integer> res;
+		Iterator<String> its = agents.keySet().iterator();
+		Map<Integer, Integer> counts = new HashMap<Integer, Integer>();
+		int c = 0;
+		for(Agent n = null; its.hasNext();){
+			n = agents.get(its.next());
+			res = n.getStat().getStateDrop();
+			for (Integer stateId : res.keySet()) {
+				if (counts.containsKey(stateId)){
+					c = counts.get(stateId);
+					c += res.get(stateId);
+				}else{
+					c = res.get(stateId);
+				}
+				counts.put(stateId, c);
+			}
 		}
 		return counts;
 	}

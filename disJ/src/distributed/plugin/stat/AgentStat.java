@@ -34,6 +34,13 @@ public class AgentStat extends Statistic {
 	// number of time that agent drop token at different node
 	private Map<String, Integer> tokDrop;
 	
+	// number of time that agent pick up token at different state
+	private Map<Integer, Integer> statePick;
+	
+	
+	// number of time that agent drop off token at different state
+	private Map<Integer, Integer> stateDrop;
+	
 	/**
 	 * 
 	 * @param name
@@ -50,8 +57,11 @@ public class AgentStat extends Statistic {
 		this.pastStates = new ArrayList<String>();
 		this.nodeVisit = new HashMap<String, Integer>();
 		this.stateMove = new HashMap<Integer, Integer>();
+		this.statePick = new HashMap<Integer, Integer>();
+		this.stateDrop = new HashMap<Integer, Integer>();
 		this.tokPick = new HashMap<String, Integer>();
 		this.tokDrop = new HashMap<String, Integer>();
+		
 	}
 
 	@Override
@@ -66,6 +76,8 @@ public class AgentStat extends Statistic {
 		this.pastStates = new ArrayList<String>();
 		this.nodeVisit = new HashMap<String, Integer>();
 		this.stateMove = new HashMap<Integer, Integer>();
+		this.statePick = new HashMap<Integer, Integer>();
+		this.stateDrop = new HashMap<Integer, Integer>();
 		this.tokPick = new HashMap<String, Integer>();
 		this.tokDrop = new HashMap<String, Integer>();
 	}
@@ -201,6 +213,36 @@ public class AgentStat extends Statistic {
 			this.tokDrop.put(nodeId, 1);
 		}
 		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_AGENT, null, this.tokDrop);
+	}
+
+	public Map<Integer, Integer> getStatePick() {
+		return statePick;
+	}
+	
+	public void incStatePick(int agentState){
+		if(this.statePick.containsKey(agentState)){
+			int count = this.statePick.get(agentState);
+			count++;
+			this.statePick.put(agentState, count);
+		}else{
+			this.statePick.put(agentState, 1);
+		}
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_AGENT, null, this.statePick);
+	}
+
+	public Map<Integer, Integer> getStateDrop() {
+		return stateDrop;
+	}
+	
+	public void incStateDrop(int agentState){
+		if(this.stateDrop.containsKey(agentState)){
+			int count = this.stateDrop.get(agentState);
+			count++;
+			this.stateDrop.put(agentState, count);
+		}else{
+			this.stateDrop.put(agentState, 1);
+		}
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATISTIC_AGENT, null, this.stateDrop);
 	}
 	
 }

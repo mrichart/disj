@@ -43,6 +43,11 @@ public interface IConstants {
 	public static final short MSGDELAY_LOCAL_RANDOM_POISSON = 2;
 	public static final short MSGDELAY_LOCAL_RANDOM_CUSTOMS= 3;
 	
+	// board access type
+	public static final int BOARD_READ = 0;
+	public static final int BOARD_DEL = 1;
+	public static final int BOARD_WRITE = 2;
+	
 	// the priority order of Event execution	
 	public static final short EVENT_INITIATE_TYPE = 0;
 	public static final short EVENT_ALARM_RING_TYPE = 1;
@@ -132,6 +137,16 @@ public interface IConstants {
     public static final String PROPERTY_CHANGE_STATISTIC_AGENT = "update agent statistic";
     public static final String PROPERTY_CHANGE_STATISTIC_NODE = "update node statistic";
     public static final String PROPERTY_CHANGE_STATISTIC_EDGE = "update edge statistic";
+    
+    public static final String PROPERTY_FINAL_MSG_PASSING_REPORT = "final msg passing report statistic";
+    public static final String PROPERTY_FINAL_AGENT_BOARD_REPORT = "final whiteboard report statistic";
+    public static final String PROPERTY_FINAL_AGENT_TOKEN_REPORT = "final token report statistic";
+    
+    
+	// Model code
+	public static final int MODEL_MESSAGE_PASSING = 0;
+	public static final int MODEL_AGENT_WHITEBOARD = 1;
+	public static final int MODEL_AGENT_TOKEN = 2;
 	
 	
 	

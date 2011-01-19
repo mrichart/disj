@@ -160,11 +160,6 @@ public interface IGraphEditorConstants {
     public static final String STATE_CHANGE=" changes_its_state_to ";
 	public static final String LINK_VISIBILITY_CHANGE = " changes_its_visibility_to ";
 	
-	// Model code
-	public static final int MODEL_MESSAGE_PASSING = 0;
-	public static final int MODEL_AGENT_WHITEBOARD = 1;
-	public static final int MODEL_AGENT_TOKEN = 2;
-	
 	
 	
 

@@ -129,6 +129,25 @@ public class Graph implements Serializable {
     	this.stateFields = stateFields;
     }
    
+    /**
+     * Send signal to UI observer to display final report of the graph
+     */
+    public void signalFinalReportDisplay(int procType){
+    	
+    	if(procType == IConstants.MODEL_MESSAGE_PASSING){
+    		this.firePropertyChange(IConstants.PROPERTY_FINAL_MSG_PASSING_REPORT, null,
+    				null);
+    		
+    	}else if (procType == IConstants.MODEL_AGENT_WHITEBOARD){
+    		this.firePropertyChange(IConstants.PROPERTY_FINAL_AGENT_BOARD_REPORT, null,
+    				null);
+    		
+    	}else  if (procType == IConstants.MODEL_AGENT_TOKEN){
+    		this.firePropertyChange(IConstants.PROPERTY_FINAL_AGENT_TOKEN_REPORT, null,
+				null);
+    	}
+    }
+    
 	/**
 	 * Add a link that used in this graph
 	 * 

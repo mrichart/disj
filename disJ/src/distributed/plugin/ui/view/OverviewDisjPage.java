@@ -334,8 +334,11 @@ public class OverviewDisjPage extends DisJViewPage {
 	}
 
 	public void setContents(GraphElement contents) {
-		this.contents = contents;
-		this.contents.addPropertyChangeListener(this.prov);
+		if(contents != null){
+			this.contents = contents;
+			this.prov.setGraph(contents.getGraph());
+			this.contents.addPropertyChangeListener(this.prov);
+		}
 	}
 
 	private void loadAgents() {

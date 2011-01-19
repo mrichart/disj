@@ -534,7 +534,7 @@ public abstract class AgentProcessor implements IProcessor {
 					+ " is successfully over.*****");
 
 			// display statistic report
-			this.displayStat();
+			this.displayStat();					
 		
 			while(stop == false){
 				try{

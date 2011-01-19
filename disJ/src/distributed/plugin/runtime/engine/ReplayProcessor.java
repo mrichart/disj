@@ -443,6 +443,7 @@ public class ReplayProcessor implements IProcessor {
 			
 			// update statistic
 			agent.getStat().incDrop();
+			agent.getStat().incStateDrop(agent.getCurState());
 			agent.getStat().incNodeTokDrop(nodeId);
 			
 		} else if (tag == logTag.AGENT_PICK_TOKEN){
@@ -457,6 +458,7 @@ public class ReplayProcessor implements IProcessor {
 			// update statistic
 			for(int i =0; i < amount; i++){
 				agent.getStat().incPick();
+				agent.getStat().incStatePick(agent.getCurState());
 				agent.getStat().incNodeTokPick(nodeId);
 			}
 			

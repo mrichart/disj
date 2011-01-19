@@ -78,6 +78,10 @@ public class TokenAgentProcessor extends AgentProcessor {
 	}
 
 	public void displayStat() {
+		
+		// signal UI to display one time final graph report
+		this.graph.signalFinalReportDisplay(IConstants.MODEL_AGENT_TOKEN);
+
 		GraphStat gStat = this.graph.getStat();
 		Map<String, Agent> agents = this.graph.getAgents();
 		Map<String, Edge> edges = this.graph.getEdges();
