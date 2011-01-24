@@ -192,8 +192,7 @@ public class Agent implements Serializable{
 			return;
 		}else{
 			this.curState = state;								
-			this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATE_AGENT, null,
-					this);
+			this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATE_AGENT, null, this);
 		
 			// it is not a reset action
 			if(this.curState != -1){

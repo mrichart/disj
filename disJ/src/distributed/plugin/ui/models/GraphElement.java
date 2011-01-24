@@ -210,8 +210,11 @@ public class GraphElement extends AdapterElement {
         try {
             this.graph.addNode(id, element.getNode());
             this.nodeElements.add(element);
-            firePropertyChange(IConstants.PROPERTY_CHANGE_NODE, null, element);
             GraphFactory.addGraph(this.graph);
+            
+            // update DisJView display
+            firePropertyChange(IConstants.PROPERTY_CHANGE_ADD_NODE, null, element.getNode());
+                     
         } catch (DisJException ignore) {
             System.err.println("[GraphElement] "+ignore);
         }
@@ -239,8 +242,11 @@ public class GraphElement extends AdapterElement {
         try {
             this.graph.removeNode(id);
             this.nodeElements.remove(element);
-            firePropertyChange(IConstants.PROPERTY_CHANGE_NODE, element, null);
             GraphFactory.addGraph(this.graph);
+            
+            // update DisJView display
+            firePropertyChange(IConstants.PROPERTY_CHANGE_REM_NODE, null, element.getNode());
+            
         } catch (DisJException ignore) {
             System.err.println("[GraphElement] "+ignore);
         }

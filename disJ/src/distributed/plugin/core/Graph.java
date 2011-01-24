@@ -136,16 +136,25 @@ public class Graph implements Serializable {
     	
     	if(procType == IConstants.MODEL_MESSAGE_PASSING){
     		this.firePropertyChange(IConstants.PROPERTY_FINAL_MSG_PASSING_REPORT, null,
-    				null);
+    				"msg");
     		
     	}else if (procType == IConstants.MODEL_AGENT_WHITEBOARD){
     		this.firePropertyChange(IConstants.PROPERTY_FINAL_AGENT_BOARD_REPORT, null,
-    				null);
+    				"board");
     		
     	}else  if (procType == IConstants.MODEL_AGENT_TOKEN){
     		this.firePropertyChange(IConstants.PROPERTY_FINAL_AGENT_TOKEN_REPORT, null,
-				null);
+				"token");
     	}
+    }
+    
+    
+    /**
+     * Send signal to UI observer to start display GUI
+     */
+    public void signalStartGui(){      	
+    	this.firePropertyChange(IConstants.PROPERTY_START_REPORT, null,
+    				"msg");   	
     }
     
 	/**

@@ -327,7 +327,7 @@ public class OverviewDisjPage extends DisJViewPage {
 	public OverviewDisjPage(GraphElement contents) {
 		this.agents = new ArrayList<Agent>();
 		this.nodes = new ArrayList<Node>();
-		this.prov = new GraphContentProvider(this.agents);
+		this.prov = new GraphContentProvider(this.agents, nodes);
 		this.agentCompare = new AgentComparator();
 		this.nodeCompare = new NodeComparator();
 		this.setContents(contents);
@@ -336,23 +336,23 @@ public class OverviewDisjPage extends DisJViewPage {
 	public void setContents(GraphElement contents) {
 		if(contents != null){
 			this.contents = contents;
-			this.prov.setGraph(contents.getGraph());
 			this.contents.addPropertyChangeListener(this.prov);
+			this.prov.setGraph(this.contents.getGraph());
 		}
 	}
 
-	private void loadAgents() {
-		Map<String, Agent> maps = this.contents.getGraph().getAgents();
-		if (this.agents.isEmpty()) {
-			Iterator<String> it = maps.keySet().iterator();
-			for (String id = null; it.hasNext();) {
-				id = it.next();
-				this.agents.add(maps.get(id));
-			}
-		}
-	}
-
-	private void loadNodes() {
+//	void loadAgents() {
+//		Map<String, Agent> maps = this.contents.getGraph().getAgents();
+//		if (this.agents.isEmpty()) {
+//			Iterator<String> it = maps.keySet().iterator();
+//			for (String id = null; it.hasNext();) {
+//				id = it.next();
+//				this.agents.add(maps.get(id));
+//			}
+//		}
+//	}
+//
+	void loadNodes() {
 		Map<String, Node> maps = this.contents.getGraph().getNodes();
 		if (this.nodes.isEmpty()) {
 			Iterator<String> it = maps.keySet().iterator();
@@ -449,7 +449,7 @@ public class OverviewDisjPage extends DisJViewPage {
 		agentViewer.setLabelProvider(new AgentViewLabelProvider());
 
 		// upload agents
-		this.loadAgents();
+		//this.loadAgents();
 		agentViewer.setInput(this.agents);
 
 		this.sorter = new NameSorter();

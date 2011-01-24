@@ -274,6 +274,9 @@ public class Node implements Serializable {
 	public void addAgent(Agent agent){
 		if(!curAgents.contains(agent)){
 			this.curAgents.add(agent);
+			
+			this.firePropertyChange(IConstants.PROPERTY_CHANGE_AGENT_AT_NODE, null,
+					this);
 		}
 	}
 	
@@ -285,6 +288,9 @@ public class Node implements Serializable {
 		if(curAgents.contains(agent)){
 			this.curAgents.remove(agent);
 			this.removeRegistee(agent.getAgentId());
+			
+			this.firePropertyChange(IConstants.PROPERTY_CHANGE_AGENT_AT_NODE, null,
+					this);
 		}
 	}
 	
@@ -721,6 +727,10 @@ public class Node implements Serializable {
 					+ this.numToken);
 		}
 		this.numToken -= numDecrease;
+		
+		// for DisJView
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_NUM_TOK_NODE, null, 
+				this);
 	}
 
 	public void incrementToken(int numIncrease) {
@@ -730,6 +740,10 @@ public class Node implements Serializable {
 					+ " must be more than 0");
 		}
 		this.numToken += numIncrease;
+
+		// for DisJView
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_NUM_TOK_NODE, null, 
+				this);
 	}
 
 	/**
@@ -761,9 +775,14 @@ public class Node implements Serializable {
 		}else{
 			this.curState = state;
 		}
-				
-		this.firePropertyChange(IConstants.PROPERTY_CHANGE_NODE_STATE, null,
-				new Integer(this.curState));
+			
+		// for node state coloring
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_COLOR_NODE, null, 
+				this.curState);
+		
+		// for DisJView
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_STATE_NODE, null, 
+				this);
 	
 		// it is not a reset action
 		if(this.curState != -1){
@@ -905,6 +924,7 @@ public class Node implements Serializable {
 			if(log != null){
 				this.log.logNode(logTag.NODE_DIE, this.nodeId, null);
 			}
+			this.firePropertyChange(IConstants.PROPERTY_CHANGE_REM_NODE, null, this);
 			
 			// every agent resides in the node must die as well
 			for(int i = 0; i < this.curAgents.size(); i++){

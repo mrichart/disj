@@ -22,13 +22,15 @@ public class GraphContentProvider implements IStructuredContentProvider,
 
 	private Graph graph;
 	private List<Agent> agents; 
+	private List<Node> nodes;
 	
 	private TableViewer agentViewer;
 	private TableViewer nodeViewer;
 	private Canvas canvas;
 	
-	public GraphContentProvider(List<Agent> agents){
+	public GraphContentProvider(List<Agent> agents, List<Node> nodes){
 		this.agents = agents;
+		this.nodes = nodes;
 		this.graph = null;
 	}
 	
@@ -70,19 +72,66 @@ public class GraphContentProvider implements IStructuredContentProvider,
 		//return agents.toArray();			
 	}
 
+	/*
+	 * Start init data from model to gui
+	 */
+	private void startUp(){
+		
+		if(this.graph != null){
+			Map<String, Agent> amaps = this.graph.getAgents();
+			if (this.agents.isEmpty()) {
+				Iterator<String> it = amaps.keySet().iterator();
+				for (String id = null; it.hasNext();) {
+					id = it.next();
+					this.agents.add(amaps.get(id));
+				}
+			}
+			
+			Map<String, Node> nmaps = this.graph.getNodes();
+			if (this.nodes.isEmpty()) {
+				Iterator<String> it = nmaps.keySet().iterator();
+				for (String id = null; it.hasNext();) {
+					id = it.next();
+					this.nodes.add(nmaps.get(id));
+				}
+			}
+		}	
+	}
+	
+	/*
+	 * Clean up records in GUI
+	 */
+	private void cleanUp(){
+		for(int i =0; i < this.agents.size(); i++){
+			this.agentViewer.remove(this.agents.get(i));
+		}
+		
+		for(int i =0; i < this.nodes.size(); i++){
+			this.nodeViewer.remove(this.nodes.get(i));
+		}
+		this.agents.clear();
+		this.nodes.clear();
+
+		this.agentViewer.refresh();
+		this.nodeViewer.refresh();
+
+	}
+	
 	public void propertyChange(java.beans.PropertyChangeEvent evt) {
 		String prop = evt.getPropertyName();
 		Display display = Display.getCurrent();
         Runnable ui = null;
         
         //System.out.println("ContentProvider: PropertyChange: " + prop);
-        
         //this.inputChanged(viewer, evt.getOldValue(), evt.getNewValue());
+        
 		final Object o = evt.getNewValue();
 		
+		// ******** AGENT ********
+		// ======================
 		if (prop.equals(IConstants.PROPERTY_CHANGE_ADD_AGENT)) {
 			if(o instanceof Agent){
-				agents.add((Agent)o);
+				this.agents.add((Agent)o);
 		        if (display == null) {
 					ui = new Runnable() {
 						public void run() {
@@ -91,79 +140,101 @@ public class GraphContentProvider implements IStructuredContentProvider,
 					};
 				} 
 			}		        
+		} else if (prop.equals(IConstants.PROPERTY_CHANGE_REM_AGENT)){			
+			if(o instanceof Agent){
+				if (display == null) {
+					// Do not remove physically, only set state to be death
+					ui = new Runnable() {
+						public void run() {
+							agentViewer.update(o, null);
+						}
+					};
+				} 
+			}
 		} else if (prop.equals(IConstants.PROPERTY_CHANGE_STATE_AGENT)){
+			if(o instanceof Agent){
+				if (display == null) {
+					ui = new Runnable() {
+						public void run() {
+							agentViewer.update(o, null);
+							
+							// print states vs agents table
+							GraphContentProvider.printStateVsAgentTable(graph.getAgents());
+						}
+					};
+				} 
+			}
+		} else if (prop.equals(IConstants.PROPERTY_CHANGE_LOC_AGENT)){		
+			if(o instanceof Agent){
+				if (display == null) {
+					ui = new Runnable() {
+						public void run() {
+							agentViewer.update(o, null);						
+						}
+					};
+				} 
+			}
+		}else if (prop.equals(IConstants.PROPERTY_CHANGE_STATISTIC_AGENT)){
 			if (display == null) {
 				ui = new Runnable() {
 					public void run() {
-						agentViewer.update(o, null);
+						agentViewer.refresh();
+						canvas.redraw();
+					}
+				};
+			} 
+			
+			// ******** NODE ********
+			// ======================
+		} else if (prop.equals(IConstants.PROPERTY_CHANGE_ADD_NODE)){
+			if(o instanceof Node){
+				this.nodes.add((Node)o);
+				if (display == null) {
+					ui = new Runnable() {
+						public void run() {
+							nodeViewer.update(o, null);							
+						}
+					};
+				} 
+			}
+		} else if (prop.equals(IConstants.PROPERTY_CHANGE_REM_NODE)){
+			if(o instanceof Node){
+				// Do not remove physically, only set state to be death
+				if (display == null) {
+					ui = new Runnable() {
+						public void run() {
+							nodeViewer.update(o, null);							
+						}
+					};
+				} 
+			}
+		} else if (prop.equals(IConstants.PROPERTY_CHANGE_STATE_NODE)){			
+			if (display == null) {
+				ui = new Runnable() {
+					public void run() {
+						nodeViewer.update(o, null);
 						
-						// print states vs agents table
-						GraphContentProvider.printStateVsAgentTable(graph.getAgents());
+						// print nodes vs states table
+						GraphContentProvider.printStateVsNodeTable(graph.getNodes());	
 					}
 				};
 			} 
-		} else if (prop.equals(IConstants.PROPERTY_CHANGE_LOC_AGENT)){
-			if (display == null) {
-				ui = new Runnable() {
-					public void run() {
-						agentViewer.update(o, null);
-					}
-				};
-			} 
-		} else if (prop.equals(IConstants.PROPERTY_CHANGE_REM_AGENT)){
-			if (display == null) {
-				ui = new Runnable() {
-					public void run() {
-						agentViewer.update(o, null);
-					}
-				};
-			} 
-		} else if (prop.equals(IConstants.PROPERTY_CHANGE_AGENT_ARRIVE)){
+		} else if (prop.equals(IConstants.PROPERTY_CHANGE_NUM_TOK_NODE)){
 			if(o instanceof Node){
 				if (display == null) {
 					ui = new Runnable() {
 						public void run() {
-							nodeViewer.update(o, null);
+							nodeViewer.update(o, null);						
 						}
 					};
 				} 
 			}
-		}  else if (prop.equals(IConstants.PROPERTY_CHANGE_AGENT_LEAVE)){
+		} else if (prop.equals(IConstants.PROPERTY_CHANGE_AGENT_AT_NODE)){
 			if(o instanceof Node){
 				if (display == null) {
 					ui = new Runnable() {
 						public void run() {
-							nodeViewer.update(o, null);
-						}
-					};
-				} 
-			}
-		}  else if (prop.equals(IConstants.PROPERTY_CHANGE_TOKEN_DROP)){
-			if(o instanceof Node){
-				if (display == null) {
-					ui = new Runnable() {
-						public void run() {
-							nodeViewer.update(o, null);
-						}
-					};
-				} 
-			}
-		} else if (prop.equals(IConstants.PROPERTY_CHANGE_TOKEN_PICK)){
-			if(o instanceof Node){
-				if (display == null) {
-					ui = new Runnable() {
-						public void run() {
-							nodeViewer.update(o, null);
-						}
-					};
-				} 
-			}
-		} else if (prop.equals(IConstants.PROPERTY_CHANGE_AGENT_BOARD)){
-			if(o instanceof Node){
-				if (display == null) {
-					ui = new Runnable() {
-						public void run() {
-							nodeViewer.update(o,null);
+							nodeViewer.update(o, null);						
 						}
 					};
 				} 
@@ -172,17 +243,19 @@ public class GraphContentProvider implements IStructuredContentProvider,
 			if (display == null) {
 				ui = new Runnable() {
 					public void run() {
-						canvas.redraw();
-						
-						// print nodes vs states table
-						GraphContentProvider.printStateVsNodeTable(graph.getNodes());					
+						nodeViewer.refresh();
+						canvas.redraw();																
 					}
 				};		
 			}
+			
+			// ******** FINAL ********
+			// =======================
 		} else if (prop.equals(IConstants.PROPERTY_FINAL_AGENT_TOKEN_REPORT)){
 			if (display == null) {
 				ui = new Runnable() {
 					public void run() {
+						//cleanUp();
 						
 						// print agent states vs token pick
 						GraphContentProvider.printStateVsTokenPick(graph.getAgents());
@@ -196,7 +269,7 @@ public class GraphContentProvider implements IStructuredContentProvider,
 			if (display == null) {
 				ui = new Runnable() {
 					public void run() {	
-						
+						//cleanUp();
 						// print access type vs count
 						GraphContentProvider.printAccessTypeVsCount(graph.getNodes());						
 					}
@@ -206,10 +279,21 @@ public class GraphContentProvider implements IStructuredContentProvider,
 			if (display == null) {
 				ui = new Runnable() {
 					public void run() {
-
+						//cleanUp();
 						// print node vs msg sent table
-						GraphContentProvider.printStateVsMsgSent(graph.getNodes());
-						
+						GraphContentProvider.printStateVsMsgSent(graph.getNodes());						
+					}
+				};
+			}
+			
+			// ******** START ********
+			// =======================
+		} else if (prop.equals(IConstants.PROPERTY_START_REPORT)){
+			if (display == null) {
+				ui = new Runnable() {
+					public void run() {
+						cleanUp();
+						startUp();										
 					}
 				};
 			}

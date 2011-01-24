@@ -109,9 +109,8 @@ public interface IConstants {
 	public static final String RECV_TAG = "<recv>";
 	public static final String EDGE_TAG = "<edge>";
 	public static final String STATE_NOT_FOUND = "State Not found";
-	
-	public static final String PROPERTY_CHANGE_NODE_STATE = "node_state_changed";
-    public static final String PROPERTY_CHANGE_NODE = "node";
+	 
+	// For GEF Parts drawing
     public static final String PROPERTY_CHANGE_EDGE = "edge";
     public static final String PROPERTY_CHANGE_BOUND = "bound";
     public static final String PROPERTY_CHANGE_INPUT = "input_link";
@@ -122,21 +121,24 @@ public interface IConstants {
     public static final String PROPERTY_CHANGE__LINK_INVISIBLE = "link_invisible";
     public static final String PROPERTY_CHANGE_NAME = "name";
     public static final String PROPERTY_CHANGE_USER_INPUT = "user_input";
+    public static final String PROPERTY_CHANGE_COLOR_NODE = "node_state_color_changed";
     
+    public static final String PROPERTY_CHANGE_ADD_NODE = "add_node";
+    public static final String PROPERTY_CHANGE_REM_NODE = "rem_node";
+	public static final String PROPERTY_CHANGE_STATE_NODE = "node_state_changed";
+	public static final String PROPERTY_CHANGE_NUM_TOK_NODE = "node_num_token_changed";
+	public static final String PROPERTY_CHANGE_AGENT_AT_NODE = "num_agent_at_node";	
+
     public static final String PROPERTY_CHANGE_ADD_AGENT = "add_agent";
     public static final String PROPERTY_CHANGE_REM_AGENT = "rem_agent";
     public static final String PROPERTY_CHANGE_STATE_AGENT = "agent_state_changed";
     public static final String PROPERTY_CHANGE_LOC_AGENT = "agent_location_changed";
-    
-    public static final String PROPERTY_CHANGE_AGENT_ARRIVE = "agent_arrived";
-    public static final String PROPERTY_CHANGE_AGENT_LEAVE = "agent_leaved";
-    public static final String PROPERTY_CHANGE_TOKEN_DROP = "agent_drop_token";
-    public static final String PROPERTY_CHANGE_TOKEN_PICK = "agent_pick_token";   
-    public static final String PROPERTY_CHANGE_AGENT_BOARD = "agent_access_board";
-    
+      
     public static final String PROPERTY_CHANGE_STATISTIC_AGENT = "update agent statistic";
     public static final String PROPERTY_CHANGE_STATISTIC_NODE = "update node statistic";
     public static final String PROPERTY_CHANGE_STATISTIC_EDGE = "update edge statistic";
+    
+    public static final String PROPERTY_START_REPORT = "start report statistic";
     
     public static final String PROPERTY_FINAL_MSG_PASSING_REPORT = "final msg passing report statistic";
     public static final String PROPERTY_FINAL_AGENT_BOARD_REPORT = "final whiteboard report statistic";

@@ -528,6 +528,7 @@ public abstract class AgentProcessor implements IProcessor {
 			this.logAgentInfo();
 
 			// start execute events
+			this.graph.signalStartGui();
 			this.executeEvents();
 
 			this.systemOut.println("\n*****Simulation for " + this.procName

@@ -270,7 +270,7 @@ public class NodePart extends AbstractGraphicalEditPart implements
 				} else {
 					refreshSourceConnections();
 				}
-			} else if (prop.equals(IConstants.PROPERTY_CHANGE_NODE_STATE)) {
+			} else if (prop.equals(IConstants.PROPERTY_CHANGE_COLOR_NODE)) {
 				final Integer value = (Integer) evt.getNewValue();
 				if (display == null) {
 					ui = new Runnable() {
