@@ -588,15 +588,24 @@ public class ProcessActions extends WorkbenchPartAction {
 
 	private void executeSpeed() {
 		int speed = IConstants.SPEED_DEFAULT_RATE;
+		SpeedDialog dialog = null;
 		try{
-			speed = this.engine.getSpeed();
-			SpeedDialog dialog = new SpeedDialog(getWorkbenchPart().getSite()
-					.getShell(), speed);
-			speed = dialog.open();
-			this.engine.setSpeed(speed);
-			
-		}catch(DisJException e){
-			this.missUseActionMsg("Processor has not yet created");	
+			if(!this.engine.isStarted()){
+				this.missUseActionMsg("No processor is running");
+				
+			}else if(this.engine.isSuspend()){
+				speed = this.engine.getSpeed();
+				Shell shell = this.getWorkbenchPart().getSite().getShell();
+				dialog = new SpeedDialog(shell, speed);	
+				dialog.open();
+				
+				speed = dialog.getSpeedInput();			
+				this.engine.setSpeed(speed);
+			}else{
+				this.missUseActionMsg("Need to pause processor before setting speed");
+			}			
+		}catch(Exception e){
+			this.missUseActionMsg("Error!! @executeSpeed() " + e);			
 		}
 			
 	}

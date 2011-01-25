@@ -208,21 +208,21 @@ public class GraphLoader {
      * Covert a percentage of execution speed into a sleeping time of 
      * processor
      * 
-     * @param per A percentage value of [0-100] inclusive
+     * @param value A percentage value of [0-100] inclusive
      * 
      * @return a millisecond of processor to be sleeping between 
      * [0 - 10000] milliseconds inclusive
      */
-    public static int speedConverter(int per){
-    	int min = 10000;
+    public static int speedConverter(int value){
+    	int rate = 10000;
     	
-    	if(per < 0){
-    		per = 0;
+    	if(value < IConstants.SPEED_MIN_RATE){
+    		value = IConstants.SPEED_MIN_RATE;
     	}
-    	if(per > 100){
-    		per = 100;
+    	if(value > IConstants.SPEED_MAX_RATE){
+    		value = IConstants.SPEED_MAX_RATE;
     	}
-    	int sleeping = min - ((per * min)/100);
+    	int sleeping = rate - ((value * rate)/IConstants.SPEED_MAX_RATE);
     	
     	return sleeping;
     }

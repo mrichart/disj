@@ -264,18 +264,18 @@ public class Graph implements Serializable {
 	public void removeAllAgents(){
 		
 		// remove listeners
-		PropertyChangeListener[] lis = this.listeners.getPropertyChangeListeners();
-		Iterator<String> its = this.agents.keySet().iterator();
-		Agent a = null;
-		for(String id = null; its.hasNext(); ){
-			id = its.next();
-			a = this.agents.remove(id);		
-			for(int i =0; i < lis.length; i++){				
-				a.removePropertyChangeListener(lis[i]);
-			}			
-			this.firePropertyChange(IConstants.PROPERTY_CHANGE_REM_AGENT, null,
-					a);
-		}
+//		PropertyChangeListener[] lis = this.listeners.getPropertyChangeListeners();
+//		Iterator<String> its = this.agents.keySet().iterator();
+//		Agent a = null;
+//		for(String id = null; its.hasNext(); ){
+//			id = its.next();
+//			a = this.agents.remove(id);		
+//			for(int i =0; i < lis.length; i++){				
+//				a.removePropertyChangeListener(lis[i]);
+//			}			
+//			this.firePropertyChange(IConstants.PROPERTY_CHANGE_REM_AGENT, null,
+//					a);
+//		}
 		
 		// double safe lol
 		this.agents.clear();

@@ -42,7 +42,7 @@ public class SpeedDialog extends Dialog {
 		this.speed = speed;
 	}
 	
-	public int open() {
+	public void open() {
 		final Shell shell = new Shell(getParent(), SWT.DIALOG_TRIM
 				| SWT.APPLICATION_MODAL);
 		shell.setText(getText());
@@ -77,6 +77,15 @@ public class SpeedDialog extends Dialog {
 		 max.setLocation(220, 60);
 		 max.setSize(50, 20);
 		 max.setText("Fast");
+		
+		 shell.open();
+		 Display display = getParent().getDisplay();
+		 while (!shell.isDisposed()) {
+			 if (!display.readAndDispatch()){
+				 display.sleep();
+			 }
+		 }
+		
 		
 //		final int[] speeds=new int[4];
 //		
@@ -126,13 +135,10 @@ public class SpeedDialog extends Dialog {
 //		};		
 //		btnOkay.addListener(SWT.Selection, listener);
 //		
-		shell.open();
-		Display display = getParent().getDisplay();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
-				display.sleep();
-		}
 		
-		return speed;
+	}
+	
+	public int getSpeedInput(){
+		return this.speed;
 	}
 }
