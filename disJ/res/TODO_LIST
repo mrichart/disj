@@ -2,8 +2,6 @@ TODO
 
 
 
-4. Add more statistic detail at the end
-
 8. Display warning when there is no init state at any node in the network
 
 11.Modify in document that disj doesn't allow user to call any Entity 
@@ -11,7 +9,7 @@ TODO
 
 13. add adversary
 14. do step next 
-15. remove save rec icon
+
 16. update cookbook
 17. Remove existing graph and recreate a new graph in the file cause all
 kinds of error. (check maping state color and node, tracking node object
