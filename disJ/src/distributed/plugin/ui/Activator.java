@@ -10,9 +10,6 @@
 
 package distributed.plugin.ui;
 
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -22,13 +19,13 @@ import org.osgi.framework.BundleContext;
  */
 public class Activator extends AbstractUIPlugin {
 	
-	public static final String PLUGIN_ID = "disj";//"distributed.plugin.ui.editor.GraphEditor"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "distributed.plugin.ui.editor.GraphEditor"; //$NON-NLS-1$
 	
 	//The shared instance.
 	private static Activator plugin;
 	
 	//Resource bundle.
-	private ResourceBundle resourceBundle;
+	//private ResourceBundle resourceBundle;
 	
 	/**
 	 * The constructor.
@@ -36,11 +33,11 @@ public class Activator extends AbstractUIPlugin {
 	public Activator() {
 		super();
 		plugin = this;
-		try {
-			resourceBundle = ResourceBundle.getBundle("distributed.plugin.ui.GraphEditorPluginResources");
-		} catch (MissingResourceException x) {
-			resourceBundle = null;
-		}
+//		try {
+//			resourceBundle = ResourceBundle.getBundle("distributed.plugin.ui.ActivatorResources");
+//		} catch (MissingResourceException x) {
+//			resourceBundle = null;
+//		}
 	}
 
 	/**
@@ -67,7 +64,7 @@ public class Activator extends AbstractUIPlugin {
 	/**
 	 * Returns the string from the plugin's resource bundle,
 	 * or 'key' if not found.
-	 */
+	 *
 	public static String getResourceString(String key) {
 		ResourceBundle bundle = Activator.getDefault().getResourceBundle();
 		try {
@@ -76,14 +73,14 @@ public class Activator extends AbstractUIPlugin {
 			return key;
 		}
 	}
-
+*/
 	/**
 	 * Returns the plugin's resource bundle,
-	 */
+	 *
 	public ResourceBundle getResourceBundle() {
 		return resourceBundle;
 	}
-	
+	*/
 	/** Returns an image descriptor for the image file at the given
 	 * plug-in relative path
 	 *

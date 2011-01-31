@@ -22,17 +22,14 @@ import org.eclipse.swt.graphics.Color;
 public interface IGraphEditorConstants {
 
 	// menu constants
-	public String GraphicalEditor_FILE_DELETED_TITLE_UI = Activator
-			.getResourceString("%GraphicalEditor.FILE_DELETED_TITLE_UI_"); //$NON-NLS-1$
+	public String GraphicalEditor_FILE_DELETED_TITLE_UI = "File Deleted"; //$NON-NLS-1$
 
-	public String GraphicalEditor_FILE_DELETED_WITHOUT_SAVE_INFO = Activator
-			.getResourceString("%GraphicalEditor.FILE_DELETED_WITHOUT_SAVE_INFO_");//$NON-NLS-1$
+	public String GraphicalEditor_FILE_DELETED_WITHOUT_SAVE_INFO = "The file has been deleted from the file system. " +
+			"Do you want to save your changes or close the editor without saving?";//$NON-NLS-1$
 
-	public String GraphicalEditor_SAVE_BUTTON_UI = Activator
-			.getResourceString("%GraphicalEditor.SAVE_BUTTON_UI_"); //$NON-NLS-1$
+	public String GraphicalEditor_SAVE_BUTTON_UI = "Save"; //$NON-NLS-1$
 
-	public String GraphicalEditor_CLOSE_BUTTON_UI = Activator
-			.getResourceString("%GraphicalEditor.CLOSE_BUTTON_UI_"); //$NON-NLS-1$
+	public String GraphicalEditor_CLOSE_BUTTON_UI = "Close"; //$NON-NLS-1$
 
 	// Default node background color
 	public static Color DEFAULT_NODE_COLOR = new Color(null, 100, 150, 50);
