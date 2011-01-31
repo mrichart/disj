@@ -109,18 +109,18 @@ public class Ring extends AbstractGraph {
         NodeElement node;
         double dTheta = 360.0 / (double) this.numNode;
         double thetaDeg, thetaRad, x, y;
-
+        
         for (int i = 0; i < this.nodes.size(); i++) {            
             thetaDeg = 360.0 - (double) i * dTheta;
             thetaRad = Math.toRadians(thetaDeg);
             x = radius * Math.cos(thetaRad) + point.x;
             y = radius * Math.sin(thetaRad) + point.y;
-            
-            node = (NodeElement) this.nodes.get(i);
+                
+            node = this.nodes.get(i);
             node.setLocation(new Point(x, y));
             node.setSize(new Dimension(IGraphEditorConstants.NODE_SIZE,
                     IGraphEditorConstants.NODE_SIZE));
-        }
+        }               
     }
 
     /**

@@ -34,7 +34,7 @@ public class TreeDialog extends Dialog {
 
 	private boolean cancel;
     private int numNode;
-    private int diameter;
+    private int depth;
     private int numInit;
     private boolean rooted;
     private String linkType;
@@ -47,7 +47,7 @@ public class TreeDialog extends Dialog {
         setText("Tree Dialog");
         this.cancel = true;
         this.numNode = 0;
-        this.diameter = 0;
+        this.depth = 0;
         this.numInit = 0;
         this.rooted = true;
         this.linkType = null;
@@ -74,7 +74,7 @@ public class TreeDialog extends Dialog {
         Label numDiaQs = new Label(shell, SWT.NONE);
         numDiaQs.setLocation(25, 40);
         numDiaQs.setSize(160, 25);
-        numDiaQs.setText("Diameter length: ");
+        numDiaQs.setText("Depth length: ");
 
         final Text diaRes = new Text(shell, SWT.BORDER);
         diaRes.setLocation(190, 40);
@@ -142,7 +142,7 @@ public class TreeDialog extends Dialog {
                                 res);
                         return;
                     } else {
-                        diameter = Integer.parseInt(diaRes.getText().trim());
+                        depth = Integer.parseInt(diaRes.getText().trim());
                     }
                     
                     // read number of init input
@@ -225,8 +225,8 @@ public class TreeDialog extends Dialog {
         return this.numNode;
     }
 
-    public int getDiamerLength() {
-        return this.diameter;
+    public int getDepthLength() {
+        return this.depth;
     }
     
     public boolean isRooted(){

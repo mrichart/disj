@@ -232,7 +232,7 @@ public abstract class AgentProcessor implements IProcessor {
 					this.graph.addAgent(agentId+"", agent);
 										
 					agentId++;
-					this.systemOut.println("@loadAgent() " + agent.getAgentId());
+					//this.systemOut.println("@loadAgent() " + agent.getAgentId());
 				}
 			}
 			// record graph statistic info

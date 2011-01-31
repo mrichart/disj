@@ -326,6 +326,8 @@ public class Node implements Serializable {
 		if (!this.edges.containsKey(label) && !this.edges.containsValue(edge)) {
 			this.edges.put(label, edge);
 			this.ports.put(label, type);
+			
+			// initialize local port labels with non blocking state
 			this.portStates.put(label, false);
 
 		} else {
@@ -493,6 +495,15 @@ public class Node implements Serializable {
 		Short portType = this.ports.get(old);
 		this.ports.remove(old);
 		this.ports.put(port, portType);
+		
+		// update blocking port state and blocked events
+		boolean s = this.portStates.remove(old);
+		this.portStates.put(port, s);
+		
+		List<Event> list = this.blockedEvents.remove(old);
+		if(list != null){
+			this.blockedEvents.put(port, list);
+		}
 	}
 
 	/**
@@ -538,7 +549,7 @@ public class Node implements Serializable {
 	 * @param event
 	 */
 	public void addEventToBlockList(String portLabel, Event event) {
-		if (!this.blockedEvents.containsKey(portLabel)){
+		if (!this.portStates.containsKey(portLabel)){
 			throw new IllegalArgumentException("@Node.addEventToBlockList() port " 
 					+ portLabel + " not found ");
 		}
@@ -554,7 +565,7 @@ public class Node implements Serializable {
 	 * @return
 	 */
 	public List<Event> getBlockedEvents(String portLabel){
-		if (!this.blockedEvents.containsKey(portLabel)){
+		if (!this.portStates.containsKey(portLabel)){
 			throw new IllegalArgumentException("@Node.getBlockedEvents() port " 
 					+ portLabel + " not found ");
 		}

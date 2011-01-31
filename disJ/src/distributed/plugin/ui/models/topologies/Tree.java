@@ -18,6 +18,7 @@ import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.swt.widgets.Shell;
 
+import distributed.plugin.core.Node;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.dialogs.TreeDialog;
 import distributed.plugin.ui.models.GraphElementFactory;
@@ -33,254 +34,183 @@ import distributed.plugin.ui.models.NodeElement;
 public class Tree extends AbstractGraph {
 
     private static final int GAP = IGraphEditorConstants.NODE_SIZE + 10;
-
     private static final int HIGHT = IGraphEditorConstants.NODE_SIZE * 4;
-
-    
-    private int count;
-    private int nextL;
-    private int diameter;
-    private boolean rootedTree;
-
+ 
+    private boolean isRootedTree;
+    private int depth;   
     private String linkType;
-    private int[] hops;
-    private InternalNode tree[];
-
+    
+    private int[] trunk;
+    private List<NodeElement[]> tree;
+    private Random ran;
+    
     /**
      * Constructor
      */
     public Tree(GraphElementFactory factory, Shell shell) {
-    	super(factory, shell);
-        this.count = -1;
-        this.nextL = -1;       
-        this.diameter = 0;
+    	super(factory, shell);   
+        this.depth = 0;
         this.linkType = IGraphEditorConstants.BI;
-        this.rootedTree = false;      
-        this.hops = null;
-        this.tree = null;     
+        this.isRootedTree = false;      
+        this.trunk = null;
+        this.tree = null;
+        this.ran = new Random(System.currentTimeMillis());
     }
 
-    class InternalNode {
-	
-	    private int level;
-	
-	    final private NodeElement element;
-	
-	    private List<InternalNode> children;
-	
-	    InternalNode(NodeElement root) {
-	        this.level = 1;
-	        this.element = root;
-	        this.children = new ArrayList<InternalNode>();
-	    }
-	
-	    NodeElement getElement() {
-	        return this.element;
-	    }
-	
-	    void addChild(InternalNode node) {
-	        this.children.add(node);
-	    }
-	
-	    List<InternalNode> getChildren() {
-	        return this.children;
-	    }
-	
-	    int getNumOfChildren() {
-	        return this.children.size();
-	    }
-	
-	    InternalNode getChild(int i) {
-	        return (InternalNode) this.children.get(i);
-	    }
-	
-	    int getLevel() {
-	        return this.level;
-	    }
-	
-	    void setLevel(int level) {
-	        this.level = level;
-	    }
-	}
-
-	/**
+    /**
      * @see distributed.plugin.ui.models.topologies.ITopology#getName()
      */
     public String getName() {
         return IGraphEditorConstants.CREATE_TREE_COMD;
     }
 
-    private NodeElement nextNode() {
-        return this.nodes.get(++count);
-    }
-
-    private LinkElement nextLink() {
-        return this.links.get(++nextL);
-    }
-
     /**
-     * @see distributed.plugin.ui.models.topologies.ITopology#createTopology()
-     */
-    public void createTopology() {
-    	TreeDialog dialog = new TreeDialog(this.shell);
-        dialog.open();
-        
-        if(!dialog.isCancel()){
+	 * @see distributed.plugin.ui.models.topologies.ITopology#createTopology()
+	 */
+	public void createTopology() {
+		TreeDialog dialog = new TreeDialog(this.shell);
+	    dialog.open();
+	    
+	    if(!dialog.isCancel()){
 	        this.numNode = dialog.getNumNode();
-	        this.diameter = dialog.getDiamerLength();
+	        this.depth = dialog.getDepthLength();
 	        this.linkType = dialog.getLinkType();
-	        this.rootedTree = dialog.isRooted();
+	        this.isRootedTree = dialog.isRooted();
 	        this.numInit = dialog.getNumInit();
-	        this.hops = new int[this.diameter + 1];
-	        
-	        if (this.rootedTree){
-	            this.tree = new InternalNode[this.numNode];
-	        }else{
-	            this.tree = new InternalNode[this.diameter + 1];
-	        }
-	        
-	        // Tree: the number of link == number of node - 1	
-	        // create links
-	        if (this.linkType.equals(IGraphEditorConstants.UNI))
-	            for (int i = 0; i < this.numNode - 1; i++) {
-	                this.links.add(this.factory.createUniLinkElement());
-	            }
-	        else
-	            for (int i = 0; i < this.numNode - 1; i++) {
-	                this.links.add(this.factory.createBiLinkElement());
-	            }
-	
-	        // create nodes
-	        for (int i = 0; i < this.numNode; i++) {
-	            NodeElement node = this.factory.createNodeElement();
-	            node.setSize(new Dimension(IGraphEditorConstants.NODE_SIZE,
-	                    IGraphEditorConstants.NODE_SIZE));
-	            this.nodes.add(node);
-	        }
-	
-	        if (this.rootedTree) {
-	            // add node into a list
-	            for (int i = 0; i < this.tree.length; i++) {
-	                this.tree[i] = new InternalNode(this.nextNode());
-	            }
-	            // a random rooted tree;
-	            // r.h.s index of "i" is parent of "i",
-	            // therefore, the last index is root
-	            for (int i = 0; i < this.tree.length - 1; i++) {
-	                int par = this.random.nextInt(this.tree.length - 1 - i) + 1;
-	                this.tree[par + i].addChild(this.tree[i]);
-	            }
-	        } else {
-	            // assign number of nodes for each hop along a diameter line
-	            int maxChild = this.numNode - this.diameter - 1;
-	            this.assignChildren(maxChild);
-	            this.constructSubTree();
-	        }
+	        this.trunk = new int[this.depth];	        	       
+	       
+	        // generate number of node at each level
+	        this.initStructure();
+	     	        
+	        // initialize a tree with nodes without connection
+	        this.initNodes();
 	        
 	        // set init nodes
 	        this.setInitNodes();
-        }
+	    }
+	}
+
+	/*
+     * Generate tree structure with defining number of nodes that
+ 	 * can be at each tree level
+     */
+    private void initStructure(){
+    	
+    	int numRoot = 1;
+    	
+    	// get average minus root node and a level of a root
+    	int avgNum = (this.numNode - numRoot)/(this.depth - 1);
+    	
+    	// find a remainder
+    	int remainder = this.numNode - ((avgNum * (this.depth - 1)) + numRoot);
+    	   	
+    	// assign a root into at the beginning of a trunk
+    	this.trunk[0] = numRoot;
+    	
+    	// assign number of internal nodes into the trunk
+    	// at each level
+    	for(int i = 1; i < this.trunk.length; i++){
+    		this.trunk[i] = avgNum;
+    	}
+    	
+    	// add remainder into a last level (leaves)
+    	this.trunk[this.trunk.length - 1] += remainder;
+    	
     }
 
     /*
-     * generate a number of children for each hops along a diameter
+     * Create nodes into a tree structure
      */
-    private void assignChildren(int maxChild) {
-
-        // add a node along a diameter line
-        for (int i = 0; i < this.hops.length; i++) {
-            this.hops[i]++;
-        }
-
-        // add children along a diameter line except 2 ends
-        for (int i = 1; i < this.hops.length - 1 && maxChild > 0; i++) {
-            int deduct = this.random.nextInt(maxChild);
-            this.hops[i] += deduct;
-            maxChild -= deduct;
-        }
-
-        int i = 0;
-        int size = this.hops.length - 2;
-        while (maxChild > 0) {
-            this.hops[(i % size) + 1]++;
-            maxChild--;
-            i++;
+    private void initNodes(){
+    	
+    	this.tree = new ArrayList<NodeElement[]>();
+    	
+    	// create nodes at each level of the tree
+    	for(int i = 0; i < this.trunk.length; i++){    		
+    		NodeElement[] nodes = new NodeElement[this.trunk[i]];
+    		this.tree.add(nodes);
+    	}
+    	
+    	// add nodes into tracker
+    	for(int i =0 ; i < this.tree.size(); i++){
+    		NodeElement[] nodes = this.tree.get(i);    		
+    		for(int k = 0; k < nodes.length; k++){
+    			nodes[k] = this.factory.createNodeElement();
+    			super.nodes.add(nodes[k]);
+    		}
+    	}
+    }
+    
+    private LinkElement getLink(){
+    	if (this.linkType.equals(IGraphEditorConstants.UNI)){
+    		return this.factory.createUniLinkElement();        
+        } else {
+        	return this.factory.createBiLinkElement();
         }
     }
-
+    
     /*
-     * Construct a virtual tree
+     * Random generate children - parent relationship between
+     * level, and connect links between nodes
      */
-    private void constructSubTree() {
+    private void connectTree(){
+    	
+    	// start from a root down
+    	int parIndex;
+    	for(int i = 1; i < this.tree.size(); i++){
+    		NodeElement[] parents = this.tree.get(i-1);
+    		NodeElement[] children = this.tree.get(i);
+    		
+    		for(int k = 0; k < children.length; k++){
 
-        // create a set of nodes along the diameter path
-        for (int i = 0; i < this.hops.length; i++) {
-            this.tree[i] = new InternalNode(this.nextNode());
-        }
+                // create and add link into a tracker
+                LinkElement link = this.getLink();               
+                super.links.add(link);
+                
+                NodeElement source = children[k];
+                link.setSource(source);
+                link.attachSource();
 
-        // construct a new sub-trees along the diameter path
-        int maxChild = 0;
-        int half = this.tree.length / 2;
-
-        // first half of diameter
-        for (int i = 0; i < half; i++) {
-            // then.. max level <= i
-            maxChild = this.subTree(i, this.hops[i] - 1, this.tree[i]);
-            // if there is a leftover, add to root of each hop
-            if (maxChild > 0) {
-                for (int j = 0; j < maxChild; j++) {
-                    InternalNode child = new InternalNode(this.nextNode());
-                    tree[i].addChild(child);
+                // find and connect to a random parent (target) of this source
+                parIndex = this.getRandomParent(parents.length);
+                NodeElement target = parents[parIndex];
+                link.setTarget(target);
+                link.attachTarget();
+                
+                // set port label
+                if(this.isRootedTree){
+	                try{
+		            	Node s = source.getNode();
+		            	Node t = target.getNode();
+		            	s.setPortLable("parent", link.getEdge());
+		            	t.setPortLable("child:"+link.getEdgeId(), link.getEdge());
+		            	
+	            	}catch(Exception e){
+	            		System.err.println("@Tree.setConnections() Cannot do rooted tree " + e);
+	            	}
                 }
-            }
-        }
-
-        // second half of diameter
-        for (int i = this.tree.length; i > half; i--) {
-            // then.. max level <= tree.lenght - i
-            maxChild = this.subTree(tree.length - i, this.hops[i - 1] - 1,
-                    this.tree[i - 1]);
-            // if there is a leftover, add to root of each hop
-            if (maxChild > 0) {
-                for (int j = 0; j < maxChild; j++) {
-                    InternalNode child = new InternalNode(this.nextNode());
-                    tree[i - 1].addChild(child);
-                }
-            }
-        }
-
+    		}
+    	}
     }
-
-    private int subTree(int depth, int maxChild, InternalNode par) {
-
-        // we dont wana do anymore
-        if (maxChild == 0)
-            return maxChild;
-
-        if (depth == 0)
-            return maxChild;
-
-        int num = random.nextInt(maxChild) + 1;
-        InternalNode child;
-        for (int j = 0; j < num; j++) {
-            maxChild--;
-            child = new InternalNode(this.nextNode());
-            par.addChild(child);
-        }
-        // toss the coin wheather we need to go
-        // deeper til the max depth we can go
-
-        int toss = random.nextInt(depth);
-        if (toss > 0) {
-            // still want more depth
-            for (int j = 0; j < par.getNumOfChildren(); j++) {
-                maxChild = this.subTree(depth--, maxChild, par.getChild(j));
-            }
-        }
-        return maxChild;
+    
+    /*
+     * Generate random number between [0 - parentSize)
+     */
+    private int getRandomParent(int parentSize){   	    	
+    	int r = this.ran.nextInt(parentSize);    	
+    	return r;
     }
-
+    
     /**
+	 * @see distributed.plugin.ui.models.topologies.ITopology#setConnections()
+	 */
+	public void setConnections() {
+		if(this.numNode > 1){
+			this.connectTree();
+		}
+	}
+
+	/**
      * @see distributed.plugin.ui.models.topologies.ITopology#getConnectionType()
      */
     public String getConnectionType() {
@@ -292,157 +222,43 @@ public class Tree extends AbstractGraph {
      */
     public void applyLocation(Point point) {
     	if(this.numNode > 0){
-	        if (this.rootedTree){
-	            this.drawRootedTree(point, this.tree[this.tree.length - 1], 2);
-	        }else{
-	            // draw a random tree
-	            this.drawTree(point);
-	        }
+    		this.drawRootedTree(point, 2);	        
     	}
     }
 
-    private void drawRootedTree(Point point, InternalNode par, int varies) {
-        par.getElement().setLocation(point);
-        if (par.getNumOfChildren() > 0) {
-            List<InternalNode> children = par.getChildren();
-            int half = children.size() / 2;
-            for (int i = 0; i < children.size(); i++) {
-                Point p;
-                // divide children into 2 halves
-                if (i < half)
-                    p = new Point(point.x - ((GAP + varies) * (half - i)),
-                            point.y + HIGHT);
-                else if (i == half)
-                    p = new Point(point.x, point.y + HIGHT);
-                else
-                    p = new Point(point.x + ((GAP + varies) * (i - half)),
-                            point.y + HIGHT);
-
-                this.drawRootedTree(p, children.get(i),
-                        (int) (varies * 2));
-            }
-        }
-    }
-
-    private void drawTree(Point point) {
-        // draw a subtree along the diameter
-        for (int i = 0; i < tree.length; i++) {
-            this.drawRootedTree(point, tree[i], 2);
-            point = new Point(point.x + HIGHT, point.y);
-        }
-    }
-
-    /*
-     * Find a location for directed child of this node @return a locatoin for a
-     * sibling
-     */
-    // private Point applyOneLevel(Point center, Point p1, List children) {
-    //
-    // int overlap = IGraphEditorConstants.NODE_SIZE + 10;
-    // int numNode = children.size() + 2; // extra for sibling and parent
-    // int radius = IGraphEditorConstants.NODE_SIZE * 4;
-    // NodeElement node;
-    // double dTheta = 360.0 / (double) numNode;
-    // double thetaDeg, thetaRad, nextTheta, x, y;
-    //
-    // int next = 0;
-    // // keep finding the place until got all of it
-    // for (int i = 0; next < children.size(); i++) {
-    // thetaDeg = 360.0 - (double) i * dTheta;
-    // thetaRad = Math.toRadians(thetaDeg);
-    // x = radius * Math.cos(thetaRad) + center.x;
-    // y = radius * Math.sin(thetaRad) + center.y;
-    //
-    // if (Math.abs(x - p1.x) < overlap || Math.abs(y - p1.y) < overlap)
-    // continue;
-    //
-    // if (next < children.size()) {
-    // InternalNode par = (InternalNode) children.get(next);
-    // next++;
-    // node = par.getElement();
-    // Point point = new Point(x, y);
-    // node.setLocation(point);
-    // node.setSize(new Dimension(IGraphEditorConstants.NODE_SIZE,
-    // IGraphEditorConstants.NODE_SIZE));
-    //
-    // if (par.getNumOfChildren() > 0) {
-    // Point p = this.applyOneLevel(point, center, par
-    // .getChildren());
-    // }
-    // }
-    // }
-    //
-    // thetaDeg = 360.0 - (double) children.size() * dTheta;
-    // thetaRad = Math.toRadians(thetaDeg);
-    // x = radius * Math.cos(thetaRad) + center.x;
-    // y = radius * Math.sin(thetaRad) + center.y;
-    // return new Point(x, y);
-    // }
-    /**
-     * @see distributed.plugin.ui.models.topologies.ITopology#setConnections()
-     */
-    public void setConnections() {
-    	if(this.numNode > 0){   	
-	        if (this.rootedTree){
-	            this.connectRootedTree();
-	        }else{
-	            this.connectTree();
-	        }
-    	}
-
-    }
-
-    private void connectRootedTree() {
-        for (int i = this.tree.length - 1; i >= 0; i--) {
-            NodeElement source = this.tree[i].getElement();
-            for (int j = 0; j < this.tree[i].getNumOfChildren(); j++) {
-                LinkElement link = this.nextLink();
-
-                link.setSource(source);
-                link.attachSource();
-
-                NodeElement target = ((InternalNode) this.tree[i].getChild(j))
-                        .getElement();
-                link.setTarget(target);
-                link.attachTarget();
-            }
-        }
-    }
-
-    private void connectTree() {
-        // connect nodes along diameter
-        for (int i = 0; i < this.tree.length - 1; i++) {
-            NodeElement source = this.tree[i].getElement();
-            LinkElement link = this.nextLink();
-            link.setSource(source);
-            link.attachSource();
-
-            NodeElement target = this.tree[i + 1].getElement();
-            link.setTarget(target);
-            link.attachTarget();
-        }
-        
-        // connect node for each subtree
-        for(int i = 0; i < this.tree.length; i++){
-            this.connectSubTree(this.tree[i]);
-        }
-    }
-    
-    private void connectSubTree(InternalNode par){
-        NodeElement source = par.getElement();
-        for(int j =0; j < par.getNumOfChildren(); j++){
-            InternalNode target = par.getChild(j);
-            this.connectSubTree(target);  
-            this.connectNodes(source, target.getElement());
-        }        
-    }
-    
-    private void connectNodes(NodeElement par, NodeElement child){
-        LinkElement link = this.nextLink();
-        link.setSource(par);
-        link.attachSource();
-
-        link.setTarget(child);
-        link.attachTarget();
+    private void drawRootedTree(Point point, int varies) {
+    	NodeElement[] lev = this.tree.get(0);
+    	lev[0].setLocation(point); // root
+    	lev[0].setSize(new Dimension(IGraphEditorConstants.NODE_SIZE,
+                 IGraphEditorConstants.NODE_SIZE));
+    	int half;
+    	int hight = HIGHT;
+    	Point p = null;
+    	for(int i = 1; i < this.tree.size(); i++){
+    		lev = this.tree.get(i);
+    		half = lev.length/2;
+    		
+    		for(int k = 0; k < lev.length; k++){
+    		   	
+    			 // divide children into 2 halves
+	             if (k < half){
+	                 p = new Point(point.x - ((GAP + varies) * (half - k)),
+	                         point.y + hight);
+	                 
+	             } else if (k == half) {
+	                 p = new Point(point.x, point.y + hight);
+	                 
+	             } else {
+	                 p = new Point(point.x + ((GAP + varies) * (k - half)),
+	                         point.y + hight);	   
+	             }
+    			
+    			lev[k].setLocation(p);
+    			lev[k].setSize(new Dimension(IGraphEditorConstants.NODE_SIZE,
+                        IGraphEditorConstants.NODE_SIZE));
+	                      
+    		}
+    		hight += HIGHT;
+    	}    
     }
 }

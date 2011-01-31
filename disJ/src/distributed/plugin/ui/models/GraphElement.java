@@ -16,10 +16,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
@@ -162,7 +162,7 @@ public class GraphElement extends AdapterElement {
         	this.graph.setId(partName);
 			this.graphId = partName;
         	GraphFactory.addGraph(this.graph);
-		} catch (DisJException e) {
+		} catch (Exception e) {
 			System.err.println("Error add graph into map "+ e);
 		}
 //        System.err.println("[GraphElement] setGraphId " + this.graph + " <" + this.graph.getId() + ">");
@@ -211,21 +211,54 @@ public class GraphElement extends AdapterElement {
             this.graph.addNode(id, element.getNode());
             this.nodeElements.add(element);
             GraphFactory.addGraph(this.graph);
+         
+            // set maxX and maxY location
+            this.setMaxXandY();
             
             // update DisJView display
             firePropertyChange(IConstants.PROPERTY_CHANGE_ADD_NODE, null, element.getNode());
-                     
-        } catch (DisJException ignore) {
+            
+        } catch (Exception ignore) {
             System.err.println("[GraphElement] "+ignore);
         }
     }
+
+    /*
+     * Setting current Max X and Max Y location of Node(s)
+     * in a graph
+     */
+	private void setMaxXandY() {
+		// update maxX and maxY
+		NodeElement node;
+		int maxX = 0;
+		int maxY = 0;
+		Point p;
+		for (int i = 0; i < this.nodeElements.size(); i++) { 
+			node = this.nodeElements.get(i);            	
+			p = node.getLocation();
+			
+			// find max
+		    if (maxX < p.x){
+		    	maxX = p.x;
+		    }
+		    if(maxY < p.y){
+		    	maxY = p.y;
+		    }
+		}      
+		// set max
+		for (int i = 0; i < this.nodeElements.size(); i++) { 
+			node = this.nodeElements.get(i);
+			node.setMaxX(maxX);
+			node.setMaxY(maxY);
+		}
+	}
 
     public void addEdge(String id, final LinkElement element) {
         try {
             this.graph.addEdge(id, element.getEdge());
             this.linkElements.add(element);
             GraphFactory.addGraph(this.graph);
-        } catch (DisJException ignore) {
+        } catch (Exception ignore) {
             System.err.println("[GraphElement] "+ignore);
         }
     }
@@ -244,10 +277,13 @@ public class GraphElement extends AdapterElement {
             this.nodeElements.remove(element);
             GraphFactory.addGraph(this.graph);
             
+            // set maxX and maxY location
+            this.setMaxXandY();           
+            
             // update DisJView display
             firePropertyChange(IConstants.PROPERTY_CHANGE_REM_NODE, null, element.getNode());
-            
-        } catch (DisJException ignore) {
+                                 
+        } catch (Exception ignore) {
             System.err.println("[GraphElement] "+ignore);
         }
     }
@@ -257,7 +293,7 @@ public class GraphElement extends AdapterElement {
             this.graph.removeEdge(id);
             this.linkElements.remove(element);
             GraphFactory.addGraph(this.graph);
-        } catch (DisJException ignore) {
+        } catch (Exception ignore) {
             System.err.println("[GraphElement] "+ignore);
         }
     }
@@ -490,7 +526,7 @@ public class GraphElement extends AdapterElement {
         try {
         	// store new updated
 			GraphFactory.addGraph(this.graph);
-		} catch (DisJException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
     }

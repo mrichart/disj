@@ -42,7 +42,7 @@ public class Mesh extends AbstractGraph {
 
     private String linkType;
 
-    private NodeElement[][] nodes;
+    private NodeElement[][] myNodes;
 
     /**
      * Constructor
@@ -53,7 +53,7 @@ public class Mesh extends AbstractGraph {
         this.rows = 0;
         this.cols = 0;
         this.linkType = IGraphEditorConstants.BI;
-        this.nodes = null;
+        this.myNodes = null;
     }
 
     /**
@@ -75,13 +75,13 @@ public class Mesh extends AbstractGraph {
         	this.rows = dialog.getNumRows();
             this.cols = dialog.getNumCols();
             this.linkType = dialog.getLinkType();
-            this.nodes = new NodeElement[this.rows][this.cols];
+            this.myNodes = new NodeElement[this.rows][this.cols];
             this.numInit = dialog.getNumInit();
             this.isOriented = dialog.isOriented();
             
 	        for (int i = 0; i < this.rows; i++) {
 	            for (int j = 0; j < this.cols; j++) {
-	                this.nodes[i][j] = this.factory.createNodeElement();
+	                this.myNodes[i][j] = this.factory.createNodeElement();
 	            }
 	        }
 	
@@ -123,7 +123,7 @@ public class Mesh extends AbstractGraph {
         List<NodeElement> tmp = new ArrayList<NodeElement>();
         for (int i = 0; i < this.rows; i++) {
             for (int j = 0; j < this.cols; j++) {
-                tmp.add(this.nodes[i][j]);
+                tmp.add(this.myNodes[i][j]);
             }
         }
         return tmp;
@@ -141,12 +141,16 @@ public class Mesh extends AbstractGraph {
      */
     public void applyLocation(Point point) {
         int x = point.x;
-        int y = point.y;
+        int y = point.y;        
+        int px, py;
+        
         for (int i = 0; i < this.rows; i++) {
             for (int j = 0; j < this.cols; j++) {
-                Point p = new Point(x + (j * GAP), y + (i * GAP));
-                this.nodes[i][j].setLocation(p);
-                this.nodes[i][j].setSize(new Dimension(
+            	px = x + (j * GAP);
+            	py = y + (i * GAP);           	            
+                Point p = new Point(px, py);
+                this.myNodes[i][j].setLocation(p);
+                this.myNodes[i][j].setSize(new Dimension(
                         IGraphEditorConstants.NODE_SIZE,
                         IGraphEditorConstants.NODE_SIZE));
             }
@@ -166,16 +170,16 @@ public class Mesh extends AbstractGraph {
         for (int i = 0; i < this.rows - 1; i++) {
             for (int j = 0; j < this.cols - 1; j++) {
                 LinkElement link = (LinkElement) this.links.get(++count);
-                link.setSource(this.nodes[i][j]);
+                link.setSource(this.myNodes[i][j]);
                 link.attachSource();
                 
-                link.setTarget(this.nodes[i][j + 1]);
+                link.setTarget(this.myNodes[i][j + 1]);
                 link.attachTarget();
                 
                 if(this.isOriented){
                 	try{
-    	            	Node s = this.nodes[i][j].getNode();
-    	            	Node t = this.nodes[i][j+1].getNode();
+    	            	Node s = this.myNodes[i][j].getNode();
+    	            	Node t = this.myNodes[i][j+1].getNode();
     	            	s.setPortLable("east", link.getEdge());
     	            	t.setPortLable("west", link.getEdge());
     	            	
@@ -189,15 +193,15 @@ public class Mesh extends AbstractGraph {
         for (int i = rows - 1; i < this.rows; i++) {
             for (int j = cols - 1; j > 0; j--) {
                 LinkElement link = (LinkElement) this.links.get(++count);
-                link.setSource(this.nodes[i][j]);
+                link.setSource(this.myNodes[i][j]);
                 link.attachSource();
-                link.setTarget(this.nodes[i][j - 1]);
+                link.setTarget(this.myNodes[i][j - 1]);
                 link.attachTarget();
                 
                 if(this.isOriented){
                 	try{
-    	            	Node s = this.nodes[i][j].getNode();
-    	            	Node t = this.nodes[i][j-1].getNode();
+    	            	Node s = this.myNodes[i][j].getNode();
+    	            	Node t = this.myNodes[i][j-1].getNode();
     	            	s.setPortLable("west", link.getEdge());
     	            	t.setPortLable("east", link.getEdge());
     	            	
@@ -213,15 +217,15 @@ public class Mesh extends AbstractGraph {
         for (int i = 0; i < 1; i++) {
             for (int j = this.rows - 1; j > 0; j--) {
                 LinkElement link = (LinkElement) this.links.get(++count);
-                link.setSource(this.nodes[j][i]);
+                link.setSource(this.myNodes[j][i]);
                 link.attachSource();
-                link.setTarget(this.nodes[j - 1][i]);
+                link.setTarget(this.myNodes[j - 1][i]);
                 link.attachTarget();
                 
                 if(this.isOriented){
                 	try{
-    	            	Node s = this.nodes[j][i].getNode();
-    	            	Node t = this.nodes[j-1][i].getNode();
+    	            	Node s = this.myNodes[j][i].getNode();
+    	            	Node t = this.myNodes[j-1][i].getNode();
     	            	s.setPortLable("north", link.getEdge());
     	            	t.setPortLable("south", link.getEdge());
     	            	
@@ -234,15 +238,15 @@ public class Mesh extends AbstractGraph {
         for (int i = 1; i < this.cols; i++) {
             for (int j = 0; j < this.rows - 1; j++) {
                 LinkElement link = (LinkElement) this.links.get(++count);
-                link.setSource(this.nodes[j][i]);
+                link.setSource(this.myNodes[j][i]);
                 link.attachSource();
-                link.setTarget(this.nodes[j + 1][i]);
+                link.setTarget(this.myNodes[j + 1][i]);
                 link.attachTarget();
                 
                 if(this.isOriented){
                 	try{
-    	            	Node s = this.nodes[j][i].getNode();
-    	            	Node t = this.nodes[j+1][i].getNode();
+    	            	Node s = this.myNodes[j][i].getNode();
+    	            	Node t = this.myNodes[j+1][i].getNode();
     	            	s.setPortLable("south", link.getEdge());
     	            	t.setPortLable("north", link.getEdge());
     	            	

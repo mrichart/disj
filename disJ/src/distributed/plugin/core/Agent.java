@@ -235,7 +235,7 @@ public class Agent implements Serializable{
 		this.alive = alive;
 		if(alive == false){
 			String value = this.getCurNode().getNodeId();
-			System.out.println("@Agent() agent " +this.getAgentId() + " is deads");
+			//System.out.println("@Agent() agent " +this.getAgentId() + " is deads");
 			if(log != null){
 				this.log.logAgent(logTag.AGENT_DIE, this.agentId, value);
 			}
