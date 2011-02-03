@@ -85,7 +85,7 @@ public class Edge implements Serializable {
 	private Edge(String graphId, String id, short direction, Node start, Node end)
 			throws DisJException {
 		this(graphId, id, true, direction, IConstants.MSGFLOW_FIFO_TYPE, IConstants.MSGDELAY_LOCAL_FIXED,
-				IConstants.DEFAULT_MSGDELAY_SEED, start, end);
+				IConstants.MSGDELAY_SEED_DEFAULT, start, end);
 	}
 
 	public Edge(String graphId, String id, boolean isReliable,

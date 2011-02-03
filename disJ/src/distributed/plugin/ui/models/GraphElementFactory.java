@@ -173,7 +173,7 @@ public class GraphElementFactory implements CreationFactory {
     }
 
     private ITopology createGeneric() {
-        ITopology gen = new GenericGraph(this, this.shell, IGraphEditorConstants.FORREST);
+        ITopology gen = new GenericGraph(this, this.shell, IGraphEditorConstants.FOREST);
         gen.createTopology();
         return gen;
     }

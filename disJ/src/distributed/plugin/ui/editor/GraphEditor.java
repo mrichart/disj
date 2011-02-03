@@ -893,7 +893,7 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 			e.printStackTrace();
 		}
 		combined = new CombinedTemplateCreationEntry(
-				IGraphEditorConstants.FORREST,
+				IGraphEditorConstants.FOREST,
 				IGraphEditorConstants.FORREST_DESC,
 				IGraphEditorConstants.TEMPLATE_GENERIC, this
 						.getFactory(IGraphEditorConstants.TEMPLATE_GENERIC),

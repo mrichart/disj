@@ -72,7 +72,7 @@ public class Graph implements Serializable {
 		this.graphId = id;
 		this.globalFlowType = IConstants.MSGFLOW_FIFO_TYPE;
 		this.globalDelayType = IConstants.MSGDELAY_GLOBAL_SYNCHRONOUS;
-		this.globalDelaySeed = IConstants.DEFAULT_MSGDELAY_SEED;
+		this.globalDelaySeed = IConstants.MSGDELAY_SEED_DEFAULT;
 		this.currentNodeId = 0;
 		this.currentEdgeId = 0;
 		this.protocol = "";

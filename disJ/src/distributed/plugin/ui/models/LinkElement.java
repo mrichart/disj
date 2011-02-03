@@ -46,9 +46,9 @@ public abstract class LinkElement extends AdapterElement {
 	
 	private static final String PROPERTY_EDGE_ID = "L00 Edge ID";
 	private static final String PROPERTY_DIRECTION_TYPE = "L01 Type of Direction"; 
-	private static final String PROPERTY_SOURCE = "L02 Source";
+	private static final String PROPERTY_SOURCE = "L02 Source Name";
 	private static final String PROPERTY_START_PORT = "L03 Source Port Name"; 
-	private static final String PROPERTY_TARGET = "L04 Target";  
+	private static final String PROPERTY_TARGET = "L04 Target Name";  
 	private static final String PROPERTY_END_PORT = "L05 Target Port Name";
 	private static final String PROPERTY_MSG_FLOW_TYPE = "L06 Message Flow Type";
 	private static final String PROPERTY_DELAY_TYPE = "L07 Delay Type";   
@@ -65,20 +65,7 @@ public abstract class LinkElement extends AdapterElement {
 		PROPERTY_SOURCE, PROPERTY_TARGET, PROPERTY_TOTAL_OUT_MSG};
 
 	private static final int NUM_PROPERTIES = propertyArray.length;
-
-    // message flow supported types
-    protected static final String FIFO_TYPE = "FIFO";
-    protected static final String NO_ORDER_TYPE = "No Order";
-
-    // message delay time supported types
-    private static final String FIXED = "Fixed";
-    private static final String RANDOM_UNIFORM = "Random Uniform";
-    private static final String RANDOM_POISSON = "Random Poisson";
-    private static final String RANDOM_CUSTOMS = "Random Customs";
-    
-    
-    //private Map hmProperties = new HashMap();
-    
+   
     protected static IPropertyDescriptor[] descriptors;
     static {
         descriptors = new IPropertyDescriptor[NUM_PROPERTIES];
@@ -91,13 +78,14 @@ public abstract class LinkElement extends AdapterElement {
         
         descriptors[2] = new ComboBoxPropertyDescriptor(PROPERTY_MSG_FLOW_TYPE,
                 PROPERTY_MSG_FLOW_TYPE,
-                // FIXME the index order must corresponding to value in IConstance 
-                new String[] {FIFO_TYPE, NO_ORDER_TYPE});
+                // NOTE the index order must corresponding to value in IConstance 
+                new String[] {IConstants.FIFO_TYPE, IConstants.NO_ORDER_TYPE});
         
         descriptors[3] = new ComboBoxPropertyDescriptor(PROPERTY_DELAY_TYPE,
-                //FIXME the index order must corresponding to value in IConstance 
-                PROPERTY_DELAY_TYPE, new String[] { FIXED,
-                        RANDOM_UNIFORM, RANDOM_POISSON, RANDOM_CUSTOMS });
+                //NOTE the index order must corresponding to value in IConstance 
+                PROPERTY_DELAY_TYPE, new String[] { IConstants.FIXED,
+        		IConstants.RANDOM_UNIFORM, IConstants.RANDOM_POISSON, 
+        		IConstants.RANDOM_CUSTOMS});
 
         descriptors[4] = new PropertyDescriptor(PROPERTY_TOTAL_MSG,
                 PROPERTY_TOTAL_MSG);
@@ -325,25 +313,29 @@ public abstract class LinkElement extends AdapterElement {
         		this.edge.setDelayType(this.mapDelayType(val));         		 
         		try {
         			 // since some links have been modified to be different
-        			 // so overall of the graph should be customs
+        			 // so overall of the graph should be mixed
                 	 Graph g = GraphFactory.getGraph(this.edge.getGraphId());
-                     g.setGlobalDelayType(IConstants.MSGDELAY_GLOBAL_CUSTOMS);
+                     g.setGlobalDelayType(IConstants.MSGDELAY_GLOBAL_MIX);
     				 GraphFactory.addGraph(g);    				 
     			} catch (DisJException e) {
     				 e.printStackTrace();
     			}
         	}
         } else if (id.equals(PROPERTY_DELAY_SEED)) {
-        	int val = ((Integer)value).intValue();
+        	int val = Integer.parseInt(value.toString());
         	if(val > 255 || val < 1){
         		// default value
-        		this.edge.setDelaySeed(IConstants.DEFAULT_MSGDELAY_SEED);
+        		this.edge.setDelaySeed(IConstants.MSGDELAY_SEED_DEFAULT);
+        		
         	} else {
         		this.edge.setDelaySeed(val);
-        	}           
+        	}
+        	
             try {
+            	// since some links have been modified to be different
+   			 	// so overall of the graph should be mixed
             	Graph g = GraphFactory.getGraph(this.edge.getGraphId());
-                g.setGlobalDelayType(IConstants.MSGDELAY_GLOBAL_CUSTOMS);
+                g.setGlobalDelaySeed(IConstants.MSGDELAY_SEED_MIX);
 				GraphFactory.addGraph(g);
 			} catch (DisJException e) {
 				e.printStackTrace();
@@ -518,10 +510,12 @@ public abstract class LinkElement extends AdapterElement {
     		return IConstants.MSGDELAY_LOCAL_RANDOM_UNIFORM;
     	} else if (type == 2){
     		return IConstants.MSGDELAY_LOCAL_RANDOM_POISSON;
-    	}else{
+    	}else if (type == 3){
     		return IConstants.MSGDELAY_LOCAL_RANDOM_CUSTOMS;
+    	}else{
+    		System.err.println("@LinkElement.mapDelayType() Should not happen!!" + type);
+    		return -1;
     	}
-    	
     }
 
  /*   private final short mapDelayType(Object type) {

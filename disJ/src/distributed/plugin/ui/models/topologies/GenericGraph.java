@@ -34,7 +34,7 @@ public class GenericGraph extends AbstractGraph {
 
 	private String linkType;
 
-	private String defaultType = IGraphEditorConstants.FORREST;
+	private String defaultType = IGraphEditorConstants.FOREST;
 
 	private String type = defaultType;
 
@@ -60,7 +60,7 @@ public class GenericGraph extends AbstractGraph {
 	 */
 	public void createTopology() {
 		
-		if(this.type.equals(IGraphEditorConstants.FORREST)){
+		if(this.type.equals(IGraphEditorConstants.FOREST)){
 			GenericGraphDialog dialog = new GenericGraphDialog(this.shell);
 			dialog.open();
 			if(!dialog.isCancel()){
@@ -159,7 +159,7 @@ public class GenericGraph extends AbstractGraph {
 	 * @see distributed.plugin.ui.models.topologies.ITopology#setConnections()
 	 */
 	public void setConnections() {
-		if (this.type == IGraphEditorConstants.FORREST) {
+		if (this.type == IGraphEditorConstants.FOREST) {
 			for (int i = 0; i < this.numNode; i++) {
 				NodeElement source = (NodeElement) this.nodes.get(i);
 				int numNeighbour = this.random.nextInt(4) + 1;

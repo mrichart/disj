@@ -48,17 +48,17 @@ public class GraphElement extends AdapterElement {
 	static final long serialVersionUID = IConstants.SERIALIZE_VERSION;
 	
 	private static final String PROPERTY_NAME = "G00 Graph Name";
-	private static final String PROPERTY_TOTAL_NODE = "G01 Total Node";
-	private static final String PROPERTY_TOTAL_LINK = "G02 Total Link";
+	private static final String PROPERTY_TOTAL_NODE = "G01 Total Nodes";
+	private static final String PROPERTY_TOTAL_LINK = "G02 Total Links";
 	private static final String PROPERTY_TOTAL_MSG_RECV = "G03 Total Messages Received";
 	private static final String PROPERTY_TOTAL_MSG_SENT = "G04 Total Messages Sent";
 	private static final String PROPERTY_GLOBAL_MSG_FLOW_TYPE = "G05 Global Message Flow Type";
 	private static final String PROPERTY_GLOBAL_DELAY_TYPE = "G06 Global Delay Type";
 	private static final String PROPERTY_GLOBAL_DELAY_SEED = "G07 Global Delay Seed";
 	private static final String PROPERTY_PROTOCOL = "G08 Protocol";
-	private static final String PROPERTY_MAX_TOKEN = "G09 Maximum Token Agent can Carry";
-	private static final String PROPERTY_TOTAL_AGENT = "G10 Number of Agent at Start";
-	private static final String PROPERTY_TOTAL_ALIVE_AGENT = "G11 Current Number of Agent";
+	private static final String PROPERTY_MAX_TOKEN = "G09 Max Number of Tokens per Agent";
+	private static final String PROPERTY_TOTAL_AGENT = "G10 Number of Agents at Start";
+	private static final String PROPERTY_TOTAL_ALIVE_AGENT = "G11 Current Number of Agents";
     
 	private static final String[] propertyArray = {PROPERTY_NAME, PROPERTY_TOTAL_NODE,
 		PROPERTY_TOTAL_LINK, PROPERTY_TOTAL_MSG_RECV, PROPERTY_TOTAL_MSG_SENT,
@@ -66,18 +66,7 @@ public class GraphElement extends AdapterElement {
 		PROPERTY_PROTOCOL, PROPERTY_MAX_TOKEN, PROPERTY_TOTAL_AGENT, PROPERTY_TOTAL_ALIVE_AGENT};
 	
 	private static final int NUM_PROPERTIES = propertyArray.length;
-	
-    // message delay time supported types
-	private static final String SYNCHRONOUS = "Synchronous";   
-	private static final String CUSTOMS = "Customs";
-	private static final String RANDOM_UNIFORM = "Random Uniform";
-	private static final String RANDOM_POISSON = "Random Poisson";
-	private static final String RANDOM_CUSTOMS = "Random Customs";
-	
-	private static final String FIFO_TYPE = "FIFO";
-	private static final String NO_ORDER_TYPE = "No Order";
-	private static final String MIX_TYPE = "Mix Order";
-    
+	 
     protected static IPropertyDescriptor[] descriptors;      
     static {
         descriptors = new IPropertyDescriptor[NUM_PROPERTIES];
@@ -95,13 +84,16 @@ public class GraphElement extends AdapterElement {
         
         descriptors[5] = new ComboBoxPropertyDescriptor(PROPERTY_GLOBAL_MSG_FLOW_TYPE,
                 PROPERTY_GLOBAL_MSG_FLOW_TYPE,
-                // FIXME the index order must corresponding to value in IConstance
-                new String[] {FIFO_TYPE, NO_ORDER_TYPE, MIX_TYPE});
+                // NOTE the index order must corresponding to value in IConstance
+                new String[] {IConstants.FIFO_TYPE, IConstants.NO_ORDER_TYPE, 
+        		IConstants.MIX_ORDER_TYPE});
         
         descriptors[6] = new ComboBoxPropertyDescriptor(PROPERTY_GLOBAL_DELAY_TYPE,
                 PROPERTY_GLOBAL_DELAY_TYPE, 
-                // FIXME the index order must corresponding to value in IConstance
-                new String[] {SYNCHRONOUS, RANDOM_UNIFORM, RANDOM_POISSON, RANDOM_CUSTOMS, CUSTOMS });
+                // NOTE the index order must corresponding to value in IConstance
+                new String[] {IConstants.SYNCHRONOUS, IConstants.RANDOM_UNIFORM, 
+        		IConstants.RANDOM_POISSON, IConstants.RANDOM_CUSTOMS, 
+        		IConstants.MIX_TYPE });
         
         descriptors[7] = new TextPropertyDescriptor(PROPERTY_GLOBAL_DELAY_SEED,
                 PROPERTY_GLOBAL_DELAY_SEED);
@@ -372,10 +364,10 @@ public class GraphElement extends AdapterElement {
             return sum;
             
         } else if (propName.equals(PROPERTY_GLOBAL_MSG_FLOW_TYPE)) {
-            return this.mapGlobalFlowType(this.graph.getGlobalFlowType());
+            return this.graph.getGlobalFlowType();
            
         } else if (propName.equals(PROPERTY_GLOBAL_DELAY_TYPE)) {
-            return this.mapGlobalDelayType(this.graph.getGlobalDelayType());
+            return this.graph.getGlobalDelayType();
            
         } else if (propName.equals(PROPERTY_GLOBAL_DELAY_SEED)) {
             return "" + this.graph.getGlobalDelaySeed();
@@ -434,66 +426,58 @@ public class GraphElement extends AdapterElement {
         	this.graph.setProtocol((String)value);
         	
         } else if (id.equals(PROPERTY_GLOBAL_MSG_FLOW_TYPE)){
-      		int local_type;
-        	int global_type = this.mapGlobalFlowType(((Integer)value).intValue());
+      		int globalType = ((Integer)value).intValue();        	
+        	this.graph.setGlobalFlowType(globalType); 
         	
-        	this.graph.setGlobalFlowType(global_type); 
-        	if (global_type == IConstants.MSGDELAY_GLOBAL_CUSTOMS){
-        		// no specific setting for local       		
+        	// set local to be the same except Mix
+        	if (globalType == IConstants.MSGDELAY_GLOBAL_MIX){
+        		// Mix flow	
         		
-        	}else {
-    			local_type = global_type;
+        	} else {
     			Map<String, Edge> edges = this.graph.getEdges();
 	        	for (String label : edges.keySet()) {
 	        		Edge ed = edges.get(label);             
-	        		ed.setMsgFlowType(local_type);
+	        		ed.setMsgFlowType(globalType);
 				}
     		}
         } else if (id.equals(PROPERTY_GLOBAL_DELAY_TYPE)){
-      		int local_type;
-      		int temp = ((Integer)value).intValue();
-        	int global_type = this.mapGlobalDelayType(temp);
-        	
-        	this.graph.setGlobalDelayType(global_type); 
-        	if (global_type == IConstants.MSGDELAY_GLOBAL_CUSTOMS){
-        		// no specific setting for local
-        		local_type = -9;
-        		
-        	}else if(global_type == IConstants.MSGDELAY_GLOBAL_RANDOM_CUSTOMS){
-    			local_type = IConstants.MSGDELAY_LOCAL_RANDOM_CUSTOMS;
-    		}
-    		else if(global_type == IConstants.MSGDELAY_GLOBAL_RANDOM_UNIFORM){
-    			local_type = IConstants.MSGDELAY_LOCAL_RANDOM_UNIFORM;
-    		}
-    		else if(global_type == IConstants.MSGDELAY_GLOBAL_RANDOM_POISSON){
-    			local_type = IConstants.MSGDELAY_LOCAL_RANDOM_POISSON;
-    		}
-    		else{
-    			local_type = IConstants.MSGDELAY_LOCAL_FIXED;
-    		}
-        	if(local_type != -9){
+      		int globalType = ((Integer)value).intValue();
+      		this.graph.setGlobalDelayType(globalType);
+      	
+        	// set all local to be the same, except Mix
+      		int local_type = this.mapGlobalDelayType(globalType);
+        	if(local_type >= 0){
 	    		Map<String, Edge> edges = this.graph.getEdges();
 	        	for (String label : edges.keySet()) {
-	        		Edge ed = edges.get(label);
-	        		ed.setDelaySeed(this.graph.getGlobalDelaySeed());              
+	        		Edge ed = edges.get(label);          
 	        		ed.setDelayType(local_type);
 				}
         	}
         } else if (id.equals(PROPERTY_GLOBAL_DELAY_SEED)) {
         	int val;
+        	boolean flag = true;
         	try{
-        		Integer i = Integer.valueOf(value.toString());
-        		val = i.intValue();
+        		val = Integer.parseInt(value.toString());
         		
         	}catch(NumberFormatException e){
-        		val = IConstants.DEFAULT_MSGDELAY_SEED;
+        		val = IConstants.MSGDELAY_SEED_DEFAULT;
         	}
-        	if(val > 255 || val < 1){
-        		// default value
-        		val = IConstants.DEFAULT_MSGDELAY_SEED;       		
-        	} else {
-        		this.graph.setGlobalDelaySeed(val);
+        	if(val == 0){
+        		// Mix order
+        		// display 0 in global and change nothing at local
+        		flag = false;
         		
+        	}else if(val > 255 || val < 1){
+        		// bad input from user, set to be default value
+        		val = IConstants.MSGDELAY_SEED_DEFAULT;            		
+        		
+        	} else {        		
+        		// valid input for global value       		
+        	}
+        	
+        	// set value to graph record
+        	this.graph.setGlobalDelaySeed(val);
+        	if(flag == true){
         		Map<String, Edge> edges = this.graph.getEdges();
         		for (String label : edges.keySet()) {
         			Edge ed = (Edge)edges.get(label);
@@ -561,36 +545,24 @@ public class GraphElement extends AdapterElement {
     }
     
 
-    private final int mapGlobalDelayType(int type) {   	
-    	if (type == 0){
-    		return IConstants.MSGDELAY_GLOBAL_SYNCHRONOUS;
+    private final short mapGlobalDelayType(int type) {   	
+    	if (type == IConstants.MSGDELAY_GLOBAL_SYNCHRONOUS){
+    		return IConstants.MSGDELAY_LOCAL_FIXED;
     		
-    	} else if (type == 1){
-    		return IConstants.MSGDELAY_GLOBAL_RANDOM_UNIFORM;
+    	} else if (type == IConstants.MSGDELAY_GLOBAL_RANDOM_UNIFORM){
+    		return IConstants.MSGDELAY_LOCAL_RANDOM_UNIFORM;
     		
-    	} else if (type == 2){
-    		return IConstants.MSGDELAY_GLOBAL_RANDOM_POISSON;
+    	} else if (type == IConstants.MSGDELAY_GLOBAL_RANDOM_POISSON){
+    		return IConstants.MSGDELAY_LOCAL_RANDOM_POISSON;
     		
-    	} else if (type == 3){
-    		return IConstants.MSGDELAY_GLOBAL_RANDOM_CUSTOMS;
+    	} else if (type == IConstants.MSGDELAY_GLOBAL_RANDOM_CUSTOMS){
+    		return IConstants.MSGDELAY_LOCAL_RANDOM_CUSTOMS;
     		
-    	}else{
-    		return IConstants.MSGDELAY_GLOBAL_CUSTOMS;
+    	} else {
+    		return -1;
     	}
     }
-    
-    private final int mapGlobalFlowType(int type) {
-        if(type == IConstants.MSGFLOW_FIFO_TYPE){
-        	return IConstants.MSGFLOW_FIFO_TYPE;
-        	
-        } else if(type == IConstants.MSGFLOW_NO_ORDER_TYPE){
-            return IConstants.MSGFLOW_NO_ORDER_TYPE;
-            
-        }else{
-        	 return IConstants.MSGFLOW_MIX_TYPE;
-        }
-    }
-
+  
     /*
      * Overriding serialize object due to Java Bug4152790
      */

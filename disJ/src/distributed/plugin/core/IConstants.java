@@ -28,21 +28,37 @@ public interface IConstants {
 	public static final short MSGFLOW_NO_ORDER_TYPE = 1;
 	public static final short MSGFLOW_MIX_TYPE = 2;
 	
+	 // message flow LABEL supported types
+    public static final String FIFO_TYPE = "FIFO";
+    public static final String NO_ORDER_TYPE = "Random Order";
+    public static final String MIX_ORDER_TYPE = "Mix Order";
+
 	// message delay time supported types
 	public static final short MSGDELAY_GLOBAL_SYNCHRONOUS = 0;
 	public static final short MSGDELAY_GLOBAL_RANDOM_UNIFORM = 1;
 	public static final short MSGDELAY_GLOBAL_RANDOM_POISSON = 2;
 	public static final short MSGDELAY_GLOBAL_RANDOM_CUSTOMS= 3;
-	public static final short MSGDELAY_GLOBAL_CUSTOMS = 4;
-	
-	public static final short DEFAULT_MSGDELAY_SEED = 1;
-	public static final short MSGFAILURE_DEFAULT_PROB = 5;
+	public static final short MSGDELAY_GLOBAL_MIX = 4;
 	
 	public static final short MSGDELAY_LOCAL_FIXED = 0;
 	public static final short MSGDELAY_LOCAL_RANDOM_UNIFORM = 1;
 	public static final short MSGDELAY_LOCAL_RANDOM_POISSON = 2;
 	public static final short MSGDELAY_LOCAL_RANDOM_CUSTOMS= 3;
+		
+    // message delay time LABEL supported types
+    public static final String FIXED = "Fixed";
+    public static final String SYNCHRONOUS = "Synchronous";
+    public static final String RANDOM_UNIFORM = "Random Uniform";
+    public static final String RANDOM_POISSON = "Random Poisson";
+    public static final String RANDOM_CUSTOMS = "Random Customs";
+    public static final String MIX_TYPE = "Mix Type";
+    
 	
+	public static final short MSGDELAY_SEED_DEFAULT = 1;
+	public static final short MSGDELAY_SEED_MIX = 0;
+	
+	public static final short MSGFAILURE_DEFAULT_PROB = 5;
+
 	// board access type
 	public static final int BOARD_READ = 0;
 	public static final int BOARD_DEL = 1;

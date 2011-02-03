@@ -47,16 +47,16 @@ public class NodeElement extends AdapterElement {
 	private static final String PROPERTY_BREAKPOINT = "N04 Breakpoint";
 
 	// unmodifiable properties
-	private static final String PROPERTY_MSG_RECV = "N05 Number of Received Message";
-	private static final String PROPERTY_MSG_SENT = "N06 Number of Sent Message";
+	private static final String PROPERTY_MSG_RECV = "N05 Number of Messages Received";
+	private static final String PROPERTY_MSG_SENT = "N06 Number of Messages Sent";
 	
 	// unmodifiable properties with multiple values
 	private static final String PROPERTY_OUT_PORTS = "N07 Outgoing Ports";
 	private static final String PROPERTY_IN_PORTS = "N08 Incoming Ports";
-	private static final String PROPERTY_STATES = "N09 State List";
-	private static final String PROPERTY_NUM_INIT_AGENT = "N10 Number of Agent Hosted";
-	private static final String PROPERTY_NUM_AGENT = "N11 Current Number of Agent";
-	private static final String PROPERTY_NUM_TOKEN = "N12 Current Number of Token";
+	private static final String PROPERTY_STATES = "N09 States Transition";
+	private static final String PROPERTY_NUM_INIT_AGENT = "N10 Number of Agents Hosted";
+	private static final String PROPERTY_NUM_AGENT = "N11 Current Number of Agents";
+	private static final String PROPERTY_NUM_TOKEN = "N12 Current Number of Tokens";
 	
 	private static final String[] propertyArray = {PROPERTY_USER, PROPERTY_NAME,
 			PROPERTY_IS_INIT, PROPERTY_IS_ALIVE, PROPERTY_BREAKPOINT,
