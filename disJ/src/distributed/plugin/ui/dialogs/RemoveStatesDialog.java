@@ -50,7 +50,9 @@ public class RemoveStatesDialog extends Dialog {
 		this.response = false;
 	}
 
-	public Map<Integer, RGB> open() {
+	public List<Short> open() {
+		
+		final List<Short> remList = new ArrayList<Short>();
 		final Shell shell = new Shell(getParent(), SWT.DIALOG_TRIM
 				| SWT.APPLICATION_MODAL);
 		shell.setText(getText());
@@ -107,10 +109,9 @@ public class RemoveStatesDialog extends Dialog {
 						if (items[i].getChecked()) {							
 							String state = items[i].getText(0);
 							short s = Short.parseShort(state);
-							stateColr.remove(s);
+							remList.add(s);
 						}
 					}
-					
 				}
 				shell.close();
 			}
@@ -127,7 +128,7 @@ public class RemoveStatesDialog extends Dialog {
 		}
 		
 		if (response)
-			return stateColr;
+			return remList;
 		else
 			return null;
 	}

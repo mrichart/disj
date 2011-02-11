@@ -56,7 +56,7 @@ public class GraphEditorActionBarContributor extends ActionBarContributor {
 		addRetargetAction(new RemoveStateRetargetAction(IGraphEditorConstants.REMOVE_STATE_ID, IGraphEditorConstants.REMOVE_STATE));
 		addRetargetAction(new SpeedRetargetAction(IGraphEditorConstants.ACTION_SET_SPEED, IGraphEditorConstants.SPEED));
 		addRetargetAction(new ReplayRegargetAction(IGraphEditorConstants.ACTION_REPLAY_RECORD,IGraphEditorConstants.REPLAY));
-		addRetargetAction(new SaveRecordRegargetAction(IGraphEditorConstants.ACTION_SAVE_RECORD,IGraphEditorConstants.SAVE_RECORD));
+		//addRetargetAction(new SaveRecordRegargetAction(IGraphEditorConstants.ACTION_SAVE_RECORD,IGraphEditorConstants.SAVE_RECORD));
 		
 	}
 
@@ -90,7 +90,7 @@ public class GraphEditorActionBarContributor extends ActionBarContributor {
 		tbm.add(getAction(IGraphEditorConstants.ACTION_SET_SPEED));
 		tbm.add(new Separator());
 		tbm.add(getAction(IGraphEditorConstants.ACTION_REPLAY_RECORD));
-		tbm.add(getAction(IGraphEditorConstants.ACTION_SAVE_RECORD));
+		//tbm.add(getAction(IGraphEditorConstants.ACTION_SAVE_RECORD));
 		
 	}
 	

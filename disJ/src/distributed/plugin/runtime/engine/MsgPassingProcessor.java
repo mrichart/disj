@@ -390,14 +390,31 @@ public class MsgPassingProcessor implements IProcessor {
 	 * @throws DisJException
 	 */
 	public void cleanUp() {
-	
-		// clean up the memory
-		this.graph = null;
-
+		
 		// reset the flag the process is terminated
 		this.stop = true;
 		this.pause = false;
-
+	
+		// clear all nodes and edges
+		Map<String, Node> nodes = this.graph.getNodes();
+		Iterator<String> its = nodes.keySet().iterator();
+		for(Node n = null; its.hasNext();){
+			n = nodes.get(its.next());
+			n.cleanUp();
+		}
+		
+		Map<String, Edge> edges = this.graph.getEdges();
+		its = edges.keySet().iterator();
+		for(Edge e = null; its.hasNext();){
+			e = edges.get(its.next());
+			e.cleanUp();
+		}
+			
+		// reset time generator
+		this.timeGen.reset(this.graph.getId());
+		
+		// clear cache memory
+		this.graph = null;
 	}
 
 	/**

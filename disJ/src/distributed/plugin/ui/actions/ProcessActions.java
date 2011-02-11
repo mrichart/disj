@@ -266,11 +266,11 @@ public class ProcessActions extends WorkbenchPartAction {
 			this.executeSpeed();
 			
 		} else if (actionType.equals(IGraphEditorConstants.ACTION_REPLAY_RECORD)) {
-			this.executeReplay();
-			
-		} else if (actionType.equals(IGraphEditorConstants.ACTION_SAVE_RECORD)) {
-			this.executeSaveRecord();
+			this.executeReplay();			
 		}
+//		else if (actionType.equals(IGraphEditorConstants.ACTION_SAVE_RECORD)) {
+//			this.executeSaveRecord();
+//		}
 
 	}
 	

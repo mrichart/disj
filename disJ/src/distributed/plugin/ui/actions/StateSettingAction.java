@@ -10,6 +10,7 @@
 
 package distributed.plugin.ui.actions;
 
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.gef.ui.actions.WorkbenchPartAction;
@@ -111,16 +112,16 @@ public class StateSettingAction extends WorkbenchPartAction {
                 stateColr);
         
         // accept new updated
-        stateColr = dialog.open();
+        List<Short> remList = dialog.open();
         
-        // ok selected
-        if (stateColr != null){
+        // OK selected
+        if (remList != null){
 	        // update data
-        	ge.removeAllStateColor();
-	        ge.addStateColor(stateColr);
+        	for(int i =0; i < remList.size(); i++){
+        		int state = remList.get(i);
+        		ge.removeStateColor(state);        		
+        	}
 	        editor.makeDirty();
         }
-
     }
-
 }

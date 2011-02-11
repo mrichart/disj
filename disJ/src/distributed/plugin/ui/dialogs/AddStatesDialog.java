@@ -217,7 +217,7 @@ public class AddStatesDialog extends Dialog {
 	        	Short.parseShort(((String)param).trim());
 	            return null;
 	        }catch(NumberFormatException n){
-	            return "Input must be a short number";
+	            return "Input must be a number between 1 - 224 inclusive";
 	        }
 	  }
 }
