@@ -258,10 +258,6 @@ public class GraphElement extends AdapterElement {
     public void addStateColor(Map<Integer, RGB> stateMap){
         this.stateColors.putAll(stateMap);		
     }
-    
-    public void setStateColor(Map<Integer, RGB> stateMap){
-       this.stateColors = stateMap;
-    }
 
     public void removeNode(String id, final NodeElement element) {
         try {

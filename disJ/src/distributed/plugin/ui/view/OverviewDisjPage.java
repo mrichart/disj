@@ -30,6 +30,7 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
@@ -57,6 +58,19 @@ import distributed.plugin.ui.models.GraphElement;
 
 public class OverviewDisjPage extends DisJViewPage {
 
+	private static final int LINE_THICK = 4;
+	private static final int BAR_LENGTH = 120;
+	private static final int BAR_HIGHT = 120;
+	private static final int BAR_GAP = 4;
+	
+	// coordinate of starting point of each graph/bar
+	private static final List<int[]> CORDINATE;
+	static{
+		CORDINATE = new ArrayList<int[]>();
+		// column1
+		CORDINATE.add(new int[]{20,20});
+	}
+	
 	private GraphElement contents;
 
 	private List<Agent> agents;
@@ -388,18 +402,20 @@ public class OverviewDisjPage extends DisJViewPage {
 		// create canvas
 		canvas = new Canvas(com, SWT.NONE);
 		canvas.setBackground(com.getDisplay().getSystemColor(SWT.COLOR_WHITE));
-		canvas.setSize(500, 500);
+		canvas.setSize(1000, 1000);
 		canvas.addListener(SWT.Paint, new Listener() {
 			public void handleEvent(Event event) {
 				redrawStatistic(event.gc);
 			}
 		});
 		this.statTab.setControl(com);
-
 	}
 
 	private void redrawStatistic(GC gc) {
 
+		int column = 0;
+		int row = 0;
+		
 		// read info from model
 		Graph graph = this.contents.getGraph();
 		Map<String, Node> nodes = graph.getNodes();
@@ -407,8 +423,47 @@ public class OverviewDisjPage extends DisJViewPage {
 		GraphStat st = graph.getStat();
 		Map<Integer, String> states = graph.getStateFields();
 
+		gc.setLineWidth(LINE_THICK);
+		
+		// column 0: draw a bar chart of state vs #node
 		Map<Integer, Integer> ns = st.getNodeCurStateCount(nodes);
-		gc.setLineWidth(4);
+		
+		// draw X and Y axis
+		int totState = this.contents.getNumStateColor();
+		float r = totState/5;
+		int xLength = BAR_LENGTH;
+		if(r > 1){
+			xLength = (int)(BAR_LENGTH * r);
+		}
+		int totNode = nodes.size();
+		
+		// top left of column
+		int x = CORDINATE.get(0)[0];
+		int y = CORDINATE.get(0)[1];
+		int[] bar1 = new int[]{x, y, x, y+BAR_HIGHT, x+xLength, y+BAR_HIGHT};
+		gc.drawText("# Node", 10, 10);
+		gc.drawPolyline(bar1);		
+		gc.drawText("States", (x+xLength)/2, (x+BAR_HIGHT+10));
+		
+		int width = xLength/(totState + BAR_GAP);
+		// compute number and size of bar 
+		int i = 1;
+		for (int state : ns.keySet()) {
+			int count = ns.get(state);
+			int per = (100*count)/totNode;
+			Color color = this.contents.getColor(state);
+			gc.setForeground(color);
+			gc.setBackground(color);
+			gc.drawRectangle((x + BAR_GAP)*i , y +(BAR_HIGHT-per-LINE_THICK), width, per);
+			gc.fillRectangle((x + BAR_GAP)*i , y +(BAR_HIGHT-per-LINE_THICK), width, per);
+			i++;
+		}
+		
+		
+		// get color of bar from graphelement(contents)
+		
+		
+		/*
 		int[] tmp = new int[(ns.size() + 1) * 2];
 		tmp[0] = 0;
 		tmp[1] = 0;
@@ -419,12 +474,15 @@ public class OverviewDisjPage extends DisJViewPage {
 			tmp[k] = j * 10;
 			tmp[k + 1] = k;
 		}
-		gc.drawPolyline(tmp);
+		//gc.setLineWidth(4);
+		//gc.drawPolyline(tmp);
+		 */
+		 
 		// gc.drawRectangle(10, 10, 40, 45);
 		// gc.drawOval(65, 10, 30, 35);
 		// gc.drawLine(130, 10, 90, 80);
-		gc.drawPolygon(new int[] { 20, 70, 45, 90, 70, 70 });
-		gc.drawPolyline(new int[] { 10, 120, 70, 100, 100, 130, 130, 75 });
+		//gc.drawPolygon(new int[] { 20, 70, 45, 90, 70, 70 });
+		//gc.drawPolyline(new int[] { 10, 120, 70, 100, 100, 130, 130, 75 });
 	}
 
 	private void creatAgentView() {
