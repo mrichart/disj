@@ -157,7 +157,7 @@ public class GraphStat extends Statistic {
 	}
 	
 	/**
-	 * Get total number of message that every nodes sent
+	 * Get total number of message of every nodes sent
 	 * 
 	 * @param nodes
 	 * @return

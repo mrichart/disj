@@ -67,8 +67,10 @@ public class OverviewDisjPage extends DisJViewPage {
 	private static final List<int[]> CORDINATE;
 	static{
 		CORDINATE = new ArrayList<int[]>();
-		// column1
+		// column0
 		CORDINATE.add(new int[]{20,20});
+		CORDINATE.add(new int[]{20,220});
+		CORDINATE.add(new int[]{20,420});
 	}
 	
 	private GraphElement contents;
@@ -408,13 +410,14 @@ public class OverviewDisjPage extends DisJViewPage {
 				redrawStatistic(event.gc);
 			}
 		});
+		this.prov.setCanvas(canvas);
 		this.statTab.setControl(com);
 	}
 
 	private void redrawStatistic(GC gc) {
-
-		int column = 0;
-		int row = 0;
+		
+		int totNode;
+		int totAgent;
 		
 		// read info from model
 		Graph graph = this.contents.getGraph();
@@ -423,29 +426,33 @@ public class OverviewDisjPage extends DisJViewPage {
 		GraphStat st = graph.getStat();
 		Map<Integer, String> states = graph.getStateFields();
 
+		// get default color
+		Color deFor = gc.getForeground();
+		Color deBac = gc.getBackground();
+		
+		// define basic draw X and Y axis		
 		gc.setLineWidth(LINE_THICK);
 		
-		// column 0: draw a bar chart of state vs #node
-		Map<Integer, Integer> ns = st.getNodeCurStateCount(nodes);
-		
-		// draw X and Y axis
 		int totState = this.contents.getNumStateColor();
 		float r = totState/5;
 		int xLength = BAR_LENGTH;
 		if(r > 1){
 			xLength = (int)(BAR_LENGTH * r);
 		}
-		int totNode = nodes.size();
+		int width = xLength/(totState + BAR_GAP);
+		
+		// column 0: draw a bar chart of state vs #node
+		totNode = nodes.size();
+		Map<Integer, Integer> ns = st.getNodeCurStateCount(nodes);						
 		
 		// top left of column
 		int x = CORDINATE.get(0)[0];
 		int y = CORDINATE.get(0)[1];
 		int[] bar1 = new int[]{x, y, x, y+BAR_HIGHT, x+xLength, y+BAR_HIGHT};
-		gc.drawText("# Node", 10, 10);
+		gc.drawText("# Nodes", x-10, y-10);
 		gc.drawPolyline(bar1);		
-		gc.drawText("States", (x+xLength)/2, (x+BAR_HIGHT+10));
+		gc.drawText("States", (x+xLength)/2, (y+BAR_HIGHT+10));		
 		
-		int width = xLength/(totState + BAR_GAP);
 		// compute number and size of bar 
 		int i = 1;
 		for (int state : ns.keySet()) {
@@ -459,9 +466,68 @@ public class OverviewDisjPage extends DisJViewPage {
 			i++;
 		}
 		
+		// clear up the color
+		gc.setForeground(deFor);
+		gc.setBackground(deBac);
 		
-		// get color of bar from graphelement(contents)
+		// column 1: draw a bar chart of state vs #agent
+		totAgent = agents.size();
+		ns = st.getAgentStateCount(agents);
+				
+		// top left of column
+		x = CORDINATE.get(1)[0];
+		y = CORDINATE.get(1)[1];
+		bar1 = new int[]{x, y, x, y+BAR_HIGHT, x+xLength, y+BAR_HIGHT};
+		gc.drawText("# Agents", x-10, y-10);
+		gc.drawPolyline(bar1);		
+		gc.drawText("States", (x+xLength)/2, (y+BAR_HIGHT+10));		
 		
+		// compute number and size of bar 
+		i = 1;
+		for (int state : ns.keySet()) {
+			int count = ns.get(state);
+			int per = (100*count)/totAgent;
+			Color color = this.contents.getColor(state);
+			gc.setForeground(color);
+			gc.setBackground(color);
+			gc.drawRectangle((x + BAR_GAP)*i , y +(BAR_HIGHT-per-LINE_THICK), width, per);
+			gc.fillRectangle((x + BAR_GAP)*i , y +(BAR_HIGHT-per-LINE_THICK), width, per);
+			i++;
+		}
+		
+		// clear up the color
+		gc.setForeground(deFor);
+		gc.setBackground(deBac);
+		
+		// column 2: draw a bar chart of node state vs #msg sent
+		totNode = nodes.size();
+		ns = st.getNodeStateMsgSentCount(nodes);
+				
+		// top left of column
+		x = CORDINATE.get(2)[0];
+		y = CORDINATE.get(2)[1];
+		bar1 = new int[]{x, y, x, y+BAR_HIGHT, x+xLength, y+BAR_HIGHT};
+		gc.drawText("# Msg Sent", x-10, y-10);
+		gc.drawPolyline(bar1);		
+		gc.drawText("States", (x+xLength)/2, (y+BAR_HIGHT+10));		
+		
+		// compute number and size of bar 
+		i = 1;
+		int max = st.getTotalMsgSent(nodes);
+		for (int state : ns.keySet()) {
+			int count = ns.get(state);
+			int per = (100*count)/max;
+			Color color = this.contents.getColor(state);
+			gc.setForeground(color);
+			gc.setBackground(color);
+			gc.drawRectangle((x + BAR_GAP)*i , y +(BAR_HIGHT-per-LINE_THICK), width, per);
+			gc.fillRectangle((x + BAR_GAP)*i , y +(BAR_HIGHT-per-LINE_THICK), width, per);
+			i++;
+		}
+		
+		// clear up the color
+		gc.setForeground(deFor);
+		gc.setBackground(deBac);
 		
 		/*
 		int[] tmp = new int[(ns.size() + 1) * 2];
@@ -483,6 +549,7 @@ public class OverviewDisjPage extends DisJViewPage {
 		// gc.drawLine(130, 10, 90, 80);
 		//gc.drawPolygon(new int[] { 20, 70, 45, 90, 70, 70 });
 		//gc.drawPolyline(new int[] { 10, 120, 70, 100, 100, 130, 130, 75 });
+				
 	}
 
 	private void creatAgentView() {
