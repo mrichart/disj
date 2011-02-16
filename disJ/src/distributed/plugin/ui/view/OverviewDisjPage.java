@@ -31,6 +31,8 @@ import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
@@ -59,18 +61,21 @@ import distributed.plugin.ui.models.GraphElement;
 public class OverviewDisjPage extends DisJViewPage {
 
 	private static final int LINE_THICK = 4;
-	private static final int BAR_LENGTH = 120;
-	private static final int BAR_HIGHT = 120;
+	private static final int BAR_LENGTH = 160;
+	private static final int BAR_HIGHT = 160;
 	private static final int BAR_GAP = 4;
+	private static final int TEXT_HIGH = 20;
 	
 	// coordinate of starting point of each graph/bar
 	private static final List<int[]> CORDINATE;
 	static{
 		CORDINATE = new ArrayList<int[]>();
-		// column0
+		// section ..
+		CORDINATE.add(new int[]{620,20});
 		CORDINATE.add(new int[]{20,20});
+		CORDINATE.add(new int[]{320,20});
 		CORDINATE.add(new int[]{20,220});
-		CORDINATE.add(new int[]{20,420});
+		CORDINATE.add(new int[]{320,220});
 	}
 	
 	private GraphElement contents;
@@ -415,7 +420,10 @@ public class OverviewDisjPage extends DisJViewPage {
 	}
 
 	private void redrawStatistic(GC gc) {
-		
+		int i;
+		int curX;
+		int curY;
+		int max;
 		int totNode;
 		int totAgent;
 		
@@ -434,100 +442,190 @@ public class OverviewDisjPage extends DisJViewPage {
 		gc.setLineWidth(LINE_THICK);
 		
 		int totState = this.contents.getNumStateColor();
-		float r = totState/5;
+		float r = totState/4;
 		int xLength = BAR_LENGTH;
 		if(r > 1){
 			xLength = (int)(BAR_LENGTH * r);
 		}
 		int width = xLength/(totState + BAR_GAP);
 		
-		// column 0: draw a bar chart of state vs #node
+		
+		// section 0: draw state's colors legend
+		// =====================================
+		Map<Integer, String> smap = contents.getGraph().getStateFields();
+			
+		// top left of chart
+		int x = CORDINATE.get(0)[0];
+		int y = CORDINATE.get(0)[1];
+		
+		// draw squares of color a long side with state name
+		// from top to bottom
+		Color c;
+		for(int state : smap.keySet()){
+			// set to default color
+			gc.setBackground(deBac);
+			
+			// get state color
+			c = contents.getColor(state);			
+			
+			// draw a text on the right of color box
+			gc.drawText(smap.get(state), x + 40, y);
+			
+			// draw a box
+			gc.drawRectangle(x, y, 20, 20);
+			gc.setBackground(c);
+			gc.fillRectangle(x, y, 20, 20);
+						
+			y = y + 40;
+		}
+		
+		// clear up the color
+		gc.setForeground(deFor);
+		gc.setBackground(deBac);
+		
+		// section 1: draw a bar chart of state vs #node
+		// =============================================
 		totNode = nodes.size();
 		Map<Integer, Integer> ns = st.getNodeCurStateCount(nodes);						
 		
-		// top left of column
-		int x = CORDINATE.get(0)[0];
-		int y = CORDINATE.get(0)[1];
-		int[] bar1 = new int[]{x, y, x, y+BAR_HIGHT, x+xLength, y+BAR_HIGHT};
-		gc.drawText("# Nodes", x-10, y-10);
-		gc.drawPolyline(bar1);		
-		gc.drawText("States", (x+xLength)/2, (y+BAR_HIGHT+10));		
-		
-		// compute number and size of bar 
-		int i = 1;
-		for (int state : ns.keySet()) {
-			int count = ns.get(state);
-			int per = (100*count)/totNode;
-			Color color = this.contents.getColor(state);
-			gc.setForeground(color);
-			gc.setBackground(color);
-			gc.drawRectangle((x + BAR_GAP)*i , y +(BAR_HIGHT-per-LINE_THICK), width, per);
-			gc.fillRectangle((x + BAR_GAP)*i , y +(BAR_HIGHT-per-LINE_THICK), width, per);
-			i++;
-		}
-		
-		// clear up the color
-		gc.setForeground(deFor);
-		gc.setBackground(deBac);
-		
-		// column 1: draw a bar chart of state vs #agent
-		totAgent = agents.size();
-		ns = st.getAgentStateCount(agents);
-				
-		// top left of column
+		// top left of chart
 		x = CORDINATE.get(1)[0];
 		y = CORDINATE.get(1)[1];
-		bar1 = new int[]{x, y, x, y+BAR_HIGHT, x+xLength, y+BAR_HIGHT};
-		gc.drawText("# Agents", x-10, y-10);
+		int[] bar1 = new int[]{x, y, x, y+BAR_HIGHT, x+xLength, y+BAR_HIGHT};
+		gc.drawText("# Nodes", x-TEXT_HIGH, y-TEXT_HIGH);
 		gc.drawPolyline(bar1);		
-		gc.drawText("States", (x+xLength)/2, (y+BAR_HIGHT+10));		
+		gc.drawText("States", x+(xLength/2), (y+BAR_HIGHT+BAR_GAP));		
 		
 		// compute number and size of bar 
-		i = 1;
-		for (int state : ns.keySet()) {
-			int count = ns.get(state);
-			int per = (100*count)/totAgent;
-			Color color = this.contents.getColor(state);
-			gc.setForeground(color);
-			gc.setBackground(color);
-			gc.drawRectangle((x + BAR_GAP)*i , y +(BAR_HIGHT-per-LINE_THICK), width, per);
-			gc.fillRectangle((x + BAR_GAP)*i , y +(BAR_HIGHT-per-LINE_THICK), width, per);
-			i++;
-		}
-		
-		// clear up the color
-		gc.setForeground(deFor);
-		gc.setBackground(deBac);
-		
-		// column 2: draw a bar chart of node state vs #msg sent
-		totNode = nodes.size();
-		ns = st.getNodeStateMsgSentCount(nodes);
-				
-		// top left of column
-		x = CORDINATE.get(2)[0];
-		y = CORDINATE.get(2)[1];
-		bar1 = new int[]{x, y, x, y+BAR_HIGHT, x+xLength, y+BAR_HIGHT};
-		gc.drawText("# Msg Sent", x-10, y-10);
-		gc.drawPolyline(bar1);		
-		gc.drawText("States", (x+xLength)/2, (y+BAR_HIGHT+10));		
-		
-		// compute number and size of bar 
-		i = 1;
-		int max = st.getTotalMsgSent(nodes);
+		i = 0;
+		max = totNode;
+		curX = x + BAR_GAP;
 		for (int state : ns.keySet()) {
 			int count = ns.get(state);
 			int per = (100*count)/max;
 			Color color = this.contents.getColor(state);
 			gc.setForeground(color);
 			gc.setBackground(color);
-			gc.drawRectangle((x + BAR_GAP)*i , y +(BAR_HIGHT-per-LINE_THICK), width, per);
-			gc.fillRectangle((x + BAR_GAP)*i , y +(BAR_HIGHT-per-LINE_THICK), width, per);
+			
+			curY = y +(BAR_HIGHT-per-LINE_THICK);
+			gc.drawRectangle(curX, curY, width, per);
+			gc.fillRectangle(curX, curY, width, per);
+			
+			gc.setForeground(deFor);
+			gc.setBackground(deBac);
+			gc.drawText(count+"", curX, curY-TEXT_HIGH);
+			
 			i++;
-		}
+			curX = curX + width + BAR_GAP;
+		}		
+			
+		// section 2: draw a bar chart of node state vs #msg sent
+		// ======================================================
+		totNode = nodes.size();
+		ns = st.getNodeStateMsgSentCount(nodes);
+				
+		// top left of chart
+		x = CORDINATE.get(2)[0];
+		y = CORDINATE.get(2)[1];
+		bar1 = new int[]{x, y, x, y+BAR_HIGHT, x+xLength, y+BAR_HIGHT};
+		gc.drawText("# Msg Sent", x-TEXT_HIGH, y-TEXT_HIGH);
+		gc.drawPolyline(bar1);		
+		gc.drawText("States", x+(xLength/2), (y+BAR_HIGHT+BAR_GAP));		
 		
-		// clear up the color
-		gc.setForeground(deFor);
-		gc.setBackground(deBac);
+		// compute number and size of bar 
+		i = 1;
+		max = st.getTotalMsgSent(nodes);
+		curX = x + BAR_GAP;
+		for (int state : ns.keySet()) {
+			int count = ns.get(state);
+			int per = (100*count)/max;
+			Color color = this.contents.getColor(state);
+			gc.setForeground(color);
+			gc.setBackground(color);
+			
+			curY = y +(BAR_HIGHT-per-LINE_THICK);
+			gc.drawRectangle(curX, curY, width, per);
+			gc.fillRectangle(curX, curY, width, per);
+			
+			gc.setForeground(deFor);
+			gc.setBackground(deBac);
+			gc.drawText(count+"", curX, curY-TEXT_HIGH);
+			
+			i++;
+			curX = curX + width + BAR_GAP;
+		}
+				
+		// section 3: draw a bar chart of state vs #agent
+		// ==============================================
+		totAgent = agents.size();
+		ns = st.getAgentStateCount(agents);
+				
+		// top left of chart
+		x = CORDINATE.get(3)[0];
+		y = CORDINATE.get(3)[1];
+		bar1 = new int[]{x, y, x, y+BAR_HIGHT, x+xLength, y+BAR_HIGHT};
+		gc.drawText("# Agents", x-TEXT_HIGH, y-TEXT_HIGH);
+		gc.drawPolyline(bar1);		
+		gc.drawText("States", x+(xLength/2), (y+BAR_HIGHT+BAR_GAP));		
+		
+		// compute number and size of bar 
+		i = 1;
+		max = totAgent;
+		curX = x + BAR_GAP;
+		for (int state : ns.keySet()) {
+			int count = ns.get(state);
+			int per = (100*count)/max;
+			Color color = this.contents.getColor(state);
+			gc.setForeground(color);
+			gc.setBackground(color);
+			
+			curY = y +(BAR_HIGHT-per-LINE_THICK);
+			gc.drawRectangle(curX, curY, width, per);
+			gc.fillRectangle(curX, curY, width, per);
+			
+			gc.setForeground(deFor);
+			gc.setBackground(deBac);
+			gc.drawText(count+"", curX, curY-TEXT_HIGH);
+			
+			i++;
+			curX = curX + width + BAR_GAP;
+		}
+	
+		// section 4: draw a bar chart of state vs #agent
+		// ==============================================
+		totAgent = agents.size();
+		ns = st.getStateMoveCount(agents);
+				
+		// top left of chart
+		x = CORDINATE.get(4)[0];
+		y = CORDINATE.get(4)[1];
+		bar1 = new int[]{x, y, x, y+BAR_HIGHT, x+xLength, y+BAR_HIGHT};
+		gc.drawText("# Agent Move", x-TEXT_HIGH, y-TEXT_HIGH);
+		gc.drawPolyline(bar1);		
+		gc.drawText("States", x+(xLength/2), (y+BAR_HIGHT+BAR_GAP));		
+		
+		// compute number and size of bar 
+		i = 1;
+		max = st.getTotalAgentMove(agents);
+		curX = x + BAR_GAP;
+		for (int state : ns.keySet()) {
+			int count = ns.get(state);
+			int per = (100*count)/max;
+			Color color = this.contents.getColor(state);
+			gc.setForeground(color);
+			gc.setBackground(color);
+			
+			curY = y +(BAR_HIGHT-per-LINE_THICK);
+			gc.drawRectangle(curX, curY, width, per);
+			gc.fillRectangle(curX, curY, width, per);
+			
+			gc.setForeground(deFor);
+			gc.setBackground(deBac);
+			gc.drawText(count+"", curX, curY-TEXT_HIGH);
+			
+			i++;
+			curX = curX + width + BAR_GAP;
+		}
 		
 		/*
 		int[] tmp = new int[(ns.size() + 1) * 2];
