@@ -61,21 +61,28 @@ import distributed.plugin.ui.models.GraphElement;
 public class OverviewDisjPage extends DisJViewPage {
 
 	private static final int LINE_THICK = 4;
-	private static final int BAR_LENGTH = 160;
-	private static final int BAR_HIGHT = 160;
+	private static final int BAR_LENGTH = 140;
+	private static final int BAR_HIGHT = 140;
+	private static final int BAR_WIDTH = 20;
 	private static final int BAR_GAP = 4;
+	private static final int NUM_BAR = 6;
 	private static final int TEXT_HIGH = 20;
 	
-	// coordinate of starting point of each graph/bar
+	// coordinate of starting point of each section
 	private static final List<int[]> CORDINATE;
 	static{
 		CORDINATE = new ArrayList<int[]>();
 		// section ..
-		CORDINATE.add(new int[]{620,20});
+		CORDINATE.add(new int[]{820,20});
+		
 		CORDINATE.add(new int[]{20,20});
-		CORDINATE.add(new int[]{320,20});
+		CORDINATE.add(new int[]{420,20});
+		
 		CORDINATE.add(new int[]{20,220});
-		CORDINATE.add(new int[]{320,220});
+		CORDINATE.add(new int[]{420,220});
+		
+		CORDINATE.add(new int[]{20,420});
+		CORDINATE.add(new int[]{420,420});
 	}
 	
 	private GraphElement contents;
@@ -392,9 +399,11 @@ public class OverviewDisjPage extends DisJViewPage {
 		this.creatNodeView();
 		this.createStatisticView();
 
+		this.clickSelectAction();
+		
 		makeActions();
-		// hookContextMenu();
-		hookDoubleClickAction();
+		
+		// hookContextMenu();		
 		// contributeToActionBars();
 	}
 
@@ -409,7 +418,7 @@ public class OverviewDisjPage extends DisJViewPage {
 		// create canvas
 		canvas = new Canvas(com, SWT.NONE);
 		canvas.setBackground(com.getDisplay().getSystemColor(SWT.COLOR_WHITE));
-		canvas.setSize(1000, 1000);
+		canvas.setSize(1400, 1000);
 		canvas.addListener(SWT.Paint, new Listener() {
 			public void handleEvent(Event event) {
 				redrawStatistic(event.gc);
@@ -442,13 +451,11 @@ public class OverviewDisjPage extends DisJViewPage {
 		gc.setLineWidth(LINE_THICK);
 		
 		int totState = this.contents.getNumStateColor();
-		float r = totState/4;
+		float r = totState/NUM_BAR;
 		int xLength = BAR_LENGTH;
 		if(r > 1){
 			xLength = (int)(BAR_LENGTH * r);
-		}
-		int width = xLength/(totState + BAR_GAP);
-		
+		}		
 		
 		// section 0: draw state's colors legend
 		// =====================================
@@ -483,8 +490,8 @@ public class OverviewDisjPage extends DisJViewPage {
 		gc.setForeground(deFor);
 		gc.setBackground(deBac);
 		
-		// section 1: draw a bar chart of state vs #node
-		// =============================================
+		// section 1: draw a bar chart of nod's state vs #node
+		// ===================================================
 		totNode = nodes.size();
 		Map<Integer, Integer> ns = st.getNodeCurStateCount(nodes);						
 		
@@ -508,19 +515,19 @@ public class OverviewDisjPage extends DisJViewPage {
 			gc.setBackground(color);
 			
 			curY = y +(BAR_HIGHT-per-LINE_THICK);
-			gc.drawRectangle(curX, curY, width, per);
-			gc.fillRectangle(curX, curY, width, per);
+			gc.drawRectangle(curX, curY, BAR_WIDTH, per);
+			gc.fillRectangle(curX, curY, BAR_WIDTH, per);
 			
 			gc.setForeground(deFor);
 			gc.setBackground(deBac);
 			gc.drawText(count+"", curX, curY-TEXT_HIGH);
 			
 			i++;
-			curX = curX + width + BAR_GAP;
+			curX = curX + BAR_WIDTH + BAR_GAP;
 		}		
 			
-		// section 2: draw a bar chart of node state vs #msg sent
-		// ======================================================
+		// section 2: draw a bar chart of node's state vs #msg sent
+		// ========================================================
 		totNode = nodes.size();
 		ns = st.getNodeStateMsgSentCount(nodes);
 				
@@ -544,19 +551,19 @@ public class OverviewDisjPage extends DisJViewPage {
 			gc.setBackground(color);
 			
 			curY = y +(BAR_HIGHT-per-LINE_THICK);
-			gc.drawRectangle(curX, curY, width, per);
-			gc.fillRectangle(curX, curY, width, per);
+			gc.drawRectangle(curX, curY, BAR_WIDTH, per);
+			gc.fillRectangle(curX, curY, BAR_WIDTH, per);
 			
 			gc.setForeground(deFor);
 			gc.setBackground(deBac);
 			gc.drawText(count+"", curX, curY-TEXT_HIGH);
 			
 			i++;
-			curX = curX + width + BAR_GAP;
+			curX = curX + BAR_WIDTH + BAR_GAP;
 		}
 				
-		// section 3: draw a bar chart of state vs #agent
-		// ==============================================
+		// section 3: draw a bar chart of agent's state vs #agent
+		// ======================================================
 		totAgent = agents.size();
 		ns = st.getAgentStateCount(agents);
 				
@@ -580,19 +587,19 @@ public class OverviewDisjPage extends DisJViewPage {
 			gc.setBackground(color);
 			
 			curY = y +(BAR_HIGHT-per-LINE_THICK);
-			gc.drawRectangle(curX, curY, width, per);
-			gc.fillRectangle(curX, curY, width, per);
+			gc.drawRectangle(curX, curY, BAR_WIDTH, per);
+			gc.fillRectangle(curX, curY, BAR_WIDTH, per);
 			
 			gc.setForeground(deFor);
 			gc.setBackground(deBac);
 			gc.drawText(count+"", curX, curY-TEXT_HIGH);
 			
 			i++;
-			curX = curX + width + BAR_GAP;
+			curX = curX + BAR_WIDTH + BAR_GAP;
 		}
 	
-		// section 4: draw a bar chart of state vs #agent
-		// ==============================================
+		// section 4: draw a bar chart of agent's state vs #move
+		// =====================================================
 		totAgent = agents.size();
 		ns = st.getStateMoveCount(agents);
 				
@@ -600,7 +607,7 @@ public class OverviewDisjPage extends DisJViewPage {
 		x = CORDINATE.get(4)[0];
 		y = CORDINATE.get(4)[1];
 		bar1 = new int[]{x, y, x, y+BAR_HIGHT, x+xLength, y+BAR_HIGHT};
-		gc.drawText("# Agent Move", x-TEXT_HIGH, y-TEXT_HIGH);
+		gc.drawText("# Move", x-TEXT_HIGH, y-TEXT_HIGH);
 		gc.drawPolyline(bar1);		
 		gc.drawText("States", x+(xLength/2), (y+BAR_HIGHT+BAR_GAP));		
 		
@@ -616,40 +623,94 @@ public class OverviewDisjPage extends DisJViewPage {
 			gc.setBackground(color);
 			
 			curY = y +(BAR_HIGHT-per-LINE_THICK);
-			gc.drawRectangle(curX, curY, width, per);
-			gc.fillRectangle(curX, curY, width, per);
+			gc.drawRectangle(curX, curY, BAR_WIDTH, per);
+			gc.fillRectangle(curX, curY, BAR_WIDTH, per);
 			
 			gc.setForeground(deFor);
 			gc.setBackground(deBac);
 			gc.drawText(count+"", curX, curY-TEXT_HIGH);
 			
 			i++;
-			curX = curX + width + BAR_GAP;
+			curX = curX + BAR_WIDTH + BAR_GAP;
 		}
 		
-		/*
-		int[] tmp = new int[(ns.size() + 1) * 2];
-		tmp[0] = 0;
-		tmp[1] = 0;
-		Iterator<Integer> it = ns.keySet().iterator();
-		int k = 2;
-		for (int j = 0; it.hasNext(); k += 2) {
-			j = ns.get(it.next());
-			tmp[k] = j * 10;
-			tmp[k + 1] = k;
-		}
-		//gc.setLineWidth(4);
-		//gc.drawPolyline(tmp);
-		 */
-		 
-		// gc.drawRectangle(10, 10, 40, 45);
-		// gc.drawOval(65, 10, 30, 35);
-		// gc.drawLine(130, 10, 90, 80);
-		//gc.drawPolygon(new int[] { 20, 70, 45, 90, 70, 70 });
-		//gc.drawPolyline(new int[] { 10, 120, 70, 100, 100, 130, 130, 75 });
+		
+		// section 5: draw a bar chart of agent's state vs #drop token
+		// ===========================================================
+		totAgent = agents.size();
+		ns = st.getStateTokenDropCount(agents);
 				
+		// top left of chart
+		x = CORDINATE.get(5)[0];
+		y = CORDINATE.get(5)[1];
+		bar1 = new int[]{x, y, x, y+BAR_HIGHT, x+xLength, y+BAR_HIGHT};
+		gc.drawText("# Token Drop", x-TEXT_HIGH, y-TEXT_HIGH);
+		gc.drawPolyline(bar1);		
+		gc.drawText("States", x+(xLength/2), (y+BAR_HIGHT+BAR_GAP));		
+		
+		// compute number and size of bar 
+		i = 1;
+		max = st.getTotalTokDrop(agents);
+		curX = x + BAR_GAP;
+		for (int state : ns.keySet()) {
+			int count = ns.get(state);
+			int per = (100*count)/max;
+			Color color = this.contents.getColor(state);
+			gc.setForeground(color);
+			gc.setBackground(color);
+			
+			curY = y +(BAR_HIGHT-per-LINE_THICK);
+			gc.drawRectangle(curX, curY, BAR_WIDTH, per);
+			gc.fillRectangle(curX, curY, BAR_WIDTH, per);
+			
+			gc.setForeground(deFor);
+			gc.setBackground(deBac);
+			gc.drawText(count+"", curX, curY-TEXT_HIGH);
+			
+			i++;
+			curX = curX + BAR_WIDTH + BAR_GAP;
+		}	
+		
+		// section 6: draw a bar chart of agent's state vs #pickup token
+		// =============================================================
+		totAgent = agents.size();
+		ns = st.getStateTokenPickCount(agents);
+				
+		// top left of chart
+		x = CORDINATE.get(6)[0];
+		y = CORDINATE.get(6)[1];
+		bar1 = new int[]{x, y, x, y+BAR_HIGHT, x+xLength, y+BAR_HIGHT};
+		gc.drawText("# Token Pick", x-TEXT_HIGH, y-TEXT_HIGH);
+		gc.drawPolyline(bar1);		
+		gc.drawText("States", x+(xLength/2), (y+BAR_HIGHT+BAR_GAP));		
+		
+		// compute number and size of bar 
+		i = 1;
+		max = st.getTotalTokPick(agents);
+		curX = x + BAR_GAP;
+		for (int state : ns.keySet()) {
+			int count = ns.get(state);
+			int per = (100*count)/max;
+			Color color = this.contents.getColor(state);
+			gc.setForeground(color);
+			gc.setBackground(color);
+			
+			curY = y +(BAR_HIGHT-per-LINE_THICK);
+			gc.drawRectangle(curX, curY, BAR_WIDTH, per);
+			gc.fillRectangle(curX, curY, BAR_WIDTH, per);
+			
+			gc.setForeground(deFor);
+			gc.setBackground(deBac);
+			gc.drawText(count+"", curX, curY-TEXT_HIGH);
+			
+			i++;
+			curX = curX + BAR_WIDTH + BAR_GAP;
+		}	
+		
 	}
 
+
+	
 	private void creatAgentView() {
 		this.agentTab = new CTabItem(this.folder, SWT.NONE);
 		this.agentTab.setText("Agent View");
@@ -866,7 +927,7 @@ public class OverviewDisjPage extends DisJViewPage {
 		// not support
 	}
 
-	private void hookDoubleClickAction() {
+	private void clickSelectAction() {
 		agentViewer
 				.addPostSelectionChangedListener(new ISelectionChangedListener() {
 
@@ -888,6 +949,26 @@ public class OverviewDisjPage extends DisJViewPage {
 						}
 					}
 				});
+		
+		nodeViewer
+		.addPostSelectionChangedListener(new ISelectionChangedListener() {
+
+			public void selectionChanged(SelectionChangedEvent event) {
+				ISelection selection = nodeViewer.getSelection();
+				Object o = ((IStructuredSelection) selection)
+						.getFirstElement();
+
+				if (o instanceof Node) {
+					Node a = (Node) o;
+					List<String> info = a.getWhiteboard();
+					board.removeAll();
+					for (int i = 0; i < info.size(); i++) {
+						board.add(info.get(i));
+					}
+					board.redraw();
+				}
+			}
+		});
 	}
 
 	private void makeActions() {

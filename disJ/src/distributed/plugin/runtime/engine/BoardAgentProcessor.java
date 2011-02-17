@@ -5,16 +5,19 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import distributed.plugin.core.Agent;
 import distributed.plugin.core.Edge;
 import distributed.plugin.core.Graph;
 import distributed.plugin.core.IConstants;
+import distributed.plugin.core.Node;
 import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.GraphLoader;
 import distributed.plugin.stat.GraphStat;
+import distributed.plugin.stat.NodeStat;
 
 public class BoardAgentProcessor extends AgentProcessor {
 
@@ -98,6 +101,7 @@ public class BoardAgentProcessor extends AgentProcessor {
 		GraphStat gStat = this.graph.getStat();
 		Map<String, Agent> agents = this.graph.getAgents();
 		Map<String, Edge> edges = this.graph.getEdges();
+		Map<String, Node> nodes = this.graph.getNodes();
 		
 		int totalMove = gStat.getTotalAgentMove(agents);
 		int totalRead = gStat.getTotalBoardRead(agents);
@@ -108,6 +112,11 @@ public class BoardAgentProcessor extends AgentProcessor {
 		Map<String, Integer> nodeVisit = gStat.getNodeVisitCount(agents);
 		Map<Integer, Integer> stateMove = gStat.getStateMoveCount(agents);
 		Map<Integer, Integer> stateCount = gStat.getAgentStateCount(agents);
+		
+		List<Node> minRead = gStat.getMinBoardRead(nodes);
+		List<Node> minWrite = gStat.getMinBoardWrite(nodes);
+		List<Node> maxRead = gStat.getMaxBoardRead(nodes);
+		List<Node> maxWrite = gStat.getMaxBoardWrite(nodes);
 		
 		System.out.println("************** STATISTIC REPORT **************");
 		System.out.println("Total Agents moved: " + totalMove);
@@ -143,6 +152,33 @@ public class BoardAgentProcessor extends AgentProcessor {
 			System.out.println("Node " + nodeId + " has been visited " + count);
 		}
 		
+		System.out.println();
+		for(Node node : minRead){
+			NodeStat stat = node.getStat();
+			count = stat.getNumBoardRead();
+			System.out.println("Board at " + node.getNodeId() + " has min Read accesses: " + count);
+		}
+		
+		System.out.println();
+		for(Node node : minWrite){
+			NodeStat stat = node.getStat();
+			count = stat.getNumBoardWrite();
+			System.out.println("Board at " + node.getNodeId() + " has min Write accesses: " + count);
+		}
+		
+		System.out.println();
+		for(Node node : maxRead){
+			NodeStat stat = node.getStat();
+			count = stat.getNumBoardRead();
+			System.out.println("Board at " + node.getNodeId() + " has max Read accesses: " + count);
+		}
+		
+		System.out.println();
+		for(Node node : maxWrite){
+			NodeStat stat = node.getStat();
+			count = stat.getNumBoardWrite();
+			System.out.println("Board at " + node.getNodeId() + " has max Write accesses: " + count);
+		}
 		
 	}
 
