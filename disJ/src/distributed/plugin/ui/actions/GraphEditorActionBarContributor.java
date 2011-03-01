@@ -46,8 +46,9 @@ public class GraphEditorActionBarContributor extends ActionBarContributor {
 		addRetargetAction(new RedoRetargetAction());
 		addRetargetAction(new DeleteRetargetAction());
 		
-		addRetargetAction(new LoadRetargetAction(IGraphEditorConstants.ACTION_LOAD, IGraphEditorConstants.LOAD));
+		addRetargetAction(new LoadRetargetAction(IGraphEditorConstants.ACTION_LOAD, IGraphEditorConstants.LOAD_PROTOCOL));
 		addRetargetAction(new LoadRandomRetargetAction(IGraphEditorConstants.ACTION_LOAD_RANDOM, IGraphEditorConstants.LOAD_RANDOM));
+		addRetargetAction(new LoadAdversaryRetargetAction(IGraphEditorConstants.ACTION_LOAD_ADVERSARY, IGraphEditorConstants.LOAD_ADVERSARY));
 		addRetargetAction(new StepNextRetargetAction(IGraphEditorConstants.ACTION_STEP_NEXT, IGraphEditorConstants.NEXT));
 		addRetargetAction(new ResumeRetargetAction(IGraphEditorConstants.ACTION_RESUME, IGraphEditorConstants.RESUME));
 		addRetargetAction(new StopRetargetAction(IGraphEditorConstants.ACTION_STOP, IGraphEditorConstants.STOP));
@@ -75,21 +76,26 @@ public class GraphEditorActionBarContributor extends ActionBarContributor {
 
 		tbm.add(getAction(ActionFactory.UNDO.getId()));
 		tbm.add(getAction(ActionFactory.REDO.getId()));
+		
 		tbm.add(new Separator());
 		tbm.add(getAction(IGraphEditorConstants.ADD_STATE_ID));
 		tbm.add(getAction(IGraphEditorConstants.REMOVE_STATE_ID));
+		
 		tbm.add(new Separator());
 		tbm.add(getAction(IGraphEditorConstants.ACTION_LOAD));
 		tbm.add(getAction(IGraphEditorConstants.ACTION_LOAD_RANDOM));
+		tbm.add(getAction(IGraphEditorConstants.ACTION_LOAD_ADVERSARY));
+		
 		tbm.add(new Separator());
 		tbm.add(getAction(IGraphEditorConstants.ACTION_RESUME));
 		tbm.add(getAction(IGraphEditorConstants.ACTION_SUSPEND));
-		tbm.add(getAction(IGraphEditorConstants.ACTION_STOP));		
 		tbm.add(getAction(IGraphEditorConstants.ACTION_STEP_NEXT));
+		tbm.add(getAction(IGraphEditorConstants.ACTION_STOP));		
+		
 		tbm.add(new Separator());
 		tbm.add(getAction(IGraphEditorConstants.ACTION_SET_SPEED));
-		tbm.add(new Separator());
 		tbm.add(getAction(IGraphEditorConstants.ACTION_REPLAY_RECORD));
+		
 		//tbm.add(getAction(IGraphEditorConstants.ACTION_SAVE_RECORD));
 		
 	}
@@ -100,20 +106,25 @@ public class GraphEditorActionBarContributor extends ActionBarContributor {
 	public void contributeToMenu(IMenuManager menubar) {
 		super.contributeToMenu(menubar);
 		MenuManager viewMenu = new MenuManager(IGraphEditorConstants.EXECUTE_MENU, IGraphEditorConstants.EXECUTE_MENU_ID);	
+		
 		viewMenu.add(getAction(IGraphEditorConstants.ADD_STATE_ID));
 		viewMenu.add(getAction(IGraphEditorConstants.REMOVE_STATE_ID));
+		
+		viewMenu.add(new Separator("load group"));	
 		viewMenu.add(getAction(IGraphEditorConstants.ACTION_LOAD));
 		viewMenu.add(getAction(IGraphEditorConstants.ACTION_LOAD_RANDOM));
+		viewMenu.add(getAction(IGraphEditorConstants.ACTION_LOAD_ADVERSARY));
 		
 		viewMenu.add(new Separator("execute group"));		
 		viewMenu.add(getAction(IGraphEditorConstants.ACTION_RESUME));
-		viewMenu.add(getAction(IGraphEditorConstants.ACTION_SUSPEND));
+		viewMenu.add(getAction(IGraphEditorConstants.ACTION_SUSPEND));		
+		viewMenu.add(getAction(IGraphEditorConstants.ACTION_STEP_NEXT));
 		viewMenu.add(getAction(IGraphEditorConstants.ACTION_STOP));
 		
-		viewMenu.add(new Separator("extra grpup"));
-		viewMenu.add(getAction(IGraphEditorConstants.ACTION_STEP_NEXT));
+		viewMenu.add(new Separator("extra group"));		
 		viewMenu.add(getAction(IGraphEditorConstants.ACTION_SET_SPEED));
-
+		viewMenu.add(getAction(IGraphEditorConstants.ACTION_REPLAY_RECORD));
+		
 		menubar.insertAfter(IWorkbenchActionConstants.M_EDIT, viewMenu);
 	}
 	

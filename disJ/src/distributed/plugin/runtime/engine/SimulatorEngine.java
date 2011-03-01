@@ -28,6 +28,8 @@ import distributed.plugin.core.Graph;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.IProcessor;
+import distributed.plugin.runtime.adversary.AgentControl;
+import distributed.plugin.runtime.adversary.MsgPassingControl;
 
 /**
  * @author npiyasin
@@ -83,21 +85,39 @@ public class SimulatorEngine {
      * @param client
      * @param clienRandom
      */
-    public void execute(Graph graph, Class client, Class<IRandom> clientRandom) {
+    public void execute(Graph graph, Class client, Class<IRandom> clientRandom, Class clientAdver) {
         try {
            this.graphId = graph.getId();
            
            if(Entity.class.isAssignableFrom(client)){
         	   Class<Entity> c = (Class<Entity>) client;
-        	   this.proc = new MsgPassingProcessor(graph, c, clientRandom, this.outLocation);
-        	   
+        	   if(clientAdver != null){
+        		   Class<MsgPassingControl> v = (Class<MsgPassingControl>) clientAdver;
+        		   this.proc = new MsgPassingProcessor(graph, c, clientRandom, v, this.outLocation);
+        		   
+        	   }else{
+        		   this.proc = new MsgPassingProcessor(graph, c, clientRandom, null, this.outLocation);
+        	   }
+        	          	   
            }else if(BoardAgent.class.isAssignableFrom(client)){
         	   Class<BoardAgent> c = (Class<BoardAgent>) client;
-        	   this.proc = new BoardAgentProcessor(graph, c, clientRandom, this.outLocation);
+        	   if(clientAdver != null){
+	        	   Class<AgentControl> v = (Class<AgentControl>) clientAdver;
+	        	   this.proc = new BoardAgentProcessor(graph, c, clientRandom, v, this.outLocation);
+	        	   
+        	   }else{
+        		   this.proc = new BoardAgentProcessor(graph, c, clientRandom, null, this.outLocation);
+        	   }
         	   
            }else if(TokenAgent.class.isAssignableFrom(client)){
         	   Class<TokenAgent> c = (Class<TokenAgent>) client;
-        	   this.proc = new TokenAgentProcessor(graph, c, clientRandom, this.outLocation);
+        	   if(clientAdver != null){
+	        	   Class<AgentControl> v = (Class<AgentControl>) clientAdver;
+	        	   this.proc = new TokenAgentProcessor(graph, c, clientRandom, v, this.outLocation);
+	        	   
+        	   }else{
+        		   this.proc = new TokenAgentProcessor(graph, c, clientRandom, null, this.outLocation);
+        	   }
         	   
            }else {
         	   System.err.println("[Warning] @SimultorEngine.execute() No support for class " 

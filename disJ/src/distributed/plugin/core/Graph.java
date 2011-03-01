@@ -278,8 +278,8 @@ public class Graph implements Serializable {
 //		}
 		
 		// double safe lol
-		this.agents.clear();
-
+		this.agents.clear();		
+		
 	}
 	
 	/**

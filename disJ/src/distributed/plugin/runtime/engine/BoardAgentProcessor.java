@@ -16,6 +16,7 @@ import distributed.plugin.core.Node;
 import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.GraphLoader;
+import distributed.plugin.runtime.adversary.AgentControl;
 import distributed.plugin.stat.GraphStat;
 import distributed.plugin.stat.NodeStat;
 
@@ -35,10 +36,10 @@ public class BoardAgentProcessor extends AgentProcessor {
 	 * @param out A URL to a location of log files directory
 	 * @throws IOException
 	 */
-	BoardAgentProcessor(Graph graph, Class<BoardAgent> client, 
-			Class<IRandom> clientRandom, URL out) {
+	BoardAgentProcessor(Graph graph, Class<BoardAgent> client, Class<IRandom> clientRandom, 
+			Class<AgentControl> clientAdver, URL out) {
 		
-		super(graph, clientRandom, out);
+		super(graph, clientRandom, clientAdver, out);
 		
 		if (client == null){
 			throw new NullPointerException(IConstants.RUNTIME_ERROR_0);

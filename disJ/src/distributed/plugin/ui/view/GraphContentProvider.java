@@ -159,7 +159,7 @@ public class GraphContentProvider implements IStructuredContentProvider,
 							agentViewer.update(o, null);
 							
 							// print states vs agents table
-							GraphContentProvider.printStateVsAgentTable(graph.getAgents());
+							//GraphContentProvider.printStateVsAgentTable(graph.getAgents());
 						}
 					};
 				} 
@@ -215,7 +215,7 @@ public class GraphContentProvider implements IStructuredContentProvider,
 						nodeViewer.update(o, null);
 						
 						// print nodes vs states table
-						GraphContentProvider.printStateVsNodeTable(graph.getNodes());	
+						//GraphContentProvider.printStateVsNodeTable(graph.getNodes());	
 					}
 				};
 			} 
@@ -249,45 +249,8 @@ public class GraphContentProvider implements IStructuredContentProvider,
 				};		
 			}
 			
-			// ******** FINAL ********
-			// =======================
-		} else if (prop.equals(IConstants.PROPERTY_FINAL_AGENT_TOKEN_REPORT)){
-			if (display == null) {
-				ui = new Runnable() {
-					public void run() {
-						//cleanUp();
-						
-						// print agent states vs token pick
-						GraphContentProvider.printStateVsTokenPick(graph.getAgents());
-						
-						// print agent states vs token drop
-						GraphContentProvider.printStateVsTokenDrop(graph.getAgents());
-					}
-				};
-			}
-		}  else if (prop.equals(IConstants.PROPERTY_FINAL_AGENT_BOARD_REPORT)){
-			if (display == null) {
-				ui = new Runnable() {
-					public void run() {	
-						//cleanUp();
-						// print access type vs count
-						GraphContentProvider.printAccessTypeVsCount(graph.getNodes());						
-					}
-				};
-			}
-		} else if (prop.equals(IConstants.PROPERTY_FINAL_MSG_PASSING_REPORT)){
-			if (display == null) {
-				ui = new Runnable() {
-					public void run() {
-						//cleanUp();
-						// print node vs msg sent table
-						GraphContentProvider.printStateVsMsgSent(graph.getNodes());						
-					}
-				};
-			}
-			
 			// ******** START ********
-			// =======================
+			// =======================		
 		} else if (prop.equals(IConstants.PROPERTY_START_REPORT)){
 			if (display == null) {
 				ui = new Runnable() {
@@ -299,6 +262,46 @@ public class GraphContentProvider implements IStructuredContentProvider,
 			}
 		}
 		
+			// ******** FINAL ********
+			// =======================
+	
+		/* else if (prop.equals(IConstants.PROPERTY_FINAL_AGENT_TOKEN_REPORT)){
+			if (display == null) {
+				ui = new Runnable() {
+					public void run() {
+						//cleanUp();
+						
+						// print agent states vs token pick
+						//GraphContentProvider.printStateVsTokenPick(graph.getAgents());
+						
+						// print agent states vs token drop
+						//GraphContentProvider.printStateVsTokenDrop(graph.getAgents());
+					}
+				};
+			}
+		}  else if (prop.equals(IConstants.PROPERTY_FINAL_AGENT_BOARD_REPORT)){
+			if (display == null) {
+				ui = new Runnable() {
+					public void run() {	
+						//cleanUp();
+						// print access type vs count
+						//GraphContentProvider.printAccessTypeVsCount(graph.getNodes());						
+					}
+				};
+			}
+		} else if (prop.equals(IConstants.PROPERTY_FINAL_MSG_PASSING_REPORT)){
+			if (display == null) {
+				ui = new Runnable() {
+					public void run() {
+						//cleanUp();
+						// print node vs msg sent table
+						//GraphContentProvider.printStateVsMsgSent(graph.getNodes());						
+					}
+				};
+			}
+		}
+			*/
+			
 		if (ui != null) {
 			display = Display.getDefault();
 			display.asyncExec(ui);

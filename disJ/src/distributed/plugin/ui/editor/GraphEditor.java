@@ -106,6 +106,7 @@ import distributed.plugin.core.DisJException;
 import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.GraphFactory;
 import distributed.plugin.runtime.IDistributedModel;
+import distributed.plugin.runtime.adversary.AbstractControl;
 import distributed.plugin.runtime.engine.SimulatorEngine;
 import distributed.plugin.ui.Activator;
 import distributed.plugin.ui.IGraphEditorConstants;
@@ -143,6 +144,8 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 
 	transient private Class<IRandom> clientRandom;
 
+	transient private Class<AbstractControl> clientAdver;
+	
 	transient private ClassLoader loader;
 
 	private Map<String, GraphElementFactory> graphFactories;
@@ -460,6 +463,10 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		return this.clientRandom;
 	}
 
+	public Class<AbstractControl> getClientAdversaryObject() {
+		return this.clientAdver;
+	}
+
 	/**
 	 * Set a client class object that will be simulated by this editor's graph
 	 * 
@@ -473,6 +480,10 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		this.clientRandom = clientRandom;
 	}
 
+	public void setClientAdversaryObject(Class<AbstractControl> clientAdver) {
+		this.clientAdver = clientAdver;
+	}
+	
 	public ClassLoader getLoader() {
 		return loader;
 	}
@@ -988,6 +999,9 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		this.addAction(procAct);
 
 		procAct = new ProcessActions(this, IGraphEditorConstants.ACTION_LOAD_RANDOM);
+		this.addAction(procAct);
+
+		procAct = new ProcessActions(this, IGraphEditorConstants.ACTION_LOAD_ADVERSARY);
 		this.addAction(procAct);
 
 		procAct = new ProcessActions(this, IGraphEditorConstants.ACTION_RESUME);

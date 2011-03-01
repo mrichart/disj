@@ -83,8 +83,9 @@ public interface IGraphEditorConstants {
 	public static final String RESUME = "Run/Resume";
 	public static final String SUSPEND = "Suspend";
 	public static final String STOP = "Stop";
-	public static final String LOAD = "Load Java Class";
+	public static final String LOAD_PROTOCOL = "Load Distributed Protocol";
 	public static final String LOAD_RANDOM = "Load Random Generator";
+	public static final String LOAD_ADVERSARY = "Load Adversary";
 	public static final String NEXT = "Step Next";
 	public static final String ADD_STATE = "Add States";
 	public static final String REMOVE_STATE = "Remove/View States";
@@ -99,6 +100,7 @@ public interface IGraphEditorConstants {
 	public static final String ACTION_STOP = "IGraphEditorConstants.Stop";
 	public static final String ACTION_LOAD = "IGraphEditorConstants.Load_Java_Class";
 	public static final String ACTION_LOAD_RANDOM = "IGraphEditorConstants.Load_Random";
+	public static final String ACTION_LOAD_ADVERSARY = "IGraphEditorConstants.Load_Adversary";
 	public static final String ACTION_STEP_NEXT = "IGraphEditorConstants.Step_Next";
 	public static final String ADD_STATE_ID = "IGraphEditorConstants.Add_State";
 	public static final String REMOVE_STATE_ID = "IGraphEditorConstants.Remove_State";

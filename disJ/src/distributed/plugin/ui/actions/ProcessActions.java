@@ -37,21 +37,21 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IFileEditorInput;
 
 import distributed.plugin.core.DisJException;
-import distributed.plugin.core.Edge;
 import distributed.plugin.core.Graph;
 import distributed.plugin.core.IConstants;
-import distributed.plugin.core.Node;
 import distributed.plugin.random.IRandom;
+import distributed.plugin.runtime.adversary.AgentControl;
+import distributed.plugin.runtime.adversary.MsgPassingControl;
 import distributed.plugin.runtime.engine.BoardAgent;
 import distributed.plugin.runtime.engine.Entity;
 import distributed.plugin.runtime.engine.SimulatorEngine;
 import distributed.plugin.runtime.engine.TokenAgent;
 import distributed.plugin.ui.IGraphEditorConstants;
-import distributed.plugin.ui.dialogs.ClassInputDialog;
+import distributed.plugin.ui.dialogs.AdversaryClassInputDialog;
+import distributed.plugin.ui.dialogs.ClientClassInputDialog;
 import distributed.plugin.ui.dialogs.SpeedDialog;
 import distributed.plugin.ui.editor.GraphEditor;
 import distributed.plugin.ui.models.GraphElement;
-import distributed.plugin.ui.models.LinkElement;
 import distributed.plugin.ui.models.NodeElement;
 import distributed.plugin.ui.validators.ClassNameValidator;
 
@@ -205,7 +205,7 @@ public class ProcessActions extends WorkbenchPartAction {
 				return false;
 			} else {
 				if (!graph.getProtocol().equals("")) {
-					loadClientClass(graph.getModelId(), graph.getProtocol());
+					loadClientProtocol(graph.getModelId(), graph.getProtocol());
 				}
 			}
 		} 
@@ -248,10 +248,13 @@ public class ProcessActions extends WorkbenchPartAction {
 			this.executeRun();
 			
 		} else if (actionType.equals(IGraphEditorConstants.ACTION_LOAD)) {
-			this.executeLoad();
+			this.executeLoadClient();
 			
 		} else if (actionType.equals(IGraphEditorConstants.ACTION_LOAD_RANDOM)) {
-			this.executeRandomLoad();
+			this.executeLoadRandom();
+			
+		} else if (actionType.equals(IGraphEditorConstants.ACTION_LOAD_ADVERSARY)) {
+			this.executeLoadAdversary();
 			
 		} else if (actionType.equals(IGraphEditorConstants.ACTION_SUSPEND)) {
 			this.executeSuspend();
@@ -358,12 +361,42 @@ public class ProcessActions extends WorkbenchPartAction {
 //			for (Node node = null; its.hasNext();) {
 //				node = (Node) nodes.get(its.next());
 //				node.resetState(node.getCurState());
-//			}
-			
+//			}			
 			// FIXME why we need this copy???
 			// editor.getGraphElement().copyGraphElement();
-			Class client = editor.getClientObject();					
-			this.engine.execute(graph, client, editor.getClientRandomObject());
+			
+			// get clients objects
+			Class client = editor.getClientObject();
+			Class<IRandom> clientRan = editor.getClientRandomObject();
+			Class clientAdv = editor.getClientAdversaryObject();
+			
+			// validate client objects matching
+			boolean pass = false;
+			if(clientAdv != null){
+				int model = editor.getGraphElement().getGraph().getModelId();
+				if(model == IConstants.MODEL_MESSAGE_PASSING){
+					 if(MsgPassingControl.class.isAssignableFrom(client)){
+						 pass = true;
+					 }
+				} else if (model == IConstants.MODEL_AGENT_WHITEBOARD){
+					if(AgentControl.class.isAssignableFrom(client)){
+						 pass = true;
+					 }
+				} else if (model == IConstants.MODEL_AGENT_TOKEN){
+					if(AgentControl.class.isAssignableFrom(client)){
+						 pass = true;
+					 }
+				}
+				if(pass){
+					this.engine.execute(graph, client, clientRan, clientAdv);
+					
+				}else{
+					this.missUseActionMsg("Client Protocol Model does NOT match " +
+							"with Adversary Protocol Model");
+				}
+			}else{
+				this.engine.execute(graph, client, clientRan, null);
+			}
 			
 		} else {
 			try {
@@ -379,7 +412,7 @@ public class ProcessActions extends WorkbenchPartAction {
 		}
 	}
 
-	private void executeLoad(){
+	private void executeLoadClient(){
 		if (this.engine.isStarted() == true) {
 			MessageDialog.openError(
 					getWorkbenchPart().getSite().getShell(),
@@ -391,7 +424,7 @@ public class ProcessActions extends WorkbenchPartAction {
 		String className = null;
 
 		// open up class name input dialog
-		ClassInputDialog classNameDialog = new ClassInputDialog(parent);
+		ClientClassInputDialog classNameDialog = new ClientClassInputDialog(parent);
 		classNameDialog.open();
 		
 		if(classNameDialog.getReturnCode() < 0){
@@ -400,13 +433,13 @@ public class ProcessActions extends WorkbenchPartAction {
 		}else {
 			// user pressed OK
 			className = classNameDialog.getClassName();
-			this.loadClientClass(classNameDialog.getReturnCode(),className);
-			editor.getGraphElement().getGraph().setProtocol(className);
-			editor.getGraphElement().getGraph().setModelId(classNameDialog.getReturnCode());
+			if(className != null){
+				this.loadClientProtocol(classNameDialog.getReturnCode(), className);				
+			}
 		}
 	}
 	
-	private void loadClientClass(int model, String protocol) {
+	private void loadClientProtocol(int model, String protocol) {
 		// open Dialog
 		Shell parent = this.editor.getSite().getShell();
 		try {
@@ -422,28 +455,29 @@ public class ProcessActions extends WorkbenchPartAction {
 
 			if(model == IConstants.MODEL_MESSAGE_PASSING){
 				if (!Entity.class.isAssignableFrom(client)) {
-					MessageDialog.openError(parent, "Cannot load Client Class Error",
+					MessageDialog.openError(parent, "Cannot load Client Class",
 							"Class must extends Entity");
 					return;
 				}
 			}else if (model == IConstants.MODEL_AGENT_WHITEBOARD){
 				if (!BoardAgent.class.isAssignableFrom(client)) {
-					MessageDialog.openError(parent, "Cannot load Client Class Error",
+					MessageDialog.openError(parent, "Cannot load Client Class",
 							"Class must extends BoardAgent");
 					return;
 				}
 			}else {
 				if (!TokenAgent.class.isAssignableFrom(client)) {
-					MessageDialog.openError(parent, "Cannot load Client Class Error",
+					MessageDialog.openError(parent, "Cannot load Client Class",
 							"Class must extends TokenAgent");
 					return;
 				}
 			}
-			// set client's class to editor
-			// FIXME editor must be able to hold more than one class
-			// at a time
+			
+			// set client's class to editor			
 			editor.setClientObject(client);
-
+			editor.getGraphElement().getGraph().setProtocol(protocol);
+			editor.getGraphElement().getGraph().setModelId(model);
+			
 		} catch (ClassNotFoundException e) {
 			MessageDialog.openError(parent, "Unable to load client Classd", e
 					.getMessage()
@@ -459,7 +493,7 @@ public class ProcessActions extends WorkbenchPartAction {
 
 
 
-	private void executeRandomLoad() {
+	private void executeLoadRandom() {
 		if (this.engine.isStarted() == true) {
 			MessageDialog.openError(
 					getWorkbenchPart().getSite().getShell(),
@@ -475,7 +509,7 @@ public class ProcessActions extends WorkbenchPartAction {
 			className = editor.getClientRandomObject().getName();
 
 		InputDialog classNameDialog = new InputDialog(parent,
-				"Random Number generator Input Dialog", "Class Name",
+				"Client Random generator Input Dialog", "Class Name",
 				className, new ClassNameValidator());
 		classNameDialog.open();
 
@@ -489,7 +523,7 @@ public class ProcessActions extends WorkbenchPartAction {
 			} catch (DisJException ignore) {
 			}
 			try {
-				Class<IRandom> clientRandom = this.loadClientRandomClass(parent,
+				Class<IRandom> clientRandom = this.loadClientRandomGenerator(parent,
 						className);
 
 				if (clientRandom == null)
@@ -499,14 +533,14 @@ public class ProcessActions extends WorkbenchPartAction {
 				editor.setClientRandomObject(clientRandom);
 
 			} catch (ClassNotFoundException e) {
-				MessageDialog.openError(parent, "Unable to load client Classd",
+				MessageDialog.openError(parent, "Unable to load client random Classd",
 						e.getMessage() + " not found");
 
 			} catch (Exception g) {
 				// unexpected error
 				String msg = g + "";
 				MessageDialog.openError(parent,
-						"Unexpected Load Client Class Error", msg);
+						"Unexpected Load Client Random Class Error", msg);
 			}
 
 		} else {
@@ -515,7 +549,7 @@ public class ProcessActions extends WorkbenchPartAction {
 		}
 	}
 
-	private Class<IRandom> loadClientRandomClass(Shell parent,
+	private Class<IRandom> loadClientRandomGenerator(Shell parent,
 			String className) throws ClassNotFoundException {
 		
 		// load class
@@ -529,6 +563,86 @@ public class ProcessActions extends WorkbenchPartAction {
 		return clientRandom;
 	}
 
+	
+
+
+	private void executeLoadAdversary(){
+		if (this.engine.isStarted() == true) {
+			MessageDialog.openError(
+					getWorkbenchPart().getSite().getShell(),
+					"Engine is running",
+					"Stop the engine and reload algorithm again");
+			return;
+		}
+		Shell parent = this.editor.getSite().getShell();
+		String className = null;
+
+		// open up class name input dialog
+		AdversaryClassInputDialog classNameDialog = new AdversaryClassInputDialog(parent);
+		classNameDialog.open();
+		
+		if(classNameDialog.getReturnCode() < 0){
+			// user press cancel
+			return;
+		}else {
+			// user pressed OK
+			className = classNameDialog.getClassName();
+			if(className != null){
+				this.loadClientAdversary(classNameDialog.getReturnCode(), className);
+			}			
+		}
+	}
+
+	private void loadClientAdversary(int model, String protocol) {
+		
+		// open Dialog
+		Shell parent = this.editor.getSite().getShell();
+		try {
+			// kill current running or pending process if exist
+			// FIXME one engine must maps to many processors
+			this.engine.terminate();
+		} catch (DisJException ignore) {
+		}
+
+		try {
+			// load client class
+			Class client = this.loader.loadClass(protocol);
+
+			if(model == IConstants.MODEL_MESSAGE_PASSING){
+				if (!MsgPassingControl.class.isAssignableFrom(client)) {
+					MessageDialog.openError(parent, "Cannot load Adversary Class",
+							"Class must extends MsgPassingControl");
+					return;
+				}
+			}else if (model == IConstants.MODEL_AGENT_WHITEBOARD){
+				if (!AgentControl.class.isAssignableFrom(client)) {
+					MessageDialog.openError(parent, "Cannot load Adversary Class",
+							"Class must extends AgentControl");
+					return;
+				}
+			}else {
+				if (!AgentControl.class.isAssignableFrom(client)) {
+					MessageDialog.openError(parent, "Cannot load Adversary Class",
+							"Class must extends AgentControl");
+					return;
+				}
+			}
+			// set adversary client's class to editor
+			editor.setClientAdversaryObject(client);
+
+		} catch (ClassNotFoundException e) {
+			MessageDialog.openError(parent, "Unable to load adversary client Classd", e
+					.getMessage()
+					+ " not found");
+
+		} catch (Exception g) {
+			// unexpected error
+			String msg = g + "";
+			MessageDialog.openError(parent,
+					"Unexpected Load Adversary Client Class Error", msg);
+		}
+	}
+	
 	private void executeStop() {
 		if (!this.validateAction(IGraphEditorConstants.ACTION_STOP)){
 			return;

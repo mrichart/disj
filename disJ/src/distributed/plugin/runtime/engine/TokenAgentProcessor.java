@@ -13,6 +13,7 @@ import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.GraphLoader;
+import distributed.plugin.runtime.adversary.AgentControl;
 import distributed.plugin.stat.GraphStat;
 
 public class TokenAgentProcessor extends AgentProcessor {
@@ -22,10 +23,10 @@ public class TokenAgentProcessor extends AgentProcessor {
 	 */
 	private Class<TokenAgent> client;
 
-	public TokenAgentProcessor (Graph graph, Class<TokenAgent> client, 
-			Class<IRandom> clientRandom, URL out) {
+	public TokenAgentProcessor (Graph graph, Class<TokenAgent> client, Class<IRandom> clientRandom,
+			 Class<AgentControl> clientAdver, URL out) {
 			
-		super(graph, clientRandom, out);
+		super(graph, clientRandom, clientAdver, out);
 		
 		if (client == null){
 			throw new NullPointerException(IConstants.RUNTIME_ERROR_0);

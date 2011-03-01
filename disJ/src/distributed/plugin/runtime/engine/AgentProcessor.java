@@ -27,6 +27,7 @@ import distributed.plugin.runtime.GraphLoader;
 import distributed.plugin.runtime.IMessage;
 import distributed.plugin.runtime.IProcessor;
 import distributed.plugin.runtime.adversary.AgentControl;
+import distributed.plugin.runtime.adversary.MsgPassingControl;
 import distributed.plugin.runtime.engine.AgentModel.NotifyType;
 import distributed.plugin.stat.GraphStat;
 import distributed.plugin.ui.IGraphEditorConstants;
@@ -54,11 +55,6 @@ public abstract class AgentProcessor implements IProcessor {
 	Logger log;
 	
 	/*
-	 * Client random Class file (blueprint)
-	 */
-	private Class<IRandom> clientRandom;
-
-	/*
 	 * Global tracking list of all created agents
 	 */
 	private Map<String, Agent> allAgents;	
@@ -73,21 +69,27 @@ public abstract class AgentProcessor implements IProcessor {
 	 * System out delegate to Eclipse plug-in console
 	 */
 	MessageConsoleStream systemOut;
-
 	
 	/*
 	 * Adversary controller
 	 */
 	private AgentControl adversary;
 	
+	/*
+	 * Client random generator
+	 */
+	private IRandom randomGen;
+
 	/**
 	 * Constructor
 	 * 
 	 * @param graph A graph model that used by the processor
 	 * @param clientRandom A client IRandom object the hold algorithm
+	 * @param clientAdver An adversary Class<AgentControl> object the hold algorithm
 	 * @param out A URL to a location of log files directory
 	 */
-	AgentProcessor(Graph graph, Class<IRandom> clientRandom, URL out) {
+	AgentProcessor(Graph graph, Class<IRandom> clientRandom, 
+			Class<AgentControl> clientAdver, URL out) {
 		
 		if (graph == null){
 			throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
@@ -98,8 +100,8 @@ public abstract class AgentProcessor implements IProcessor {
 		this.pause = false;		
 		
 		this.graph = graph;
-		this.procName = graph.getId();
-		this.clientRandom = clientRandom;
+		this.procName = graph.getId();	
+		
 		this.queue = new EventQueue();
 		this.stateFields = new HashMap<Integer, String>();
 		this.allAgents = new HashMap<String, Agent>();
@@ -111,8 +113,13 @@ public abstract class AgentProcessor implements IProcessor {
 
 		this.setSystemOutConsole();
 		
-		if (this.clientRandom != null) {
-			this.initClientRandomStateVariables();
+		// initiate client custom instances
+		if (clientRandom != null) {
+			this.randomGen = this.initClientRandom(clientRandom);
+			this.graph.setClientRandom(this.randomGen);
+		}
+		if(clientAdver != null){
+			this.adversary = this.initClientAdversary(clientAdver);
 		}
 	}
 	
@@ -135,10 +142,6 @@ public abstract class AgentProcessor implements IProcessor {
 		System.setErr(new PrintStream(this.systemOut));
 	}
 
-	// FIXME need to do something here!!!
-	private void initClientRandomStateVariables() {
-		
-	}
 	
 	/**
 	 * Get a disJ plug-in console
@@ -149,6 +152,26 @@ public abstract class AgentProcessor implements IProcessor {
 		return this.systemOut;
 	}
 
+	private IRandom initClientRandom(Class<IRandom> client) {
+		IRandom ran = null;
+		try {
+			ran = GraphLoader.createClientRandomObject(client);
+		} catch (Exception e) {			
+			e.printStackTrace();
+		}
+		return ran;
+	}
+	
+	private AgentControl initClientAdversary(Class<AgentControl> client){
+		AgentControl adv = null;
+		try {
+			adv = GraphLoader.createAgentAdversaryObject(client);			
+		} catch (Exception e) {			
+			e.printStackTrace();
+		}
+		return adv;
+	}
+	
 	/*
 	 * Write exception message to Eclipse plug-in console 
 	 * then throw RuntimeException

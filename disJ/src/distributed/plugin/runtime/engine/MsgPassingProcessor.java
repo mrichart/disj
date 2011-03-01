@@ -62,8 +62,6 @@ public class MsgPassingProcessor implements IProcessor {
 
 	private Class<Entity> client;
 
-	private Class<IRandom> clientRandom;
-
 	private Map<Integer, String> stateFields;
 
 	private EventQueue queue;
@@ -87,18 +85,24 @@ public class MsgPassingProcessor implements IProcessor {
 	 * Adversary controller
 	 */
 	private MsgPassingControl adversary;
-	
+
+	/*
+	 * Client custom random generator
+	 */
+	private IRandom randomGen;
+
 	/**
 	 * Constructor
 	 * 
 	 * @param graph A graph model that used by the processor
-	 * @param client A client Entity object that hold algorithm
-	 * @param clientRandom A client IRandom object the hold algorithm
+	 * @param client A client Class<Entity> object that hold algorithm
+	 * @param clientRandom A client Class<IRandom> object the hold algorithm
+	 * @param clientAdver An adversary Class<MsgPassingControl> object the hold algorithm
 	 * @param out A URL to a location of log files directory
 	 * @throws IOException
 	 */
 	MsgPassingProcessor(Graph graph, Class<Entity> client, Class<IRandom> clientRandom,
-			URL out) throws IOException {
+			Class<MsgPassingControl> clientAdver, URL out) throws IOException {
 		
 		if (graph == null || client == null){
 			throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
@@ -112,7 +116,6 @@ public class MsgPassingProcessor implements IProcessor {
 		this.graph = graph;
 		this.procName = graph.getId();
 		this.client = client;
-		this.clientRandom = clientRandom;
 		this.queue = new EventQueue();
 		this.stateFields = new HashMap<Integer, String>();
 		
@@ -124,9 +127,13 @@ public class MsgPassingProcessor implements IProcessor {
 		this.setSystemOutConsole();
 		
 		this.initClientStateVariables();
-		if (this.clientRandom != null) {
-			this.initClientRandomStateVariables();
-		}		
+		if (clientRandom != null) {
+			this.randomGen = this.initClientRandom(clientRandom);
+			this.graph.setClientRandom(this.randomGen);
+		}
+		if(clientAdver != null){
+			this.adversary = this.initClientAdversary(clientAdver);
+		}
 	}
 
 	/**
@@ -205,9 +212,24 @@ public class MsgPassingProcessor implements IProcessor {
 		this.graph.setStateFields(this.stateFields);
 	}
 
-	// FIXME need to do something here!!!
-	private void initClientRandomStateVariables() {
-		
+	private IRandom initClientRandom(Class<IRandom> client) {
+		IRandom ran = null;
+		try {
+			ran = GraphLoader.createClientRandomObject(client);
+		} catch (Exception e) {			
+			e.printStackTrace();
+		}
+		return ran;
+	}
+	
+	private MsgPassingControl initClientAdversary(Class<MsgPassingControl> client){
+		MsgPassingControl adv = null;
+		try {
+			adv = GraphLoader.createMsgPassAdversaryObject(client);			
+		} catch (Exception e) {			
+			e.printStackTrace();
+		}
+		return adv;
 	}
 	
 	/**

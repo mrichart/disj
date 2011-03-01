@@ -231,15 +231,17 @@ public class Edge implements Serializable {
 				this.lastestMsgTimeForEnd = t;
 			}
 			return t;
-		} else {
+			
+		} else {			
+			//if (this.delayType == IConstants.MSGDELAY_LOCAL_RANDOM_CUSTOMS) {
+			
 			IRandom clientRandom = GraphFactory.getGraph(graphId).getClientRandom();
-			if(clientRandom == null)
-			{
-				String msg = "You haven't set your random number generator!";
+			if(clientRandom == null){
+				String msg = "You haven't set your custom random number generator!";
 				System.err.println(msg);
 				throw new RuntimeException(msg);
-			}
-			else{
+				
+			} else{
 				int base = 0;
 				if (sender.equals(this.start)) {
 					if(this.lastestMsgTimeForStart > curTime){

@@ -25,6 +25,9 @@ import distributed.plugin.core.Edge;
 import distributed.plugin.core.Graph;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
+import distributed.plugin.random.IRandom;
+import distributed.plugin.runtime.adversary.AgentControl;
+import distributed.plugin.runtime.adversary.MsgPassingControl;
 import distributed.plugin.runtime.engine.BoardAgent;
 import distributed.plugin.runtime.engine.Entity;
 import distributed.plugin.runtime.engine.TokenAgent;
@@ -91,7 +94,7 @@ public class GraphLoader {
         try {
             entity = (Entity) client.newInstance();
         } catch (InstantiationException e) {
-            throw new DisJException(IConstants.ERROR_8, e.toString());
+            throw new DisJException(e);
         }
         return entity;
     }
@@ -114,7 +117,7 @@ public class GraphLoader {
         	Object obj = client.newInstance();
         	agent = (BoardAgent) obj;
         } catch (Exception e) {
-            throw new DisJException(IConstants.ERROR_8, e.toString());
+            throw new DisJException(e);
         }
         return agent;
     }
@@ -136,11 +139,81 @@ public class GraphLoader {
         try {
         	agent = (TokenAgent) client.newInstance();
         } catch (InstantiationException e) {
-            throw new DisJException(IConstants.ERROR_8, e.toString());
+            throw new DisJException(e);
         }
         return agent;
     }
 
+    
+    /**
+     * Create a client MsgPassingControl object by reflection with empty constructor
+     * 
+     * @param client
+     *            a client class object that need to be created
+     * @return
+     * @throws Exception
+     *             All the exception that caused by reflection processes
+     */
+    public static MsgPassingControl createMsgPassAdversaryObject(Class<MsgPassingControl> client) throws Exception {
+        if (client == null)
+            throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
+
+        MsgPassingControl adversary = null;
+        try {
+        	Object obj = client.newInstance();
+        	adversary = (MsgPassingControl) obj;
+        } catch (Exception e) {
+            throw new DisJException(e);
+        }
+        return adversary;
+    }
+    
+    /**
+     * Create a client AgentControl object by reflection with empty constructor
+     * 
+     * @param client
+     *            a client class object that need to be created
+     * @return
+     * @throws Exception
+     *             All the exception that caused by reflection processes
+     */
+    public static AgentControl createAgentAdversaryObject(Class<AgentControl> client) throws Exception {
+        if (client == null)
+            throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
+
+        AgentControl adversary = null;
+        try {
+        	Object obj = client.newInstance();
+        	adversary = (AgentControl) obj;
+        } catch (Exception e) {
+            throw new DisJException(e);
+        }
+        return adversary;
+    }
+    
+    /**
+     * Create a client Random generator object by reflection with empty constructor
+     * 
+     * @param client
+     *            a client class object that need to be created
+     * @return
+     * @throws Exception
+     *             All the exception that caused by reflection processes
+     */
+    public static IRandom createClientRandomObject(Class<IRandom> client) throws Exception {
+        if (client == null)
+            throw new NullPointerException(IConstants.RUNTIME_ERROR_0);
+
+        IRandom random = null;
+        try {
+        	Object obj = client.newInstance();
+        	random = (IRandom) obj;
+        } catch (Exception e) {
+            throw new DisJException(e);
+        }
+        return random;
+    }
+    
     /**
      * Get a local port's label of a given edge on a given node
      * 
