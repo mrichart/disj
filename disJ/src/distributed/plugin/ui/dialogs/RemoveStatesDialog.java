@@ -45,7 +45,7 @@ public class RemoveStatesDialog extends Dialog {
 	 */
 	public RemoveStatesDialog(Shell arg0, Map<Integer, RGB> stateColr) {
 		super(arg0);
-		setText("View/Remove State Dialog");
+		setText("Remove States Dialog");
 		this.stateColr = stateColr;
 		this.response = false;
 	}
@@ -66,10 +66,10 @@ public class RemoveStatesDialog extends Dialog {
 
 		TableColumn col = new TableColumn(table2, SWT.LEFT);
 		col.setText("State");
-		col.setWidth(40);
+		col.setWidth(80);
 		TableColumn colour = new TableColumn(table2, SWT.LEFT);
 		colour.setText("Color");
-		colour.setWidth(50);
+		colour.setWidth(90);
 		
 		// display existing colors
 		List<Integer> temp = new ArrayList<Integer>();

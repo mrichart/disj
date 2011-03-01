@@ -37,7 +37,7 @@ public class LoadAdversaryRetargetAction extends RetargetAction {
         
         	try {
 				final URL installUrl = Activator.getDefault().getBundle().getEntry("/");
-				final URL imageUrl = new URL(installUrl, "icons/load.png");
+				final URL imageUrl = new URL(installUrl, "icons/adver.png");
 				setImageDescriptor(ImageDescriptor.createFromURL(imageUrl));
 				
 			} catch (MalformedURLException e) {					

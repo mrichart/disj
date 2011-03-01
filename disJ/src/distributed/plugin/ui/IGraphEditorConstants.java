@@ -88,8 +88,8 @@ public interface IGraphEditorConstants {
 	public static final String LOAD_ADVERSARY = "Load Adversary";
 	public static final String NEXT = "Step Next";
 	public static final String ADD_STATE = "Add States";
-	public static final String REMOVE_STATE = "Remove/View States";
-	public static final String SPEED = "Process Speed";
+	public static final String REMOVE_STATE = "Remove States";
+	public static final String SPEED = "Adjust Speed";
 	public static final String REPLAY = "Replay Record";
 	public static final String SAVE_RECORD = "Save the last run";
 	
@@ -104,7 +104,7 @@ public interface IGraphEditorConstants {
 	public static final String ACTION_STEP_NEXT = "IGraphEditorConstants.Step_Next";
 	public static final String ADD_STATE_ID = "IGraphEditorConstants.Add_State";
 	public static final String REMOVE_STATE_ID = "IGraphEditorConstants.Remove_State";
-	public static final String ACTION_SET_SPEED = "IGraphEditorConstants.Process_Speed";
+	public static final String ACTION_SET_SPEED = "IGraphEditorConstants.Adjust_Speed";
 	public static final String ACTION_REPLAY_RECORD ="IGraphEditorConstants.Replay_Record";
 	public static final String ACTION_SAVE_RECORD="IGraphEditorConstants.Save_Recording";
 	
