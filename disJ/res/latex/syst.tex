@@ -1,0 +1,874 @@
+\subsection{SYSTEM MODEL}
+(what the simulation can do)
+- a discrete event simulation
+1. what is this simulation model
+2. why it has been picked this model
+
+The simulation is discrete event simulation system that processes the sequence of event and each execution of the event may lead to the change of system state. Since the events of distributed algorithm are discrete, and the number of states is finite, at any given point in time the state of the system can be observed, therefore, discrete simulation has been used. The simulation consists of three main components are internal clock, event list and number generator.
+
+Internal clock represents a simulation time that keeps track of current times of the simulation and make sure the time is advancing. Any new event created will be assigned an execution time that will be after a current simulation time.
+
+Event list is an ordered list of discrete event of system model ordered by simulation time. The event is an instantaneous action that occurs at a given time. After the event has been executed the system may changed the state and/or derives another set of event.
+
+Event generator generates the events corresponding to user algorithm in order to simulate the behavior of the algorithm. Each event derived from that execution of previous event, but each execution of event may not always create event or list of event in order to provide a mechanism to terminate the simulation.
+
+
+- required a single machine to operate
+1. what are the advantages of this simulation model
+2. what are the disadvantages of this simulation model
+
+The simulation runs on a single machine and it will simulate multiple virtual machines and connected into a network topology based on user predefined in graph editor. The virtual machines created are homogenous in term of computing power and algorithm that runs on it. The simulation allows user to define the distributed environment into the network such as network communication (i.e. connectivity, delay time and reliability), power consumption and mobility ability. These environment parameters can be defined before or during the simulation execution, which in a real network these parameters are not easy or impossible for user to define or adjust in order to test the algorithm. In addition, the cost and complexity of setting up the network topology in different structures are expensive and troublesome in real network, while in our virtual are done with ease in minutes.
+The limitation of creating virtual network in a single machine is the size of network which completely realize on a power and memory size of the machine. Also the network can only create a set of homogenous virtual machine; it cannot create a network that contains varieties of machine with different properties and algorithm.
+
+
+- support message passing and distributed agent computing
+	- direct message passing
+	- whiteboard
+	- token
+1. what are communication models support by this simulation
+2. why these communication models were picked
+3. what was communication models were not picked
+4. what are the differences between these models (in brief)
+5. when these model will be used
+
+The simulation supports four types of distributed communication model, the first model is message passing and the other three are used in distributed agent computing are blackboard, whiteboard and token. These four models are common model used in distributed computing each model has advantage and disadvantage on itself based on nature of task it is performing.
+
+Direct message passing model is a distributed system that allows the node in the network to share information by sending and receiving message between each others. The node in the network has completely no visibility and knowledge of others except by the information received.
+
+Blackboard, whiteboard and token are different than direct message passing in term of communication because it is used for mobile agent platform, which there will be a set of agent that traveling between nodes in the network while message passing are not. The agents actions are asynchronous, have it own memory, and capability of computing task on a node.
+
+Blackboard model is a system that each node provides a sharing memory area (blackboard) that allows the visiting agents to read and write the information into it. The blackboard information is completely visible locally within a node that hosts it, in order for any agent to read or write the agents must present inside the node. For writing access, the blackboard provides a mutual exclusive access to an agent once at a time, while reading can be done by multiple agents at a time.?????
+
+Whiteboard model is a similar system to blackboard except the information on a board is propagates to every node in a network. The visibility of information of a whiteboard can be seen at any node in a network.???
+
+Token or Pebble is a model that allow agent to carry some amount of token and a node allows the agent to drop/pick  token at/from various place within the node. The token can be replicated or destroy during the execution of protocol by agent or node.
+
+
+
+- various network model
+	- fixed
+	- dynamic
+	- mobility
+1. what are network models support by this simulation
+2. why these network models were picked
+4. what are the differences between these models (in brief)
+5. when these models will be used
+6. how these models are used
+
+The simulation supports three types of network models, fix, dynamic and mobility. By definitions the network or topology is a set of nodes that formed up into a group and connect to each others by a means of communication medium such as fiber optic, wireless antenna, satellite etc. the node in these three networks are homogenous in term of computing and program that installed. These three networks are common use in the real world of industries and academic researches.
+
+A fixed network is a network of fixed and wired connection between nodes, the communication on a link can be uni-directional or bi-direction. The nodes are totally independent from each others but they are homogenous.
+
+A dynamic network is similar to a fixed network but the difference is that in dynamic network the connection between nodes can be changed at any given time such as a link between nodes in the network can be dropped or resurrected. Also the node can be removed or added into the network while the simulation is running.
+
+A mobility network is a set of nodes that can move and has wireless connection, the connectivity within the network determined by the range of wireless transmission between nodes. Therefore, the structure of the networks is constantly changed if the nodes are constantly moving.
+
+These three models are common network structure in distributed computing studies and in real life applications. Therefore, the simulation can support the development of algorithms that have been developed for these three network models. The very good examples of situation or applications that are used in fixed network model are parallel computing, LAN/WAN network maintenance and routine tasks etc. in dynamic network model are internet cloud computing, sensor network that detect geographical changes, LAN/WAN network maintenance and routine tasks etc. and in mobility network model are mobile sensors network that detect geographical changes, mobile communication network like cell phone etc.
+
+
+- support GUI
+	- topology editor
+	- java programming IDE
+	- simulation controller
+    - viewers
+1. what are GUI functionalities that the simulation provided
+2. why does simulation support only these gui functions
+3. what GUI functionalities the simulation not support and why
+
+The simulation provides four main GUI, Java IDE, graph editor, simulation controller, and viewers. Java IDE is a very powerful tool that DisJ derived from Eclipse IDE and has been used by many hi-tech industries for developing Java software. The graph editor allows user to create and edit topology manually from drawing nodes and connecting links between them, or using topology wizard creator that automatically draw a well-known topologies by a click of button. The simulation controller provides interface for user to control an execution of the simulation from loading algorithm to replay of saved execution. The viewers provide different types of view such as Node View, Agent View, Statistics View, Properties View etc in which allow user to observe runtime statuses, behaviors of the algorithm and statistics data of different entities and perspectives.
+
+These four main GUI cover a full life cycle of software development from writing a code to verifying correctness and performance, which it is definitely increase effectiveness to user in developing a reactive distributed algorithm. However, there can be others more GUI to add on but these four GUI are effectively sufficient enough.
+
+Currently version has not yet supported GUI for Adversary execution control, topology debugger and multi type viewers from statistical reports. However, these will be add in further development.
+
+- using JAVA as user development protocol
+1. how does the simulation has been developed
+2. why use this methodology in development
+3. what advantage/disadvantage of this strategy of development
+4. what are the difficulties in development
+
+DisJ simulation has been fully developed as Eclipse plug-in application by using Java technologies. Eclipse is an open platform that is designed for third parties to develop and extend their software by reusing existing resources provided by Eclipse platform to their software. Eclipse is a collection of a small program that collectively run and consume services from each others to achieve a goal of the third party software, this small program is called Eclipse plug-in. In our case, we develop a DisJ simulation for reactive distributed algorithm which requires many existing plug-in such as Core plug-in, JDT plug-in, UI plug-in and GEF plug-in, Team(Concurrent and Version Control) plug-in etc.
+
+The simulation has been designed with Object Oriented methodology which allows the software to adopt properties of Object Oriented such as modularity, adaptability and reusability. Since, the simulation can be improved in many aspects in the future therefore, these properties of software are crucial for enhancement and maintenance with less complexity and resources. However, the difficulties of design and development of the simulation are creating API set that can fulfill future needs of changes and add on.
+
+The simulation provides various type of communication API set of three different models, in which it is a main interface for user algorithm to communicate and interact with the simulation. Since there are many models and layers of communication in distributed computing that DisJ supports therefore, it is very hard to define the set of API that answers all the needs and avoids any confusion in using it.
+
+The others difficulties are in software engineering domain which we all known and is a key issue to every software development project, adaptation for a future changes. Since the future needs and requirements are unknown so, the designers have to predicted the possibilities and pin down the sections of software that may be changed and design those sections with high flexibility. However, the other sections that were not selected still cannot be overlooked therefore flexibility still apply to it as well. The most challenging in creating adaptability software that is ready for future requirements, and the later challenge is a penalty that the software has to pay for adaptability such as performance, size of code and complexity of design etc.
+
+
+- provide API for distributed communication
+1. what main tools are provided for user to develop protocol
+2. why does the simulation provided only this set of tool
+3. what are not provided and why
+
+There are three models that the simulation supports, message passing, agent with whiteboard, and agent with token models.
+
+Message passing model is a communication model for nodes communication, the nodes communicate to each other by sending and receiving messages via a communication medium (wire or wireless), any information of a node can only be shared to other nodes via messages.
+
+Agent with whiteboard model is a communication model for agent that moving from node to node within a connected network, the agent can communicate to each other by writing and reading message to/from the board that hosted by a node in the network, any node information can be directly accessed by an agent while it resites at the node.
+
+Agent with token model is a communication model for an agent that moving from node to node within a connected network, a token is a small number of bits that agent can carry. Every token are identical and undistinguishable, the number of token that agent can carry and ability of replicate/destroy token have been defined by environment before an execution begin. Agent can drop and/or pick up token(s) at a node and agent can access node information once it resites at the node.
+
+These three models are common and well known in distributed computing and there are many existing algorithms that use these models. (example of protocol using each model)????
+
+Face to face communication of agent has been left out due to it is not yet commonly use in distributed computation and there are no (yet) existing common definition of the communication such as the location of meeting (at a node, on a link), the distance between agents that can be defined as meeting, and direction of agent facing etc. Therefor DisJ has not yet support agent to agent communication but not limited to for future improvement.
+
+
+- external plug-in libraries
+	- probability model
+1. what are flexibility of the tool provided to user
+2. what are advantage/disadvantage of this flexibilities
+3. what is not include or support and why
+4. how it has been use (in brief) how easy is it
+5. what are limitation
+
+As part of our adaptability to user libraries, the simulation provides a channel to accept or link user libraries into the simulation. The current channel we accept are probability model libraries which is used in generate random result such as probability of losing message on a link, a time length that agent probably will spent in traveling on a link etc.
+
+Probability model, currently the default probability model used by the simulation is random uniformed. In some cases, user might have their probability model that fit best for their simulation protocol, therefore the user can set the simulation to use their model instead of the default model.
+
+Custom communication model libraries which is not yet support because communication is the most important means of the existing of distributed computing. Therefore, a small change of character of communication it will completely define a new type of distributed computing, which mean it is very difficult to design software to adapt functionalities that unknown of its character and it will definitely require difference underline infrastructure. For example a visibility of information on a whiteboard, currently visibility of whiteboard is local at a node that host it, if another model allows global visibility of the whiteboard which mean global synchronization and notification of nodes and agents have to be handled and underlining infrastructure has to be redesign in order to adapt such API from custom communication model.
+
+In order to plug-in custom probability model library, user has to implement interfaces that DisJ requires in class IRandom, so that DisJ will call those functions in IRandom when it needs, and user implemented interface will redirect the call to custom libraries correctly. However, before the execution of the simulation, user has to load the implemented interface to the simulation by click load random library button on DisJ editor.
+
+Limitation for external libraries API with respect to the simulation is that the implemented interface class has to be Java language only, if the existing libraries are others languages rather than Java, then user has to use Java technologies to communicate to the libraries from implemented interface class. For example, if existing libraries are C/C++, user may use JNI or socket to communicate.
+
+
+
+- runtime interaction to the program
+
+1. what functionality is used for user interaction with the simulation
+2. why these functionalities are picked
+3. what are limitations
+
+DisJ simulation provides visualization views and controls during runtime execution and replay. For the control execution, the simulation provides Start, Pause, Resume, Step Next, Adjust Speed and Stop functions that user can interact via GUI. The simulation also provides many types of view that user can observe and some can be interacted, for examples Properties Views that allow user to view and interact such as viewing entity properties, modify some properties of entities (changing port label, adjust reliability of link etc). Agent View display status and location of each agent, Node View display status and internal info (whiteboard data, number of token located etc). Finally, Statistic View display report charts of interesting info (number of agent corresponding to agent's states, number of messages sent corresponding to each of node state etc)
+
+These runtime interactions allow user to interact and observe a closer look of behavior of algorithm during the execution of the protocol. Also provides information that may help user to have a better analysis of the algorithm at different stages of protocol execution.
+
+However, the simulation has not yet supported hot codes replacement, which mean the modification of algorithm during the execution does not effect results of execution until user stop the simulation, reload algorithm and restart the simulation execution.
+
+
+- replay execution
+1. what is replay 
+2. why we need it
+3. how does it work
+4. what is limitation
+
+Replay execution is a visualization of replaying a saved execution data. The visualization display, entities states transition, and statistics results are exactly the same as what happened during the execution.
+
+Replay execution provides a way for user to observe a past execution of algorithm in off-line mode and in a closer look in such a way that the behavior of execution will be the same regardless or number of times user rerun the replay. Sometime, user algorithm is based on some random decision or based on a curtains set of states transitions that cause failure of the algorithm. Therefore, user can observe and find reasons of the failure without reliable on random chance or rerunning the execution so that the algorithm will have the same set of states transitions of the past failure execution.
+
+Every execution of the simulation, DisJ simulation will automatically save all necessary information that requires for replay of the execution in a persistence storage, e.g. file I/O, in redefined text format. Therefore, the Replay will read a saved file that provided by user and reproduce a visualization of execution as if it was executing algorithm but it is not.
+
+The replay execution is 100 percent readonly execution therefore, any adjustment of input into the replay via GUI will not effect any of executions. Also the save file will be saved under .rec file extension and the name of the file will be the name of a topology file, thus, any execution on that topology file will cause an overriding .rec file, therefore, it is user obligation to rename the .rec file if user willing to save it for later replay.
+
+
+
+
+
+
+- hidden network layer and below of OSI network model
+- synchronous and asynchronous communication between agents and/or nodes
+1. what special feature about this simulation
+2. why these are picked
+3. what were not picked and why
+4. how these special features benefit user
+5. what these special features do
+
+The simulation provides a set of communication API for user protocol that hide the detail of network communication and its layers below. The advantage of this API is to allow user to focus on an algorithm of protocol instead of coding detail of communication, since the layer below are technology and environment specific in which, most likely, independent from the algorithm of the protocol. Also the complexity of communication coding is a complex issue by itself in which it should not be mixed into a distributed algorithm development. For example for message passing model, the simulation provides an API function call to broadcast message to all neighbors that connected to the sender. This function call will handle the transportation in finding the neighbors and deliver the message to a right recipients. The communication  properties like delay, losing and order of message arriving during the transmission will be handled by the simulation based on the parameters configuration of the user. This communication properties setting is a powerful feature that allow user to create and control the prefer environment of the network communication in order to test and verify the protocol. Contradiction to the real network that user hardly be able to control which it is difficult to test and verify the correctness and performance of the protocol.
+
+
+- provide statistic record of execution
+	- message cost
+	- memory cost
+	- unit time cost
+	- node and/or agent relationship
+1. what stats and report does the simulation support
+2. what does not support
+3. why these functions were pick, advantage/disadvantage
+4. what are limitation and future potential
+
+The statistic and record keeping of the execution of protocol states is another tool that help user to analyze the protocol correctness and performance. The basic information that the simulation currently provide are related to number of message, usage of memory, and unit execution time. These records are related to node and agent that are used in the execution of protocol. The example of information collected in relation to a node are number of message sent/receipted, type of message sent/receipted, target and source of message transmitting, size of each message type, time unit of sub procedure of an execution etc.
+
+Actually there are many information that can be recored and statistic that the simulation can be extended in various things, however, this will leave to a future improvement.
+
+- persistence storage of data in file system
+	- log data
+	- statistic data
+	- states capture
+1. what persistence features provided by the simulation
+2. what does not
+3. why these were pick, advantage/disadvantage
+4. what limitation and future potential
+
+Some of the simulation features and functionalities that described above are not be able to exist without the use of persistence storage. Therefore, the persistence is worth to describe a bit in order to justify the usage in those features. The simulation will keep three main types of record in persistence are logging, statistic data, and states transition which currently are kept in a file system format.
+
+Logging data includes internal logging of the simulation that will be used to find defections or study of the simulation behaviors and performance. For external logging from user (do we need it) ????
+
+Statistic data and records are also kept in the persistence storage and being used to make a report of the execution.
+
+State transition records are kept and used for replay the simulation, since the replay is a visualization of past execution, which there is no new execution being made to the protocol. The replay is a recreate of visualization based on the state transition records and information kept by the simulation.
+
+
+- limitation
+	- size of network
+	- environment configuration i.e. visibility setting, communication range etc.
+	- underline communication cost
+1. what are the limitation of this simulation
+2. why don't support it
+3. how these can be overcome
+
+This simulation is a first version therefore, there are many limitations and incomplete feature but it has provided, at some level, a satisfaction support the user in development of distributed protocol. The most common limitation is the size of network which are completely based on the performance of machine running the simulation. Secondly, the environment parameters configuration that the simulation currently supports are limited to time of development but definitely it can be added and improve in the future. Third, the underline communication cost that are hidden to the user in which the real world environment, this cost cannot be neglected. In the real world, it is very difficult to measure the cost because it is very tight to technology and environment specific; the actual value are highly deviated based on many factors and never be the same for each execution of the protocol. However, the simulation main objective is to help user to develop the protocol and verify it correctness and its performance, not to verify the performance of the network that it has been deployed.
+
+
+The core thesis can be divided into 4 logical sections
+1. Communication
+2. Runtime
+3. API
+4. User Simulation
+1. what are the core of this thesis
+2. why it has been divided into this way
+
+The main proposal of the simulation for distributed algorithm is to purpose an effective software program that allow user to develop a distributed algorithm protocol at maximum efficiency with ease of usage and less resources. The simulation are consisted of four main categories: Communication model of distributed computing that the simulation support, Runtime execution of the protocol by the simulation, API that the simulation provides and supports, and user interaction and usage of the simulation.
+
+
+\subsection{COMMUNICATION}
+
+This section will define distributed communication models between entities in the system
+1. what is communication
+2. what is it for
+3. why need it
+4. what communication the simulation supported
+5. how the simulation support it
+6. what are the differences
+
+In distributed computing, entity cannot have direct access to other entities information, which it has to use a communication in order to exchange information. The communication between entities in a connected network is to obtain information of other for internal computing and for collaboration of a task that entities are trying to achieve. The simulation supports three common distributed communication models that are used in distributed computing: message passing, blackboard/whiteboard and token. These models have been implemented and hide the complexity from the user by providing a set of API for each model. The behaviors of each communication model are described as follow:
+
+Message passing model is a model that the node can send/receive message to/from any nodes that are connected. The message is transmitted via a medium (link, wireless) that carries message from source to destination. The reliability and order of message transmitted are depended on the medium condition. The message is  a finite sequence of data that have a format that known by nodes in order to read/write.
+
+Blackboard/Whiteboard model is a model that has two types of entity: node and agent. The communication between nodes is message passing but is used for infrastructure and network maintenance purpose. The agent, a main entity that does the task, has blackboard/whiteboard as a main communication between agents, which they can read and write information from/on the board. The boards are located at each node and have mechanism that controls multi agent access. The communication between node and agent are direct access while agents are inside a node.
+
+Token model is also a model that has two types of entity: node and agent. The communication between nodes is message passing but is used for infrastructure and network maintenance purpose. A token is a small piece of fixed data that can be created and destroyed by agent, the token can be dropped or pick up at the node by an agent. The agent can communicate to other agents by dropping a token(s) at a node, and the agent who found the token may pick it up or leave it based on user protocol. The communication between node and agent are direct access while agents are inside a node.
+
+In order to support these models the simulation has divided the underneath communication platform into three sub-modules that implements each model. Each module will be activated based on user selection at the beginning of protocol development. The behaviors and functions of each model are described in the following sub sections.
+
+\subsubsection{3.2.1 Message Passing Model}
+- definition
+	a finite sequence of data
+1. what is it
+2. what is it for
+3. why we support it
+4. example of how important
+
+The message passing model in distributed computing is a communication method where messages are sent and received between entities. The message is driving an entity that received to perform some actions based which on the content of the message and current status of itself. In message passing model there are several properties of the message to consider such as reliability, order of arrival, synchronous or asynchronous, duplex or half-duplex etc.
+
+- properties cover
+	- synchronous/asynchronous
+	- delay time
+	- reliability rate	
+	- local orientation
+	- uni-directional/ bi-directional
+	- order of arrival
+	- visibility
+1. what properties are covered
+2. what are not covered
+3. why these were picked, advantage/disadvantage
+4. how these properties effect the simulation and user
+5. case study
+
+The properties that the simulation supports for message passing and allows user to select or adjust the values are as follow.
+
+3.2.1.1 Reliability Rate, this defines level of reliability of message transmission on a link from total reliability to total loss.
+
+The reliable of message is a very crucial property in any distributed computing since the message drives the action of entity. Any missing of message may skip some actions, and skipping some actions may leads to a failure of a protocol. The missing of message may also increase the number of message to resend if protocol has a detection mechanism, in which it will lead to the performance draw back and traffic intensity in a network. In addition, any real network there always a loss of message in transmission from various causes such as power failure, nature disruption, limitation of hardware etc. therefore, the simulation has to provided this option for user to duplicate the real network environment and able to test a protocol to handle such conditions.
+
+For example, neighbor information collection protocol, the protocol is simply broadcast their information to every connected neighbours, and keep tract that every in coming port has message coming from, then terminated. This protocol works nicely if the message is 100% reliable, however, if it is not 100% reliable, the protocol will be a lot more complex just to make sure that there is a global termination since no one know whether the message has arrived the destination.
+
+However, a reliability rate is based on a random uniform probability in which user has to provide the number in order for the simulation can duplicate the environment closer to the demand of user. The simulation will compute each and every message before it has been sent based on the reliability rate given by user at the beginning of its execution.
+
+3.2.1.2 Delay Time, this defines a time that message may take to travel on a link in finite time unit.
+
+The time of message traveling on a link is based on many factors such as the medium of transmission, hardware, nature disruption etc. therefore, the simulation provides this option to user to adjust the rate so that user protocol can be tested and verified. The delay of message may cause the performance draw back or even failure of the protocol, since an entity may not be able to perform some actions without arrival of message and the delay of message may postpone the action. In addition, the delay of message may cause the order of execution of protocol when one from different sender arrived before another in which may cause the failure of protocol.
+
+For example, spanning tree construction protocol, the protocol is to construct a virtual tree structure network. This protocol is initiated by a single node (which it can be many nodes) broadcast a message to all neighbors and set itself passive and root. Any node that received a message for the first time will set a sender of the message to be a parent and set itself to passive, then broadcast the message to all others. If the node is in a passive will ignore every message arrived. This protocol will create different tree at each execution due to the arrival of a first message to a node will dictate the parent. Therefore, the delay on the link will definitely affects the structure of a tree and structure of a tree defines an efficiency of tree's properties.
+
+However, the simulation requires user to provide a rang time unit of delay, and the simulation will user random uniform probability to select the delay time for a given range for each message transmitting in a link.
+
+3.2.1.3 Order of Arrival, this allows user to define a link to transmit message in specific order of sending based on user selection e.g. FIFO, LIFO or Random.
+
+A node may send a sequence of message on a same link and a receiver node may receive message in difference sequence which can alternate the sequence of action of a receiver node than the original sequence. Therefore, order of message arrival may cause a draw back of performance or even a failure of the protocol. In a real network the order of message arrival may difference at any point in time due to many reasons such as hardware, internal implementation of transportation, traffic condition etc. Therefore, the simulation provides an option for user to alternate the behavior of message arrival in order to test and verify the protocol correctness and performance.
+
+For example, message construction protocol, this protocol is very common in internet communication when the file is too big and it has to be sent in multiple small messages. The sequence of sending and arriving will definitely give the differences in complexity of protocol. If it is FIFO, the destination just has to append a message to previous messages until the arrival of termination message. While in random the sender may have to add extra information to a small message in order to help the destination construct the message (i.e. sequence number). Moreover, it is even more complex to determine when all the small messages are received since the termination message may arrive before other small messages. Therefore, the order of arrival is very crucial environment for user to test and verify the protocol correctness and performance.
+
+The simulation provides FIFO, "First In First Out", where the message will be arrived in an order as when it sent. LIFO, "Last In First Out", where the message will be arrived in reverse of the time it sent. Finally, Random, where the message will be arrived in random order from where it sent, the simulation uses uniform random probability to assign the arrival sequence on a link.
+
+3.2.1.4 Synchronous or Asynchronous, this indicates the execution and transmission of messages in the network that can be synchronous or asynchronous.
+(validate this contents????)
+
+In distributed computing there are two common environments of computing, synchronous and asynchronous which dictate a protocol to solve a same problem in difference way, some problems may be easier to solve in one environment than another.
+
+Synchronous environment, where entities have a same internal synchronous clock that synchronously run, and the transmission of messages are synchronously transmitted in every link within a network. Therefore, a protocol can make use of these two properties, which are common knowledge to every entity, to control the time of execution and message transmission.
+
+Asynchronous environment is the environment where entities have difference internal clock and it is independent. The entity also has no knowledge of others clock, and any message transmission is not synchronously transmitted, which it can happen at any given time by an entity. Therefore, a protocol cannot realize on internal clock and time as synchronous environment.
+
+The simulation has internally implemented the internal clock and message control, and it provides options for user to select the type of environment. The synchronous environment option will allow entities to perform task synchronously across the network, and message transmission will be strictly synchronous. The simulation also provides an API to access internal clock and the time will be given the same simulation time in every entity at a point of real time. While the asynchronous environment the simulation does not control the synchronistic of entity internal clock the current simulation time of each clock will be difference at a point of real time. Messages transmission are not synchronously control by the simulation, therefore, at any point within an interval of simulation time unit, entity may transmit a message at it own free will.
+
+For example, broadcast info with knowledge of global termination protocol, this protocol has a simple objective, which is a node broadcast it info to everyone in network then terminate globally. The assumptions are network is total reliable, and knowledge of network diameter. In synchronous network, every node flood messages and wait for a diameter unit of time then terminated. During the waiting entity may receive or send message. After the diameter unit of time, every node will terminate and know that it is a global termination because the longest time for a message to be flooded in the network from an entity to another is a diameter time units (when two entities are in difference end of network. In asynchronous network, it is more complex and requires extra works more than synchronous environment such as leader election to coordinate global termination.
+
+
+3.2.1.5 Link Directional, this allows user to select the link communication to be bi-directional or uni-directional and direction flow of message.
+
+There are two types of link direction, uni-directional and bi-directional. Uni-directional or half-duplex, is a link that has one way message transmission such as a uni-directional link between A and B, let say link A-B, which a message can be sent from A to B but not B to A. However, B can have a uni-directional link and send message to A as well, let say B-A. These two links are physically separate and totally independent from each other, therefore, if one link was down while another may alive. Bi-directional or full-duplex, is a link that has two ways message transmission such as a bi-directional link between A and B, let say link A-B, which a message can be sent and received from the same link and it is a physically share between two directions. Unlike uni-directional, if the link is down both ways of communication will be down and the environment properties are subjected to impact to one and another e.g. pay load and traffic congestion etc.
+
+In the dawn of network infrastructure, the cost of building full-duplex is very expensive and high complexity of implementation in physical and data layers. Therefore, the existing of half-duplex link are famously used in the early day, however, there still existing half-duplex in many network today even the cost full-duplex are low and the efficiency is high. For example, in high security network where information are critically confidence or mobile agent the has very limited of power consumption, therefore, uni-directional link are still around and used in many distributed algorithm protocol, but may not as much as bi-directional link.
+The simulation graph editor provides two options for users to create a link in their virtual network and the simulation engine underneath will records and perform accordingly while the protocol is executed. The simulation physically provides two ports for bi-directional link, in-port and out-port, automatically and one port for uni-directional (in-port or out-port) based on direction of the link. The simulation also keeps track of each and every entity's ports and provides API for user to access the record information (port list). If users are using non-existing port in their protocol, such as sending out message on a non-existing out-port, the simulation will notify an error (validate it ????) etc.
+
+For example, Election in a ring protocol with unique ID, this protocol works for both uni-directional and bi-directional ring, by each node flood message with it ID, and the message will be relayed if the ID in the message is smaller than the receiver ID. The message of smallest ID will travel around the ring and return to the message originator. Notably that this protocol uses less message in uni-directional ring rather than bi-directional ring. Therefore, both types of link are useful and have advantages than another based on various environment e.g. network, protocol etc.
+
+3.2.1.6 Local orientation, is relating to port labeling of entities within a network whether the port's labels are known to neighbors, unique within entities. The knowledge of port to the neighbors means the port labels are mapped in the same way as other, for example, a ring network, where every entity must know that their outgoing port that labeled as a right side will connect to a neighbor who labeled it as a left side and vice versa for outgoing port that labeled as a left side. The uniqueness of port label means the port labeled does not have to match to the neighbor such that port 'b' of entity 'A' does not have to connect to entity 'B' and vice versa, also the label of port within an entity may or may not unique.
+
+Local orientation has a high effect to the complexity of distributed computing protocol because the protocol can realize on the port labeling and save time of computing and memory usage. Therefore, in real network there usually have a virtual network with a proper labeling that help reduce complexity and cost of protocol. For example, a virtual tree network, spanning tree, since tree structure has many properties that facilitate and reduce the cost of communication and information access. Therefore, the labeling of the port that help protocol to fine which port is heading to parent and children is unavoidable in order to make create a spanning tree network.
+
+The simulation allows user to edit a port label manually from graph editor, however, by default the simulation always create a global unique port labels by using a node ID, node ID is an internal unique ID that simulation assigned to any node in a network, that connected to. For example, node 'A' connect to node 'B' with bi-directional link, so, port label of 'A' on the link will be 'b' and port label of 'B' on the link will be 'a'. In addition, the simulation does not allow more than one link of the same type on a same pair, for example, 'A' can connect to 'B' with a bi-directional link and 'B' cannot connect to 'A' with another link. If 'A' connected to 'B' with uni-directional link, so 'B' can connected to 'A' with another uni-directional link. (validate ????)
+
+A classic example network with local orientation is a ring network with bi-directional link, where each node will have two ports called left and right. If every node defines their right port connects to a next neighbor left port this will automatically provide a sense of direction of the network. Therefore, a protocol can make use of port label in order to make the protocol more efficiency. Moreover, in this example, the protocol can treat this bi-directional ring as uni-directional ring by define the protocol to send message only through a left port and receive from a right port, so, the protocol can switch between them back and forth based on the task that best suit them.
+
+3.2.1.7 Visibility, ????
+
+-what
+-why
+-how
+-example
+
+
+
+Limitation
+
+1. what are limitations
+2. why it is limited
+3. how to overcome
+
+The simulation does not provide a global orientation directly to a node, where a protocol can access information of the network such as a knowledge of which port of a node leads to a target node.
+
+The simulation does not provide an access to the state of the link that a node connected to, such that an entity can check whether a target link is up or down.
+
+The simulation does not provide a global visibility of network such as the number of node in the network or query existing of a node in the network.
+
+All above limitation are not provided because those information can be created by using distributed computing protocol which is the part that user is developing, beside in the real network these information are not exist without performing distributed computing.
+
+However, if user really needs this information, the user can embedded the information directly into a protocol manually or execute another protocol to obtain such information.
+
+
+\subsubsection{3.2.2 Agent with Whiteboard Model}
+
+-	definition
+Whiteboard is a bounded amount of storage with a fair mutual exclusion access, which resides in a node (host) and allows visited agents to communicate by reading from and writing on the board.
+
+Blackboard is …???
+
+Mobile agent is a popular computing paradigm in networked environments ranging from Internet to Data Grid. It has been used in theoretical computing and system-supported programming platform. Therefore, the simulation has provided environment and development API to support this paradigm. The following are properties that the simulation allows user to adjust in order to test and verify their protocol correctness and efficiency.
+
+
+- properties cover
+	- mutual exclusion access fairness rate
+	- size of memory
+	- visibility
+	- broadcasting to others board in difference nodes
+
+1. what properties are covered
+2. what are not covered
+3. why these were picked, advantage/disadvantage
+4. how these properties effect the simulation and user
+5. case study
+
+3.1.2.1 Mutual Exclusion Access is a fairness rate of multi agent to access a board. The mutual exclusion access is a mechanism for a board access by agent. At each node there is only one board, while the node may have multiple agents visit.
+
+Therefore, the fairness rate of board access is crucial since the sequence of information propaganda on the board may effects the correctness and efficiency of protocol.
+
+The simulation currently uses uniform random probability as a default fairness mechanism. However, user may adjust probability rate to specific type of agent by using API provided while developing a protocol.
+
+For example, Cautious Walk protocol is a protocol that used for Black Hole search in a network. An agent has to post a message that contains a status of this node and a target port for a next search on a board before heading to, so that another agent may acknowledge and prevent unnecessary actions. If the mutual exclusion access neither is unfair nor exists, the protocol may fail or leads to a high cost of computing (lost of agent in a black hole, unbalance workload of agent etc.)
+
+3.1.2.2 Memory size of Board, a board is a bounded size of memory that store within a node (host). The size of information may posted and kept on a board is depended on the capacity of a node. The more information means more cost for a node in term of memory size and maintenance, but it may increase the efficiency of protocol and agent in performing a task.
+
+Therefore, the simulation provides a parameter for user to set the size of information that a board can keep. The simulation currently defines the size by number of message posted by agent, which a size of the message is undefined bounded string of char. Once the limit is reached, the oldest information posted will be removed in FIFO order.
+
+Example ???
+
+3.1.2.3 Board visibility, blackboard does allow information written on one board can be broadcasted to other boards, which is the similarity to a global visibility within a network.
+
+Therefore, an agent can access and share information without to be at any particular node in order to access information where it was written. (validate it ????)
+
+The simulation provide underneath implementation to duplicate the information on a blackboard to every others blackboard in the network in the same way of sharing global variable in programming. The implementation uses various synchronous and mutual exclusion mechanisms to control the access and provide a fairness of accessing.
+
+Example ???
+
+Limitation
+
+Blackboard/Whiteboard paradigm is known to the weakness of security issue, which there are two major concerns, a harmful node and a harmful agent. The harmful node is a node that can kill or contaminate the visiting agent, and harmful agent is an agent contaminated with danger and may kill or harm node or agent that it has been contacted with. The simulation does not provide a direct mechanism to generate this issue in the environment during an execution of protocol.
+
+However, the users are free to embedded programming code into the protocol in order to generate this security loophole (e.g. changing states of node and/or agent when some certain conditions are met).
+
+\subsubsection{3.2.3 Agent with Token Model}
+- definition
+
+Token paradigm in distributed mobile agent computing is a less powerful paradigm compare to Whiteboard/Blackboard paradigm. A token is an identical (i.e. indistinguishable) bit of information, an agent has token(s) that can be carried, can be placed in the center of a node and removed from it, in an enhanced token model an agent can replicate token, destroy token and place token in front of particular port of a node. There is no other form of marking or communication via token available between agent to agent or agent to node.
+
+- properties of token
+	- number of token can be carried
+	- number of token can be placed on a same spot
+	- life time of token
+	- location of token drop in the node (i.e. in front of port,middle etc)
+	- visibility	
+	- duplication of token by agent
+
+3.2.3.1 Number of token an agent can be carried, the simulation allows user to set a finite number of token that every agent can be carried.
+
+Since token is a piece of data and agent does requires space to store, therefore, the more token agent carries is the more space the agent has to allocate. Due to the nature to distributed mobile agent which the agent is small and limited computing power therefore the number of token that agent can carry is an important factor to consider when developing a protocol.
+
+The simulation provide an option for user to specify the number of token in graph editor interface, once the simulation is starting the implementation underneath will assign tokens to each agent. The simulation provides API for user to access token information of an agent (e.g. number of token can be carried, current token holding etc.) so that user protocol can keep track of the using token.
+
+For example ???
+
+3.2.3.2 Number of token can be placed at a same location, the simulation allows user to set a finite number of token that can be placed at any legitimate place in a node.
+
+In distributed mobile agent usually include various number of agents that cooperate together to accomplish some tasks, and some tasks requires placing some numbers of token at a particular location in order to achieve the goals.
+
+Therefore, in graph editor, the simulation allows user to specify a finite number of token can be placed on a same location before the execution of simulation. The simulation also provides API for user to access information of number of token currently placed at a center of a node and a max number of token can be placed at a center of a node (NOT yet a port ???).
+
+For example ????
+
+3.2.3.3 Duplication and destroy of token, agent is be able to generate a finite number of token and destroy a finite number of token that it carries.
+
+The replication and destroy of token may necessary in some protocol since the limitation of token can be carried by an agent. Especially, when the network is large and number of agent is small, in this case, there are many places for agent to visit and place token and it requires a large number of token to be used in order to cover the whole network.
+
+The simulation provides API for user to allow agent to replicate token(s) from what it is currently carries to a max number that it can carry, and user can program agent to destroy token(s) that it currently carries as well.
+
+For example ???
+
+3.2.3.4 Token visibility, a token can be seen by an agent at certain location or remotely.
+
+The visibility of token is a powerful property that will affect the outcome of protocol complexity. The remote visibility may shorten traveling distance and time but the underneath implementation of the system is more complex than local visibility.
+
+Currently the simulation provides a local visibility, which means a token can be seen by an agent if and only if an agent present in a node that contain token(s). User can use API to query the existing token at a particular node that the an agent presents.
+
+For example ???
+
+3.2.3.5 Life time of token ???
+
+Limitation
+
+The simulation only supports an identical token without any labeling and no extra information can be embedded into it by agent.
+
+There is no global visibility of token to an agent, a token can be seen if and only if an agent presents in a node that contain the token.
+
+The location that token can be placed is only a center of a node, the simulation not yet support a various location of a node e.g. in front of a port etc.
+An agent cannot create a token by itself, it only be able to replicate a token from what it is currently carried to a max number of token it can carry.
+
+These limitations are not limited; it can be added or removed in the future due to there are many model of token in distributed mobile agent are used. Also due to the limitation of time and resources therefore, the simulation provides what it is seem to be sufficient for now.
+
+3.3 RUNTIME (Playback and Adversary Interruptions)
+
+This section discuss about two main components during runtime of the system
+1. what is runtime
+2. what is it for
+3. why need it
+4. what are the feature that supported
+5. how the simulation support it
+
+
+The simulation execution is executed on two main inputs, network topology that user provided via graph editor, and user protocol that computing the algorithm. The combination of these two inputs produces series of data information, which later provided into the simulation internal subsystems. Once the simulation subsystems consume the information, it will produce various from of output such as data log record, visualize effect on screen, update internal states etc. which this process is called runtime of the simulation.
+
+In general, based on external (user) interaction, the simulation at runtime consists of two main components, playback and adversary interruptions. These two components allow user to interact, response and absorb the information from the simulation during its execution of protocol. Playback allows user to observe and see the process of protocol execution in visual way. The adversary interruption is a mechanism that allow user to dictate the execution of protocol by the simulation to be the way that user intended in order to verify the correctness of the protocol.
+
+The playback is more of any visualization tools that allow user to play, pause, and stop etc. while the adversary interruption is an internal library that delegates between the simulation engine and user adversary instruction (codes). The detail are discussed in the following sub sections.
+
+\subsection{PLAYBACK}
+
+Playback of the simulation is a visualization tools that display the changes of states of network and protocol that user provided before the execution starts. During the execution of the protocol, user can visually observe the changes on screen like the change of node state, agent moving from place to place and the value of curtain variable changed etc. The following subsections discuss a list of functionalities of playback that the simulation supports.
+
+	- functionalities support
+		- play/pause/stop
+		- statistic display
+		- graphical display
+		- record data into persistence storage
+		- replay from recored data
+1. what functionalities are provided
+2. what are not provided
+3. why these were picked, advantage/disadvantage
+4. how these functionalities effect the simulation and user
+5. how these functionalities works
+-what
+-why
+-how
+-example
+
+
+3.3.1.1 Play-Pause-Stop are common functionalities for any playback application and their functionalities detail are discussed below
+
+Play function makes the simulation to execute and run user algorithm on a give graph topology; the Play command can be issued only by user via GUI provided in graph editor. While the simulation is under play mode, verities of internal components of the simulation are working such as the screen keep updating visualization information display, logging system does recording necessary data into a persistence storage, new event has been generating and executed etc.
+
+Pause function allows user to pause the simulation, all activities of every simulation subsystem will be put on hold; the Pause command can be issued only by user via GUI provided in graph editor. However, it does allow user to observe and investigate some values and status of the simulation such as state of node and agent, raw record of activities (number of message, token, agent etc.) and progress of the protocol execution. In order to resume (continue) an execution, the user must issue a Play command via GUI in graph editor.
+
+Stop function will end the simulation execution process regardless of the progress and state of the protocol execution. There are two ways of issue Stop command, the command is issued by user via GUI and the execution of user protocol is terminated. Either way of issuing Stop command, every subsystem of the simulation will end their activities in a normal routine way and the simulation considers it as a peaceful ending process. However, when the simulation is stopped, a Stop command has been issued, the progress of past execution cannot be resumed or continued, it has to be start over only.
+
+3.3.1.2 Data Report, the simulation provides a current raw simple data report during the playback. These data are very basic information that can be retrieve and understand quickly such as current states, stack of states changed, number of message sent/received, number of node, number of agent, token count etc. The information can be viewed from graph editor under properties view, the data displayed on the view is based on the selection of object in graph editor.
+
+3.3.1.3 Graphical Report,(validate ???)
+
+3.3.1.4 Persistence data log is more like an internal function of the simulation which it main task is to save all necessary information of an execution in order to reproduce a visualization for a Replay function. The logging subsystem has two steps of logging, first capture event information such as timestamp, target state and information. Second, constructs information obtained from the first step into a simple format that Replay module understands, and record into persistence storage. (validate ????)
+
+3.3.1.5 Execution replay is a function that allows user to review or replay the past execution of user protocol that has been executed by the simulation. The replay is unlike playback where the replay does not execute any of user protocol nor creating new events and nor update states. The replay is only read the logging record (past protocol execution information) from persistence storage and generates visualization on screen based on information provided by the logging record. Therefore, the visualization display will be identical to what was happened when the protocol was executed. While the restart execution of the same protocol does not necessary produce the same out come, especially during the process, as the past execution because by the nature of network environment is heavily based on random parameters. For example, a spanning tree algorithm, each time the algorithm is executed it may produce a different tree because the shape of the tree is based on the speed of link transmission and a selection of a next port that a node willing to send a message.
+
+
+Limitation
+
+The simulation does not support a change of information of object displayed in graph editor during the execution of the protocol such as state of node and agent, number of token, information on a board etc. However, this functionality can be provided in the future when time and resources are provided.
+
+
+\subsection{ADVERSARY INTERRUPTION}
+
+- Adversary interruptions
+	- overview (objective, design, in action)
+1. what is adversary
+2. what is it for
+3. why need it
+4. how the simulation support it
+5. how it has been designed and developed
+6. why it has been done these ways, advantage/disadvantage
+7. what another alternative of doing this
+8. why we don't do as alternative way
+
+Adversary interruption is another mechanism that simulation provides for user to use it to validate and verify the correctness of protocol. Since the simulation does not provide a GUI for user to change or update information of objects during the execution of protocol. Therefore, adversary interruption is another option that user may use it to interrupt and dictate how the simulation execute the protocol.
+
+This adversary interruption module is a module that delegates between user adversary scripts and the simulation internal execution. The simulation has defined mapping table between internal communication function calls and the module scripts API. The mapping table will be used when an internal call has been invoked (by the simulation), first the mapping table will redirected the call to the module in order to check user adversary script whether there is any instruction related to this call. If there is, the simulation will perform the function call with given parameters from the script, otherwise it will use the simulation pre configuration parameters.
+
+However, this feature requires user to write a script in Java language by implementing the module functions which it will be used as adversary to verify and test the protocol. There are three groups of control that the module supports, delay of arrival, target action starting time, and order of target action.
+
+3.3.2.1 Delay of arrival, the delay of arrival includes message on a link, agent on a link, and data on a board. This allows user to control link delay based on condition given in adversary script.
+
+For example, node 'N' has three bi-directional links 'a', 'b', and 'c'. With broadcast info protocol, adversary wants a message on link 'a' to arrive node 'N' as the last message. An adversary script will implement delay\_arrival(node) by checking node 'N' states and conditions before allowing port 'a' of node 'N' to receive a message (see code Appendix). Under this example, the simulation will execute this delay\_arrival() function every time when message is arriving at node 'N' or timeout setting at a message is reached.
+
+For example, agent 'A' searching a network with other agent, 'B'. With black hole search in a ring protocol, where 'A' and 'B' are on a same home node, 'A' starts from the left and 'B' start from the right. Adversary wants an agent 'A' to advance slowly, while agent 'B' continues searching almost the entire ring. Therefore, adversary script will implement delay_arrival(agent) function by checking at agent 'A' and 'B' states and conditions before allowing 'A' to advance (see code Appendix). Under this example, the simulation will execute this delay_arrival() function every time when agent is arriving at a node (any node???) or timeout setting at an agent is reached.
+
+3.3.2.2 Target action is an option that allow user to define a target to do some certain action at certain time without breaking a protocol (e.g. agent wake up time, decide to do some action). This allow user to control some certain internal action of a node or agent based on adversary script.
+
+For example, node initiation from a sleep before execution of leader election protocol, where election will be among initiated nodes. Adversary wants only node 'N' to initiate election without any competition from any other nodes. An adversary script will implement init(node) function by checking an ID of each node that trying to initiate and make sure only node 'N' can initiate election (see code Appendix).  Under this example, the simulation will execute this init(node) function every time when any node tired to initiate.
+
+For example, agent traveling in a certain route while execute a random searching protocol with multiple agents. Adversary wants an agent, say 'A', chooses a certain route that does not break the searching protocol. An adversary script will implement function move(agent) by make sure that an agent 'A' pick a path that the adversary wants, and no other agents pick that route (see code Appendix). Under this example, the simulation will execute move() function every time when an agent start moving in or out.
+
+
+3.3.2.3 Order of target action, the module allows user to define an order to target on some actions in a way that does not break a protocol (e.g. sending multiple messages to a same target, starting action of agents) This allows user to control an order of arrival on a certain target based on adversary script.
+
+For example, arrival of election messages with FIFO bi-direction. An adversary wants messages from node, say 'M', arrives at node, say 'N', in decreasing order of message owner ID. Adversary script will implement function order_msg(M, N) by make sure that 'M' received election message from every incoming port before it relays those messages to 'N' in an decreasing order (see code Appendix).  Under this example, the simulation will execute order_msg() function every time when 'M' sends message to 'N'.
+
+For example, agents entering a sub network zone in asynchronous environment. A network has divided into two, where a sub network is small subset of a large network and agents are randomly located out side the sub network. Every agent has to find a path and enter into the sub network and perform some tasks. An adversary wants an agent enter into a sub network sequentially. Therefore, an adversary script will implement function order_move_in() by make sure that at time, t, there is only one agent entering a sub network (see code Appendix).  Under this example, the simulation will execute order_move_in() function every time when an agent is moving into a node.
+
+- functionalities support
+		- delay time (i.e. message travel, update data visibility on difference boards)
+		- target selection (i.e. message to a port, agent in node, agent to port)
+		- order of arrival/departure (i.e. message, agent)
+
+1. what functionalities are provided
+2. what are not provided
+3. why these were picked, advantage/disadvantage
+4. how these functionalities effect the simulation and user
+5. how these works
+
+
+	- limitation
+		- default parameters are random/fixed value/FIFO which are based on pre-configuration of the system by user
+		- Adversary script is fixed to a protocol and a graph, since the script needs to know info of graph and protocol behavior.
+		- Proprietary or functions when multiple adversary functions are implemented and were called by a same simulation API ??? (fix this)
+1. what are limitations
+2. why it is limited
+3. how to overcome
+
+Limitation
+
+The adversary interruption is dangerous feature that may break the protocol even the protocol is actually correct since it can change decision making of the protocol also the behaviors. Therefore, the use of this feature is highly recommended to be very cautious.
+
+In addition, an adversary script is fixed to a protocol and a graph since the script needs to know information of graph and protocol in order to verify it. Therefore, a script may or may not work on different combination of protocol and graph.
+
+The priority of adversary interruption API is also important for user to keep in mind since at curtain time may be there are more than one functions were executed. At current implementation, the higher priority function that was executed will override the lower priority function if there is an overlapping of state or data change. Therefore, it is up to the user to keep in mind and check the list of API function calls priority.
+
+\subsection{API}
+
+1. what is communication protocol api
+2. why do we need it
+3. what does it help to make the simulation better
+4. what group of api do we have here
+5. what else we didn't cover here and why
+6. how are we organize it here
+
+\subsubsection{3.4.1 Communication Protocol}
+This section describes interesting API and usage for user to use in communication between entities. The simulation supports three models message passing, mobile agent with black/whiteboard and mobile agent with token. The API is a most important tools that encapsulates underneath communication implementation that tie to many proprietary and specific technologies but serve the same purpose, which this allows user to focus on an actual protocol rather than coding and handling of those communication technologies. In this section we discuss some detail of interesting API of difference models and entities.
+
+
+1. what are api for xxx
+2. why do we need it, what benefit
+3. what else we didn't cover
+4. why this is enough
+5. how is it works
+6. examples
+
+3.4.1.1 Node
+
+- init() is an initiation function of a protocol. Once the simulation started, the first thing that the simulation will do is to execute init() of initiation node(s), where it (initiation node(s)) has been set by user in Graph Editor before starting the simulation. There must be at lest one node set to be an initiation node in order to activate a simulation of user protocol, and the function will be executed only once in a life time of the simulation, also the only node that set as initiation node will be executed with this function.
+
+- become(int state) is a setting function that set a state of a node to be a prefer state. The state of a node represented by an integer number defined by user in a protocol, the number has to map to a color setting in Graph Editor as well in order to the simulation makes a correct virtualization (see 3.5 User Simulation GUI)
+
+- getState() is a query function that returns a current state of a node.
+
+- getTime() is a query function that returns a current simulation time.
+
+- getName() is a query function that returns a name represented to a node. The name can be edited by user in Graph Editor before the starting of the simulation but it cannot be changed once the simulation is started.
+
+- getXLocation() is a query function that return a current X coordinate of a node located in Graph Editor.
+
+- getYLocation() is a query function that return a current Y coordinate of a node located in Graph Editor.
+
+- alarmRing() is an internal alarm clock of a node that will interrupt a node when the setting time is reached. The alarm can be set by calling setAlarm() function.
+
+- setAlarm(int timeUnit) is a setting function that set an internal clock of a node to be rang after a given (positive) unit of simulation time.
+
+- getUserInput() is a query function that allows user to access a specific input (in String format) that user provided to a node via Graph Editor before or/and during the execution of the protocol.
+
+- getInPorts() is a query function that returns a list of all incoming ports label of a node.
+
+- getOutPorts() is a query function that returns a list of all outgoing ports label of a node.
+
+
+3.4.1.2 Agent
+
+- init() is an initiation function of a protocol. Once the simulation started, the first thing that the simulation will do is to execute init() of initiation agent(s), where it (initiation agent(s)) has been set by user in Graph Editor before starting the simulation. There must be at lest one agent set to be an initiation agent in order to activate a simulation of user protocol, and the function will be executed only once in a life time of the simulation, also the only agent that set as initiation agent will be executed with this function.
+
+
+- become(int state) is a setting function that set a state of an agent to be a prefer state. The state of an agent represented by an integer number defined by user in a protocol, the number has to map to a color setting in Graph Editor as well in order to the simulation makes a correct virtualization (see 3.5 User Simulation GUI)
+
+- getState() is a query function that returns a current state of an agent.
+
+- alarmRing() is an internal alarm clock of an agent that will interrupt the agent when the setting time is reached. The alarm can be set by calling setAlarm() function.
+
+- setAlarm(int timeUnit) is a setting function that set an internal clock of an agent to be rang after a given (positive) unit of simulation time.
+
+- moveTo(String port) is a function that directs an agent to move into a given outgoing port of a current node that it resides.
+
+- getAllInfo() is a query function that return a list data (in String format) that has been kept by an agent in memory slots. The number of memory slot is fixed by user via Graph Editor before starting the simulation, but the size of each slot is, currently, unlimited size of Java String.
+
+- getInfo(int index) is a query function that return a data (in String format) corresponding to a given slot index that has been stored by an agent in memory slots.
+
+- recordInfo(int index, String info) is a function that allows agent to add/override data at a given memory slot. The agent can erase data in a given slot index by add an empty String or null.
+
+- getMaxSlot() is a query function that provides a maximum number of memory slot that agent available to keep information.
+
+- getHostId() is a query function that return a current host ID that an agent currently located in Graph Editor.
+
+3.4.1.3 Message passing
+
+-	send() is a set of sending functions that allow a node to send message(s) to other nodes that directly connected to. The example of sending function are as follow
+
+o	sendToAll() allows a same message to be send to all outgoing ports of a node at the same time.
+
+o	sendToOthers() is for bi-directional link which allows a same message to be send to all ports of a node at the same time except a latest port that it received a message.
+
+o	sendTo() is basic sending message that allow a node to send a message to all given target ports at the same time.
+
+ The message types that can be passed through these functions parameter are Java primitive types and Serializable objects.
+
+- receive(String port, IMessage message) is an entry point of receiving message of a node. The function provides port label of arrival and a message itself. IMessage is a wrapper object that allows user to get message label (if exist), by calling getLabel(), and actual message content, by calling getContent(), that a sender is sending.
+
+
+3.4.1.4 Whiteboard
+
+The board contains a list of slot and each slot represents Java String record written by an agent at each time. The number of slot defined by user at Graph Editor before the simulation starts, once the simulation started the number of slot cannot be modified. Any new record entering will append to the end and if the number of record exceed the limit size of slot, the oldest record will be removed and new record will be append to the end of slot.
+
+Synchronous of data will be handled in such a way that there is only one physical memory of board for all agents.
+
+Example1, a board contains two records; an agent 'A' is reading from the board and currently is at record number two. At the same time an agent 'B' is appeding a new record to the board and finished it before agent 'A' done reading number two record. Once an agent 'A' done reading record number two, agent 'A' will read be able to see and read record number three. However, if agent 'A' done reading number two record before agent 'B' done writing record three, then agent 'A' will not the record number three.
+
+Example2, a board contains three records; an agent 'A' is reading from the board and currently reading record number two. At the same time an agent 'B' is removing record number one, regardless of whoever done first between 'A' and 'B', agent 'A' will never known that the record number one has been removed unless agent 'A' starts reading the board again. However, if agent 'B' is removing record number three, and 'B' done removing the record number three before 'A' done reading the record number two, then 'A' will not see the record number three, otherwise 'A' will see record number three.
+
+- readFrom() is a function called by an agent in order to read from a board at a current host node. The function will return a current list of record in a list of String format..  (How an agent object can access data of a node object???)
+
+- writeTo(String info) is a function called by an agent in order to write a record into a board of a current host node. The size of the record for each call (slot), currently, is unlimited size of Java String. The new entering record will be append to the end of the board, if the number of slot exceed the limit, the oldest slot will be removed and a new record will be appended to the end of a board.
+
+- remove(String info) is a function called by an agent in order to remove a record ,corresponding to a given data entry, from a board at a current host node.
+
+
+3.4.1.5 Token
+
+- countMyToken() is a query function that return a number of token that an agent currently has.
+
+- countHostToken() is a query function that return a number of token that currently located in a host node that agent resides.
+
+- dropToken() is a function that allows an agent to leave a token at a current host node.
+
+- pickupToken() is a function that allows an agent to pick up a token at a current host node.
+
+- getMaxToken() is a query function that returns a number of maximum token that an agent can carry.
+
+- replicateToken() (do we need it now???)
+- destroyToken()(do we need it now???)
+
+\subsubsection{3.4.2 Underline Libraries TODO ????}
+This section discuss about main and interesting libraries used by the system
+1. what is underline libraries
+2. why do we need it
+3. what does it help to make the simulation better
+4. what group of underline libraries do we have here
+5. what else we didn't include here, and why
+6. how are we organize it here
+
+
+
+\subsubsection{3.4.2.1 Probability Libraries Extensions}
+1. what is probability lib
+2. why do we need it, what benefit
+3. what else we didn't cover
+4. why this is enough
+3. how is it works
+4. examples
+
+
+
+\subsubsection{3.4.3 External (Adversary) Interrupts}
+This section describes interesting API and usage for user to implement their own protocol
+1. what is adversary
+2. why do we need it
+3. what does it help to make the simulation better
+4. what functionality we cover here for adversary
+5. what else we didn't include here, and why
+6. how are we organize it here
+
+
+3.4.3.1 Node
+
+- init(Node n) the function allows user to control the time and conditions of a node initialization. The user will be able to observe node states and information and return true if a node requires an execution otherwise return false.
+
+- delay_arrival(Node n) the function that allows user to delay message/agent from any port that will arrive at node n. The user will be able to access every port of node n, include observing messages/agents that are arriving. The user can hold any arriving messages/agent at any port of n by setting timeout in finite unit of simulation time.
+
+- alarm(Node n) the function allows user to specify a node to perform some certain action after it has been initialized at specific time. The user can specify a simulation time or conditions of a node in order to perform some tasks. This function will be executed when the time has arrived or when the node received a message.
+
+- order_msg(Node m, Node n) the function allows user to control the order of message sending from node 'm' to node 'n' in any order (based on user implementation in this function). This function will be called when 'm' send message to 'n'.
+
+
+- initialize target condition
+- initialize time condition
+- wake up condition
+
+1. what are api for node
+2. why do we need it, what benefit
+3. how it works (underline system)
+4. what else we didn't cover
+5. why this is enough
+6. how to use it
+7. examples
+
+
+3.4.3.2 Agent
+
+- init(Agent a) the function allows user to control the time and conditions of an agent initialization. The user will be able to observe agent information, and return true if an agent requires an execution otherwise return false.
+
+- alarm(Agent a) the function allows user to specify an agent to perform some certain action after it has been initialized at specific time. The user can specify a simulation time or conditions of an agent in order to perform some tasks. This function will be executed when the time has arrived.
+
+- move(Agent a) the function allows user to control direction of agent movement. The user will be able to access agent states and location and specify the direction of agent next move. However, it is a responsible for user to make sure that it does not break the protocol. This function will be called when agent about to move.
+	
+- order_move_in(Agent a) this function allows user to control an agent when it tries to enter a node. Before an agent entering a node, this function will be called and user able to hold agent in front of the node with a specific time or under conditions (based on user implementation in this function) by returning true it will enter the node otherwise false.
+
+- order_move_out(Agent a) this function allows user to control an agent when it tries to leave a node. Before an agent leaving a node, this function will be called and user able to hold agent inside a node with a specific time or under conditions (based on user implementation in this function) by returning true it will leave the node otherwise false.
+
+
+- initialize target condition
+- initialize time condition
+- wake up condition
+- move to target condition
+- arrive time at target condition
+
+1. what are api for agent
+2. why do we need it, what benefit
+3. how it works (underline system)
+4. what else we didn't cover
+5. why this is enough
+6. how to use it
+7. examples
+
+
+Limitation
+
+Since some function calls are called by the simulation at the same conditions therefore, the following is a list adversary API function calls priority and order. (??? Priority based on the order of who call first, the first will be override by the later)
+
+-TODO list of priority ?????
+
+3.5 USER SIMULATION (HCI and GUI) TODO ???
+This section discuss why the system interface has been layout the way it is
+
+\subsection{STATISTIC AND REPORT}
+This section discuss about representation of statistic data collected during the execution of algorithm
+
+3.6.1 Topology Overall
+
+- Number of nodes in a network ' GP
+- Number of links in a network ' GP
+- Number of agents at the start of the simulation ' GP
+- Number of currently agents alive ' GP
+- Maximum number of tokens that an agent can carry ' GP
+
+3.6.2 Node
+- A list of nodes with a state at the end of simulation ' NV
+- A list of nodes with a sequence of state transition ' NP
+- A list of nodes with a total number of agents visited ' C
+
+3.6.3 Agent
+- A list of alive agents ' AV
+- A list of agents with a state at the end of simulation ' C
+- A list of agents with a sequence of state transition ' AV
+- A list of agents with a number of moves at the end of simulation ' C
+- A list of states with number of moved of all agents at the end of simulation  ' C
+
++A bar chart represents agent states verses number of agents
++A bar chart represents agent states verses number of move made by agents
+
+
+3.6.4 Message
+- A total number of messages have been sent ' GP
+- A total number of messages have been received ' GP
+- A list of message types with number of produced (sent) ' C
+- Node(s) that has a highest load of received/sent message (include node info) 'C
+- Node(s) that has a lowest load of received/sent message (include node info) 'C
+
++A graph represents a number message produced in every period of time T unit
+
++A bar chart represents node states verses number of nodes (in that state)
++A bar chart represents node states verses accumulation of number of messages produced during such states
+
+3.6.5 Blackboard/Whiteboard
+- A total number of times that (all) boards have been accessed ' C
+- A total number of write accesses to every board ' C
+- A total number of delete accesses to every board ' C
+- A total number of read accesses to every board ' C
+- Board(s) that has a highest number of write accesses (include node info) ' C
+- Board(s) that has a lowest number of write accesses (include node info) ' C
+- Board(s) that has a highest number of read accesses (include node info) ' C
+- Board(s) that has a lowest number of read accesses (include node info) ' C
+
+3.6.6 Token
+- A total number of tokens that have been dropped by all agents ' C
+- A total number of tokens that have been picked up by all agents 'C
+- A list of agents with number of current tokens holding ' AV
+- A list of nodes with a total number of tokens that have been dropped  ' C
+- A list of nodes with a total number of tokens that have been picked ' C
+
+- Agent(s) that has a highest number of pick up token ' C
+- Agent(s) that has a lowest number of pick up token ' C
+- Agent(s) that has a highest number of drop off token ' C
+- Agent(s) that has a lowest number of drop off token ' C
+- A highest number of tokens have been dropped at a node ' C
+
++A bar chart represents agent state verses number of pick up token
++A bar chart represents agent state verses number of drop off token
+
+3.6.7 Edge
+- An average accumulated delay time of all edges at the end of simulation ' C
+- Edge(s) that has a highest accumulate delay time (include edge info) ' C
+- A total number of message/agent entering each edge ' EP
+- A total number of message/agent leaving each edge ' EP

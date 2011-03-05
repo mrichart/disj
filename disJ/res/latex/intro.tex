@@ -1,0 +1,34 @@
+
+\section{Motivations and Problems}
+- what is reactive distributed algorithm
+- why it is interesting (influence of reactive distributed algorithm to the world)
+- what is the problem of it
+- why there is no existing way to solve the problem
+
+Reactive distributed algorithm is a distributed algorithm that corresponding to a computing environment of many HOMOGENOUS entities, and every entity in the environment has same software and algorithm installed. The reactive means that every entity computing cycle obeys the rule of STATE X INPUT -> ACTION(S) and ACTION may leads to a new STATE.
+
+In modern technology, there are many systems, beside distributed system, that use reactive distributed algorithm such as communication services, security control, system coordination, perversive applications etc. These systems are commonly used and very crucial to the existing of modern world, and reactive distributed algorithms are commonly used and very crucial to the existing of the systems as well.
+
+The nature of distributed system or systems that require reactive distributed algorithm are involve in many entities, in generally a huge volume, and located physically remote in distances and varieties of communication time delay etc that make the development of the algorithm increasingly harder than any other algorithms. The development of algorithm is not just writing a protocol but also testing the correctness as well, in which the later part becomes increasingly bigger problem because of the nature of the system. Therefore, it is important to find a simple, cost effective and efficient way of testing the algorithm rather than a conservative way of testing in a fixed and limited environment that is far from real environment.
+
+There are some existing technologies like PMV, MPI, MRI or COBRA etc that provide communication tools and infrastructure to develop the algorithms. Unfortunately the learning curve is too steep and the libraries that provided are very general and mainly for network layer, which user has to responsible to create a higher level libraries specifically for reactive distributed algorithm. Furthermore, these technologies do not provide a testing mechanism for the algorithm. Another group of computer scientists may use many existing Network Simulation tools to test the algorithms, however, as the name said, network simulations are focused on testing the network communication and data transferring rather than distributed algorithm which cover wider range than network communication and data transferring.
+
+However, there are some existing tool and simulations that have been built for reactive distributed algorithm specifically but some systems are limited in term of usage, capability, efficiency etc which we will discuss in later chapter.
+
+
+\section{Contributions}
+- what is disJ
+- why it help solve the problem
+
+DisJ is a reactive distributed algorithm simulation that provides a virtually distributed environment for computation in a standalone computing machine. The simulation supports three different reactive distributed computing model, Message Passing, Agent with Whiteboard and Agent with Token models that allows user to write a protocol in plain Java language with support of available API for each model that user is developing. Moreover, the simulation also provides visualization editor and views for user to create testing topologies, to observe states and behavior of entities while the simulation executing the protocol.
+
+DisJ simulation has been developed to help user to implement and test their reactive distributed algorithm in a single standalone environment, difference platforms with less cost and effort. Furthermore, the simulation requires non or less of unnecessary knowledge such as network layer communication, hardware configuration etc in order to develop a protocol, which mean the users can fully concentrate on their algorithm without worrying about environments, infrastructures and configuration etc.
+
+The simulation itself is an Eclipse Plug-in that has been merged with Java IDE (Integration Development Environment) and many of Plug-ins that provided by Eclipse and others that facilitates users in software development life cycle in full potential and effectiveness.
+
+
+\section{Thesis layout}
+- what reader expect the rest of thesis will be look like
+
+The rest of the thesis has been organized by chapter two we will look back to existing simulation system and its limitation, then chapter three focuses on DisJ simulation system model which describe functionalities and features that makes the simulation different than other. In chapter four describes the design and implementation of the simulation, in chapter five shows a basic example of how to use the simulation, and a final chapter will be the conclusions.
+

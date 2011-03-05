@@ -1,0 +1,59 @@
+\documentclass[pdftex,12pt]{report}
+%\usepackage{fullpage}
+%\usepackage{setspace}
+%\usepackage{pifont}
+%\usepackage{fullpage}
+%\usepackage[square, comma, sort&compress]{natbib}
+%\usepackage{natbib}
+%\usepackage{amsmath}
+%\usepackage{supertabular}
+%\usepackage{verbatim}
+%\usepackage{nomencl}
+%\usepackage{multicol}
+%\usepackage{color}
+%\usepackage[printonlyused]{acronym}
+%\usepackage[pdftex]{graphicx}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\renewcommand{\abstractname}{Preface}
+
+%\doublespace
+
+\begin{document}
+
+%\input{TitlePage.tex}
+
+\tableofcontents
+\listoffigures
+\addcontentsline{toc}{section}{List of Figures}
+\listoftables
+\addcontentsline{toc}{section}{List of Tables}
+
+
+\chapter{Introduction}
+
+\input{intro.tex}
+
+\chapter{Background}
+
+\input{back.tex}
+
+\chapter{Simulation for Distributed Algorithm}
+
+\input{syst.tex}
+
+\chapter{Design and Implementation}
+
+\input{impl.tex}
+
+\chapter{Example and Usage}
+
+
+\chapter{Conclusion}
+
+
+
+\addcontentsline{toc}{chapter}{References}
+\bibliographystyle{plain}
+\bibliography{MyBIB}
+\end{document}
