@@ -98,7 +98,7 @@ public abstract class MsgPassingControl extends AbstractControl {
 	 * @param incomingPort A port that want to block
 	 * @param nodeId An ID of a node that wants to block
 	 */
-	protected final void blockMsg(String msgLable, String incomingPort, String nodeId){
+	public final void blockMsg(String msgLable, String incomingPort, String nodeId){
 		Node recv = this.getNode(nodeId);
 		if(this.isInPortExist(nodeId, incomingPort)){
 			recv.blockVisitor(msgLable, incomingPort);
@@ -116,7 +116,7 @@ public abstract class MsgPassingControl extends AbstractControl {
 	 * @param incomingPort A port that want to unblock
 	 * @param nodeId An ID of a node that wants to unblock
 	 */
-	protected final void unblockMsg(String msgLabel, String incomingPort, String nodeId){
+	public final void unblockMsg(String msgLabel, String incomingPort, String nodeId){
 		Node recv = this.getNode(nodeId);
 		
 		if(!this.isInPortExist(nodeId, incomingPort)){
@@ -156,7 +156,7 @@ public abstract class MsgPassingControl extends AbstractControl {
 	 * @return True if the port exists and it blocks every incoming message with
 	 * a given label, otherwise false
 	 */
-	protected final boolean isMsgBlocked(String msgLabel, String incomingPort, String nodeId) {
+	public final boolean isMsgBlocked(String msgLabel, String incomingPort, String nodeId) {
 		Node recv = this.getNode(nodeId);
 		return recv.isVisitorBlocked(msgLabel, incomingPort);
 	}
@@ -170,7 +170,7 @@ public abstract class MsgPassingControl extends AbstractControl {
 	 * @return a list of message with expected arrival time if exist, 
 	 * otherwise empty list is returned
 	 */
-	protected final Map<IMessage, Integer> getTravelingMsg(String edgeId, String nodeId){
+	public final Map<IMessage, Integer> getTravelingMsg(String edgeId, String nodeId){
 		Map<IMessage, Integer> tmp = ((MsgPassingProcessor)this.proc).getTravelingMsg(edgeId, nodeId);
 		return tmp;
 	}

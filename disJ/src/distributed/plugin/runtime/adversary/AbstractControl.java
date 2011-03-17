@@ -15,9 +15,8 @@ public abstract class AbstractControl {
 	IProcessor proc;
 	
 	
-	/**
+	/*
 	 * Register a processor to this adversary program
-	 * 
 	 * @param proc A processor
 	 */
 	public final void setProcessor(IProcessor proc){

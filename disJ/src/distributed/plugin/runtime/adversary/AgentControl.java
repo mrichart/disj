@@ -97,7 +97,7 @@ public abstract class AgentControl extends AbstractControl {
 	 * @return a list of agents with expected arrival time if exist, 
 	 * otherwise empty list is returned
 	 */
-	protected final Map<String, Integer> getTravelingAgents(String edgeId, String nodeId){
+	public final Map<String, Integer> getTravelingAgents(String edgeId, String nodeId){
 		Map<String, Integer> tmp = ((AgentProcessor)this.proc).getMovingAgents(edgeId, nodeId);
 		return tmp;
 	}
@@ -109,7 +109,7 @@ public abstract class AgentControl extends AbstractControl {
 	 * @param incomingPort A port that want to block
 	 * @param nodeId An ID of a node that wants to block
 	 */
-	protected final void blockAgent(String agentId, String incomingPort, String nodeId){
+	public final void blockAgent(String agentId, String incomingPort, String nodeId){
 		Node recv = this.getNode(nodeId);
 		if(this.isInPortExist(nodeId, incomingPort)){
 			recv.blockVisitor(agentId, incomingPort);
@@ -126,7 +126,7 @@ public abstract class AgentControl extends AbstractControl {
 	 * @param incomingPort A port that want to unblock
 	 * @param nodeId An ID of a node that wants to unblock
 	 */
-	protected final void unblockAgent(String agentId, String incomingPort, String nodeId){
+	public final void unblockAgent(String agentId, String incomingPort, String nodeId){
 		Node recv = this.getNode(nodeId);
 		
 		if(!this.isInPortExist(nodeId, incomingPort)){
@@ -164,7 +164,7 @@ public abstract class AgentControl extends AbstractControl {
 	 * @return True if the port exists and it blocks arrival agent with
 	 * a given ID, otherwise false
 	 */
-	protected final boolean isAgentBlocked(String agentId, String incomingPort, String nodeId) {
+	public final boolean isAgentBlocked(String agentId, String incomingPort, String nodeId) {
 		Node recv = this.getNode(nodeId);
 		return recv.isVisitorBlocked(agentId, incomingPort);
 	}

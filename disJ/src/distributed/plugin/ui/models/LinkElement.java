@@ -52,7 +52,7 @@ public abstract class LinkElement extends AdapterElement {
 	private static final String PROPERTY_END_PORT = "L05 Target Port Name";
 	private static final String PROPERTY_MSG_FLOW_TYPE = "L06 Message Flow Type";
 	private static final String PROPERTY_DELAY_TYPE = "L07 Delay Type";   
-	private static final String PROPERTY_DELAY_SEED = "L08 Delay Seed";   
+	private static final String PROPERTY_DELAY_SEED = "L08 Delay Time";   
 	private static final String PROPERTY_RELIABLE = "L09 Reliable";   
 	private static final String PROPERTY_PROB_FAILURE = "L10 Probability of Failure";
 	private static final String PROPERTY_TOTAL_MSG = "L11 Total In Traffic";

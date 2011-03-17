@@ -133,6 +133,7 @@ public class MsgPassingProcessor implements IProcessor {
 		}
 		if(clientAdver != null){
 			this.adversary = this.initClientAdversary(clientAdver);
+			this.adversary.setProcessor(this);
 		}
 	}
 
