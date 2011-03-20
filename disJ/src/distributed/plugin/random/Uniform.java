@@ -25,8 +25,8 @@ public class Uniform implements IRandom {
 	}
 	
 
-	public int nextInt( double n ) {
-		return rand.nextInt((int)n);
+	public int nextInt(int n) {
+		return rand.nextInt(n);
 	}
 
 	public void setSeed( long seed ) {

@@ -62,7 +62,7 @@ public class Poisson implements IRandom {
 		rand = new PoissonHelper( seed );
 	}
 	
-	public int nextInt( double n ) {
+	public int nextInt(int n ) {
 		return rand.nextPoisson(n);
 	}
 

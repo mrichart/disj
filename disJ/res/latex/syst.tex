@@ -447,7 +447,7 @@ This section discusses about two main components during runtime of the simulatio
 4. what are the feature that supported
 5. how the simulation support it
 
-During DisJ simulation excuse a protocol that there are two main inputs, network topology and protocol (Java code) that drive behaviors of the simulation and results. During the simulation execution there are many things happening and sometime user wants to interrupt the execution in order to observe information and/or deviate some actions. Therefore, the simulation provides two types of interaction from user toward the simulation in runtime, playback and adversary interruption.
+When DisJ simulation has been initiated execution, the simulation starts running and performing tasks such as executing user protocol, animating graphical display, collecting data etc, while performing the tasks the simulation is in a state that called Runtime state. During the simulation performing tasks there are two main inputs that feed into the simulation, network topology and protocol (Java code), which drive behaviors of the simulation and results until the simulation stops. While the simulation execution there are many things happening and sometime user wants to interrupt the execution in order to observe information and/or deviate some actions. Therefore, the simulation provides two types of interaction from user toward the simulation in runtime, playback and adversary interruption.
 
 Playback is more of visualization tools that allows user to play, pause, and stop etc so that user can have a closer look and able to observe information at particular point of time instead of wait until the end and able to observe only a final results and status of the simulation.
 
@@ -542,34 +542,31 @@ The priority of adversary interruption API is also important for user to keep in
 
 
 
-
-
-
 \subsection{API}
 
 1. what is communication protocol api
-2. why do we need it
-3. what does it help to make the simulation better
-4. what group of api do we have here
-5. what else we didn't cover here and why
-6. how are we organize it here
+2. what is it for
+3. why do we need it
 
-\subsubsection{3.4.1 Communication Protocol}
-This section describes interesting API and usage for user to use in communication between entities. The simulation supports three models message passing, mobile agent with black/whiteboard and mobile agent with token. The API is a most important tools that encapsulates underneath communication implementation that tie to many proprietary and specific technologies but serve the same purpose, which this allows user to focus on an actual protocol rather than coding and handling of those communication technologies. In this section we discuss some detail of interesting API of difference models and entities.
+(in subsection)
+4. what are the modules that api supported
+5. what does it do
 
+In software development and programming, API (Abstract Programming Interface) is gateway that connects between user protocol and system engine. DisJ simulation allows user codes to connect the simulation in three different modules of the system, distributed communication protocol, random probability generator, and adversary control script. The first module is for user to develop distributed protocol, the second module is optional which allows user to connect custom random libraries that the simulation does not support, and the last module is also optional for use who requires additional testing and verification to a protocol by adding scripts to control environment of the simulation while the protocol is running.
 
-1. what are api for xxx
-2. why do we need it, what benefit
-3. what else we didn't cover
-4. why this is enough
-5. how is it works
-6. examples
+API is a crucial feature of DisJ simulation which provides adaptability, reusability and modularity for user to enhance and adjust the simulation to the needs. The simulation is more of user centric, since the simulation cannot cover every aspects and environment to meet the needs of user, secondly, there are many existing libraries and codes that users may prefer to use or reuse instead of remaking new version to fit the simulation.
 
-3.4.1.1 Node
+\subsubsection{Communication Protocol}
+DisJ simulation provides communication protocol API of entities and environment, in which user can use during development of distributed algorithm protocol. The communication protocol API encapsulates underneath communication implementation that tie to many proprietary and specific technologies but serve the same purpose, which this allows user to focus on an actual protocol rather than coding and handling of those communication technologies. However, the simulation provides others means for user to config and adjust network environment for the simulation directly via GUI that had been discussed in previous sections.
+
+The simulation API can be divided into five groups of API, node, agent, message passing, whiteboard and token. In this section we discuss some of interesting API, for full list of API see appendix.
+
+\begin[enumerate]
+\item[Node]
 
 - init() is an initiation function of a protocol. Once the simulation started, the first thing that the simulation will do is to execute init() of initiation node(s), where it (initiation node(s)) has been set by user in Graph Editor before starting the simulation. There must be at lest one node set to be an initiation node in order to activate a simulation of user protocol, and the function will be executed only once in a life time of the simulation, also the only node that set as initiation node will be executed with this function.
 
-- become(int state) is a setting function that set a state of a node to be a prefer state. The state of a node represented by an integer number defined by user in a protocol, the number has to map to a color setting in Graph Editor as well in order to the simulation makes a correct virtualization (see 3.5 User Simulation GUI)
+- become(int state) is a setting function that set a state of a node to be a prefer state. The state of a node represented by an integer number defined by user in a protocol, the number has to map to a color setting in Graph Editor as well in order to the simulation makes a correct visualization (see 3.5 User Simulation GUI)
 
 - getState() is a query function that returns a current state of a node.
 
@@ -592,12 +589,12 @@ This section describes interesting API and usage for user to use in communicatio
 - getOutPorts() is a query function that returns a list of all outgoing ports label of a node.
 
 
-3.4.1.2 Agent
+\item[Agent]
 
 - init() is an initiation function of a protocol. Once the simulation started, the first thing that the simulation will do is to execute init() of initiation agent(s), where it (initiation agent(s)) has been set by user in Graph Editor before starting the simulation. There must be at lest one agent set to be an initiation agent in order to activate a simulation of user protocol, and the function will be executed only once in a life time of the simulation, also the only agent that set as initiation agent will be executed with this function.
 
 
-- become(int state) is a setting function that set a state of an agent to be a prefer state. The state of an agent represented by an integer number defined by user in a protocol, the number has to map to a color setting in Graph Editor as well in order to the simulation makes a correct virtualization (see 3.5 User Simulation GUI)
+- become(int state) is a setting function that set a state of an agent to be a prefer state. The state of an agent represented by an integer number defined by user in a protocol, the number has to map to a color setting in Graph Editor as well in order to the simulation makes a correct visualization (see 3.5 User Simulation GUI)
 
 - getState() is a query function that returns a current state of an agent.
 
@@ -607,17 +604,14 @@ This section describes interesting API and usage for user to use in communicatio
 
 - moveTo(String port) is a function that directs an agent to move into a given outgoing port of a current node that it resides.
 
-- getAllInfo() is a query function that return a list data (in String format) that has been kept by an agent in memory slots. The number of memory slot is fixed by user via Graph Editor before starting the simulation, but the size of each slot is, currently, unlimited size of Java String.
+- getMemorySuitcase() is a query function that return a list data (in String format) that has been kept by an agent in memory slots. The number of memory slot is fixed by user via Graph Editor before starting the simulation, but the size of each slot is, currently, unlimited size of Java String.
 
-- getInfo(int index) is a query function that return a data (in String format) corresponding to a given slot index that has been stored by an agent in memory slots.
+- getMaxMemorySlot() is a query function that provides a maximum number of memory slot that agent available to keep information.
 
-- recordInfo(int index, String info) is a function that allows agent to add/override data at a given memory slot. The agent can erase data in a given slot index by add an empty String or null.
+- getNodeId() is a query function that return a current host ID that an agent currently located in Graph Editor.
 
-- getMaxSlot() is a query function that provides a maximum number of memory slot that agent available to keep information.
 
-- getHostId() is a query function that return a current host ID that an agent currently located in Graph Editor.
-
-3.4.1.3 Message passing
+\item[Message passing]
 
 -	send() is a set of sending functions that allow a node to send message(s) to other nodes that directly connected to. The example of sending function are as follow
 
@@ -632,24 +626,20 @@ o	sendTo() is basic sending message that allow a node to send a message to all g
 - receive(String port, IMessage message) is an entry point of receiving message of a node. The function provides port label of arrival and a message itself. IMessage is a wrapper object that allows user to get message label (if exist), by calling getLabel(), and actual message content, by calling getContent(), that a sender is sending.
 
 
-3.4.1.4 Whiteboard
+\item[Whiteboard]
 
-The board contains a list of slot and each slot represents Java String record written by an agent at each time. The number of slot defined by user at Graph Editor before the simulation starts, once the simulation started the number of slot cannot be modified. Any new record entering will append to the end and if the number of record exceed the limit size of slot, the oldest record will be removed and new record will be append to the end of slot.
+The board contains a list of slot and each slot represents Java String record written by an agent each time. Any new record entering will append to the end and if the number of record exceed the limit size of slot, the oldest record will be removed and new record will be append to the end of slot.
 
 Synchronous of data will be handled in such a way that there is only one physical memory of board for all agents.
 
-Example1, a board contains two records; an agent 'A' is reading from the board and currently is at record number two. At the same time an agent 'B' is appeding a new record to the board and finished it before agent 'A' done reading number two record. Once an agent 'A' done reading record number two, agent 'A' will read be able to see and read record number three. However, if agent 'A' done reading number two record before agent 'B' done writing record three, then agent 'A' will not the record number three.
+- readFromboard() is a function called by an agent in order to read from a board at a current host node. The function will return a current list of record in a list of String format..  (How an agent object can access data of a node object???)
 
-Example2, a board contains three records; an agent 'A' is reading from the board and currently reading record number two. At the same time an agent 'B' is removing record number one, regardless of whoever done first between 'A' and 'B', agent 'A' will never known that the record number one has been removed unless agent 'A' starts reading the board again. However, if agent 'B' is removing record number three, and 'B' done removing the record number three before 'A' done reading the record number two, then 'A' will not see the record number three, otherwise 'A' will see record number three.
+- appendToBoard(String info) is a function called by an agent in order to write a record into a board of a current host node. The size of the record for each call (slot), currently, is unlimited size of Java String. The new entering record will be append to the end of the board, if the number of slot exceed the limit, the oldest slot will be removed and a new record will be appended to the end of a board.
 
-- readFrom() is a function called by an agent in order to read from a board at a current host node. The function will return a current list of record in a list of String format..  (How an agent object can access data of a node object???)
-
-- writeTo(String info) is a function called by an agent in order to write a record into a board of a current host node. The size of the record for each call (slot), currently, is unlimited size of Java String. The new entering record will be append to the end of the board, if the number of slot exceed the limit, the oldest slot will be removed and a new record will be appended to the end of a board.
-
-- remove(String info) is a function called by an agent in order to remove a record ,corresponding to a given data entry, from a board at a current host node.
+- removeRecord(String info) is a function called by an agent in order to remove a record ,corresponding to a given data entry, from a board at a current host node.
 
 
-3.4.1.5 Token
+\item[Token]
 
 - countMyToken() is a query function that return a number of token that an agent currently has.
 
@@ -661,39 +651,27 @@ Example2, a board contains three records; an agent 'A' is reading from the board
 
 - getMaxToken() is a query function that returns a number of maximum token that an agent can carry.
 
-- replicateToken() (do we need it now???)
-- destroyToken()(do we need it now???)
 
-\subsubsection{3.4.2 Underline Libraries TODO ????}
-This section discuss about main and interesting libraries used by the system
-1. what is underline libraries
-2. why do we need it
-3. what does it help to make the simulation better
-4. what group of underline libraries do we have here
-5. what else we didn't include here, and why
-6. how are we organize it here
+\end[enumerate]
 
 
 
-\subsubsection{3.4.2.1 Probability Libraries Extensions}
-1. what is probability lib
-2. why do we need it, what benefit
-3. what else we didn't cover
-4. why this is enough
-3. how is it works
-4. examples
+\subsubsection{Random Probability Generator}
+
+Random Probability generator extension allows user to connect any custom random generator into DisJ simulation, this generator will be used by the simulation everywhere when random probability is needed. However, user must implement IRandom class with two functions nextInt() and setSeed() since the simulation always use these two functions to get a random number.
+
+\begin[enumerate]
+
+\item[nextInt(int)] return an integer number between zero(inclusive) and a given number (exclusive)
+
+\item[setSeed(long)] to set the seed of this random number generator using a single long seed. The general contract of setSeed is that it alters the state of this random number generator object so as to be in exactly the same state as if it had just been created with the argument seed as a seed.
+
+\end[enumerate]
 
 
+\subsubsection{Adversary Control}
 
-\subsubsection{3.4.3 External (Adversary) Interrupts}
-This section describes interesting API and usage for user to implement their own protocol
-1. what is adversary
-2. why do we need it
-3. what does it help to make the simulation better
-4. what functionality we cover here for adversary
-5. what else we didn't include here, and why
-6. how are we organize it here
-
+Adversary control extension allows user to inject a script to control the behavior of environment of the network while DisJ simulation simulate a protocol. DisJ provides two model of adversary control, agent adversary and message passing adversary, which each one will be used in its name corresponding model.
 
 3.4.3.1 Node
 
