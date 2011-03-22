@@ -487,7 +487,7 @@ DisJ simulation provides simple reports during the playback in different form su
 
 \item[Persistence data log]
 The Persistence data log is more like an internal function of the simulation which it main task is to save all necessary information of an execution in order to reproduce a visualization for a Replay function. The logging subsystem has two steps of logging, first capture event information such as timestamp, states and environment information etc. Second, constructs information obtained from the first step into a simple text format that Replay module understands, and record into persistence storage (e.g. file I/O).
-
+\end[desciption]
 
 \subsubsection{Adversary Control}
 
@@ -673,134 +673,127 @@ Random Probability generator extension allows user to connect any custom random 
 
 Adversary control extension allows user to inject a script to control the behavior of environment of the network while DisJ simulation simulate a protocol. DisJ provides two model of adversary control, agent adversary and message passing adversary, which each one will be used in its name corresponding model.
 
-3.4.3.1 Node
+\begin[enumerate]
+\item[Message Passing Control]
 
-- init(Node n) the function allows user to control the time and conditions of a node initialization. The user will be able to observe node states and information and return true if a node requires an execution otherwise return false.
+\begin[description]
+\item[initTimeControl(nodeId)] allows adversary adversary to specify the time of initiation of a given node ID
+\item[arrivalControl(message, portId, nodeId)] allows adversary to control and manipulate incoming message at a node. This will be called right before it entering a port of a node
+\item[setArrivalTime(message, portId, nodeId)] allows adversary to configure an arrival time for message before it enters an edge
+\item[setDrop(message, edgeId, nodeId)] allows adversary to configure the lost of message that will traveling on an edge to a node. This drop will be determined right after the message is created
+\item[blockMsg(msgLable, incomingPort, nodeId) allows adversary to block any message that has a given message label at a given port of a node
+\item[unblockMsg(msgLabel, incomingPort, nodeId)] allows adversary to unblock a port with a given message label at a node. All messages with the label that has been blocked will be released
+\item[isMsgBlocked(msgLabel, incomingPort, nodeId)] allow adversary to check whether a given message label specifically is blocked at a given port of a node
+\item[getTravelingMsg(edgeId, nodeId)] allow adversary to get a list of messages(with expected arrival time) currently in a link and heading to a given destination node
+\end[description]
 
-- delay_arrival(Node n) the function that allows user to delay message/agent from any port that will arrive at node n. The user will be able to access every port of node n, include observing messages/agents that are arriving. The user can hold any arriving messages/agent at any port of n by setting timeout in finite unit of simulation time.
-
-- alarm(Node n) the function allows user to specify a node to perform some certain action after it has been initialized at specific time. The user can specify a simulation time or conditions of a node in order to perform some tasks. This function will be executed when the time has arrived or when the node received a message.
-
-- order_msg(Node m, Node n) the function allows user to control the order of message sending from node 'm' to node 'n' in any order (based on user implementation in this function). This function will be called when 'm' send message to 'n'.
-
-
-- initialize target condition
-- initialize time condition
-- wake up condition
-
-1. what are api for node
-2. why do we need it, what benefit
-3. how it works (underline system)
-4. what else we didn't cover
-5. why this is enough
-6. how to use it
-7. examples
-
-
-3.4.3.2 Agent
-
-- init(Agent a) the function allows user to control the time and conditions of an agent initialization. The user will be able to observe agent information, and return true if an agent requires an execution otherwise return false.
-
-- alarm(Agent a) the function allows user to specify an agent to perform some certain action after it has been initialized at specific time. The user can specify a simulation time or conditions of an agent in order to perform some tasks. This function will be executed when the time has arrived.
-
-- move(Agent a) the function allows user to control direction of agent movement. The user will be able to access agent states and location and specify the direction of agent next move. However, it is a responsible for user to make sure that it does not break the protocol. This function will be called when agent about to move.
-	
-- order_move_in(Agent a) this function allows user to control an agent when it tries to enter a node. Before an agent entering a node, this function will be called and user able to hold agent in front of the node with a specific time or under conditions (based on user implementation in this function) by returning true it will enter the node otherwise false.
-
-- order_move_out(Agent a) this function allows user to control an agent when it tries to leave a node. Before an agent leaving a node, this function will be called and user able to hold agent inside a node with a specific time or under conditions (based on user implementation in this function) by returning true it will leave the node otherwise false.
+\item[Agent Control]
+\begin[description]
+\item[initTimeControl(agentId)] allows adversary to specify the time of initiation of a given agent ID
+\item[arrivalControl( agentId, arrivalPort, nodeId)] allows adversary to control and manipulate incoming agent to a node. This will be called right before it entering a port of a node
+\item[setArrivalTime(agentId, edgeId, nodeId)] allows adversary to configure an arrival time of agent to a destination before it enters an edge
+\item[setDrop(agentId, edgeId, nodeId)] allows adversary to configure the lost of agent that will traveling on an edge to a node. This drop will be determined right after the agent entered the edge
+\item[getTravelingAgents(edgeId, nodeId)] allows adversary to get a list of agents(with expected arrival time) currently in a link and heading to a given destination node
+\item[blockAgent(agentId, incomingPort, nodeId)] allows adversary to block a given agent at a given port of a node
+\item[unblockAgent(agentId, incomingPort, nodeId)] allows adversary to unblock an agent at given port and node
+\item[isAgentBlocked(agentId, incomingPort, nodeId)] allows adversary to check whether a given agent is blocked at a given port and node
+\end[description]
+\end[enumeration]
 
 
-- initialize target condition
-- initialize time condition
-- wake up condition
-- move to target condition
-- arrive time at target condition
+\subsection{STATISTICAL REPORT}
 
-1. what are api for agent
-2. why do we need it, what benefit
-3. how it works (underline system)
-4. what else we didn't cover
-5. why this is enough
-6. how to use it
-7. examples
+1. what is statistic and report?
+2. what is it for
+3. why do we need it
 
+(in subsection)
+4. what are they
+5. what does it do
 
-Limitation
+DisJ simulation provides statistical report module to display information and status of entities within the simulation while a protocol is running and after the termination of the protocol. The report is a collection of information of environment and entities of a running protocol that the simulation collects during the execution of the protocol. The report information can be used by user to analyze correctness, behavior and performance of the protocol. There are two type of report display, dynamic data update and final results, which are displaying in many various GUI views components of the simulation. However, each reports can be categorized based on entities within the simulation as follow.
 
-Since some function calls are called by the simulation at the same conditions therefore, the following is a list adversary API function calls priority and order. (??? Priority based on the order of who call first, the first will be override by the later)
-
--TODO list of priority ?????
-
-3.5 USER SIMULATION (HCI and GUI) TODO ???
-This section discuss why the system interface has been layout the way it is
-
-\subsection{STATISTIC AND REPORT}
-This section discuss about representation of statistic data collected during the execution of algorithm
-
-3.6.1 Topology Overall
-
-- Number of nodes in a network ' GP
-- Number of links in a network ' GP
-- Number of agents at the start of the simulation ' GP
-- Number of currently agents alive ' GP
-- Maximum number of tokens that an agent can carry ' GP
-
-3.6.2 Node
-- A list of nodes with a state at the end of simulation ' NV
-- A list of nodes with a sequence of state transition ' NP
-- A list of nodes with a total number of agents visited ' C
-
-3.6.3 Agent
-- A list of alive agents ' AV
-- A list of agents with a state at the end of simulation ' C
-- A list of agents with a sequence of state transition ' AV
-- A list of agents with a number of moves at the end of simulation ' C
-- A list of states with number of moved of all agents at the end of simulation  ' C
-
-+A bar chart represents agent states verses number of agents
-+A bar chart represents agent states verses number of move made by agents
+\begin[enumeration]
+\item[Topology Overall]
+\begin[description]
+\item[Number of nodes in a network] GP 
+\item[Number of links in a network]GP
+\item[Number of agents at the start of the simulation] GP
+\item[Number of currently agents alive] ' GP
+\item[Maximum number of tokens that an agent can carry] ' GP
+\end[description]
 
 
-3.6.4 Message
-- A total number of messages have been sent ' GP
-- A total number of messages have been received ' GP
-- A list of message types with number of produced (sent) ' C
-- Node(s) that has a highest load of received/sent message (include node info) 'C
-- Node(s) that has a lowest load of received/sent message (include node info) 'C
+\item[Node]
+\begin[description]
+\item[List of nodes with a state at the end of simulation] ' NV
+\item[List of nodes with a sequence of state transition] ' NP
+\item[List of nodes with a total number of agents visited ]' C
+\end[desciption]
 
-+A graph represents a number message produced in every period of time T unit
+\item[Agent]
+\begin[description]
+\item[List of alive agents] ' AV
+\item[List of agents with a state at the end of simulation] ' C
+\item[List of agents with a sequence of state transition] ' AV
+\item[List of agents with a number of moves at the end of simulation] ' C
+\item[List of states with number of moved of all agents at the end of simulation]  ' C
 
-+A bar chart represents node states verses number of nodes (in that state)
-+A bar chart represents node states verses accumulation of number of messages produced during such states
+\item[A bar chart represents agent states verses number of agents]
+\item[A bar chart represents agent states verses number of move made by agents]
+\end[description]
 
-3.6.5 Blackboard/Whiteboard
-- A total number of times that (all) boards have been accessed ' C
-- A total number of write accesses to every board ' C
-- A total number of delete accesses to every board ' C
-- A total number of read accesses to every board ' C
-- Board(s) that has a highest number of write accesses (include node info) ' C
-- Board(s) that has a lowest number of write accesses (include node info) ' C
-- Board(s) that has a highest number of read accesses (include node info) ' C
-- Board(s) that has a lowest number of read accesses (include node info) ' C
+\item[Message]
+\begin[description]
+\item[A total number of messages have been sent] ' GP
+\item[A total number of messages have been received]' GP
+\item[A list of message types with number of produced (sent)] ' C
+\item[Node(s) that has a highest load of received/sent message (include node info)] 'C
+\item[Node(s) that has a lowest load of received/sent message (include node info)] 'C
 
-3.6.6 Token
-- A total number of tokens that have been dropped by all agents ' C
-- A total number of tokens that have been picked up by all agents 'C
-- A list of agents with number of current tokens holding ' AV
-- A list of nodes with a total number of tokens that have been dropped  ' C
-- A list of nodes with a total number of tokens that have been picked ' C
+\item[A bar chart represents node states verses number of nodes (in that state)]
+\item[A bar chart represents node states verses accumulation of number of messages produced during such states]
+\end[description]
 
-- Agent(s) that has a highest number of pick up token ' C
-- Agent(s) that has a lowest number of pick up token ' C
-- Agent(s) that has a highest number of drop off token ' C
-- Agent(s) that has a lowest number of drop off token ' C
-- A highest number of tokens have been dropped at a node ' C
 
-+A bar chart represents agent state verses number of pick up token
-+A bar chart represents agent state verses number of drop off token
+\item[Whiteboard]
+\begin[description]
+\item[A total number of times that (all) boards have been accessed] ' C
+\item[A total number of write accesses to every board]' C
+\item[A total number of delete accesses to every board]' C
+\item[A total number of read accesses to every board] ' C
+\item[Board(s) that has a highest number of write accesses (include node info)] ' C
+\item[Board(s) that has a lowest number of write accesses (include node info)] ' C
+\item[Board(s) that has a highest number of read accesses (include node info)] ' C
+\item[Board(s) that has a lowest number of read accesses (include node info) ]' C
+\end[description]
 
-3.6.7 Edge
-- An average accumulated delay time of all edges at the end of simulation ' C
-- Edge(s) that has a highest accumulate delay time (include edge info) ' C
-- A total number of message/agent entering each edge ' EP
-- A total number of message/agent leaving each edge ' EP
+
+\item[Token]
+\begin[description]
+\item[A total number of tokens that have been dropped by all agents] ' C
+\item[A total number of tokens that have been picked up by all agents] 'C
+\item[A list of agents with number of current tokens holding] ' AV
+\item[A list of nodes with a total number of tokens that have been dropped]  ' C
+\item[A list of nodes with a total number of tokens that have been picked] ' C
+
+\item[Agent(s) that has a highest number of pick up token] ' C
+\item[Agent(s) that has a lowest number of pick up token] ' C
+\item[Agent(s) that has a highest number of drop off token] ' C
+\item[Agent(s) that has a lowest number of drop off token] ' C
+\item[A highest number of tokens have been dropped at a node] ' C
+
+\item[A bar chart represents agent state verses number of pick up token]
+\item[A bar chart represents agent state verses number of drop off token]
+\end[description]
+
+
+\item[Edge]
+\item[An average accumulated delay time of all edges at the end of simulation ]' C
+\item[Edge(s) that has a highest accumulate delay time (include edge info)] ' C
+\item[A total number of message/agent entering each edge] ' EP
+\item[A total number of message/agent leaving each edge] ' EP
+\end[description]
+\end[enumeration]
+
+
