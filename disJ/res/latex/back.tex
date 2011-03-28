@@ -104,12 +104,39 @@ The simulation SinAlgo is a very compact simulation that provide many features f
 - The GUI that represent the topology is unpleasant when the network is large
 - No statistic report for executions
 
+
 \section{DisASTer - Distributed Algorithm Simulation Terrain by Trier Computer Science, University of Applied Science, Germany}
 \subsubsection{Introduction}
-\subsubsection{Environment}
-\subsubsection{Visualization}
-\subsubsection{Adversary}
-\subsubsection{Limitation}
+DisASTer is a platform for developing distributed algorithm in Java that allows user to interact to a topology during runtime. It objective is to help student to understand the behaviour of distributed algorithm by providing graphical user interface to help visualize the activities and states of the algorithm. Also, it abstract the need of handling underneath communication protocol and infrastructure of networking, when entities try to communication to each others.
 
+\subsubsection{Environment}
+- java
+- extends class
+- type of msg based on different msg object type
+- entity can send msg to one or all
+- no environment info access
+- entities are not homogenous
+- limited graph editor with creation and user friendly
+- msg queue modify at runtime 
+- state can be reversed
+
+
+The platform is Java based implementation running in a single PC, the programming model of the platform is similar to the programming model for applets, servlets or EJBs[ref] by the user has to extend certain class and implements certain methods that will be used by the platform at runtime. The facilities of the platform that provide to user in distributed aspect is minimal to the purpose of simulation only. For example, the platform does not have API to access network and environment information, it can only send and receive messages via certain provide API.
+
+\subsubsection{Visualization}
+- network graph
+- msg queue view and editable
+- history of msg sent in sequence diagram
+- ring and torus ready made topology
+- input text to simulation at runtime
+
+\subsubsection{Adversary}
+- modify msg queue via gui at runtime
+
+\subsubsection{Limitation}
+- limited api accessing environment info
+- adjust and config environment 
+- message passing model only
+- limited topology creation, size
 
 
