@@ -107,7 +107,7 @@ The simulation SinAlgo is a very compact simulation that provide many features f
 
 \section{DisASTer - Distributed Algorithm Simulation Terrain by Trier Computer Science, University of Applied Science, Germany}
 \subsubsection{Introduction}
-DisASTer is a platform for developing distributed algorithm in Java that allows user to interact to a topology during runtime. It objective is to help student to understand the behaviour of distributed algorithm by providing graphical user interface to help visualize the activities and states of the algorithm. Also, it abstract the need of handling underneath communication protocol and infrastructure of networking, when entities try to communication to each others.
+DisASTer is a platform for developing distributed algorithm with message passing model in Java that allows user to interact to a topology during runtime. It objective is to help student to understand the behavior of distributed algorithm by providing graphical user interface to help visualize the activities and states of the algorithm. The platform abstracts the need of handling underneath communication protocol and infrastructure of networking, when entities try to communication to each others.
 
 \subsubsection{Environment}
 - java
@@ -116,27 +116,33 @@ DisASTer is a platform for developing distributed algorithm in Java that allows 
 - entity can send msg to one or all
 - no environment info access
 - entities are not homogenous
-- limited graph editor with creation and user friendly
-- msg queue modify at runtime 
-- state can be reversed
 
 
-The platform is Java based implementation running in a single PC, the programming model of the platform is similar to the programming model for applets, servlets or EJBs[ref] by the user has to extend certain class and implements certain methods that will be used by the platform at runtime. The facilities of the platform that provide to user in distributed aspect is minimal to the purpose of simulation only. For example, the platform does not have API to access network and environment information, it can only send and receive messages via certain provide API.
+The platform is Java based implementation running in a single PC, the programming model of the platform is similar to the programming model for applets, servlets or EJBs\cite{ref1}. User requires to extend and implements certain class and methods that will be used by the platform at runtime. The requires methods are for receiving message, and it will be automatically called when message arrived, and information of sender and payload are embedded inside the message object, therefore, the platform does not provide any other API to access any other environment information. The platform allows user to assign a (Java) class to specific entity in topology, which mean entities may not have a same algorithm running during a simulation, in which user can specify the role of entity before the simulation start.
 
 \subsubsection{Visualization}
+- limited graph editor with creation and user friendly
 - network graph
 - msg queue view and editable
 - history of msg sent in sequence diagram
 - ring and torus ready made topology
 - input text to simulation at runtime
+- start/stop/pause/step fwd/step back
+- state can be reversed
+
+The platform provides a graph editor that allows user to create a topology for simulation and able to observe a visualize of algorithm behavior during runtime. The platform also provides three views of the execution at runtime, network view that can view a whole network and message icons moving on the link while message has been sending, sequence view that shows sequence diagram of message interaction between entities, and message queue that show a global message queue of all current message that are in transmission. Moreover, the platform allows user to inject a text input into an entity at runtime via input text field, which the input will be intercepted by the entity when it has been executed. During the execution user may stop, pause, resume, step forward and step backward the execution at any point in time. The interesting feature of step backward is that the platform allows user to modify information (e.g.message) which yield difference results from previous execution once it resumed, simply say that it is like back to a past and change events which cause new outcomes of the future.
 
 \subsubsection{Adversary}
 - modify msg queue via gui at runtime
 
+Since the platform allows user to view and access global message queue that currently are in transmission, therefore, it allows user to modify the message queue by reordering or removing messages. This feature is very powerful in message passing model since message drives the action and states of entities, which include the outcome of the algorithm as well. Therefore, an adversary can use this feature to interrupt the algorithm in order to test and verify correctness of the protocol.
+
 \subsubsection{Limitation}
 - limited api accessing environment info
-- adjust and config environment 
+- send msg to one or all only
+- adjust and config environment
 - message passing model only
-- limited topology creation, size
+- limited topology creation, size, bi-link only
 
+DisASTer is a useful platform for studying behaviors of simple algorithm in limited way such that user can observe environment only based on message delay and loses, in which the real distributed environment has many aspects that effect the algorithm such as order of message, modified of message, entity disruption etc. The important feature that platform does not provide is API to access environment info such as number of incoming or outgoing ports etc, and API for sending message to selected targets instead of just one target or all targets in which this tremendously limit the power of algorithm design.
 
