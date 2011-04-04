@@ -1,8 +1,12 @@
-\subsection{SYSTEM MODEL}
+\section{SYSTEM MODEL}
 (what the simulation can do)
-- a discrete event simulation
-1. what is this simulation model
-2. why it has been picked this model
+\begin{itemize}
+\item a discrete event simulation
+    \begin{enumerate}
+    \item what is this simulation model
+    \item why it has been picked this model
+    \end{enumerate}
+\end{itemize}
 
 The simulation is discrete event simulation system that processes the sequence of event and each execution of the event may lead to the change of system state. Since the events of distributed algorithm are discrete, and the number of states is finite, at any given point in time the state of the system can be observed, therefore, discrete simulation has been used. The simulation consists of three main components are internal clock, event list and number generator.
 
@@ -12,24 +16,30 @@ Event list is an ordered list of discrete event of system model ordered by simul
 
 Event generator generates the events corresponding to user algorithm in order to simulate the behavior of the algorithm. Each event derived from that execution of previous event, but each execution of event may not always create event or list of event in order to provide a mechanism to terminate the simulation.
 
-
-- required a single machine to operate
-1. what are the advantages of this simulation model
-2. what are the disadvantages of this simulation model
+\begin{itemize}
+\item required a single machine to operate
+    \begin{enumerate}
+    \item what are the advantages of this simulation model
+    \item what are the disadvantages of this simulation model
+    \end{enumerate}
+\end{itemize}
 
 The simulation runs on a single machine and it will simulate multiple virtual machines and connected into a network topology based on user predefined in graph editor. The virtual machines created are homogenous in term of computing power and algorithm that runs on it. The simulation allows user to define the distributed environment into the network such as network communication (i.e. connectivity, delay time and reliability), power consumption and mobility ability. These environment parameters can be defined before or during the simulation execution, which in a real network these parameters are not easy or impossible for user to define or adjust in order to test the algorithm. In addition, the cost and complexity of setting up the network topology in different structures are expensive and troublesome in real network, while in our virtual are done with ease in minutes.
 The limitation of creating virtual network in a single machine is the size of network which completely realize on a power and memory size of the machine. Also the network can only create a set of homogenous virtual machine; it cannot create a network that contains varieties of machine with different properties and algorithm.
 
-
-- support message passing and distributed agent computing
-	- direct message passing
-	- whiteboard
-	- token
-1. what are communication models support by this simulation
-2. why these communication models were picked
-3. what was communication models were not picked
-4. what are the differences between these models (in brief)
-5. when these model will be used
+\begin{itemize}
+\item support message passing and distributed agent computing
+\item direct message passing
+\item whiteboard
+\item token
+    \begin{enumerate}
+    \item what are communication models support by this simulation
+    \item why these communication models were picked
+    \item what was communication models were not picked
+    \item what are the differences between these models (in brief)
+    \item when these model will be used
+    \end{enumerate}
+\end{itemize}
 
 The simulation supports four types of distributed communication model, the first model is message passing and the other three are used in distributed agent computing are blackboard, whiteboard and token. These four models are common model used in distributed computing each model has advantage and disadvantage on itself based on nature of task it is performing.
 
@@ -44,16 +54,19 @@ Whiteboard model is a similar system to blackboard except the information on a b
 Token or Pebble is a model that allow agent to carry some amount of token and a node allows the agent to drop/pick  token at/from various place within the node. The token can be replicated or destroy during the execution of protocol by agent or node.
 
 
-
-- various network model
-	- fixed
-	- dynamic
-	- mobility
-1. what are network models support by this simulation
-2. why these network models were picked
-4. what are the differences between these models (in brief)
-5. when these models will be used
-6. how these models are used
+\begin{itemize}
+\item various network model
+\item fixed
+\item dynamic
+\item mobility
+    \begin{enumerate}
+    \item what are network models support by this simulation
+    \item why these network models were picked
+    \item what are the differences between these models (in brief)
+    \item when these models will be used
+    \item how these models are used
+    \end{enumerate}
+\end{itemize}
 
 The simulation supports three types of network models, fix, dynamic and mobility. By definitions the network or topology is a set of nodes that formed up into a group and connect to each others by a means of communication medium such as fiber optic, wireless antenna, satellite etc. the node in these three networks are homogenous in term of computing and program that installed. These three networks are common use in the real world of industries and academic researches.
 
@@ -65,15 +78,19 @@ A mobility network is a set of nodes that can move and has wireless connection, 
 
 These three models are common network structure in distributed computing studies and in real life applications. Therefore, the simulation can support the development of algorithms that have been developed for these three network models. The very good examples of situation or applications that are used in fixed network model are parallel computing, LAN/WAN network maintenance and routine tasks etc. in dynamic network model are internet cloud computing, sensor network that detect geographical changes, LAN/WAN network maintenance and routine tasks etc. and in mobility network model are mobile sensors network that detect geographical changes, mobile communication network like cell phone etc.
 
+\begin{itemize}
+\item support GUI
+\item topology editor
+\item java programming IDE
+\item simulation controller
+\item viewers
+    \begin{enumerate}
+    \item what are GUI functionalities that the simulation provided
+    \item why does simulation support only these gui functions
+    \item what GUI functionalities the simulation not support and why
+    \end{enumerate}
+\end{itemize}
 
-- support GUI
-	- topology editor
-	- java programming IDE
-	- simulation controller
-    - viewers
-1. what are GUI functionalities that the simulation provided
-2. why does simulation support only these gui functions
-3. what GUI functionalities the simulation not support and why
 
 The simulation provides four main GUI, Java IDE, graph editor, simulation controller, and viewers. Java IDE is a very powerful tool that DisJ derived from Eclipse IDE and has been used by many hi-tech industries for developing Java software. The graph editor allows user to create and edit topology manually from drawing nodes and connecting links between them, or using topology wizard creator that automatically draw a well-known topologies by a click of button. The simulation controller provides interface for user to control an execution of the simulation from loading algorithm to replay of saved execution. The viewers provide different types of view such as Node View, Agent View, Statistics View, Properties View etc in which allow user to observe runtime statuses, behaviors of the algorithm and statistics data of different entities and perspectives.
 
@@ -81,11 +98,15 @@ These four main GUI cover a full life cycle of software development from writing
 
 Currently version has not yet supported GUI for Adversary execution control, topology debugger and multi type viewers from statistical reports. However, these will be add in further development.
 
-- using JAVA as user development protocol
-1. how does the simulation has been developed
-2. why use this methodology in development
-3. what advantage/disadvantage of this strategy of development
-4. what are the difficulties in development
+\begin{itemize}
+\item using JAVA as user development protocol
+    \begin{enumerate}
+    \item how does the simulation has been developed
+    \item why use this methodology in development
+    \item what advantage/disadvantage of this strategy of development
+    \item what are the difficulties in development
+    \end{enumerate}
+\end{itemize}
 
 DisJ simulation has been fully developed as Eclipse plug-in application by using Java technologies. Eclipse is an open platform that is designed for third parties to develop and extend their software by reusing existing resources provided by Eclipse platform to their software. Eclipse is a collection of a small program that collectively run and consume services from each others to achieve a goal of the third party software, this small program is called Eclipse plug-in. In our case, we develop a DisJ simulation for reactive distributed algorithm which requires many existing plug-in such as Core plug-in, JDT plug-in, UI plug-in and GEF plug-in, Team(Concurrent and Version Control) plug-in etc.
 
@@ -95,11 +116,14 @@ The simulation provides various type of communication API set of three different
 
 The others difficulties are in software engineering domain which we all known and is a key issue to every software development project, adaptation for a future changes. Since the future needs and requirements are unknown so, the designers have to predicted the possibilities and pin down the sections of software that may be changed and design those sections with high flexibility. However, the other sections that were not selected still cannot be overlooked therefore flexibility still apply to it as well. The most challenging in creating adaptability software that is ready for future requirements, and the later challenge is a penalty that the software has to pay for adaptability such as performance, size of code and complexity of design etc.
 
-
-- provide API for distributed communication
-1. what main tools are provided for user to develop protocol
-2. why does the simulation provided only this set of tool
-3. what are not provided and why
+\begin{itemize}
+\item provide API for distributed communication
+    \begin{enumerate}
+    \item what main tools are provided for user to develop protocol
+    \item why does the simulation provided only this set of tool
+    \item what are not provided and why
+    \end{enumerate}
+\end{itemize}
 
 There are three models that the simulation supports, message passing, agent with whiteboard, and agent with token models.
 
@@ -113,14 +137,17 @@ These three models are common and well known in distributed computing and there 
 
 Face to face communication of agent has been left out due to it is not yet commonly use in distributed computation and there are no (yet) existing common definition of the communication such as the location of meeting (at a node, on a link), the distance between agents that can be defined as meeting, and direction of agent facing etc. Therefor DisJ has not yet support agent to agent communication but not limited to for future improvement.
 
-
-- external plug-in libraries
-	- probability model
-1. what are flexibility of the tool provided to user
-2. what are advantage/disadvantage of this flexibilities
-3. what is not include or support and why
-4. how it has been use (in brief) how easy is it
-5. what are limitation
+\begin{itemize}
+\item external plug-in libraries
+\item probability model
+    \begin{enumerate}
+    \item what are flexibility of the tool provided to user
+    \item what are advantage and disadvantage of this flexibilities
+    \item what is not include or support and why
+    \item how it has been use (in brief) how easy is it
+    \item what are limitation
+    \end{enumerate}
+\end{itemize}
 
 As part of our adaptability to user libraries, the simulation provides a channel to accept or link user libraries into the simulation. The current channel we accept are probability model libraries which is used in generate random result such as probability of losing message on a link, a time length that agent probably will spent in traveling on a link etc.
 
@@ -133,12 +160,14 @@ In order to plug-in custom probability model library, user has to implement inte
 Limitation for external libraries API with respect to the simulation is that the implemented interface class has to be Java language only, if the existing libraries are others languages rather than Java, then user has to use Java technologies to communicate to the libraries from implemented interface class. For example, if existing libraries are C/C++, user may use JNI or socket to communicate.
 
 
-
-- runtime interaction to the program
-
-1. what functionality is used for user interaction with the simulation
-2. why these functionalities are picked
-3. what are limitations
+\begin{itemize}
+\item  runtime interaction to the program
+    \begin{enumerate}
+    \item  what functionality is used for user interaction with the simulation
+    \item  why these functionalities are picked
+    \item  what are limitations
+    \end{enumerate}
+\end{itemize}
 
 DisJ simulation provides visualization views and controls during runtime execution and replay. For the control execution, the simulation provides Start, Pause, Resume, Step Next, Adjust Speed and Stop functions that user can interact via GUI. The simulation also provides many types of view that user can observe and some can be interacted, for examples Properties Views that allow user to view and interact such as viewing entity properties, modify some properties of entities (changing port label, adjust reliability of link etc). Agent View display status and location of each agent, Node View display status and internal info (whiteboard data, number of token located etc). Finally, Statistic View display report charts of interesting info (number of agent corresponding to agent's states, number of messages sent corresponding to each of node state etc)
 
@@ -146,12 +175,15 @@ These runtime interactions allow user to interact and observe a closer look of b
 
 However, the simulation has not yet supported hot codes replacement, which mean the modification of algorithm during the execution does not effect results of execution until user stop the simulation, reload algorithm and restart the simulation execution.
 
-
-- replay execution
-1. what is replay
-2. why we need it
-3. how does it work
-4. what is limitation
+\begin{itemize}
+\item replay execution
+    \begin{enumerate}
+    \item what is replay
+    \item why we need it
+    \item how does it work
+    \item what is limitation
+    \end{enumerate}
+\end{itemize}
 
 Replay execution is a visualization of replaying a saved execution data. The visualization display, entities states transition, and statistics results are exactly the same as what happened during the execution.
 
@@ -164,34 +196,44 @@ The replay execution is 100 percent readonly execution therefore, any adjustment
 
 
 
-
-- hidden OSI network layer and below
-- network environment control
-1. what special feature about this features to user
-2. what these special features do
+\begin{itemize}
+\item hidden OSI network layer and below
+\item network environment control
+    \begin{enumerate}
+    \item what special feature about this features to user
+    \item what these special features do
+    \end{enumerate}
+\end{itemize}
 
  DisJ simulation provides a set of communication API for user protocol that hide the detail of network communication and its layers below. The advantage of this API is to allow user to focus on an algorithm of protocol instead of coding detail of communication, since the layer below are technology, environment and hardware specific in which, most likely, independent from the algorithm of the protocol. Also the complexity of communication coding is a complex issue by itself in which it should not be mixed into a distributed algorithm development. For example for message passing model, the simulation provides an API function call to broadcast message to all neighbors that connected to the sender. This function call will handle the transportation in finding the neighbors and deliver the message to a right recipients.
 
  The communication  properties like delay, losing and order of message arriving during the transmission will be handled by the simulation based on the parameters configurations. These communication properties setting are powerful features that allow user to create and control the prefer environment of the network communication in order to test and verify the protocol. Contradiction to the real network that user hardly be able to control and it is difficult to test and verify the correctness and performance of the protocol.
 
-
-- provide statistic record of algorithm execution
-1. what stats and report does the simulation support
-2. what does not support
-3. what are limitation and future potential
+\begin{itemize}
+\item provide statistic record of algorithm execution
+    \begin{enumerate}
+    \item what stats and report does the simulation support
+    \item what does not support
+    \item what are limitation and future potential
+    \end{enumerate}
+\end{itemize}
 
 The statistic and record keeping of the execution of protocol states is another tool that help user to analyze the protocol correctness and performance. The basic information that the simulation currently provide are related to resource usage, communication usage, and unit execution time. These reports are related to node and agent that are used in the execution of protocol, also the report will produces any interested relationship between entities, status and environment etc. Examples of direct information collected relate to node are number of message sent/received, type of message sent/receipted, target and source of message transmission etc, and examples of relation information collected relate to node are number of messages had been sent during certain states, number of nodes that were at curtain states, type of message produces at curtain node state etc.
 
 In term of reports and statistics, there are limitless to present data in difference perspectives while DisJ capture only some of it, however, DisJ saved all raw data from an execution and user may do mining it in later time in order to get preferred dimensions, also DisJ will leave to future improvement.
 
-// NOT SURE YET THAT WE NEED
+// NOT SURE YET THAT WE NEED we have for .gph file
 //==========================
-- persistence storage of data in file system
-	- replay log data
-1. what persistence features provided by the simulation
-2. what does not
-3. why these were pick, advantage/disadvantage
-4. what limitation and future potential
+\begin{itemize}
+\item persistence storage of data in file system
+\item replay log data
+    \begin{enumerate}
+    \item what persistence features provided by the simulation
+    \item what does not
+    \item why these were pick, advantage/disadvantage
+    \item what limitation and future potential
+    \end{enumerate}
+\end{itemize}
 
 Some of the simulation features and functionalities that described above are not be able to exist without the use of persistence storage. Therefore, the persistence is worth to describe a bit in order to justify the usage in those features. The simulation will keep three main types of record in persistence are logging, statistic data, and states transition which currently are kept in a file system format.
 
@@ -201,39 +243,48 @@ Statistic data and records are also kept in the persistence storage and being us
 
 State transition records are kept and used for replay the simulation, since the replay is a visualization of past execution, which there is no new execution being made to the protocol. The replay is a recreate of visualization based on the state transition records and information kept by the simulation.
 
-
-- limitation
-	- size of network
-	- environment configuration i.e. visibility setting, communication range etc.
-	- underline communication cost
-1. what are the limitation of disj simulation
-2. why don't support it
-3. how these can be overcome
+\begin{itemize}
+\item limitation
+\item size of network
+\item environment configuration i.e. visibility setting, communication range etc.
+\item underline communication cost
+    \begin{enumerate}
+    \item what are the limitation of disj simulation
+    \item why don't support it
+    \item how these can be overcome
+    \end{enumerate}
+\end{itemize}
 
 DisJ simulation is at early stage, therefore there are many limitations and incomplete features but it has provided, at some level, a satisfaction to support user in development of distributed protocol. The most common limitation is the size of network which are completely based on performance of a machine that runs the simulation. Secondly, the environment parameters configuration that the simulation currently supports are limited due to time of development but definitely it can be added and improve in the future. Third, the underline communication cost that has been hidden to user, which in the real world environment, this cost cannot be neglected and it is necessary to include in protocol analysis. In the real world, it is very difficult to measure the cost because it is very tight to specific technology proprietary, size of network, and environment specific; the actual value are highly deviated based on many factors and never be the same for each execution of the protocol. However, the simulation main objective is to help user to develop the protocol and verify it correctness and its performance, not to verify the performance of the network that it has been deployed.
 
 
 DisJ core system is divided into 4 logical sections
-1. Communication
-2. Runtime
-3. API
-4. Usage of Simulation
+\begin{enumerate}
+\item Communication
+\item Runtime
+\item API
+\item Usage of Simulation
+\end{enumerate}
 
-1. what are the core of this thesis
-2. why it has been divided into this way
+\begin{enumerate}
+\item what are the core of this thesis
+\item why it has been divided into this way
+\end{enumerate}
 
 The main proposal of the simulation for distributed algorithm is to purpose an effective software program that allow user to develop a distributed algorithm protocol at maximum efficiency with ease of usage at low cost. The simulation are consisted of four main categories: Communication model of distributed computing that the simulation supports, Runtime execution of the protocol by the simulation, API that the simulation provides and supports, and user interaction and usage of the simulation that will be discussed in the following sections
 
 
-\subsection{COMMUNICATION}
+\section{COMMUNICATION}
 
 This section defines distributed communication models between entities in the system
-1. what is communication
-2. what is it for
-3. why need it
-4. what communication the simulation supported
-5. how the simulation support it
-6. what are the differences
+\begin{enumerate}
+\item what is communication
+\item what is it for
+\item why need it
+\item what communication the simulation supported
+\item how the simulation support it
+\item what are the differences
+\end{enumerate}
 
 In distributed computing, entity cannot have direct access to other entities information, in which it has to communicate in order to exchange information. The communication between entities in a connected network is a way to obtain information of other for internal computing and for collaboration of a task that entities are trying to achieve. The simulation supports three common distributed communication models that are used in distributed computing: message passing, agent with whiteboard and agent with token. DisJ has implemented these models and hide the complexity from the user by providing a set of API of each model for programming. The behaviors and characteristics of each communication model are described as follow:
 
@@ -245,31 +296,37 @@ Agent with Token model is also a model that has two types of entities: node and 
 
 In order to support these models the simulation has divided the underneath communication platform into three sub-modules that implements each model. Each module will be activated based on user selection at the beginning of protocol development. The behaviors and functions of each model are described as followed
 
-\subsubsection{3.2.1 Message Passing Model}
-
-- definition
-1. what is it
-2. what is important things for this model
+\subsection{Message Passing Model}
+\begin{itemize}
+\item definition
+    \begin{enumerate}
+    \item what is it
+    \item what is important things for this model
+    \end{enumerate}
+\end{itemize}
 
 Message passing model in distributed computing based on a communication method where messages are sent and received between entities via a medium of transportation(cable link, wireless wave etc). In message passing model, entity has no other means of communication or access others entities information but via send and receive message. Each message drives entity that received the message to perform actions based on the content of the message, current state of entity and the protocol algorithm.
 
 Therefore, a transportation of message is very essential factor that defines the complexity of the protocol beside the content of message itself. There are several properties that relates to the transportation in which DisJ considers as important for development of the protocol such as reliability, order of arrival, synchronous/asynchronous, duplex/half-duplex etc. The following subsections describe each properties that DisJ currently supports
 
-- properties cover
-	- synchronous/asynchronous
-	- delay time
-	- reliability rate	
-	- local orientation
-	- uni-directional/ bi-directional
-	- order of arrival
+\begin{itemize}
+\item properties cover
+\item synchronous/asynchronous
+\item delay time
+\item reliability rate	
+\item local orientation
+\item uni-directional/ bi-directional
+\item order of arrival
+    \begin{enumerate}
+    \item what properties are covered
+    \item why these were picked and important
+    \item how these properties effect the simulation and user
+    \item case study
+    \end{enumerate}
+\end{itemize}
 
-1. what properties are covered
-2. why these were picked and important
-3. how these properties effect the simulation and user
-4. case study
 
-\begin{description}
-\item[Reliability Rate]
+\subsubsection*{Reliability Rate}
 This defines level of reliability of message transmission on a link that will be reached destination in finite time from total reliability to always loss.
 
 The reliable of message is a very crucial property in any distributed computing model since the communication drives actions of entities. Any missing of message may skip some actions, and skipping some actions may leads to a failure of a protocol. The missing of message may also increase the number of message to resend if protocol has a detection mechanism, in which it will lead to the performance draw back and traffic intensity in a network. In addition, any real network there always a loss of message in transmission from various causes such as power failure, nature disruption, limitation of hardware etc. therefore, the simulation has to provided this option for user to duplicate the real network environment and able to test a protocol to handle such conditions.
@@ -279,7 +336,8 @@ DisJ simulation provides a parameter configuration for reliability rate by allow
 For example, neighbor information collection protocol, the protocol is simply broadcast their information to every directed connected neighbors, and keep tract that it has received message from every of its neighbors, then terminated. This protocol works nicely if the message is total reliable, however, if it is not total reliable, the protocol will be a lot more complex just to make sure that it is it is correct.
 
 
-\item[Delay Time]
+\subsubsection*{Delay Time}
+
 This defines a finite time that message requires to travel on a link between directed connect pair of source and destination.
 
 A message traveling time on a link is based on many factors such as the medium of transmission, hardware, nature disruption etc. The delation of messages may cause the performance draw back or even failure of the protocol, since an entity may not be able to perform some actions without arrival of message -- cause to postpone the actions. In addition, message delay may cause the order of execution of protocol when message from different sender arrived before another in which may cause the failure of protocol.
@@ -289,7 +347,7 @@ DisJ simulation provides this option for user to set a finite time on target lin
 For example, a spanning tree construction protocol, the protocol is to construct a virtual tree structure network. This protocol is initiated by a single node (which it can be many nodes) broadcast a message to all neighbors, then become passive and root of a tree. Any other nodes that received a message for the first time, it will set a sender of the message to be its parent, then broadcast the messages to all others. Once a node is in a passive state, it ignores every message that received. This protocol will create different tree at each execution due to the arrival of a first message to a node will dictate the parent. Therefore, the delay on the link will definitely affects the structure of a tree and structure of a tree defines an efficiency of tree's properties.
 
 
-\item[Order of Arrival]
+\subsubsection*{Order of Arrival}
 This property defines order of arrival of message traveling in a link in order to arrive at destination in specific order e.g. FIFO, LIFO or Random.
 
 A node may send a sequence of message on a same link and a receiver node may receive messages in difference sequence which can alternate the sequence of action of a receiving node. Therefore, order of message arrival may cause a draw back of performance or even a correctness of a protocol. In a real network the order of message arrival may varies at any point in time due to many reasons such as hardware, internal implementation of transportation, traffic condition etc. Therefore, the simulation provides an option for user to alternate the behavior of message arrival in order to test and verify the protocol correctness and performance.
@@ -299,7 +357,7 @@ The simulation support three common types are FIFO, "First In First Out", where 
 For example, message construction protocol, this protocol is very common in internet communication when the file is too big and it has to be sent in multiple small messages. The sequence of arrival define complexity of the protocol on how to construct an original message. If it is FIFO, the destination only has to append a message to previous messages until the arrival of termination message. While in random the sender may have to add extra information to each small message in order to help the destination construct the message (i.e. sequence number). Moreover, it is even more complex when the termination message arrived before all small messages have been received. Therefore, the order of arrival is very crucial environment for user to test and verify the protocol correctness and performance.
 
 
-\item[Synchronous or Asynchronous]
+\subsubsection*{Synchronous or Asynchronous}
 This property indicates the execution and transmission of every messages and entities in the network that can be synchronous or asynchronous.
 
 In distributed computing there are two common environments of computing, synchronous and asynchronous which strongly dictates a protocol of how to solve a same problem in difference way, some problems may be easier to solve in one environment than another.
@@ -314,7 +372,7 @@ While the asynchronous environment the simulation does not control the synchroni
 For example, broadcast info with global termination protocol, this protocol has a simple objective is to broadcast info to all of its neighbors then terminate globally. The assumptions are network is total reliable, and knowledge of network diameter. In synchronous network, every node flood messages and wait for a diameter unit of time then terminated. During the waiting entity may receive or send message. After the diameter unit of time, every node will terminate and know that it is a global termination because the longest time for a message to be flooded in the network from on end to another end is a diameter time units. In asynchronous network, it is more complex and requires extra works more than synchronous environment such as leader election to coordinate global termination.
 
 
-\item[Type of Link]
+\subsubsection*{Type of Link}
 This property defines the link communication pipe whether to be bi-directional or uni-directional.
 
 There are two types of link, uni-directional and bi-directional. Uni-directional or half-duplex, is a link that has one way message transmission such as a uni-directional link between A and B, let say link A-B, which a message can be sent from A to B but not from B to A. However, B can have a uni-directional link and send message to A as well, let say B-A. These two links are physically separate and totally independent from each other, therefore, if one link was down the another may still alive. In Bi-directional or full-duplex, is a link that has two ways message transmission such as a bi-directional link between A and B, let say link A-B, which a message can be sent and received from the same link and it is a physically share between two directions. Unlike uni-directional, if the link is down, both ways of communication will be down and the environment properties are subjected to impact to one and another e.g. pay load and traffic congestion etc.
@@ -326,7 +384,7 @@ DisJ simulation provides a graph editor that has two options for users to create
 For example, Election in a ring protocol with unique ID, this protocol works for both uni-directional and bi-directional ring, by each node flood message with it ID, and the message will be relayed if the ID in the message is smaller than the receiver ID. The message of smallest ID will travel around the ring and return to the message originator. Notably that this protocol uses less number of messages in uni-directional ring than bi-directional ring. Therefore, both types of links are useful and have advantages than another based on various conditions e.g. network, protocol etc.
 
 
-\item[Local Orientation]
+\subsubsection*{Local Orientation}
 This relates to port labeling of nodes within a network the knowledge of port labeling is local to the node only. Therefore, the duplication of ports label can happen within a network but not in a node. However, the label of incoming port and outgoing port can share the same label, which by default DisJ provides the same label for incoming and outgoing ports of bi-directional link.
 
 Local orientation has a high effect to the complexity of distributed computing protocol because the protocol can realize on the port labeling and save time of computing and memory usage. Therefore, in real network there usually have a virtual network with a proper labeling that help reduce complexity and cost of protocol. For example, a virtual tree network, spanning tree, since tree structure has many properties that facilitate and reduce the cost of communication and information access. Therefore, the labeling of the port that help protocol to fine which port is heading to parent and children is unavoidable in order to make create a spanning tree network.
@@ -338,11 +396,16 @@ A classic example network with local orientation is a ring network with bi-direc
 
 
 
-\subsubsection{3.2.2 Agent with Whiteboard Model}
+\subsection{Agent with Whiteboard Model}
 
-- definition
-1. what is it
-2. what is important things for this model
+\begin{itemize}
+\item definition
+    \begin{enumerate}
+    \item what is it
+    \item what is important things for this model
+    \end{enumerate}
+\end{itemize}
+
 
 Agent with whiteboard model is a distribute computing model that protocol is based on moveable agent, software entity, that can travel within a connected network. The agent may have some memory storage for self computing, and it communicates to others agents via whiteboard that located inside a node. The board is a bounded memory storage with a fair mutual exclusion access, which resides in a node (host) and allows visited agents to write, read and delete information on the board. The board can be accessed if and only if agent resides within a node, and the visibility of the board is local to the node only.
 
@@ -350,19 +413,21 @@ This mobile agent is a popular distributed computing paradigm in networked envir
 
 Therefore, the simulation has provided the following properties that DisJ focus and currently supports and allows user to adjust in order to test and verify their protocol correctness and efficiency.
 
-- properties cover
-	- mutual exclusion access fairness rate (NOT yet support for custom adjustment)
-	- size of board memory (unlimited)
-    - notification of board to local registered agents
+\begin{itemize}
+\item properties cover
+\item mutual exclusion access fairness rate (NOT yet support for custom adjustment)
+\item size of board memory (unlimited)
+\item notification of board to local registered agents
+    \begin{enumerate}
+    \item what properties are covered
+    \item why these were picked and important
+    \item how these properties effect the simulation and user
+    \item case study
+    \end{enumerate}
+\end{itemize}
 
-1. what properties are covered
-2. why these were picked and important
-3. how these properties effect the simulation and user
-4. case study
 
-
-\begin{description}
-\item[Mutual Exclusion Access]
+\subsubsection*{Mutual Exclusion Access}
 Mutual exclusion access control is a mechanism that controls agents in order to access whiteboard, the mechanism is not only control the integrity of data on a board but also the fairness accessing.
 
 The mutual exclusion access control is very important sice it defines the correctness of the model infrastructure, if the infrastructure is false, then the development of protocol cannot be performed.
@@ -372,7 +437,7 @@ The simulation currently supports fully fairness mechanism by default and not ye
 For example, Cautious Walk protocol is a protocol that used for Black Hole search in a network. An agent has to post a message that contains a status of this node and a target port for a next search on a board before heading to, so that another agent may acknowledge and prevent unnecessary actions. If the mutual exclusion access neither is unfair nor exists, the protocol may fail or leads to a high cost of computing (lost of agent in a black hole, unbalance workload of agent etc.)
 
 
-\item[Memory size of Whiteboard]
+\subsubsection*{Memory size of Whiteboard}
 Whiteboard is a bounded size of memory that store within a node (host). The size of memory that can be kept on a board is depended on the capacity of a node. The more information means more cost for a node in term of memory size and maintenance, but it may increase the efficiency of protocol and agent in performing a task.
 
 Whiteboard in this model is the only means of communication between agents, therefore, the more communication agents need the size of memory requires for whiteboard is required.
@@ -381,7 +446,7 @@ The simulation currently (by default) supports unlimited number of post can be p
 
 Example ???
 
-\item[Notification of Access]
+\subsubsection*{Notification of Access}
 The node allows agent that resides in itself to register its whiteboard access activities by others agents e.g. write and delete. The node will inform a registered agent corresponding to the type that interested in when the access happening.
 
 This notification of access allows agents to wait and see the information from others agents on a node before it perform some actions.
@@ -391,27 +456,35 @@ The simulation currently supports three types of notifications, board updated, a
 Example ???
 
 
-\subsubsection{3.2.3 Agent with Token Model}
-- definition
-1. what is it
-2. what is important things for this model
+\subsection{Agent with Token Model}
+
+\begin{itemize}
+\item definition
+    \begin{enumerate}
+    \item what is it
+    \item what is important things for this model
+    \end{enumerate}
+\end{itemize}
 
 Agent with Token model in distributed computing is a lest powerful model compare to Whiteboard. Agents communicate between each others by dropping and picking up tokens at a node. A token is an identical and indistinguishable bit of information that can be placed at the node. The visibility of token is local within a node, and the picking up a token is a mutual exclusive at each location. However, currently DisJ simulation does not support enhance token model which agent has capability to duplicate and destroy tokens, capability of dropping and picking up tokens on a link and at difference location inside a node e.g. in front of particular ports.
 
 Agent with Token model is a cheapest cost of computation in distributed computing but every powerful and commonly used in some areas of applications such as security controlling access to certain resources in network, farness control of resource usage in network etc. This model heavily depends on management of tokens in network systems to make sure the integrity of tokens are preserved based on the requirement of the system. Therefore, DisJ simulation has provided the following properties of token that allows user to adjust in order to test and verify their protocol correctness and efficiency to meet actual environment of deployment system.
 
-- properties cover
-	- number of token can be carried
-	- number of token can be placed on a same spot
-	- life time of token
+\begin{itemize}
+\item properties cover
+\item number of token can be carried
+\item number of token can be placed on a same spot
+\item life time of token
+    \begin{enumerate}
+    \item what properties are covered
+    \item why these were picked and important
+    \item how these properties effect the simulation and user
+    \item case study
+    \end{enumerate}
+\end{itemize}
 
-1. what properties are covered
-2. why these were picked and important
-3. how these properties effect the simulation and user
-4. case study
 
-\begin{description}
-\item[Number of Token that agent can carry]
+\subsubsection*{Number of Token that agent can carry}
 Token is only means for communication between agents, therefore number of tokens that agent can carry may impact the capability of computing of this model.
 
 Since token is a piece of data that requires memory space for agent to store, therefore, the more tokens agent carries is the more space the agent has to allocate. Due to the nature to distributed mobile agent which the agent is small and limited computing power therefore the number of token that agent can carry is an important factor to consider when developing a protocol.
@@ -420,14 +493,14 @@ The simulation provide an option for user to specify the number of token in grap
 
 For example ???
 
-\item[Number of token that can be placed at a same location]
+\subsubsection*{Number of token that can be placed at a same location}
 A location, node, can have finite number of token to be placed. However, currently DisJ simulation support unlimited number of token can be placed at a same location.
 
 In order to solve problems with identical and indistinguishable token in this model, number of token becomes a vital property in term of communication such as placing particular number of tokens at particular location may means difference. Therefore, a capability of adjusting number of token can be placed at the same location might be very useful for developing and testing protocol.
 
 Since DisJ currently does not support this property adjusting and leave it for future development, therefore, the number of token that can be placed at a same location is unlimited.
 
-\item[Life Time of Token]
+\subsubsection*{Life Time of Token}
 A token has a life time that it can be once it has been placed at a node. However, currently DisJ simulation support life time of token is infinite until the end of simulation.
 
 A token that has been placed in a node requires memory space from a node. Since memory of a node is also limited, Therefore, a node may reclaim the memory back or there are others agents require to place tokens at the node as well but the memory space is limited. Therefore, a life time of token is also another option requires beside limit number of token can placed at a same location since some token may stay and never been used nor pick up.
@@ -437,15 +510,16 @@ DisJ simulation currently support only unlimited life time of token until the en
 
 
 
-\subsection{RUNTIME}
+\section{RUNTIME}
 This section discusses about two main components during runtime of the simulation, playback and adversary control
-1. what is runtime and adversary control
-2. what is it for
-3. why need it
+\begin{enumerate}
+\item what is runtime and adversary control
+\item what is it for
+\item why need it
 
-(in subsection)
-4. what are the feature that supported
-5. how the simulation support it
+\item what are the feature that supported
+\item how the simulation support it
+\end{enumerate}
 
 When DisJ simulation has been initiated execution, the simulation starts running and performing tasks such as executing user protocol, animating graphical display, collecting data etc, while performing the tasks the simulation is in a state that called Runtime state. During the simulation performing tasks there are two main inputs that feed into the simulation, network topology and protocol (Java code), which drive behaviors of the simulation and results until the simulation stops. While the simulation execution there are many things happening and sometime user wants to interrupt the execution in order to observe information and/or deviate some actions. Therefore, the simulation provides two types of interaction from user toward the simulation in runtime, playback and adversary interruption.
 
@@ -454,54 +528,74 @@ Playback is more of visualization tools that allows user to play, pause, and sto
 Adversary control is an internal library that delegates between the simulation engine and user adversary instruction (codes), this codes allow user internally control behaviors of the executions to be in the way user wants without breaking rules or protocol. The adversary codes is just another Java codes that the simulation will intercept and inject into the simulation execution when it is needed, the detail are discussed in the following sub sections.
 
 
-\subsubsection{Playback}
+\subsection{Playback}
 
 Playback of the simulation is a visualization tools that displays the changes of states of network and entities that user provided,through graph editor, before the execution starts. During the execution of the protocol, user can visually observe the changes on screen like the change of node state, agent states and location, and the value of curtain variable changed etc. The following subsections discuss a list of functionalities of playback that the simulation supports.
 
-- functionalities support
-	- play/pause/stop/step
-	- statistic and graph display
-	- record data into persistence storage
+\begin{itemize}
+\item functionalities support
+\item play/pause/stop/step
+\item statistic and graph display
+\item record data into persistence storage
+    \begin{enumerate}
+    \item what feature is it
+    \item why this was picked and important
+    \item how this feature effect the simulation and user
+    \end{enumerate}
+\end{itemize}
 
-1. what feature is it
-2. why this was picked and important
-3. how this feature effect the simulation and user
-
-\begin{description}
-\item[Play-Pause-Stop]
+\subsubsection*{Play-Pause-Stop}
   are common functionalities for any playback application that allow user to control the playback actions such as start or continue playing, pause currently playing and stop current playing, each of it details are discussed below
 
-\begin[enumerate]
-\item[Play]
+\begin{enumerate}
+\item Play
 This function makes the simulation to start or continue execution user protocol on a give topology; the Play command can be issued via GUI button and menu shown in graph editor. When the simulation is under play mode there are several things working such as new event has been generating and executed, screen keep updating visual information, logging system does recording necessary data into a persistence storage etc.
 
-\item[Pause]
+\item Pause
 This function allows user to pause the simulation, all activities of every simulation subsystem will be put on hold; the Pause command can be issued via GUI button and menu  shown in graph editor. This function allows user to observe and investigate some values and status of the simulation with ease such as state of node and agent, raw record of activities (number of message, token, agent etc.) and progress of the protocol execution. In order to resume (continue) an execution, the user must issue a Play command again.
 
-\item[Stop]
+\item Stop
 This function stop the simulation execution process regardless of the progress and state of the protocol execution. There are two ways of issue Stop command via GUI button and menu, another way is close down a graph editor tab of processing graph. The first will end the simulation normally while the later does not but neither will effect the simulation engine or user protocol, the only thing get effect is a replay record file(.rec) that will not have a complete record since it has bee stopped before the simulation is ended, unless the stop command is issued after the simulation end.
-\end[enumerate]
+\end{enumerate}
 
-\item[Statistic reports]
+\subsubsection*{Statistic reports}
 DisJ simulation provides simple reports during the playback in different form such as bar charts, property sheet, table columns and console text output. These data are very basic and important information that can be retrieve and understand quickly such as current states, location of agent, number of message sent/received, number of node, number of agent, token count etc.
 
-\item[Persistence data log]
+\subsubsection*{Persistence data log}
 The Persistence data log is more like an internal function of the simulation which it main task is to save all necessary information of an execution in order to reproduce a visualization for a Replay function. The logging subsystem has two steps of logging, first capture event information such as timestamp, states and environment information etc. Second, constructs information obtained from the first step into a simple text format that Replay module understands, and record into persistence storage (e.g. file I/O).
-\end[desciption]
 
-\subsubsection{Adversary Control}
 
-- Adversary interruptions
-	- overview (objective, design, in action)
+\begin{itemize}
+\item limitation
+    \begin{enumerate}
+    \item what are limitations
+    \item why it is limited
+    \item how to overcome
+    \end{enumerate}
+\end{itemize}
 
-1. what is adversary
-2. what is it for
-3. why need it
-4. how the simulation support it
-5. how it has been designed and developed
-6. why it has been done these ways, advantage/disadvantage
-7. what another alternative of doing this
-8. why we don't do as alternative way
+\subsubsection*{Limitation}
+
+??????
+
+
+\subsection{Adversary Control}
+
+\begin{itemize}
+\item Adversary interruptions
+\item overview (objective, design, in action)
+    \begin{enumerate}
+    \item what is adversary
+    \item what is it for
+    \item why need it
+    \item how the simulation support it
+    \item how it has been designed and developed
+    \item why it has been done these ways, advantage/disadvantage
+    \item what another alternative of doing this
+    \item why we don't do as alternative way
+    \end{enumerate}
+\end{itemize}
+
 
 Adversary Control is another mechanism that DisJ simulation provides for user to validate and verify the correctness of protocol. Since the simulation does not provide a GUI for user to change or update information of objects during the execution of protocol. Therefore, adversary control is another option that user may use it to interrupt and dictate how the simulation execute the protocol.
 
@@ -509,30 +603,31 @@ The adversary control module is a module that delegates between user adversary s
 
 However, this feature requires user to write a script in Java language by implementing the module functions which it will be used as adversary to verify and test the protocol. The module supports some basic and common controller such as arrival control, initiate control, time control and lost control.
 
-\begin[enumerate]
-\item[Arrival Control]
+\subsubsection*{Arrival Control}
 This allows adversary to control and dictate message or agent conditions (e.g. modified contents, reorder of arrival etc) when it arrives at target destination.
 
-\item[Initiate Control]
+\subsubsection*{Initiate Control}
 This allows adversary to control and dictate time and condition when entities should be initiated.
 
-\item[Time Control]
+\subsubsection*{Time Control}
 This allows adversary to control and dictate delay time of arrival of message or agent on target link.
 
-\item[Lost Control]
+\subsubsection*{Lost Control}
 This allows adversary to control and specify any message or agent to be lost in transmission on target link.
-\end[enumerate]
+
 
 The module also provide special API to adversary to access necessary infrastructure information of the simulation such as a list of all agents and nodes ID in the graph, get current time of the simulation, get all ports of a node etc. This API allows adversary to know and plan in advance of how to code adversary scripts that will verify and test a protocol correctly, an example will be described in appendix section.
 
+\begin{itemize}
+\item limitation
+    \begin{enumerate}
+    \item what are limitations
+    \item why it is limited
+    \item how to overcome
+    \end{enumerate}
+\end{itemize}
 
-- limitation
-
-1. what are limitations
-2. why it is limited
-3. how to overcome
-
-Limitation
+\subsubsection*{Limitation}
 
 The adversary control is double swards feature that may break the protocol even the protocol is actually correct since it can change decision making of the protocol and its behaviors. Therefore, the use of this feature is highly recommended to be very cautious.
 
@@ -542,258 +637,265 @@ The priority of adversary interruption API is also important for user to keep in
 
 
 
-\subsection{API}
+\section{API}
+\begin{enumerate}
+\item what is communication protocol api
+\item what is it for
+\item why do we need it
 
-1. what is communication protocol api
-2. what is it for
-3. why do we need it
+\item what are the modules that api supported
+\item what does it do
+\end{enumerate}
 
-(in subsection)
-4. what are the modules that api supported
-5. what does it do
 
 In software development and programming, API (Abstract Programming Interface) is gateway that connects between user protocol and system engine. DisJ simulation allows user codes to connect the simulation in three different modules of the system, distributed communication protocol, random probability generator, and adversary control script. The first module is for user to develop distributed protocol, the second module is optional which allows user to connect custom random libraries that the simulation does not support, and the last module is also optional for use who requires additional testing and verification to a protocol by adding scripts to control environment of the simulation while the protocol is running.
 
 API is a crucial feature of DisJ simulation which provides adaptability, reusability and modularity for user to enhance and adjust the simulation to the needs. The simulation is more of user centric, since the simulation cannot cover every aspects and environment to meet the needs of user, secondly, there are many existing libraries and codes that users may prefer to use or reuse instead of remaking new version to fit the simulation.
 
-\subsubsection{Communication Protocol}
+\subsection{Communication Protocol}
 DisJ simulation provides communication protocol API of entities and environment, in which user can use during development of distributed algorithm protocol. The communication protocol API encapsulates underneath communication implementation that tie to many proprietary and specific technologies but serve the same purpose, which this allows user to focus on an actual protocol rather than coding and handling of those communication technologies. However, the simulation provides others means for user to config and adjust network environment for the simulation directly via GUI that had been discussed in previous sections.
 
 The simulation API can be divided into five groups of API, node, agent, message passing, whiteboard and token. In this section we discuss some of interesting API, for full list of API see appendix.
 
-\begin[enumerate]
-\item[Node]
 
-- init() is an initiation function of a protocol. Once the simulation started, the first thing that the simulation will do is to execute init() of initiation node(s), where it (initiation node(s)) has been set by user in Graph Editor before starting the simulation. There must be at lest one node set to be an initiation node in order to activate a simulation of user protocol, and the function will be executed only once in a life time of the simulation, also the only node that set as initiation node will be executed with this function.
+\subsubsection*{Node}
 
-- become(int state) is a setting function that set a state of a node to be a prefer state. The state of a node represented by an integer number defined by user in a protocol, the number has to map to a color setting in Graph Editor as well in order to the simulation makes a correct visualization (see 3.5 User Simulation GUI)
+\paragraph{init()} is an initiation function of a protocol. Once the simulation started, the first thing that the simulation will do is to execute init() of initiation node(s), where it (initiation node(s)) has been set by user in Graph Editor before starting the simulation. There must be at lest one node set to be an initiation node in order to activate a simulation of user protocol, and the function will be executed only once in a life time of the simulation, also the only node that set as initiation node will be executed with this function.
 
-- getState() is a query function that returns a current state of a node.
+\paragraph{become(int state)} is a setting function that set a state of a node to be a prefer state. The state of a node represented by an integer number defined by user in a protocol, the number has to map to a color setting in Graph Editor as well in order to the simulation makes a correct visualization (see 3.5 User Simulation GUI)
 
-- getTime() is a query function that returns a current simulation time.
+\paragraph{getState()} is a query function that returns a current state of a node.
 
-- getName() is a query function that returns a name represented to a node. The name can be edited by user in Graph Editor before the starting of the simulation but it cannot be changed once the simulation is started.
+\paragraph{getTime()} is a query function that returns a current simulation time.
 
-- getXLocation() is a query function that return a current X coordinate of a node located in Graph Editor.
+\paragraph{getName()} is a query function that returns a name represented to a node. The name can be edited by user in Graph Editor before the starting of the simulation but it cannot be changed once the simulation is started.
 
-- getYLocation() is a query function that return a current Y coordinate of a node located in Graph Editor.
+\paragraph{getXLocation()} is a query function that return a current X coordinate of a node located in Graph Editor.
 
-- alarmRing() is an internal alarm clock of a node that will interrupt a node when the setting time is reached. The alarm can be set by calling setAlarm() function.
+\paragraph{getYLocation()} is a query function that return a current Y coordinate of a node located in Graph Editor.
 
-- setAlarm(int timeUnit) is a setting function that set an internal clock of a node to be rang after a given (positive) unit of simulation time.
+\paragraph{alarmRing()} is an internal alarm clock of a node that will interrupt a node when the setting time is reached. The alarm can be set by calling setAlarm() function.
 
-- getUserInput() is a query function that allows user to access a specific input (in String format) that user provided to a node via Graph Editor before or/and during the execution of the protocol.
+\paragraph{setAlarm(int timeUnit)} is a setting function that set an internal clock of a node to be rang after a given (positive) unit of simulation time.
 
-- getInPorts() is a query function that returns a list of all incoming ports label of a node.
+\paragraph{getUserInput()} is a query function that allows user to access a specific input (in String format) that user provided to a node via Graph Editor before or/and during the execution of the protocol.
 
-- getOutPorts() is a query function that returns a list of all outgoing ports label of a node.
+\paragraph{getInPorts()} is a query function that returns a list of all incoming ports label of a node.
 
-
-\item[Agent]
-
-- init() is an initiation function of a protocol. Once the simulation started, the first thing that the simulation will do is to execute init() of initiation agent(s), where it (initiation agent(s)) has been set by user in Graph Editor before starting the simulation. There must be at lest one agent set to be an initiation agent in order to activate a simulation of user protocol, and the function will be executed only once in a life time of the simulation, also the only agent that set as initiation agent will be executed with this function.
+\paragraph{getOutPorts()} is a query function that returns a list of all outgoing ports label of a node.
 
 
-- become(int state) is a setting function that set a state of an agent to be a prefer state. The state of an agent represented by an integer number defined by user in a protocol, the number has to map to a color setting in Graph Editor as well in order to the simulation makes a correct visualization (see 3.5 User Simulation GUI)
+\subsubsection*{Agent}
 
-- getState() is a query function that returns a current state of an agent.
-
-- alarmRing() is an internal alarm clock of an agent that will interrupt the agent when the setting time is reached. The alarm can be set by calling setAlarm() function.
-
-- setAlarm(int timeUnit) is a setting function that set an internal clock of an agent to be rang after a given (positive) unit of simulation time.
-
-- moveTo(String port) is a function that directs an agent to move into a given outgoing port of a current node that it resides.
-
-- getMemorySuitcase() is a query function that return a list data (in String format) that has been kept by an agent in memory slots. The number of memory slot is fixed by user via Graph Editor before starting the simulation, but the size of each slot is, currently, unlimited size of Java String.
-
-- getMaxMemorySlot() is a query function that provides a maximum number of memory slot that agent available to keep information.
-
-- getNodeId() is a query function that return a current host ID that an agent currently located in Graph Editor.
+\paragraph{init()} is an initiation function of a protocol. Once the simulation started, the first thing that the simulation will do is to execute init() of initiation agent(s), where it (initiation agent(s)) has been set by user in Graph Editor before starting the simulation. There must be at lest one agent set to be an initiation agent in order to activate a simulation of user protocol, and the function will be executed only once in a life time of the simulation, also the only agent that set as initiation agent will be executed with this function.
 
 
-\item[Message passing]
+\paragraph{become(int state)} is a setting function that set a state of an agent to be a prefer state. The state of an agent represented by an integer number defined by user in a protocol, the number has to map to a color setting in Graph Editor as well in order to the simulation makes a correct visualization (see 3.5 User Simulation GUI)
 
--	send() is a set of sending functions that allow a node to send message(s) to other nodes that directly connected to. The example of sending function are as follow
+\paragraph{getState()} is a query function that returns a current state of an agent.
 
-o	sendToAll() allows a same message to be send to all outgoing ports of a node at the same time.
+\paragraph{alarmRing()} is an internal alarm clock of an agent that will interrupt the agent when the setting time is reached. The alarm can be set by calling setAlarm() function.
 
-o	sendToOthers() is for bi-directional link which allows a same message to be send to all ports of a node at the same time except a latest port that it received a message.
+\paragraph{setAlarm(int timeUnit)} is a setting function that set an internal clock of an agent to be rang after a given (positive) unit of simulation time.
 
-o	sendTo() is basic sending message that allow a node to send a message to all given target ports at the same time.
+\paragraph{moveTo(String port)} is a function that directs an agent to move into a given outgoing port of a current node that it resides.
 
- The message types that can be passed through these functions parameter are Java primitive types and Serializable objects.
+\paragraph{getMemorySuitcase()} is a query function that return a list data (in String format) that has been kept by an agent in memory slots. The number of memory slot is fixed by user via Graph Editor before starting the simulation, but the size of each slot is, currently, unlimited size of Java String.
 
-- receive(String port, IMessage message) is an entry point of receiving message of a node. The function provides port label of arrival and a message itself. IMessage is a wrapper object that allows user to get message label (if exist), by calling getLabel(), and actual message content, by calling getContent(), that a sender is sending.
+\paragraph{getMaxMemorySlot()} is a query function that provides a maximum number of memory slot that agent available to keep information.
+
+\paragraph{getNodeId()} is a query function that return a current host ID that an agent currently located in Graph Editor.
 
 
-\item[Whiteboard]
+\subsubsection*{Message passing}
+
+\paragraph{send()} is a set of sending functions that allow a node to send message(s) to other nodes that directly connected to. The example of sending function are as follow
+
+\paragraph{sendToAll()} allows a same message to be send to all outgoing ports of a node at the same time.
+
+\paragraph{sendToOthers()} is for bi-directional link which allows a same message to be send to all ports of a node at the same time except a latest port that it received a message.
+
+\paragraph{sendTo()} is basic sending message that allow a node to send a message to all given target ports at the same time. The message types that can be passed through these functions parameter are Java primitive types and Serializable objects.
+
+\paragraph{receive(String port, IMessage message)} is an entry point of receiving message of a node. The function provides port label of arrival and a message itself. IMessage is a wrapper object that allows user to get message label (if exist), by calling getLabel(), and actual message content, by calling getContent(), that a sender is sending.
+
+
+\subsubsection*{Whiteboard}
 
 The board contains a list of slot and each slot represents Java String record written by an agent each time. Any new record entering will append to the end and if the number of record exceed the limit size of slot, the oldest record will be removed and new record will be append to the end of slot.
 
 Synchronous of data will be handled in such a way that there is only one physical memory of board for all agents.
 
-- readFromboard() is a function called by an agent in order to read from a board at a current host node. The function will return a current list of record in a list of String format..  (How an agent object can access data of a node object???)
+\paragraph{readFromboard()} is a function called by an agent in order to read from a board at a current host node. The function will return a current list of record in a list of String format..  (How an agent object can access data of a node object???)
 
-- appendToBoard(String info) is a function called by an agent in order to write a record into a board of a current host node. The size of the record for each call (slot), currently, is unlimited size of Java String. The new entering record will be append to the end of the board, if the number of slot exceed the limit, the oldest slot will be removed and a new record will be appended to the end of a board.
+\paragraph{appendToBoard(String info)} is a function called by an agent in order to write a record into a board of a current host node. The size of the record for each call (slot), currently, is unlimited size of Java String. The new entering record will be append to the end of the board, if the number of slot exceed the limit, the oldest slot will be removed and a new record will be appended to the end of a board.
 
-- removeRecord(String info) is a function called by an agent in order to remove a record ,corresponding to a given data entry, from a board at a current host node.
-
-
-\item[Token]
-
-- countMyToken() is a query function that return a number of token that an agent currently has.
-
-- countHostToken() is a query function that return a number of token that currently located in a host node that agent resides.
-
-- dropToken() is a function that allows an agent to leave a token at a current host node.
-
-- pickupToken() is a function that allows an agent to pick up a token at a current host node.
-
-- getMaxToken() is a query function that returns a number of maximum token that an agent can carry.
+\paragraph{removeRecord(String info)} is a function called by an agent in order to remove a record ,corresponding to a given data entry, from a board at a current host node.
 
 
-\end[enumerate]
+\subsubsection*{Token}
+
+\paragraph{countMyToken()} is a query function that return a number of token that an agent currently has.
+
+\paragraph{countHostToken()} is a query function that return a number of token that currently located in a host node that agent resides.
+
+\paragraph{dropToken()} is a function that allows an agent to leave a token at a current host node.
+
+\paragraph{pickupToken()} is a function that allows an agent to pick up a token at a current host node.
+
+\paragraph{getMaxToken()} is a query function that returns a number of maximum token that an agent can carry.
 
 
 
-\subsubsection{Random Probability Generator}
+
+\subsection{Random Probability Generator}
 
 Random Probability generator extension allows user to connect any custom random generator into DisJ simulation, this generator will be used by the simulation everywhere when random probability is needed. However, user must implement IRandom class with two functions nextInt() and setSeed() since the simulation always use these two functions to get a random number.
 
-\begin[enumerate]
 
-\item[nextInt(int)] return an integer number between zero(inclusive) and a given number (exclusive)
+\paragraph{nextInt(int)} return an integer number between zero(inclusive) and a given number (exclusive)
 
-\item[setSeed(long)] to set the seed of this random number generator using a single long seed. The general contract of setSeed is that it alters the state of this random number generator object so as to be in exactly the same state as if it had just been created with the argument seed as a seed.
-
-\end[enumerate]
+\paragraph{setSeed(long)} to set the seed of this random number generator using a single long seed. The general contract of setSeed is that it alters the state of this random number generator object so as to be in exactly the same state as if it had just been created with the argument seed as a seed.
 
 
-\subsubsection{Adversary Control}
+\subsection{Adversary Control}
 
 Adversary control extension allows user to inject a script to control the behavior of environment of the network while DisJ simulation simulate a protocol. DisJ provides two model of adversary control, agent adversary and message passing adversary, which each one will be used in its name corresponding model.
 
-\begin[enumerate]
-\item[Message Passing Control]
 
-\begin[description]
-\item[initTimeControl(nodeId)] allows adversary adversary to specify the time of initiation of a given node ID
-\item[arrivalControl(message, portId, nodeId)] allows adversary to control and manipulate incoming message at a node. This will be called right before it entering a port of a node
-\item[setArrivalTime(message, portId, nodeId)] allows adversary to configure an arrival time for message before it enters an edge
-\item[setDrop(message, edgeId, nodeId)] allows adversary to configure the lost of message that will traveling on an edge to a node. This drop will be determined right after the message is created
-\item[blockMsg(msgLable, incomingPort, nodeId) allows adversary to block any message that has a given message label at a given port of a node
-\item[unblockMsg(msgLabel, incomingPort, nodeId)] allows adversary to unblock a port with a given message label at a node. All messages with the label that has been blocked will be released
-\item[isMsgBlocked(msgLabel, incomingPort, nodeId)] allow adversary to check whether a given message label specifically is blocked at a given port of a node
-\item[getTravelingMsg(edgeId, nodeId)] allow adversary to get a list of messages(with expected arrival time) currently in a link and heading to a given destination node
-\end[description]
-
-\item[Agent Control]
-\begin[description]
-\item[initTimeControl(agentId)] allows adversary to specify the time of initiation of a given agent ID
-\item[arrivalControl( agentId, arrivalPort, nodeId)] allows adversary to control and manipulate incoming agent to a node. This will be called right before it entering a port of a node
-\item[setArrivalTime(agentId, edgeId, nodeId)] allows adversary to configure an arrival time of agent to a destination before it enters an edge
-\item[setDrop(agentId, edgeId, nodeId)] allows adversary to configure the lost of agent that will traveling on an edge to a node. This drop will be determined right after the agent entered the edge
-\item[getTravelingAgents(edgeId, nodeId)] allows adversary to get a list of agents(with expected arrival time) currently in a link and heading to a given destination node
-\item[blockAgent(agentId, incomingPort, nodeId)] allows adversary to block a given agent at a given port of a node
-\item[unblockAgent(agentId, incomingPort, nodeId)] allows adversary to unblock an agent at given port and node
-\item[isAgentBlocked(agentId, incomingPort, nodeId)] allows adversary to check whether a given agent is blocked at a given port and node
-\end[description]
-\end[enumeration]
+\subsubsection*{Message Passing Control}
 
 
-\subsection{STATISTICAL REPORT}
+\paragraph{initTimeControl(nodeId)} allows adversary adversary to specify the time of initiation of a given node ID
 
-1. what is statistic and report?
-2. what is it for
-3. why do we need it
+\paragraph{arrivalControl(message, portId, nodeId)} allows adversary to control and manipulate incoming message at a node. This will be called right before it entering a port of a node
 
-(in subsection)
-4. what are they
-5. what does it do
+\paragraph{setArrivalTime(message, portId, nodeId)} allows adversary to configure an arrival time for message before it enters an edge
+
+\paragraph{setDrop(message, edgeId, nodeId)} allows adversary to configure the lost of message that will traveling on an edge to a node. This drop will be determined right after the message is created
+
+\paragraph{blockMsg(msgLable, incomingPort, nodeId)} allows adversary to block any message that has a given message label at a given port of a node
+
+\paragraph{unblockMsg(msgLabel, incomingPort, nodeId)} allows adversary to unblock a port with a given message label at a node. All messages with the label that has been blocked will be released
+
+\paragraph{isMsgBlocked(msgLabel, incomingPort, nodeId)} allow adversary to check whether a given message label specifically is blocked at a given port of a node
+
+\paragraph{getTravelingMsg(edgeId, nodeId)} allow adversary to get a list of messages(with expected arrival time) currently in a link and heading to a given destination node
+
+
+\subsubsection*{Agent Control}
+
+\paragraph{initTimeControl(agentId)} allows adversary to specify the time of initiation of a given agent ID
+
+\paragraph{arrivalControl( agentId, arrivalPort, nodeId)} allows adversary to control and manipulate incoming agent to a node. This will be called right before it entering a port of a node
+
+\paragraph{setArrivalTime(agentId, edgeId, nodeId)} allows adversary to configure an arrival time of agent to a destination before it enters an edge
+
+\paragraph{setDrop(agentId, edgeId, nodeId)} allows adversary to configure the lost of agent that will traveling on an edge to a node. This drop will be determined right after the agent entered the edge
+
+\paragraph{getTravelingAgents(edgeId, nodeId)} allows adversary to get a list of agents(with expected arrival time) currently in a link and heading to a given destination node
+
+\paragraph{blockAgent(agentId, incomingPort, nodeId)} allows adversary to block a given agent at a given port of a node
+
+\paragraph{unblockAgent(agentId, incomingPort, nodeId)} allows adversary to unblock an agent at given port and node
+
+\paragraph{isAgentBlocked(agentId, incomingPort, nodeId)} allows adversary to check whether a given agent is blocked at a given port and node
+
+
+
+\section{STATISTICAL REPORT}
+\begin{enumerate}
+\item what is statistic and report?
+\item what is it for
+\item why do we need it
+
+\item what are they
+\item what does it do
+\end{enumerate}
 
 DisJ simulation provides statistical report module to display information and status of entities within the simulation while a protocol is running and after the termination of the protocol. The report is a collection of information of environment and entities of a running protocol that the simulation collects during the execution of the protocol. The report information can be used by user to analyze correctness, behavior and performance of the protocol. There are two type of report display, dynamic data update and final results, which are displaying in many various GUI views components of the simulation. However, each reports can be categorized based on entities within the simulation as follow.
 
-\begin[enumeration]
-\item[Topology Overall]
-\begin[description]
-\item[Number of nodes in a network] GP 
-\item[Number of links in a network]GP
-\item[Number of agents at the start of the simulation] GP
-\item[Number of currently agents alive] ' GP
-\item[Maximum number of tokens that an agent can carry] ' GP
-\end[description]
+
+\subsubsection*{Topology Overall}
+\begin{enumerate}
+\item Number of nodes in a network GP
+\item Number of links in a network GP
+\item Number of agents at the start of the simulation GP
+\item Number of currently agents alive GP
+\item Maximum number of tokens that an agent can carry GP
+\end{enumerate}
 
 
-\item[Node]
-\begin[description]
-\item[List of nodes with a state at the end of simulation] ' NV
-\item[List of nodes with a sequence of state transition] ' NP
-\item[List of nodes with a total number of agents visited ]' C
-\end[desciption]
+\subsubsection*{Node}
+\begin{enumerate}
+\item List of nodes with a state at the end of simulation NV
+\item List of nodes with a sequence of state transition NP
+\item List of nodes with a total number of agents visited  C
+\end{enumerate}
 
-\item[Agent]
-\begin[description]
-\item[List of alive agents] ' AV
-\item[List of agents with a state at the end of simulation] ' C
-\item[List of agents with a sequence of state transition] ' AV
-\item[List of agents with a number of moves at the end of simulation] ' C
-\item[List of states with number of moved of all agents at the end of simulation]  ' C
+\subsubsection*{Agent}
+\begin{enumerate}
+\item List of alive agents AV
+\item List of agents with a state at the end of simulation C
+\item List of agents with a sequence of state transition AV
+\item List of agents with a number of moves at the end of simulation C
+\item List of states with number of moved of all agents at the end of simulation C
 
-\item[A bar chart represents agent states verses number of agents]
-\item[A bar chart represents agent states verses number of move made by agents]
-\end[description]
+\item A bar chart represents agent states verses number of agents
+\item A bar chart represents agent states verses number of move made by agents
+\end{enumerate}
 
-\item[Message]
-\begin[description]
-\item[A total number of messages have been sent] ' GP
-\item[A total number of messages have been received]' GP
-\item[A list of message types with number of produced (sent)] ' C
-\item[Node(s) that has a highest load of received/sent message (include node info)] 'C
-\item[Node(s) that has a lowest load of received/sent message (include node info)] 'C
+\subsubsection*{Message}
+\begin{enumerate}
+\item A total number of messages have been sent GP
+\item A total number of messages have been received GP
+\item A list of message types with number of produced (sent) C
+\item Node(s) that has a highest load of received/sent message (include node info) C
+\item Node(s) that has a lowest load of received/sent message (include node info) C
 
-\item[A bar chart represents node states verses number of nodes (in that state)]
-\item[A bar chart represents node states verses accumulation of number of messages produced during such states]
-\end[description]
-
-
-\item[Whiteboard]
-\begin[description]
-\item[A total number of times that (all) boards have been accessed] ' C
-\item[A total number of write accesses to every board]' C
-\item[A total number of delete accesses to every board]' C
-\item[A total number of read accesses to every board] ' C
-\item[Board(s) that has a highest number of write accesses (include node info)] ' C
-\item[Board(s) that has a lowest number of write accesses (include node info)] ' C
-\item[Board(s) that has a highest number of read accesses (include node info)] ' C
-\item[Board(s) that has a lowest number of read accesses (include node info) ]' C
-\end[description]
+\item A bar chart represents node states verses number of nodes (in that state)
+\item A bar chart represents node states verses accumulation of number of messages produced during such states
+\end{enumerate}
 
 
-\item[Token]
-\begin[description]
-\item[A total number of tokens that have been dropped by all agents] ' C
-\item[A total number of tokens that have been picked up by all agents] 'C
-\item[A list of agents with number of current tokens holding] ' AV
-\item[A list of nodes with a total number of tokens that have been dropped]  ' C
-\item[A list of nodes with a total number of tokens that have been picked] ' C
-
-\item[Agent(s) that has a highest number of pick up token] ' C
-\item[Agent(s) that has a lowest number of pick up token] ' C
-\item[Agent(s) that has a highest number of drop off token] ' C
-\item[Agent(s) that has a lowest number of drop off token] ' C
-\item[A highest number of tokens have been dropped at a node] ' C
-
-\item[A bar chart represents agent state verses number of pick up token]
-\item[A bar chart represents agent state verses number of drop off token]
-\end[description]
+\subsubsection*{Whiteboard}
+\begin{enumerate}
+\item A total number of times that (all) boards have been accessed C
+\item A total number of write accesses to every board C
+\item A total number of delete accesses to every board C
+\item A total number of read accesses to every board C
+\item Board(s) that has a highest number of write accesses (include node info)C
+\item Board(s) that has a lowest number of write accesses (include node info)C
+\item Board(s) that has a highest number of read accesses (include node info) C
+\item Board(s) that has a lowest number of read accesses (include node info)  C
+\end{enumerate}
 
 
-\item[Edge]
-\item[An average accumulated delay time of all edges at the end of simulation ]' C
-\item[Edge(s) that has a highest accumulate delay time (include edge info)] ' C
-\item[A total number of message/agent entering each edge] ' EP
-\item[A total number of message/agent leaving each edge] ' EP
-\end[description]
-\end[enumeration]
+\subsubsection*{Token}
+\begin{enumerate}
+\item A total number of tokens that have been dropped by all agents C
+\item A total number of tokens that have been picked up by all agents C
+\item A list of agents with number of current tokens holding AV
+\item A list of nodes with a total number of tokens that have been dropped C
+\item A list of nodes with a total number of tokens that have been picked C
+
+\item Agent(s) that has a highest number of pick up token C
+\item Agent(s) that has a lowest number of pick up token C
+\item Agent(s) that has a highest number of drop off token C
+\item Agent(s) that has a lowest number of drop off token C
+\item A highest number of tokens have been dropped at a nodeC
+
+\item A bar chart represents agent state verses number of pick up token
+\item A bar chart represents agent state verses number of drop off token
+\end{enumerate}
+
+
+\subsubsection*{Edge}
+\begin{enumerate}
+\item An average accumulated delay time of all edges at the end of simulation  C
+\item Edge(s) that has a highest accumulate delay time (include edge info) C
+\item A total number of message/agent entering each edge EP
+\item A total number of message/agent leaving each edge EP
+\end{enumerate}
 
 

@@ -1,9 +1,11 @@
 
 \section{Motivations and Problems}
-- what is reactive distributed algorithm
-- why it is interesting (influence of reactive distributed algorithm to the world)
-- what is the problem of it
-- why there is no existing way to solve the problem
+\begin{itemize}
+\item what is reactive distributed algorithm
+\item why it is interesting (influence of reactive distributed algorithm to the world)
+\item what is the problem of it
+\item why there is no existing way to solve the problem
+\end{itemize}
 
 Reactive distributed algorithm is a distributed algorithm that corresponding to a computing environment of many HOMOGENOUS entities, and every entity in the environment has same software and algorithm installed. The reactive means that every entity computing cycle obeys the rule of STATE X INPUT -> ACTION(S) and ACTION may leads to a new STATE.
 
@@ -15,10 +17,11 @@ There are some existing technologies like PMV, MPI, MRI or COBRA etc that provid
 
 However, there are some existing tool and simulations that have been built for reactive distributed algorithm specifically but some systems are limited in term of usage, capability, efficiency etc which we will discuss in later chapter.
 
-
 \section{Contributions}
-- what is disJ
-- why it help solve the problem
+\begin{itemize}
+\item what is disJ
+\item why it help solve the problem
+\end{itemize}
 
 DisJ is a reactive distributed algorithm simulation that provides a virtually distributed environment for computation in a standalone computing machine. The simulation supports three different reactive distributed computing model, Message Passing, Agent with Whiteboard and Agent with Token models that allows user to write a protocol in plain Java language with support of available API for each model that user is developing. Moreover, the simulation also provides visualization editor and views for user to create testing topologies, to observe states and behavior of entities while the simulation executing the protocol.
 
@@ -28,7 +31,9 @@ The simulation itself is an Eclipse Plug-in that has been merged with Java IDE (
 
 
 \section{Thesis layout}
-- what reader expect the rest of thesis will be look like
+\begin{itemize}
+\item what reader expect the rest of thesis will be look like
+\end{itemize}
 
 The rest of the thesis has been organized by chapter two we will look back to existing simulation system and its limitation, then chapter three focuses on DisJ simulation system model which describe functionalities and features that makes the simulation different than other. In chapter four describes the design and implementation of the simulation, in chapter five shows a basic example of how to use the simulation, and a final chapter will be the conclusions.
 

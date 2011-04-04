@@ -1,51 +1,54 @@
 
-In this chapter discusses some existing reactive distributed algorithm simulations that have been made in a bit more detail. However, in Appendix section provides more list of existing simulations if readers interested in furthers reading and experimental.
+\section{DAJ - Interactive Execution of Distributed Algorithms by Mordechai Ben-Ari}
 
-
-\subsection{DAJ - Interactive Execution of Distributed Algorithms by Mordechai Ben-Ari}
-
-
-\subsubsection{Introduction}
+\subsection*{Introduction}
 DAJ is an interactive visual aid simulator with the main objective is to help student to understand various type of distributed algorithm. The simulator interacts to user step by step during execution of an algorithm. In order to allow the simulator to demonstrate and interact correctly, the simulator code has to be written specifically to a specific algorithm, in other words each simulator works with only one specific algorithm. Therefore, if user wants to simulate new algorithm, the user has to extend and write a new simulator that able to adapt the new algorithm. However, DAJ provides a basic common library for graphical user interface (GUI) to visualize and interaction so that a new simulator can reuse and have the same user interface pattern across differences algorithms (simulators).
 
-\subsubsection{Environment}
-- java
-- directed implemented to simulation
-- one to one mapping simulation gui and algorithm
-- complete network only
-- only runtime interaction is step next with a given choices
-- homogenous entities
-
+\subsection*{Environment}
+\begin{itemize}
+\item java
+\item directed implemented to simulation
+\item one to one mapping simulation gui and algorithm
+\item complete network only
+\item only runtime interaction is step next with a given choices
+\item homogenous entities
+\end{itemize}
 
 DAJ is a simulator that was written in Java language, which is a standalone application that requires only standard J2SE libraries or Java Runtime Environment (JRE) in order to develop and run the simulator. To start the execution of the simulator is same as any Java program by using "java" command, however, the author has provide a bash file ,for window only, that will start the simulator without using java command directly, which will save the student from configuration of classpath, environment and parameters setting. Each and every algorithm will have to be implemented specifically to the simulation therefore correctness of the algorithm and extends of the simulation are bounded to the user. The user then can interact to the simulator step by step without knowing how the algorithm is implemented, and the topology of the network is always a complete network. The interaction to the simulator is clinking an enable button that provided by the simulation in order to proceed to next step of execution such as send message M to all nodes, set my state to be sleep etc.
 
 The following algorithms have been implemented by the author,  Byzantine generals, Ricart-Agrawala mutual exclusion, Dijkstra-Scholten termination, Chandy-Lamport snapshots, Huang termination detection, Mattern termination detection, Suzuki-Kasami mutual exclusion, Neilsen-Mizuno mutual exclusion, Lamport mutual exclusion, Maekawa mutual exclusion, Carvalho-Roucairol mutual Exclusion, Failure by crashing, King of Byzantine generals.
 
-\subsubsection{Visualization}
-- text box base display
-- very limited size
-- complete network with bi-directional link only
-- step next
-- log file for replay
+\subsection*{Visualization}
+\begin{itemize}
+\item text box base display
+\item very limited size
+\item complete network with bi-directional link only
+\item step next
+\item log file for replay
+\end{itemize}
 
 The simulator provides a basic common library for graphic user interface (GUI) in form of Java Applet representation. The format of demonstration and visualization are represented in text format without graphical and images. The simulator represents a node by a textbox that contains data information and a set of button for option section that are based on current step of an algorithm. (see attached pic). The number of textbox are based on the number of node in the topology, the student will see all textboxes at the same time on a screen and the contents in the textbox will change based on the user interaction to the algorithm. The simulator provides a log file for each execution so that student able to replay the execution as many time as he/she wants.
 
-\subsubsection{Adversary}
-- not available
+\subsection*{Adversary}
+\begin{itemize}
+\item not available
+\end{itemize}
 
 The implementation of the simulator is tightly couple to a specific algorithm but share a common visualization library. Therefore, the simulator is a passive simulator that will do exactly what the developer implemented without any self decision making or dynamic algorithm input from user. So that the adversary program is not applicable to DAJ.
 
-\subsubsection{Limitation}
-- There is only complete network topology is supported
-- The size of network is very small, up to 6 nodes based on the computing power of the running machine and size of screen display
-- No any distributed API provided, in which the developer has to use a raw API from Java
-- No statistic information report about the execution
-- The simulator has to be implemented specifically with respect to a specific algorithm
-- The simulator supports only asynchronous algorithm
-- Only one round execution, cannot run iteratively execution
-- Connection between node are always bi-directional
-- Only message passing model
-- no adversary
+\subsection*{Limitation}
+\begin{itemize}
+\item There is only complete network topology is supported
+\item The size of network is very small, up to 6 nodes based on the computing power of the running machine and size of screen display
+\item No any distributed API provided, in which the developer has to use a raw API from Java
+\item No statistic information report about the execution
+\item The simulator has to be implemented specifically with respect to a specific algorithm
+\item The simulator supports only asynchronous algorithm
+\item Only one round execution, cannot run iteratively execution
+\item Connection between node are always bi-directional
+\item Only message passing model
+\item no adversary
+\end{itemize}
 
 
 
@@ -55,45 +58,53 @@ The implementation of the simulator is tightly couple to a specific algorithm bu
 
 
 
+\section{DAJ - A Toolkit for Distributed Algorithms in Java by Wolfgang Schreiner}
 
-\subsection{DAJ - A Toolkit for Distributed Algorithms in Java by Wolfgang Schreiner}
-
-\subsubsection{Introduction}
+\subsection*{Introduction}
 DAJ-Toolkit for Distributed Algorithms in Java is a tool that help user to develop distributed algorithm in Java and able to observe it behavior, the goal of the toolkit is to provide a universally tool for research and education in distributed algorithm. The toolkit helps user to design, implement, test, simulate and visualize a distributed algorithm protocol based on message passing model. The toolkit provides a communication API set for distributed algorithm development that help user in developing algorithm without handling underneath communication network detail, and graphical user interface API for user to create a network topology that will be used by the algorithm.
 
-\subsubsection{Environment}
-- java
-- communication api
-- no environment access and control
-- one to one mapping simulation gui and algorithm
-- passive simulation
-- homogenous entities
+\subsection*{Environment}
+\begin{itemize}
+\item java
+\item communication api
+\item no environment access and control
+\item one to one mapping simulation gui and algorithm
+\item passive simulation
+\item homogenous entities
+\end{itemize}
+
 
 The toolkit is written in Java language and it is a standalone application that requires standard J2SE or JRE and the toolkit library, daj.jar in order to develop and execute the protocol. The toolkit has encapsulate the network layer by providing a basic communication API that comes with the library, but the library lacks of providing distributed properties control like delay time of connectivity, reliability of connectivity etc. The way to start the execution of the simulator is like any other Java program by using "java" command or using Java Applet running in a web browser. The topology and state are static once the execution starts, which means there is no means to modify the topology and state i.e. cannot change the state of the node directly by user during an execution. The execution of protocol cannot perform many iteration continuously, only one round is allowed.
 
-\subsubsection{Visualization}
-- graphical and coloring display of states
-- create by programming
-- user interaction by mouse click, hover, and drag
-- bi-directional link only
-- step next, pause and run
+\subsection*{Visualization}
+\begin{itemize}
+\item graphical and coloring display of states
+\item create by programming
+\item user interaction by mouse click, hover, and drag
+\item bi-directional link only
+\item step next, pause and run
+\end{itemize}
 
 The toolkit provide a graphical display during execution such as the topology and state change etc. However, the topology has to be defined programmatically during implementation at application level. There is no topology editor that allow user to modify the topology and its information and it does not support replay execution and logging service. Information log of the node and application can be code statically while implementing the protocol.
 
-\subsubsection{Adversary}
-- not available
+\subsection*{Adversary}
+\begin{itemize}
+\item not available
+\end{itemize}
 
 Since the toolkit provide distributed communication API at network level without distributed properties control and property, which it has to define during the implementation of  the protocol itself. Therefore, the simulator is a passive simulator in term of distributed algorithm aspect except the network communication that applicable for adversary program but it is outside our purposes.
 
-\subsubsection{Limitation}
-- There is no distributed properties control API to control the behavior of the execution environment
-- No statistic information report about the execution
-- No state information display for node or link
-- Connection between node are always bi-directional
-- Only one round execution, cannot execute iteratively
-- No execution replay
-- Only message passing model
-- no adversary
+\subsection*{Limitation}
+\begin{itemize}
+\item There is no distributed properties control API to control the behavior of the execution environment
+\item No statistic information report about the execution
+\item No state information display for node or link
+\item Connection between node are always bi-directional
+\item Only one round execution, cannot execute iteratively
+\item No execution replay
+\item Only message passing model
+\item no adversary
+\end{itemize}
 
 
 
@@ -103,56 +114,64 @@ Since the toolkit provide distributed communication API at network level without
 
 
 
+\section{DAP - Distributed Algorithms Platform by University of Patras, Greece}
 
-\subsection{DAP - Distributed Algorithms Platform by University of Patras, Greece}
-
-\subsubsection{Introduction}
+\subsection*{Introduction}
 DAP is a simulation for distributed algorithm in homogenous environment which it helps user to implement and test the algorithm for wired and wireless network. DAP is a LEDA extension package written in C++, which provides a library for distributed algorithm communication and library to define network environment for the simulation. DAP also provides a graphical user interface for monitoring and control the execution, and gathering statistic information for later analysis.
 
-\subsubsection{Environment}
-- C++
-- LEDA extension
-- communication api
-- String type for message only
-- environment access and configuration
-- homogenous entities
-- fix and mobile network
-- tight mapping between topology and algorithm e.g. port label
-- no environment access via algorithm
-- extendable module based on LEDA
-- asynchronous only
-- viewer can be used in difference machines
+\subsection*{Environment}
+\begin{itemize}
+\item C++
+\item LEDA extension
+\item communication api
+\item String type for message only
+\item environment access and configuration
+\item homogenous entities
+\item fix and mobile network
+\item tight mapping between topology and algorithm e.g. port label
+\item no environment access via algorithm
+\item extendable module based on LEDA
+\item asynchronous only
+\item viewer can be used in difference machines
+\end{itemize}
 
 DAP is Linux base simulator that allows user to write distributed algorithm C++, and abstract the user away from low layer of network communication like physical layer and network layer. The simulator extends from LEDA and heavily depends on LEDA libraries so that the user can make use of those libraries in developing algorithm and/or extends the features and capability of the simulator. The simulator also provides a set of common distributed control and properties that required for developing and testing distributed algorithm protocol. The network topology are homogenous and can be fixed or mobile network which user can specify during configuration. The algorithm has no access to network information such as port label, number of port etc, therefore the protocol has written in a way that closely map to the topology that its running. Also, the simulator allows only String type to be a message that can be passed between entities, and since the simulation is C++ program so that it requires specific compilation and configuration to specific environment (machine) for each protocol before execution.
 
 Topology of execution can be created in a same way as the way as LEDA. The simulator provides an interface for user to define behavior of the topology like state of connection between nodes (i.e drop with probability) and node state (e.g. on/off). Moreover, the simulator provides runtime control feature such as run, stop, pause, resume and set speed of an execution so that user can observe the algorithm in visual way.
 
-\subsubsection{Visualization}
-- graph editor with creation and user friendly
-- network graph
-- msg queue view
-- history of msg sent in sequence diagram
-- start/stop/pause
-- modify environment via gui e.g. link fail, node die
-- graphical driven by xml data from simulation
+\subsection*{Visualization}
+\begin{itemize}
+\item graph editor with creation and user friendly
+\item network graph
+\item msg queue view
+\item history of msg sent in sequence diagram
+\item start/stop/pause
+\item modify environment via gui e.g. link fail, node die
+\item graphical driven by xml data from simulation
+\end{itemize}
 
 
 The visualization of the simulator uses LEDA libraries that provides a nice visual topology with different shapes of node, coloring and data representation of entities within the topology. The simulation also provides a statistic information during execution and logging service in XML format so that user can observe and analyze the execution off line. In addition, the simulation provides an optional GUI for user to configure some properties of node and connection in the topology like connection type (i.e FIFO, LIFO, random, down), connection delay time, node state etc.
 
-\subsubsection{Adversary}
-- manual via system configuration
+\subsection*{Adversary}
+\begin{itemize}
+\item manual via system configuration
+\end{itemize}
 
 DAP does not provide a direct module for user to insert adversary into the simulation in order to test and validate the algorithm. However, user may use system control and GUI to interrupt the algorithm manually at runtime while the simulation is running, but it is up to the user to make sure that the interruption happen at a right time and place from observing the algorithm status from visualize display.
 
 
-\subsubsection{Limitation}
-- Support only message passing model
-- The type message can be only String type
-- The properties of entity and connection instance has to be integer, double and String only
-- The simulation is platform dependence which the executable file need to be build specifically for each environment (machine)
-- Connection between entities are always bi-directional
-- no replay
-- no adversary
+\subsection*{Limitation}
+\begin{itemize}
+\item Support only message passing model
+\item The type message can be only String type
+\item The properties of entity and connection instance has to be integer, double and String only
+\item The simulation is platform dependence which the executable file need to be build specifically for each environment (machine)
+\item Connection between entities are always bi-directional
+\item no replay
+\item no adversary
+\end{itemize}
+
 
 The simulation is very powerful simulation that takes advantage of LEDA libraries that provides many features and capabilities on graph computing and visualization however, there are some limitation in term of distributed algorithm simulation are as follow.
 
@@ -168,51 +187,53 @@ The simulation is very powerful simulation that takes advantage of LEDA librarie
 
 
 
-\subsection{SinAlgo by Distributed Computing Group, Swiss Federal Institute of Technology, Switzerland}
+\section{SinAlgo by Distributed Computing Group, Swiss Federal Institute of Technology, Switzerland}
 
-\subsubsection{Introduction}
-Sinalgo is a network simulation framework for message passing model that help user for testing and validating network algorithms in fixed and mobile networks. The simulation is a Java program that support Eclipse plug-in and allows user to customize the environment of simulation and the visualization of the topology. As it claims that it support hundred thousand of nodes within a single topology with a reasonable performance.
-
-
-\subsubsection{Environment}
-- Java
-- hot code replacement
-- fix and mobile networks
-- communication api
-- environment access and configuration
-- homogenous entities
-- asynchronous and synchronous 
-- 
-
-- tight mapping between topology and algorithm e.g. port label
-- no environment access via algorithm
-- extendable module based on LEDA
-- viewer can be used in difference machines
+\subsection*{Introduction}
+Sinalgo is a network simulation framework for message passing model that help user to develop simulation for network algorithm in fixed and mobile networks. The framework is a Java program that support Eclipse plug-in and allows user to customize the environment of simulation and the visualization of the topology. As it claims that it support hundred thousand of nodes within a single topology with a reasonable performance with graphical 2D and 3D views.
 
 
-The simulation is Java based programming which is a standalone application that requires standard J2SE or JRE and SinAlgo libraries It provides an API for distributed control and properties for user in order to develop and test the protocol. The way to start execution is like any Java program, and it provides a debug mode so that the user can pause, resume, observe states, modify topology and hot code replace during execution of the protocol. The simulation allows user to execute the algorithm in iteration based, and it supports different models of topology such as connectivity model, interference model, mobility model, message transmission model and distribution model, which allow user to create all different kind of scenario for his/her distributed algorithm protocol. The simulation also allows user to define the properties of topology via configuration file so that it will be decoupled from algorithm itself and able to reuse the configuration with different protocols.
+\subsection*{Environment}
+\begin{itemize}
+\item Java
+\item hot code replacement
+\item fix and mobile networks
+\item communication api
+\item environment access and configuration
+\item homogenous entities
+\item asynchronous and synchronous
+\end{itemize}
 
-\subsubsection{Visualization}
-- 2D and 3D viewer
+SinAlgo is a Java based simulation framework for homogenous network environment in a standalone application that requires standard J2SE and SinAlgo libraries. The framework provides API for distributed communication, entities, environment models and properties for user in order to develop and test the algorithm. The way to start execution is like any Java program by executing a jar file, and it provides a debug mode so that the user can pause, resume, observe states, modify a topology and doing a hot code replace during execution of the protocol. The framework allows user to execute the algorithm in iteration based, and it supports different models of topology such as connectivity model, interference model, mobility model, message transmission model and distribution model, which allow user to create all different kind of scenario for a distributed algorithm protocol. The framework also allows user to define the properties of topology via configuration file so that it will be decoupled from algorithm itself and able to reuse the configuration with different protocols.
 
+\subsection*{Visualization}
+\begin{itemize}
+\item 2D and 3D viewer
+\item export graph in pdf and esp format
+\item import background image
+\item interact to GUI only when the simulation is not running
+\end{itemize}
 
-The simulation provides a topology editor that save user from coding the topology, which user can create and modify the topology graphically. The simulation also provides a logging facility so that user can replay the execution, and analyze the information off line. The visualization of the simulator is real time presentation and allows use to do dynamic modification of topology during execution. The graphical of the visualization has many adjustable properties like 2D or 3D, coloring, image file etc, in which user can specify in a configuration file. Moreover, the simulation supports an export feature so that user can export the topology to a vector graphic in ESO or PDF format.
+SinAlgo simulation framework provides a graph editor that helps user to create and modify a topology graphically. The framework also provides a logging facility so that user can replay the execution, and analyze the information off line. The visualization of the framework is simulation real time presentation and allows use to do dynamic modification of topology during execution programmatically. The graphical of the visualization has many adjustable properties like 2D or 3D, coloring, image file etc, in which user can specify in a configuration file. Moreover, the simulation supports an export feature so that user can export the topology to a vector graphic in ESO or PDF format.
 
-\subsubsection{Adversary}
-The simulation abstract the communication layer and provides API for distributed control and properties, therefore, it is applicable to have an adversary program to validate the correctness and robustness of the simulation in term of distributed algorithm computation and simulation of the environment.
+\subsection*{Adversary}
+\begin{itemize}
+\item not available
+\end{itemize}
 
-\subsubsection{Limitation}
-- require implementation of network and environment behavior and adjustment instead of GUI setting
-- no adversary
-- handling both algorithm and simulation by user e.g. event round execution, connection, time, changing color, redraw it self, calculate probability of error(interference) etc.
+SinAlgo simulation framework does not provide a direct way for adversary program to connect and control network behavior during the execution in order to validate the algorithm. However, the framework allows user to directly embedded codes into the simulation and make use of environment API access to adjust and control network environment programmatically. However, this method will make algorithm code and adversary code mix into one piece of code and difficult to separate and debugging.
 
+\subsection*{Limitation}
+\begin{itemize}
+\item require implementation of network and environment behavior and adjustment instead of GUI setting
+\item no adversary specific
+\item handling both algorithm and simulation by user e.g. event round execution, connection, time, changing color, redraw it self, calculate probability of error(interference) etc.
+\item support only message passing model
+\item more of framework that requires implementation of simulation and actual algorithm
+\item no statistic report
+\end{itemize}
 
-
-The simulation SinAlgo is a very compact simulation that provide many features for distributed algorithm development and hide all unnecessary layers that are specifically tight to hardwares and vendors, which it makes the simulation has a few limitation as follow
-- Require the knowledge of XML configuration file at different levels i.e. framework, project and execution
-- The GUI that represent the topology is unpleasant when the network is large
-- No statistic report for executions
-
+SinAlgo simulation framework is a framework for developing a simulation for network algorithm which mean user has to develop a simulation that tight to a specific algorithm instead of developing just an algorithm and feed to SinAlgo to simulate. The framework is mainly for network algorithm simulation and provide some features for distributed environment, therefore, it has less focusing in distributed algorithm as it should be such as support only message passing model. The adjustment of environment are done via configuration file or programming, the later part is use for dynamic adjusting environment but it create mixing code between actual algorithm and environment and graphical control, while the former part it is static configurations and it cannot be use during execution. Moreover, the framework does provide logging data but not statistic data of an algorithm during an execution and/or after the execution.
 
 
 
@@ -225,44 +246,53 @@ The simulation SinAlgo is a very compact simulation that provide many features f
 
 
 \section{DisASTer - Distributed Algorithm Simulation Terrain by Trier Computer Science, University of Applied Science, Germany}
-\subsubsection{Introduction}
+\subsection*{Introduction}
 DisASTer is a platform for developing distributed algorithm with message passing model in Java that allows user to interact to a topology during runtime. It objective is to help student to understand the behavior of distributed algorithm by providing graphical user interface to help visualize the activities and states of the algorithm. The platform abstracts the need of handling underneath communication protocol and infrastructure of networking, when entities try to communication to each others.
 
-\subsubsection{Environment}
-- java
-- extends class
-- type of msg based on different msg object type
-- entity can send msg to one or all
-- no environment info access
-- entities are not homogenous
+\subsection*{Environment}
+\begin{itemize}
+\item java
+\item extends class
+\item type of msg based on different msg object type
+\item entity can send msg to one or all
+\item no environment info access
+\item entities are not homogenous
+\end{itemize}
 
 
 The platform is Java based implementation running in a single PC, the programming model of the platform is similar to the programming model for applets, servlets or EJBs\cite{ref1}. User requires to extend and implements certain class and methods that will be used by the platform at runtime. The requires methods are for receiving message, and it will be automatically called when message arrived, and information of sender and payload are embedded inside the message object, therefore, the platform does not provide any other API to access any other environment information. The platform allows user to assign a (Java) class to specific entity in topology, which mean entities may not have a same algorithm running during a simulation, in which user can specify the role of entity before the simulation start.
 
-\subsubsection{Visualization}
-- limited graph editor with creation and user friendly
-- network graph
-- msg queue view and editable
-- history of msg sent in sequence diagram
-- ring and torus ready made topology
-- input text to simulation at runtime
-- start/stop/pause/step fwd/step back
-- state can be reversed
+\subsection*{Visualization}
+\begin{itemize}
+\item limited graph editor with creation and user friendly
+\item network graph
+\item msg queue view and editable
+\item history of msg sent in sequence diagram
+\item ring and torus ready made topology
+\item input text to simulation at runtime
+\item start/stop/pause/step fwd/step back
+\item state can be reversed
+\end{itemize}
+
 
 The platform provides a graph editor that allows user to create a topology for simulation and able to observe a visualize of algorithm behavior during runtime. The platform also provides three views of the execution at runtime, network view that can view a whole network and message icons moving on the link while message has been sending, sequence view that shows sequence diagram of message interaction between entities, and message queue that show a global message queue of all current message that are in transmission. Moreover, the platform allows user to inject a text input into an entity at runtime via input text field, which the input will be intercepted by the entity when it has been executed. During the execution user may stop, pause, resume, step forward and step backward the execution at any point in time. The interesting feature of step backward is that the platform allows user to modify information (e.g.message) which yield difference results from previous execution once it resumed, simply say that it is like back to a past and change events which cause new outcomes of the future.
 
-\subsubsection{Adversary}
-- modify msg queue via gui at runtime
+\subsection*{Adversary}
+\begin{itemize}
+\item modify msg queue via gui at runtime
+\end{itemize}
 
 Since the platform allows user to view and access global message queue that currently are in transmission, therefore, it allows user to modify the message queue by reordering or removing messages. This feature is very powerful in message passing model since message drives the action and states of entities, which include the outcome of the algorithm as well. Therefore, an adversary can use this feature to interrupt the algorithm in order to test and verify correctness of the protocol.
 
-\subsubsection{Limitation}
-- limited api accessing environment info
-- send msg to one or all only
-- adjust and config environment
-- message passing model only
-- limited topology creation, size, bi-link only
-- limited view and perspective of data presentation
+\subsection*{Limitation}
+\begin{itemize}
+\item limited api accessing environment info
+\item send msg to one or all only
+\item adjust and config environment
+\item message passing model only
+\item limited topology creation, size, bi-link only
+\item limited view and perspective of data presentation
+\end{itemize}
 
 DisASTer is a platform for studying behaviors of a simple message passing model algorithm in limited way such that user can observe environment only based on message delay and loses, in which the real distributed environment has many aspects that effect the algorithm such as order of message, modified of message, entity disruption etc. The important feature that platform does not provide is API to access environment info such as number of incoming or outgoing ports etc, and API for sending message to selected targets instead of just one target or all targets in which this tremendously limit the power of algorithm design. Moreover, the platform provide a topology creating that provided in a very limited to size, type of link that support only bi-directional link, and user friendly that provides very limited view and perspective of network and information.
 
