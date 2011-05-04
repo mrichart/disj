@@ -326,13 +326,21 @@ public class Edge implements Serializable {
 	}
 	
 	/**
-	 * Increment number of message has been use in this link
+	 * Increment number of message has entered this link
 	 * 
 	 */
 	public void incNumMsgEnter() {
 		this.stat.incEnterEdge();
 	}
 
+	/**
+	 * Increment number of message has leaved this link
+	 * 
+	 */
+	public void incNumMsgLeave() {
+		this.stat.incLeaveEdge();
+	}
+	
 	public String getGraphId() {
 		return this.graphId;
 	}

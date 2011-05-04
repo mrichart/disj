@@ -429,7 +429,7 @@ public abstract class AgentProcessor implements IProcessor {
 			}
 			
 			// update statistic
-			link.getStat().addTimeUse(execTime - curTime);
+			link.getStat().addTravelTime(execTime - curTime);
 			
 			int eventId = this.getNextId();		
 			IMessage msg = new Message(IConstants.MESSAGE_EVENT_ARRIVE_AT, link.getEdgeId());			 

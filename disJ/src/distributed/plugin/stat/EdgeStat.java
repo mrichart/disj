@@ -70,7 +70,7 @@ public class EdgeStat extends Statistic {
 		return totalTimeUse;
 	}
 
-	public void addTimeUse(int time){		
+	public void addTravelTime(int time){		
 		if(time > 0){
 			Integer old = this.totalTimeUse;
 			this.totalTimeUse += time;

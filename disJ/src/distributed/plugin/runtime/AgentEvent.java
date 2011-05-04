@@ -33,6 +33,13 @@ public class AgentEvent extends Event {
 		this.info = info;
 
 	}
+	
+	/*
+	 * Allow internally modify info (by Adversary)
+	 */
+	public void setMessage(IMessage msg){
+		// TODO do nothing here
+	}
 
 	public String getNodeId() {
 		return targetNodeId;

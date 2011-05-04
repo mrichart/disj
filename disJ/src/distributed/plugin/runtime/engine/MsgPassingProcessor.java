@@ -263,6 +263,7 @@ public class MsgPassingProcessor implements IProcessor {
 			
 			// validate the probability of failure
 			if(this.adversary == null){
+				// No adversary provided
 				if (!recvEdge.isReliable()) {
 					int prob = ran.nextInt(100) + 1;
 					if (prob <= recvEdge.getProbOfFailure()) {
@@ -272,11 +273,14 @@ public class MsgPassingProcessor implements IProcessor {
 					}
 				}
 			}else{
-				Node rNode = recvEdge.getOthereEnd(sNode);
-				if(this.adversary.setDrop(message, recvEdge.getEdgeId(), rNode.getNodeId())){
-					// log for losing msg
-					this.logEdgeFailurMsg(recvEdge, sender, message);
-					continue;		
+				// Use provided adversary to validate
+				if(!recvEdge.isReliable()){
+					Node rNode = recvEdge.getOthereEnd(sNode);
+					if(this.adversary.setDrop(message, recvEdge.getEdgeId(), rNode.getNodeId())){
+						// log for losing msg
+						this.logEdgeFailurMsg(recvEdge, sender, message);
+						continue;		
+					}
 				}
 			}
 
@@ -294,7 +298,7 @@ public class MsgPassingProcessor implements IProcessor {
 			}
 			
 			// update statistic
-			recvEdge.getStat().addTimeUse(execTime - curTime);
+			recvEdge.getStat().addTravelTime(execTime - curTime);
 			
 			int eventId = this.getNextId();		
 			 try {
@@ -368,7 +372,6 @@ public class MsgPassingProcessor implements IProcessor {
 	 * Update node's log after sent message
 	 */
 	private void updateSentLog(Node sender, String port, IMessage msg) {
-		sender.incMsgSend();
 		String[] value = new String[2];
 		value[0] = port;
 		value[1] = msg.getLabel();			
@@ -379,7 +382,6 @@ public class MsgPassingProcessor implements IProcessor {
 	 * Update node's log after received message
 	 */
 	private void updateRecvLog(Node receiver, String port, IMessage msg) {
-		receiver.incMsgRecv();
 		String[] value = new String[2];
 		value[0] = port;
 		value[1] = msg.getLabel();			
@@ -390,7 +392,6 @@ public class MsgPassingProcessor implements IProcessor {
 	 * Update edge's log for entering message
 	 */
 	private void updateEdgeLog(Edge edge, String nodeId, IMessage msg) {
-		edge.incNumMsgEnter();
 		String[] value = new String[2];
 		value[0] = nodeId;
 		value[1] = msg.getLabel();	
@@ -667,8 +668,6 @@ public class MsgPassingProcessor implements IProcessor {
 		Node recv = link.getOthereEnd(this.graph.getNode(event.getHostId()));
 		String port = recv.getPortLabel(link);
 
-		// update statistic
-		link.getStat().incLeaveEdge();
 		
 		// Will NOT execute a Fail node
 		if (recv.isAlive()){
@@ -685,8 +684,11 @@ public class MsgPassingProcessor implements IProcessor {
 			}else{
 				
 				if(this.adversary != null){	
-					// let check adversary commands
-					this.adversary.arrivalControl(event.getMessage(), port, recv.getNodeId());					
+					// allow adversary checks and modifies arrival msg
+					IMessage msg = this.adversary.arrivalControl(event.getMessage(), port, recv.getNodeId());
+					if(msg != null){
+						event.setMessage(msg);
+					}
 				}
 				
 				// check if the port is blocked
@@ -707,7 +709,8 @@ public class MsgPassingProcessor implements IProcessor {
 				// update receive log
 				this.updateRecvLog(recv, port, event.getMessage());
 				
-				// update statistic
+				// update statistic	
+				link.getStat().incLeaveEdge();				
 				recv.getStat().incNumMsgRecv();
 				
 				Entity entity = this.loadEntity(recv);
@@ -839,7 +842,8 @@ public class MsgPassingProcessor implements IProcessor {
 		System.out.println("Total Message has been received: " + totalRecv);
 		System.out.println("Total Message has entered link: " + totalEnter);
 		System.out.println("Total Message has leaved link: " + totalLeave);
-		System.out.println("Total Average delay time has been accumulated: " + timeUse);
+		System.out.println("Total Execution time: " + this.getCurrentTime() + " STUs");
+		System.out.println("Average Message traveling time(accumulated): " + timeUse + " STUs");
 		
 		System.out.println();
 		Iterator<Integer> its = nodeState.keySet().iterator();
@@ -847,7 +851,7 @@ public class MsgPassingProcessor implements IProcessor {
 		for(int stateId = 0; its.hasNext();){
 			stateId = its.next();
 			count = nodeState.get(stateId);
-			System.out.println("State " + this.stateFields.get(stateId) + " has " + count);
+			System.out.println("State " + this.stateFields.get(stateId) + " has " + count + " node(s)");
 		}
 		
 		System.out.println();
@@ -856,7 +860,7 @@ public class MsgPassingProcessor implements IProcessor {
 		for(String type = null; it.hasNext();){
 			type = it.next();
 			count = msgTypes.get(type);
-			System.out.println("Message " + type + " has been created " + count);
+			System.out.println("Message " + type + " has been sent " + count+ " times");
 		}
 	}
 	 

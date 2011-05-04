@@ -82,6 +82,13 @@ public class MsgPassingEvent extends Event{
 				&& e.getExecTime() == this.getExecTime() 
 				&& e.getEventType() == this.getEventType());
 	}
+	
+	/*
+	 * Allow internally modify message (by Adversary)
+	 */
+	public void setMessage(IMessage msg){
+		this.message = msg;
+	}
 
 	public String toString() {
 		return super.toString()+ hostId + IConstants.MAIN_DELIMETER

@@ -39,10 +39,14 @@ public abstract class MsgPassingControl extends AbstractControl {
 	 * @param msg A message that is arriving
 	 * @param incomingPort A port label that message is entering through
 	 * @param nodeId An ID of a destination node of the message
+	 * 
+	 * @return a modified(if necessary) message from adversary, this cannot
+	 * 		be null, otherwise, it will not override
 	 */
-	public void arrivalControl(IMessage msg, String incomingPort, String nodeId){
+	public IMessage arrivalControl(IMessage msg, String incomingPort, String nodeId){
 		// do nothing here
 		// up to adversary to implement
+		return msg;
 	}
 
 	/**

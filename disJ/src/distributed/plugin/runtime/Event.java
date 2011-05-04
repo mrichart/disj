@@ -19,6 +19,8 @@ public abstract class Event implements IEvent<Event>, Serializable{
 		this.execTime = execTime;
 	}
 	
+	public abstract  void setMessage(IMessage msg);
+	
 	public final int getExecTime() {
 		return execTime;
 	}
