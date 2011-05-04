@@ -1,0 +1,31 @@
+
+\begin{itemize}
+\item what is disj
+\item why it is good
+    \begin{enumerate}
+    \item support 3 different distributed models
+    \item using common programming language, java
+    \item provide graph editor viewing and editing that separate from algorithm
+    \item environment adjustment from GUI
+    \item adapt custom random model libraries
+    \item provide adversary control module
+    \item provide statistic views and data
+    \item support replay simulation from recorded file
+    \end{enumerate}
+\item future development
+    \begin{enumerate}
+    \item debugging module with hot code replacement
+    \item mobility support
+    \item statistic graphical and data report
+    \end{enumerate}
+\item main contribution
+\end{itemize}
+
+DisJ simulation is a tool and simulation for develop, test and simulate distributed algorithms in a single processor environment. The simulation supports three different distributed models, message passing, agent with whiteboard, and agent with token, and user can use a common programming language, Java. The simulation provides graph editor that allow user to create and modify topology and its environments via graphical user interface, which the topologies are totally independent from algorithm and the topologies can be reused by different algorithms. The simulation provide a channel for user to plug-in custom probability model into the system instead of using probability models provided by the simulation. User also able to write an adversary control code in Java language and plug-in into the system in order to verify an algorithm during simulation execution. The simulation provides statistical data and charts of executing algorithm for user to analyze the results. Moreover, the simulation save a last execution of the simulation in file I/O system, which the recorded file will be used by replay function to replay the past execution in order to have a closer look at behaviors and states of the algorithm that was exactly happen during the simulation.
+
+Despite DisJ simulation has many functionalities and features, but there are a lot of works need to be done, such as debugging facility that allows user to trace and update algorithm and data while the simulation is running. Mobility of entities also is another features that DisJ should support for agent in a plana instead of netscape network only. Also the improvement of statistical reports which is very important for user to be able to look at report and able to analyze the problem and performance quickly.
+
+The main contribution is 
+- provide a simulation for 3 difference kind of distributed algorithm
+- provide a complete life cycle development tool of the algorithm
+- reduce works load and requirements for user in develop and testing the algorithm
