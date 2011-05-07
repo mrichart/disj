@@ -500,6 +500,7 @@ public class Node implements Serializable {
 		boolean s = this.portStates.remove(old);
 		this.portStates.put(port, s);
 		
+		// reassign event list
 		List<Event> list = this.blockedEvents.remove(old);
 		if(list != null){
 			this.blockedEvents.put(port, list);
@@ -553,7 +554,11 @@ public class Node implements Serializable {
 			throw new IllegalArgumentException("@Node.addEventToBlockList() port " 
 					+ portLabel + " not found ");
 		}
+		
 		List<Event> events = this.blockedEvents.get(portLabel);
+		if(events == null){
+			events = new ArrayList<Event>();
+		}
 		events.add(event);
 		this.blockedEvents.put(portLabel, events);
 	}

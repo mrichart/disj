@@ -39,6 +39,7 @@ import distributed.plugin.runtime.GraphLoader;
 import distributed.plugin.runtime.IMessage;
 import distributed.plugin.runtime.IProcessor;
 import distributed.plugin.runtime.MsgPassingEvent;
+import distributed.plugin.runtime.adversary.BlockFlag;
 import distributed.plugin.runtime.adversary.MsgPassingControl;
 import distributed.plugin.stat.GraphStat;
 import distributed.plugin.ui.IGraphEditorConstants;
@@ -244,7 +245,14 @@ public class MsgPassingProcessor implements IProcessor {
 		Node sNode = this.graph.getNode(sender);
 		String msgLabel = message.getLabel();
 		Serializable data = message.getContent();
-	
+		IMessage orgMsg = null;
+		
+		try {
+			orgMsg = (IMessage) SimulatorEngine.deepClone(message);
+		} catch (IOException e) {
+			throw new DisJException(e);
+		}
+		
 		// sending message
 		for (int i = 0; i < receivers.size(); i++) {
 			String port = receivers.get(i);
@@ -291,6 +299,7 @@ public class MsgPassingProcessor implements IProcessor {
 				
 			}else{
 				Node rNode = recvEdge.getOthereEnd(sNode);
+				
 				execTime = this.adversary.setArrivalTime(message, recvEdge.getEdgeId(), rNode.getNodeId());
 				if(execTime <= curTime){
 					execTime = curTime + 1;
@@ -682,26 +691,31 @@ public class MsgPassingProcessor implements IProcessor {
 				recv.addEventToBlockList(port, event);
 				
 			}else{
-				
+				BlockFlag pass = BlockFlag.DEFAULT;
 				if(this.adversary != null){	
-					// allow adversary checks and modifies arrival msg
-					IMessage msg = this.adversary.arrivalControl(event.getMessage(), port, recv.getNodeId());
-					if(msg != null){
-						event.setMessage(msg);
+					// allow adversary to do some actions at a node before 
+					// this msg arrives
+					IMessage msg = event.getMessage();					
+					pass = this.adversary.arrivalControl(msg, recv.getNodeId(), port);
+										
+				}
+				if(pass == BlockFlag.DEFAULT){				
+					// check if the port of a node is blocked
+					if (recv.isBlocked(port) == true) {						
+						// add event to a block queue
+						recv.addEventToBlockList(port, event);
+						return;
 					}
-				}
-				
-				// check if the port is blocked
-				if (recv.isBlocked(port) == true) {						
-					// add event to a block queue
-					recv.addEventToBlockList(port, event);
-					return;
-				}
-				
-				// check whether a given msg label is blocked
-				String msgLabel = event.getMessage().getLabel();
-				if(recv.isVisitorBlocked(msgLabel, port)){
-					// add event to a block queue
+					
+					// check whether a given msg label is blocked
+					String msgLabel = event.getMessage().getLabel();
+					if(recv.isVisitorBlocked(msgLabel, port)){
+						// add event to a block queue
+						recv.addEventToBlockList(port, event);
+						return;
+					}
+				} else if(pass == BlockFlag.BLOCK){
+					// block only this specific event
 					recv.addEventToBlockList(port, event);
 					return;
 				}
@@ -843,7 +857,7 @@ public class MsgPassingProcessor implements IProcessor {
 		System.out.println("Total Message has entered link: " + totalEnter);
 		System.out.println("Total Message has leaved link: " + totalLeave);
 		System.out.println("Total Execution time: " + this.getCurrentTime() + " STUs");
-		System.out.println("Average Message traveling time(accumulated): " + timeUse + " STUs");
+		System.out.println("Average Message traveling time(accumulated): " + timeUse + " STUs/link");
 		
 		System.out.println();
 		Iterator<Integer> its = nodeState.keySet().iterator();

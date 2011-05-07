@@ -15,7 +15,7 @@ import distributed.plugin.runtime.MsgPassingEvent;
 import distributed.plugin.runtime.engine.MsgPassingProcessor;
 
 public abstract class MsgPassingControl extends AbstractControl {
-		
+	
 	/**
 	 * Allow adversary to specify the time of initiation of 
 	 * a given node ID
@@ -32,43 +32,44 @@ public abstract class MsgPassingControl extends AbstractControl {
 	
 	
 	/**
-	 * Allow adversary to control and manipulate incoming message
-	 * at a node. This will be called right before it entering
-	 * a port of a node
+	 * Allow adversary to control and manipulate actions of a node before 
+	 * a message arrives at the node. Also allows the adversary to override
+	 * any blocking/unblocking that may occur to the message at the node	 
+	 * 
+	 * Note: It is adversary duty to make sure any blocked message will be 
+	 * 		unblocked
 	 * 
 	 * @param msg A message that is arriving
-	 * @param incomingPort A port label that message is entering through
-	 * @param nodeId An ID of a destination node of the message
+	 * @param nodeId An ID of a node that receives the message
+	 * @param incomingPort A port label that the message is entering through
 	 * 
-	 * @return a modified(if necessary) message from adversary, this cannot
-	 * 		be null, otherwise, it will not override
+	 * @return BlockFlag.PASS if this message must be received now, 
+	 * 		   BlockFlag.BLOCK if the message has to be blocked,
+	 * 		   BlockFlag.DEFAULT no overriding
 	 */
-	public IMessage arrivalControl(IMessage msg, String incomingPort, String nodeId){
-		// do nothing here
-		// up to adversary to implement
-		return msg;
-	}
+	public abstract BlockFlag arrivalControl(final IMessage msg, String nodeId, String incomingPort);
 
 	/**
-	 * Allow adversary to configure an arrival time for message before it  
-	 * enters an edge
+	 * Allow adversary to configure an arrival time for message while it is
+	 * in an edge
 	 * 
 	 * Note: A returning time MUST be more than a current time, 
 	 * otherwise a current time + 1 will be returned. 
 	 * 
 	 * @param msg A message that is entering
-	 * @param edgeId An ID of a link that will be used by message
-	 * @param nodeId An ID of a node destination of a message
+	 * @param edgeId An ID of a link message is using
+	 * @param nodeId An ID of a destination node
 	 * 
-	 * @return A simulation time that message will be received by the node
+	 * @return A simulation time that message will be arrived at the node
 	 */
-	public int setArrivalTime(IMessage msg, String edgeId, String nodeId) {
+	public int setArrivalTime(final IMessage msg, String edgeId, String nodeId) {
 		Node sender;
 		int delay = 0;
 		int curTime = this.getCurrentTime();
 		Edge edge = this.getEdge(edgeId);
 		sender = edge.getOthereEnd(this.getNode(nodeId));
 		delay = edge.getDelayTime(sender, curTime);
+		
 		return delay;
 	}
 
@@ -83,7 +84,7 @@ public abstract class MsgPassingControl extends AbstractControl {
 	 * @return True if the message will be lost before a node receive,
 	 * otherwise false
 	 */
-	public boolean setDrop(IMessage msg, String edgeId, String nodeId) {
+	public boolean setDrop(final IMessage msg, String edgeId, String nodeId) {
 		Random ran = new Random(System.currentTimeMillis());
 		Edge edge = this.getEdge(edgeId);
 		if(!edge.isReliable()){
@@ -96,11 +97,11 @@ public abstract class MsgPassingControl extends AbstractControl {
 
 	/**
 	 * Allow adversary to block any message that has a given message label 
-	 * at a given port of a node
+	 * at a given port at a given node
 	 * 
 	 * @param msgLable A message label that want to block
 	 * @param incomingPort A port that want to block
-	 * @param nodeId An ID of a node that wants to block
+	 * @param nodeId An ID of a node that do the blocking
 	 */
 	public final void blockMsg(String msgLable, String incomingPort, String nodeId){
 		Node recv = this.getNode(nodeId);

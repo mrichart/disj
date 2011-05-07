@@ -375,15 +375,15 @@ public class ProcessActions extends WorkbenchPartAction {
 			if(clientAdv != null){
 				int model = editor.getGraphElement().getGraph().getModelId();
 				if(model == IConstants.MODEL_MESSAGE_PASSING){
-					 if(MsgPassingControl.class.isAssignableFrom(client)){
+					 if(MsgPassingControl.class.isAssignableFrom(clientAdv)){
 						 pass = true;
 					 }
 				} else if (model == IConstants.MODEL_AGENT_WHITEBOARD){
-					if(AgentControl.class.isAssignableFrom(client)){
+					if(AgentControl.class.isAssignableFrom(clientAdv)){
 						 pass = true;
 					 }
 				} else if (model == IConstants.MODEL_AGENT_TOKEN){
-					if(AgentControl.class.isAssignableFrom(client)){
+					if(AgentControl.class.isAssignableFrom(clientAdv)){
 						 pass = true;
 					 }
 				}

@@ -11,9 +11,8 @@ import distributed.plugin.runtime.IProcessor;
 import distributed.plugin.runtime.MsgPassingEvent;
 
 public abstract class AbstractControl {
-
-	IProcessor proc;
 	
+	IProcessor proc;	
 	
 	/*
 	 * Register a processor to this adversary program
@@ -101,7 +100,7 @@ public abstract class AbstractControl {
 			// pump it back to processing queue
 			this.proc.pushEvents(events);
 			
-		}					
+		}
 	}
 	
 	/**
