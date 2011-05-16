@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
@@ -34,6 +33,8 @@ import distributed.plugin.core.Logger;
 import distributed.plugin.core.Node;
 import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.random.IRandom;
+import distributed.plugin.random.Poisson;
+import distributed.plugin.random.Uniform;
 import distributed.plugin.runtime.Event;
 import distributed.plugin.runtime.GraphLoader;
 import distributed.plugin.runtime.IMessage;
@@ -129,9 +130,21 @@ public class MsgPassingProcessor implements IProcessor {
 		
 		this.initClientStateVariables();
 		if (clientRandom != null) {
-			this.randomGen = this.initClientRandom(clientRandom);
-			this.graph.setClientRandom(this.randomGen);
+			this.randomGen = this.initClientRandom(clientRandom);			
+		}else{
+			// NOTE: if user change properties after process starts, the change will
+			// not have effect.
+			// check with user setting in graph properties
+			if(this.graph.getGlobalDelayType() == IConstants.MSGDELAY_GLOBAL_RANDOM_POISSON){
+				this.randomGen = Poisson.getInstance(System.currentTimeMillis());
+			}else{
+				// For now: use uniform random generator for other setting
+				// in global graph properties sheet
+				this.randomGen = Uniform.getInstance(System.currentTimeMillis());
+			}
 		}
+		this.graph.setClientRandom(this.randomGen);
+		
 		if(clientAdver != null){
 			this.adversary = this.initClientAdversary(clientAdver);
 			this.adversary.setProcessor(this);
@@ -240,19 +253,11 @@ public class MsgPassingProcessor implements IProcessor {
 	public void processReqeust(String sender, List<String> receivers, IMessage message)
 			throws DisJException {
 
-		Random ran = new Random(System.currentTimeMillis());
 		List<Event> newEvents = new ArrayList<Event>();
 		Node sNode = this.graph.getNode(sender);
 		String msgLabel = message.getLabel();
 		Serializable data = message.getContent();
-		IMessage orgMsg = null;
-		
-		try {
-			orgMsg = (IMessage) SimulatorEngine.deepClone(message);
-		} catch (IOException e) {
-			throw new DisJException(e);
-		}
-		
+				
 		// sending message
 		for (int i = 0; i < receivers.size(); i++) {
 			String port = receivers.get(i);
@@ -273,7 +278,7 @@ public class MsgPassingProcessor implements IProcessor {
 			if(this.adversary == null){
 				// No adversary provided
 				if (!recvEdge.isReliable()) {
-					int prob = ran.nextInt(100) + 1;
+					int prob = this.randomGen.nextInt(100);
 					if (prob <= recvEdge.getProbOfFailure()) {
 						// log for losing msg
 						this.logEdgeFailurMsg(recvEdge, sender, message);
@@ -518,21 +523,18 @@ public class MsgPassingProcessor implements IProcessor {
 				init.addEntity(clientObj);				
 			}
 			
-			//Random r = new Random(System.currentTimeMillis());
 			List<Event> events = new ArrayList<Event> ();
 			// create a set of init events
 			for (int i = 0; i < initNodes.size(); i++) {
 				Node init = initNodes.get(i);
 				if(init.isAlive()){
 					int eventId = this.getNextId();
-					int execTime = 0;
 					
-					// it has delay initialize, set active time to random
-					// OR TODO get a delay initialize time from user input
-					//if (!init.hasDelayInit()){
-					//	execTime = r.nextInt(IConstants.MAX_RANDOM_RANGE);
-					//}
-	
+					// There is no need for random init time
+					// for node since it is for adversary to
+					// control.
+					int execTime = 0;
+										
 					// add an event into a queue
 					IMessage msg = new Message("Initialized", new Integer(execTime));
 					Event e = new MsgPassingEvent(init.getNodeId(), IConstants.EVENT_INITIATE_TYPE,

@@ -158,7 +158,7 @@ public class Edge implements Serializable {
 				
 			} else {				
 				String msg = "Edge " +  this + " does not contain sender node " + sender;
-				System.err.println(msg);
+				System.err.println("@Edge: " + msg);
 				throw new RuntimeException(msg);
 			}
 	
@@ -178,7 +178,7 @@ public class Edge implements Serializable {
 				}				
 			}  else {				
 				String msg = "Edge " +  this + " does not contain sender node " + sender;
-				System.err.println(msg);
+				System.err.println("@Edge: " + msg);
 				throw new RuntimeException(msg);
 			}
 
@@ -213,7 +213,7 @@ public class Edge implements Serializable {
 				}				
 			}  else {				
 				String msg = "Edge " +  this + " does not contain sender node " + sender;
-				System.err.println(msg);
+				System.err.println("@Edge: " + msg);
 				throw new RuntimeException(msg);
 			}
 
@@ -257,7 +257,7 @@ public class Edge implements Serializable {
 					}				
 				}  else {				
 					String msg = "Edge " +  this + " does not contain sender node " + sender;
-					System.err.println(msg);
+					System.err.println("@Edge: " + msg);
 					throw new RuntimeException(msg);
 				}
 

@@ -34,9 +34,11 @@ public class Graph implements Serializable {
 
 	private int globalFlowType; // FIFO
 	
-	private int globalDelayType; // a type of delay i.e random uniform,
+	// a type of delay i.e random uniform. This is for symbolic display only,
+	// since the actual random engine will be used at edge level
+	private int globalDelayType; 
 	
-	private int globalDelaySeed; // it's useful for synch delay and random
+	private int globalDelaySeed; // it's useful for synchronous delay only
 	
 	private int currentNodeId;
 

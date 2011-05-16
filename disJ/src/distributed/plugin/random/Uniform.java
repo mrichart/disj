@@ -12,12 +12,12 @@ public class Uniform implements IRandom {
 		super();
 		this.rand = new Random();
 	}
-	private Uniform( long seed ) {
+	private Uniform(long seed) {
 		super();
 		rand = new Random( seed );
 	}
 
-	public static synchronized IRandom getInstance( long seed ){
+	public static synchronized IRandom getInstance(long seed){
 		if(INSTANCE == null){
 			INSTANCE = new Uniform( seed );
 		}
@@ -29,7 +29,7 @@ public class Uniform implements IRandom {
 		return rand.nextInt(n);
 	}
 
-	public void setSeed( long seed ) {
+	public void setSeed(long seed) {
 		rand.setSeed( seed );
 
 	}

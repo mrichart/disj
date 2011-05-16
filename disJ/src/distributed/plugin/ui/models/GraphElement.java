@@ -440,13 +440,13 @@ public class GraphElement extends AdapterElement {
       		int globalType = ((Integer)value).intValue();
       		this.graph.setGlobalDelayType(globalType);
       	
-        	// set all local to be the same, except Mix
-      		int local_type = this.mapGlobalDelayType(globalType);
-        	if(local_type >= 0){
+        	// get corresponding local type with new global type
+      		int type = this.mapGlobalDelayType(globalType);
+        	if(type > -1){
 	    		Map<String, Edge> edges = this.graph.getEdges();
 	        	for (String label : edges.keySet()) {
 	        		Edge ed = edges.get(label);          
-	        		ed.setDelayType(local_type);
+	        		ed.setDelayType(type);
 				}
         	}
         } else if (id.equals(PROPERTY_GLOBAL_DELAY_SEED)) {
@@ -541,6 +541,9 @@ public class GraphElement extends AdapterElement {
     }
     
 
+    /*
+     * 
+     */
     private final short mapGlobalDelayType(int type) {   	
     	if (type == IConstants.MSGDELAY_GLOBAL_SYNCHRONOUS){
     		return IConstants.MSGDELAY_LOCAL_FIXED;

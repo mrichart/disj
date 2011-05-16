@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
@@ -21,13 +20,14 @@ import distributed.plugin.core.Logger;
 import distributed.plugin.core.Node;
 import distributed.plugin.core.Logger.logTag;
 import distributed.plugin.random.IRandom;
+import distributed.plugin.random.Poisson;
+import distributed.plugin.random.Uniform;
 import distributed.plugin.runtime.AgentEvent;
 import distributed.plugin.runtime.Event;
 import distributed.plugin.runtime.GraphLoader;
 import distributed.plugin.runtime.IMessage;
 import distributed.plugin.runtime.IProcessor;
 import distributed.plugin.runtime.adversary.AgentControl;
-import distributed.plugin.runtime.adversary.MsgPassingControl;
 import distributed.plugin.runtime.engine.AgentModel.NotifyType;
 import distributed.plugin.stat.GraphStat;
 import distributed.plugin.ui.IGraphEditorConstants;
@@ -115,9 +115,22 @@ public abstract class AgentProcessor implements IProcessor {
 		
 		// initiate client custom instances
 		if (clientRandom != null) {
-			this.randomGen = this.initClientRandom(clientRandom);
-			this.graph.setClientRandom(this.randomGen);
+			this.randomGen = this.initClientRandom(clientRandom);			
+		}else{
+			// NOTE: if user change properties after process starts, the change will
+			// not have effect.
+			// check with user setting in graph properties
+			if(this.graph.getGlobalDelayType() == IConstants.MSGDELAY_GLOBAL_RANDOM_POISSON){
+				this.randomGen = Poisson.getInstance(System.currentTimeMillis());
+			}else{
+				// For now: use uniform random generator for other setting
+				// in global graph properties sheet
+				this.randomGen = Uniform.getInstance(System.currentTimeMillis());
+			}
 		}
+		this.graph.setClientRandom(this.randomGen);
+		
+		
 		if(clientAdver != null){
 			this.adversary = this.initClientAdversary(clientAdver);
 			this.adversary.setProcessor(this);
@@ -272,8 +285,7 @@ public abstract class AgentProcessor implements IProcessor {
 						
 			// create a set of init events
 			int execTime;
-			IMessage msg;
-			Random r = new Random(System.currentTimeMillis());
+			IMessage msg;			
 			List<Event> events = new ArrayList<Event>();			
 			for (int i = 0; i < hosts.size(); i++) {
 				Node host = hosts.get(i);
@@ -286,9 +298,9 @@ public abstract class AgentProcessor implements IProcessor {
 					msg = new Message("Initialized", new Integer(execTime));
 					
 					// it is not a starter, set the starting time to random
-					// OR TODO get a start time from user input
+					// FIXME get a start time from user input
 					if (!agent.isStarter()){
-						execTime = r.nextInt(IConstants.MAX_RANDOM_RANGE);
+						execTime = this.randomGen.nextInt(IConstants.MAX_RANDOM_RANGE);
 					}
 					// add an event into a queue
 					Event e = new AgentEvent(IConstants.EVENT_INITIATE_TYPE,
@@ -382,12 +394,11 @@ public abstract class AgentProcessor implements IProcessor {
 			agent.getStat().incMove();
 			agent.getStat().incStateMove(agent.getCurState());
 			link.getStat().incEnterEdge();
-			
-			// validate the probability of failure
+						
+			// validate the probability of failure of a link
 			if(this.adversary == null){
 				if (!link.isReliable()) {
-					Random ran = new Random(System.currentTimeMillis());
-					int prob = ran.nextInt(100) + 1;
+					int prob = this.randomGen.nextInt(100);
 					if (prob <= link.getProbOfFailure()) {
 						this.systemOut.println("Agent " + agentId + " lost in a link " 
 								+ link.getEdgeId()

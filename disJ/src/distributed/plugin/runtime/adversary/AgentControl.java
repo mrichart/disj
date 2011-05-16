@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import distributed.plugin.core.Edge;
 import distributed.plugin.core.IConstants;
@@ -30,18 +29,23 @@ public abstract class AgentControl extends AbstractControl {
 	}
 	
 	/**
-	 * Allow adversary to control and manipulate incoming agent
-	 * to a node. This will be called right before it entering
-	 * a port of a node
+	 * Allow adversary to control and manipulate actions of a node before 
+	 * a message arrives at the node. Also allows the adversary to override
+	 * any blocking/unblocking that may occur to the message at the node	 
 	 * 
-	 * @param agentId An ID of agent that is arriving
-	 * @param arrivalPort A port that agent is entering through
-	 * @param nodeId An ID of a destination node
+	 * Note: It is adversary duty to make sure any blocked message will be 
+	 * 		unblocked
+	 * 
+	 * @param agentId An of agent that arrives
+	 * @param nodeId An ID of a node that the agent is arriving
+	 * @param incomingPort A port label that the agent is entering through
+	 * 
+	 * @return BlockFlag.PASS if this agent must arrive now, 
+	 * 		   BlockFlag.BLOCK if the agent has to be blocked,
+	 * 		   BlockFlag.DEFAULT no overriding
 	 */
-	public void arrivalControl(String agentId, String arrivalPort, String nodeId){
-		// do nothing here
-		// up to adversary to implement
-	}
+	public abstract BlockFlag arrivalControl(String agentId, String nodeId, String incomingPort);
+
 	
 	/**
 	 * Allow adversary to configure an arrival time of agent to 
@@ -78,10 +82,9 @@ public abstract class AgentControl extends AbstractControl {
 	 * otherwise false
 	 */
 	public boolean setDrop(String agentId, String edgeId, String nodeId) {
-		Random ran = new Random(System.currentTimeMillis());
 		Edge edge = this.getEdge(edgeId);
 		if(!edge.isReliable()){
-			int prob = ran.nextInt(100) + 1;
+			int prob = this.getRandomGen().nextInt(100);
 			return (prob <= edge.getProbOfFailure());
 		}else{
 			return false;

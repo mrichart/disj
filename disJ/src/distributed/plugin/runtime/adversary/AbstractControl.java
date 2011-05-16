@@ -6,13 +6,16 @@ import java.util.Map;
 
 import distributed.plugin.core.Edge;
 import distributed.plugin.core.Node;
+import distributed.plugin.random.IRandom;
 import distributed.plugin.runtime.Event;
 import distributed.plugin.runtime.IProcessor;
 import distributed.plugin.runtime.MsgPassingEvent;
 
 public abstract class AbstractControl {
 	
+	
 	IProcessor proc;	
+	private IRandom clientRandom;
 	
 	/*
 	 * Register a processor to this adversary program
@@ -21,7 +24,17 @@ public abstract class AbstractControl {
 	public final void setProcessor(IProcessor proc){
 		if(proc != null){
 			this.proc = proc;
+			this.clientRandom = this.proc.getGraph().getClientRandom();
 		}
+		
+	}
+	
+	/**
+	 * Get current client random generator that is being used
+	 * @return
+	 */
+	public final IRandom getRandomGen(){
+		return this.clientRandom;
 	}
 	
 	Node getNode(String nodeId){
