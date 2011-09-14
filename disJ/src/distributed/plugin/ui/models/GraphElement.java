@@ -57,13 +57,13 @@ public class GraphElement extends AdapterElement {
 	private static final String PROPERTY_GLOBAL_DELAY_SEED = "G07 Global Delay Seed";
 	private static final String PROPERTY_PROTOCOL = "G08 Protocol";
 	private static final String PROPERTY_MAX_TOKEN = "G09 Max Number of Tokens per Agent";
-	private static final String PROPERTY_TOTAL_AGENT = "G10 Number of Agents at Start";
+	private static final String PROPERTY_TOTAL_INIT_AGENT = "G10 Number of Agents at Start";
 	private static final String PROPERTY_TOTAL_ALIVE_AGENT = "G11 Current Number of Agents";
     
 	private static final String[] propertyArray = {PROPERTY_NAME, PROPERTY_TOTAL_NODE,
 		PROPERTY_TOTAL_LINK, PROPERTY_TOTAL_MSG_RECV, PROPERTY_TOTAL_MSG_SENT,
 		PROPERTY_GLOBAL_MSG_FLOW_TYPE, PROPERTY_GLOBAL_DELAY_TYPE, PROPERTY_GLOBAL_DELAY_SEED, 
-		PROPERTY_PROTOCOL, PROPERTY_MAX_TOKEN, PROPERTY_TOTAL_AGENT, PROPERTY_TOTAL_ALIVE_AGENT};
+		PROPERTY_PROTOCOL, PROPERTY_MAX_TOKEN, PROPERTY_TOTAL_INIT_AGENT, PROPERTY_TOTAL_ALIVE_AGENT};
 	
 	private static final int NUM_PROPERTIES = propertyArray.length;
 	 
@@ -106,7 +106,7 @@ public class GraphElement extends AdapterElement {
         ((PropertyDescriptor) descriptors[9])
         		.setValidator(NumberCellEditorValidator.instance());
         
-        descriptors[10] = new PropertyDescriptor(PROPERTY_TOTAL_AGENT, PROPERTY_TOTAL_AGENT);
+        descriptors[10] = new PropertyDescriptor(PROPERTY_TOTAL_INIT_AGENT, PROPERTY_TOTAL_INIT_AGENT);
         
         descriptors[11] = new PropertyDescriptor(PROPERTY_TOTAL_ALIVE_AGENT, PROPERTY_TOTAL_ALIVE_AGENT);
     }
@@ -374,13 +374,13 @@ public class GraphElement extends AdapterElement {
         } else if (propName.equals(PROPERTY_MAX_TOKEN)) {
             return "" + this.graph.getMaxToken();
             
-        } else if (propName.equals(PROPERTY_TOTAL_AGENT)) {
+        } else if (propName.equals(PROPERTY_TOTAL_INIT_AGENT)) {
         	int count = graph.getStat().getTotalAgent();
         	
         	// process hasn't started yet
         	if(count == 0){       		
         		// then read from GUI
-        		count = this.getNumAgents();
+        		count = this.getTotalInitAgent();
         	}
             return "" + count;
             
@@ -393,15 +393,15 @@ public class GraphElement extends AdapterElement {
     }
     
     /*
-     * Get number of agent from node that receives directly
-     * from GUI properties view
+     * Get total of number of init agent from node that receives directly
+     * from user input at GUI properties view
      */
-    private int getNumAgents(){
+    private int getTotalInitAgent(){
     	Map<String, Node> map = this.graph.getNodes();
     	int count = 0;
     	for (String id : map.keySet()) {
 			Node n = map.get(id);
-			count += n.getNumAgent();
+			count += n.getNumInitAgent();
 		}
     	return count;
     }

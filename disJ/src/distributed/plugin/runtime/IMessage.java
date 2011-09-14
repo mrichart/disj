@@ -2,7 +2,9 @@ package distributed.plugin.runtime;
 
 import java.io.Serializable;
 
-public interface IMessage extends Serializable{
+import distributed.plugin.core.ITransmissible;
+
+public interface IMessage extends ITransmissible {
 
 	/**
 	 * Get a message label of message

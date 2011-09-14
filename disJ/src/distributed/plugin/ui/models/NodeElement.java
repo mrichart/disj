@@ -324,7 +324,7 @@ public class NodeElement extends AdapterElement {
 			return this.node.getStateList();
 
 		} else if (propName.equals(PROPERTY_NUM_INIT_AGENT)) {
-			return "" + this.node.getNumAgent();
+			return "" + this.node.getNumInitAgent();
 
 		} else if (propName.equals(PROPERTY_NUM_AGENT)) {
 			return "" + this.node.getAllAgents().size();

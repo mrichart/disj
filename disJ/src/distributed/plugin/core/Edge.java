@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import distributed.plugin.random.IRandom;
 import distributed.plugin.random.Poisson;
@@ -58,6 +60,12 @@ public class Edge implements Serializable {
 	transient private Node end;
 
 	transient private EdgeStat stat;
+	
+	/*
+	 * A list of packets that currently transmitting inside this link
+	 */
+	transient private List<ITransmissible> curPackets;
+	
 	
 	protected PropertyChangeSupport listeners = new PropertyChangeSupport(this);
 	
@@ -108,9 +116,11 @@ public class Edge implements Serializable {
 			throw new DisJException(IConstants.ERROR_10, start.toString());
 		}
 		
+		// transient variables
 		this.start = start;
 		this.end = end;
 		this.stat = new EdgeStat(this.edgeId);
+		this.curPackets = new ArrayList<ITransmissible>();
 	}
 
 	
@@ -132,6 +142,56 @@ public class Edge implements Serializable {
 		this.lastestMsgTimeForEnd = 0;
 		this.lastestMsgTimeForStart = 0;	
 		this.stat.reset();		
+	}
+	
+	/**
+	 * Add a packet that are transmitting under this edge
+	 * @param packet
+	 */
+	public void addPacket(ITransmissible packet){
+		if(!curPackets.contains(packet)){
+			this.curPackets.add(packet);
+			
+			if(packet instanceof Agent){
+				this.firePropertyChange(IConstants.PROPERTY_CHANGE_AGENT_AT_EDGE, null,
+					this);
+			}
+		}
+	}
+	
+	/**
+	 * Remove packet that is leaving this edge
+	 * @param packet
+	 */
+	public void removePacket(ITransmissible packet){
+		if(curPackets.contains(packet)){
+			this.curPackets.remove(packet);
+			
+			if(packet instanceof Agent){
+				this.firePropertyChange(IConstants.PROPERTY_CHANGE_AGENT_AT_EDGE, null,
+					this);
+			}
+		}
+	}
+	
+	/**
+	 * Get all current packets that are in transmission
+	 * @return
+	 */
+	public List<ITransmissible> getCurTransmission(){
+		return this.curPackets;
+	}
+	
+	public void clearCurTransmission(){
+		this.curPackets.clear();
+	}
+	
+	/**
+	 * Count number of packets under transmission
+	 * @return
+	 */
+	public int countTransmission(){
+		return this.curPackets.size();
 	}
 	
 	public EdgeStat getStat() {
@@ -512,6 +572,7 @@ public class Edge implements Serializable {
     	// rebuild this object
     	os.defaultReadObject();
     	this.stat = new EdgeStat(this.edgeId);
+    	this.curPackets = new ArrayList<ITransmissible>();
     }
 
 }

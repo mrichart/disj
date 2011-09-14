@@ -10,10 +10,19 @@
 
 package distributed.plugin.ui.figures;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.RoundedRectangle;
+import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.ToolbarLayout;
+import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
 
+import distributed.plugin.ui.Activator;
 import distributed.plugin.ui.IGraphEditorConstants;
 
 /**
@@ -24,31 +33,66 @@ import distributed.plugin.ui.IGraphEditorConstants;
  */
 public class NodeFigure extends RoundedRectangle {    
 
-    /** The figure's anchor. */
-    // private ChopboxAnchor anchor;
-    /**
-     * Constructor
-     */
-    private Label label;
+	private static Image IMG_AGENT;
+	
+	private static ImageDescriptor IDSC_AGENT;
+	
+	private Label label;
+    
+    private int numAgent;
+    
+	static {
+		try {
+			URL installUrl = Activator.getDefault().getBundle().getEntry("/");
+			URL imageUrl = new URL(installUrl, "icons/agent.png");
+			IDSC_AGENT = ImageDescriptor.createFromURL(imageUrl);
+			IMG_AGENT = IDSC_AGENT.createImage();
+		}catch (MalformedURLException e) {
+		}
+	}   
     
     public NodeFigure(String name) {
         super();
-//        System.err.println("[NodeFigure] created");
-        // this.anchor = new ChopboxAnchor(this);
         label = new Label(name);
         add(label);
         ToolbarLayout layout = new ToolbarLayout();
         setLayoutManager(layout);
-        // setBorder(new RaisedBorder());
         setBackgroundColor(IGraphEditorConstants.DEFAULT_NODE_COLOR);
         setOpaque(true);
         setSize(IGraphEditorConstants.NODE_SIZE, IGraphEditorConstants.NODE_SIZE);
     }
 
+    /**
+     * @see Shape#outlineShape(Graphics)
+     */
+    public void outlineShape(Graphics graphics) {
+    	super.outlineShape(graphics);
+    	if(numAgent == 1){
+    		Rectangle f = Rectangle.SINGLETON;
+    		graphics.drawString("A", f.x, f.y);
+    		System.out.println("Num Agent: = 1");
+    		
+    	} else if (numAgent > 1){
+    		System.out.println("Num Agent: = " + this.numAgent);
+    	}
+    	
+//    	Rectangle f = Rectangle.SINGLETON;
+//    	Rectangle r = getBounds();
+//    	f.x = r.x + lineWidth / 2;
+//    	f.y = r.y + lineWidth / 2;
+//    	f.width = r.width - lineWidth;
+//    	f.height = r.height - lineWidth;
+//    	graphics.drawRoundRectangle(f, corner.width, corner.height);
+    	
+    }
+    
 	public Label getLabel() {
 		return label;
 	}
     
+	public void setNumAgent(int num){
+		this.numAgent = num;
+	}
     
 
 

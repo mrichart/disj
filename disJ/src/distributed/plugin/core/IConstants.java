@@ -143,7 +143,8 @@ public interface IConstants {
     public static final String PROPERTY_CHANGE_REM_NODE = "rem_node";
 	public static final String PROPERTY_CHANGE_STATE_NODE = "node_state_changed";
 	public static final String PROPERTY_CHANGE_NUM_TOK_NODE = "node_num_token_changed";
-	public static final String PROPERTY_CHANGE_AGENT_AT_NODE = "num_agent_at_node";	
+	public static final String PROPERTY_CHANGE_AGENT_AT_NODE = "num_agent_at_node";		
+	public static final String PROPERTY_CHANGE_AGENT_AT_EDGE = "num_agent_at_edge";
 
     public static final String PROPERTY_CHANGE_ADD_AGENT = "add_agent";
     public static final String PROPERTY_CHANGE_REM_AGENT = "rem_agent";

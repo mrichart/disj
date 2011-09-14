@@ -1,11 +1,10 @@
 package distributed.plugin.runtime;
 
-import java.io.Serializable;
-
 import distributed.plugin.core.IConstants;
+import distributed.plugin.core.ITransmissible;
 
 @SuppressWarnings("serial")
-public abstract class Event implements IEvent<Event>, Serializable{
+public abstract class Event implements IEvent<Event>, ITransmissible{
 	
 	private short eventType;
 
@@ -19,7 +18,12 @@ public abstract class Event implements IEvent<Event>, Serializable{
 		this.execTime = execTime;
 	}
 	
-	public abstract  void setMessage(IMessage msg);
+	/**
+	 * A back door for developer to modify event data info
+	 * 
+	 * @param msg
+	 */
+	public abstract  void setEventInfo(IMessage msg);
 	
 	public final int getExecTime() {
 		return execTime;

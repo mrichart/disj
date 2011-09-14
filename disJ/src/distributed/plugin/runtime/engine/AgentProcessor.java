@@ -249,7 +249,7 @@ public abstract class AgentProcessor implements IProcessor {
 			// load host nodes that contain agent(s)
 			for (int i = 0; i < hosts.size(); i++) {
 				Node host = hosts.get(i);
-				int numAgent = host.getNumAgent();
+				int numAgent = host.getNumInitAgent();
 				totalAgent += numAgent;
 				for (int j = 0; j < numAgent; j++) {
 					// create and initialize new agent instance that

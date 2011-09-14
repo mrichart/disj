@@ -31,6 +31,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
 import distributed.plugin.core.IConstants;
+import distributed.plugin.core.Node;
 import distributed.plugin.ui.IGraphEditorConstants;
 import distributed.plugin.ui.figures.NodeFigure;
 import distributed.plugin.ui.models.GraphElement;
@@ -293,7 +294,23 @@ public class NodePart extends AbstractGraphicalEditPart implements
 				} else {
 					this.refreshVisuals();
 				}
-			}else {
+			} else if (prop.equals(IConstants.PROPERTY_CHANGE_AGENT_AT_NODE)) {
+				final Object o = evt.getNewValue();
+				if(o instanceof Node){
+					Node temp = (Node)o;
+					int numAgent = temp.countAgent();
+					this.getNodeFigure().setNumAgent(numAgent);
+					if (display == null) {
+						ui = new Runnable() {
+							public void run() {
+								refreshVisuals();				
+							}
+						};
+					} 
+				} else {
+					this.refreshVisuals();
+				}
+			} else {
 				return;
 			}
 			if (ui != null) {

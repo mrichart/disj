@@ -34,11 +34,9 @@ public class AgentEvent extends Event {
 
 	}
 	
-	/*
-	 * Allow internally modify info (by Adversary)
-	 */
-	public void setMessage(IMessage msg){
-		// TODO do nothing here
+	@Override
+	public void setEventInfo(IMessage msg){
+		// do nothing here
 	}
 
 	public String getNodeId() {
@@ -53,6 +51,7 @@ public class AgentEvent extends Event {
 		return info;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof AgentEvent))
 			return false;
@@ -64,6 +63,7 @@ public class AgentEvent extends Event {
 				&& e.getEventType() == this.getEventType());
 	}
 
+	@Override
 	public String toString() {
 		return super.toString()+ this.targetNodeId + IConstants.MAIN_DELIMETER
 				+ this.agentId + IConstants.MAIN_DELIMETER + info.getLabel();

@@ -1,5 +1,6 @@
 package distributed.plugin.ui.view;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Iterator;
 import java.util.List;
@@ -117,7 +118,7 @@ public class GraphContentProvider implements IStructuredContentProvider,
 
 	}
 	
-	public void propertyChange(java.beans.PropertyChangeEvent evt) {
+	public void propertyChange(PropertyChangeEvent evt) {
 		String prop = evt.getPropertyName();
 		Display display = Display.getCurrent();
         Runnable ui = null;

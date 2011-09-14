@@ -71,7 +71,8 @@ public class MsgPassingEvent extends Event{
 	public String getEdgeId() {
 		return edgeId;
 	}
-
+	
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof MsgPassingEvent))
 			return false;
@@ -83,16 +84,16 @@ public class MsgPassingEvent extends Event{
 				&& e.getEventType() == this.getEventType());
 	}
 	
-	/*
-	 * Allow internally modify message (by Adversary)
-	 */
-	public void setMessage(IMessage msg){
-		this.message = msg;
-	}
-
+	@Override
 	public String toString() {
 		return super.toString()+ hostId + IConstants.MAIN_DELIMETER
 				+ edgeId + IConstants.MAIN_DELIMETER + message.getLabel();
+	}
+
+	@Override
+	public void setEventInfo(IMessage msg) {
+		this.message = msg;
+		
 	}
 
 	
