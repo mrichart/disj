@@ -402,7 +402,7 @@ public abstract class AgentProcessor implements IProcessor {
 			agent.getStat().incMove();
 			agent.getStat().incStateMove(agent.getCurState());
 			link.getStat().incEnterEdge();
-
+					
 			// validate the probability of failure of a link
 			if (this.adversary == null) {
 				if (!link.isReliable()) {
@@ -430,7 +430,7 @@ public abstract class AgentProcessor implements IProcessor {
 					// flag that agent is dead on a link
 					agent.setAlive(false);
 					this.allAgents.put(agentId, agent);
-					this.graph.removeAgent(agentId);
+					this.graph.removeAgent(agentId);					
 					return;
 				}
 			}
@@ -448,6 +448,9 @@ public abstract class AgentProcessor implements IProcessor {
 					execTime = curTime + 1;
 				}
 			}
+
+			// tracking edge a new transmission packet
+			link.addPacket(agent);
 
 			// update statistic
 			link.getStat().addTravelTime(execTime - curTime);
@@ -749,12 +752,15 @@ public abstract class AgentProcessor implements IProcessor {
 			if (agent.isAlive()) {
 				// update statistic for agent that left a link
 				link.getStat().incLeaveEdge();
+				
+				// tracking edge a lost of transmission packet
+				link.removePacket(agent);
 			}
 
 			// node dies agent must die as well
-			agent.setAlive(false);
+			agent.setAlive(false);			
 			this.allAgents.put(agent.getAgentId(), agent);
-			this.graph.removeAgent(agent.getAgentId());
+			this.graph.removeAgent(agent.getAgentId());			
 			return;
 		}
 
@@ -792,10 +798,13 @@ public abstract class AgentProcessor implements IProcessor {
 		agent.getStat().incNodeVisit(node.getNodeId());
 		node.getStat().incNumAgentVisit();
 		link.getStat().incLeaveEdge();
+		
+		// tracking edge a leaving of transmission packet
+		link.removePacket(agent);
 
 		// add new arrival agent to a node
 		node.addAgent(agent);
-
+		
 		// set this node to be current residence of agent
 		agent.setCurNode(node);
 		agent.setLastPortEnter(port);

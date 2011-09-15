@@ -15,16 +15,19 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.draw2d.Bendpoint;
 import org.eclipse.draw2d.Connection;
+import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.RelativeBendpoint;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.editparts.AbstractConnectionEditPart;
 import org.eclipse.gef.editpolicies.ConnectionEndpointEditPolicy;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
+import distributed.plugin.core.Edge;
 import distributed.plugin.core.IConstants;
+import distributed.plugin.ui.figures.EdgeFigure;
 import distributed.plugin.ui.models.BendpointElement;
 import distributed.plugin.ui.models.LinkElement;
 import distributed.plugin.ui.parts.policies.LinkBendpointEditPolicy;
@@ -36,9 +39,6 @@ import distributed.plugin.ui.parts.policies.LinkEditPolicy;
 public abstract class LinkPart extends AbstractConnectionEditPart implements
         PropertyChangeListener {
 
-    public static final Color ACTIVE = new Color(Display.getDefault(), 168, 74,
-            0), DEAD = new Color(Display.getDefault(), 0, 0, 0);
-
     /**
      * Constructor
      */
@@ -47,12 +47,44 @@ public abstract class LinkPart extends AbstractConnectionEditPart implements
     }
 
     /**
+     * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+     */
+    protected IFigure createFigure() {   	
+    	Figure fig = new EdgeFigure();   	
+    	return fig;
+    }
+    
+    /**
+	 * Returns the Figure of this as a EdgeFigure by calling createFigure()
+	 * 
+	 * @return a EdgeFigure
+	 */
+	protected EdgeFigure getEdgeFigure() {
+		return (EdgeFigure) this.getFigure();
+	}
+
+
+    /**
      * 
      */
     public void activate() {
-        // System.err.println("[LinkPart] activate");
+    	if (isActive()){
+			return;
+		}
         super.activate();
         this.getLinkElement().addPropertyChangeListener(this);
+    }
+
+    /**
+     * 
+     */
+    public void deactivate() {
+    	if (!isActive()){
+			return;
+		}
+    	super.deactivate();
+        this.getLinkElement().removePropertyChangeListener(this);
+       
     }
 
     public void activateFigure() {
@@ -64,15 +96,7 @@ public abstract class LinkPart extends AbstractConnectionEditPart implements
         getFigure().addPropertyChangeListener(
                 Connection.PROPERTY_CONNECTION_ROUTER, this);
     }
-
-    /**
-     * 
-     */
-    public void deactivate() {
-        this.getLinkElement().removePropertyChangeListener(this);
-        super.deactivate();
-    }
-
+    
     public void deactivateFigure() {
         getFigure().removePropertyChangeListener(
                 Connection.PROPERTY_CONNECTION_ROUTER, this);
@@ -110,54 +134,52 @@ public abstract class LinkPart extends AbstractConnectionEditPart implements
      */
     public void propertyChange(PropertyChangeEvent iEvent) {
 
-        String property = iEvent.getPropertyName();
-        Object value = iEvent.getNewValue();
-        //System.err.println("[LinkPart] propertyChange " + property);
-        if (Connection.PROPERTY_CONNECTION_ROUTER.equals(property)) {
-            refreshBendpoints();
-            refreshBendpointEditPolicy();
-        }
-        if (IConstants.PROPERTY_CHANGE_BENDPOINT.equals(property))
-            this.refreshBendpoints();
-		if (IConstants.PROPERTY_CHANGE__LINK_INVISIBLE.equals(property)) {
-			
-			this.makeInvisible((Boolean)value);
-		}
+    	try {
+			String property = iEvent.getPropertyName();
+			final Object value = iEvent.getNewValue();
+			Display display = Display.getCurrent();
+			Runnable ui = null;
 
+			if (Connection.PROPERTY_CONNECTION_ROUTER.equals(property)) {
+				refreshBendpoints();
+				refreshBendpointEditPolicy();
 
+			} else if (IConstants.PROPERTY_CHANGE_BENDPOINT.equals(property)) {
+				this.refreshBendpoints();
+
+			} else if (IConstants.PROPERTY_CHANGE_AGENT_AT_EDGE
+					.equals(property)) {
+
+				if (value instanceof Edge) {
+					Edge temp = (Edge) value;
+					int numAgent = temp.countTransmission();
+					this.getEdgeFigure().setNumPacket(numAgent);
+					if (display == null) {
+						ui = new Runnable() {
+							public void run() {
+								refreshVisuals();
+							}
+						};
+					}
+				} else {
+					this.refreshVisuals();
+				}
+			}
+
+			if (ui != null) {
+				display = Display.getDefault();
+				display.asyncExec(ui);
+			}
+		}catch(RuntimeException e){
+    		e.printStackTrace();
+    	}
     }
-
-    private void makeInvisible(final boolean value) {
-		// TODO Auto-generated method stub
-		final IFigure figure = this.getFigure();
-		Display display = Display.getCurrent();
-		Runnable ui = null;
-        if (display == null) {
-            ui = new Runnable() {
-                public void run() {
-                
-                	setVisualProperty(value);
-                }
-            };
-        } else {
-        	setVisualProperty(value);
-        }
-        if (ui != null) {
-            display = Display.getDefault();
-            display.asyncExec(ui);
-        }		
-	}
-    
-	protected void setVisualProperty(boolean value){
-    	figure.setVisible(value);
-    	super.refreshVisuals();
-	}
 
 	/** Updates bendpoints. */
     private void refreshBendpoints() {
 
-        List modelConstraint = this.getLinkElement().getBendpoints();
-        List figureConstraint = new ArrayList();
+        List<Bendpoint> modelConstraint = this.getLinkElement().getBendpoints();
+        List<RelativeBendpoint> figureConstraint = new ArrayList<RelativeBendpoint>();
         for (int i = 0; i < modelConstraint.size(); i++) {
             BendpointElement wbp = (BendpointElement) modelConstraint.get(i);
             RelativeBendpoint rbp = new RelativeBendpoint(getConnectionFigure());
@@ -180,8 +202,9 @@ public abstract class LinkPart extends AbstractConnectionEditPart implements
      * 
      */
     protected void refreshVisuals() {
+    	super.refreshVisuals();
         this.refreshBendpoints();
-        super.refreshVisuals();
+        
         // if (getWire().getValue())
         // getWireFigure().setForegroundColor(alive);
         // else

@@ -16,6 +16,8 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.PolygonDecoration;
 import org.eclipse.draw2d.PolylineConnection;
 
+import distributed.plugin.ui.figures.EdgeFigure;
+
 /**
  * @author Me
  * 
@@ -29,7 +31,6 @@ public class UniLinkPart extends LinkPart {
      */
     public UniLinkPart() {
         super();
-//        System.err.println("[UniLinkPart] created");
     }
 
     /**
@@ -37,24 +38,15 @@ public class UniLinkPart extends LinkPart {
      */
     protected IFigure createFigure() {
         IFigure connectionFigure = super.createFigure();
+        EdgeFigure lineFigure = (EdgeFigure) connectionFigure;
+        lineFigure.setTargetDecoration(new PolygonDecoration());
 
-//        System.err.println("[UniLinkPart] createFigure " + connectionFigure);
-        
-        ((PolylineConnection) connectionFigure)
-                .setTargetDecoration(new PolygonDecoration());
-
-        return connectionFigure;
+        return lineFigure;
     }
     
-    /**
-     * TODO
-     * 
-     * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-     */
+  
     public void propertyChange(PropertyChangeEvent event) {
         super.propertyChange(event);
-//        System.err.println("[UniLinkPart] propertyChange: "
-//                + event.getPropertyName());
     }
 
     /**

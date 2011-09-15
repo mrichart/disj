@@ -67,9 +67,9 @@ public class NodePart extends AbstractGraphicalEditPart implements
 	}
 
 	public void activate() {
-		// System.out.println("[NodePart] activate");
-		if (isActive())
+		if (isActive()){
 			return;
+		}
 		super.activate();
 		this.getNodeElement().addPropertyChangeListener(this);
 	}
@@ -79,8 +79,9 @@ public class NodePart extends AbstractGraphicalEditPart implements
 	 * from the model's list of listeners.
 	 */
 	public void deactivate() {
-		if (!isActive())
+		if (!isActive()){
 			return;
+		}
 		super.deactivate();
 		this.getNodeElement().removePropertyChangeListener(this);
 	}
@@ -101,7 +102,6 @@ public class NodePart extends AbstractGraphicalEditPart implements
 	 */
 	protected IFigure createFigure() {
 		Figure fig = new NodeFigure(NodeId);
-
 		this.anchor = new ChopboxAnchor(fig);
 		return fig;
 	}
@@ -220,8 +220,6 @@ public class NodePart extends AbstractGraphicalEditPart implements
 	}
 
 	/**
-	 * TODO add more stuffs look at LogicEditPart
-	 * 
 	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent evt) {
@@ -335,12 +333,11 @@ public class NodePart extends AbstractGraphicalEditPart implements
 	 * @see org.eclipse.gef.editparts.AbstractEditPart#refreshVisuals()
 	 */
 	protected void refreshVisuals() {
-		// super.refreshVisuals();
+		super.refreshVisuals();
 		Figure fig = this.getNodeFigure();
 		Point loc = this.getNodeElement().getLocation();
 		Dimension size = this.getNodeElement().getSize();
 		Rectangle r = new Rectangle(loc, size);
-		// System.out.println("[NodePart] refreshVisuals");
 		getGraphicalParent().setLayoutConstraint(this, fig, r);
 
 	}

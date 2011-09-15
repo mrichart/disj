@@ -10,6 +10,7 @@
 
 package distributed.plugin.ui.models;
 
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -158,6 +159,11 @@ public abstract class LinkElement extends AdapterElement {
         }
     }
 
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+		super.addPropertyChangeListener(listener);
+		this.edge.addPropertyChangeListener(listener);
+	}
+	
     /**
      * Get a type of direction flow of this link
      * 
@@ -464,7 +470,7 @@ public abstract class LinkElement extends AdapterElement {
     	for (int i = 0; i <  NUM_PROPERTIES; i++) {
 			this.resetPropertyValue(propertyArray[i]);
 		}
-    	 this.setVisible(true); // make every edge visible
+    	//this.setVisible(true); // make every edge visible
     }
     
     public void setEdge(Edge edge) {
@@ -598,15 +604,7 @@ public abstract class LinkElement extends AdapterElement {
     public String toString() {
         return "<LinkElement>name: " + this.name + " type: " + this.getType();
     }
-    
-	public void setVisible(boolean value){
-		this.fireVisibilityChange(IConstants.PROPERTY_CHANGE__LINK_INVISIBLE, value);
-	}
 
-	protected void fireVisibilityChange(String prop, boolean value){
-		listeners.firePropertyChange(prop, null, value);
-	}
-	
 	/*
 	 * Tracking IDs for reconstruction of object
 	 */

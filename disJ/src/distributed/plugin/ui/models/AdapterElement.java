@@ -74,7 +74,6 @@ public abstract class AdapterElement implements IPropertySource, Cloneable,
 	public abstract void setPropertyValue(Object id, Object value);
 	
 	public void addPropertyChangeListener(PropertyChangeListener listener){
-	    //System.err.println("[AdapterElement] addPropertyChangeListener: " + l);
 		listeners.addPropertyChangeListener(listener);
 	}
 
@@ -83,7 +82,6 @@ public abstract class AdapterElement implements IPropertySource, Cloneable,
 	}
 	
 	protected void firePropertyChange(String prop, Object old, Object newValue){
-	    //System.err.println("[AdapterElement] firePropertyChange: " + prop);
 		listeners.firePropertyChange(prop, old, newValue);
 	}
 
@@ -96,7 +94,6 @@ public abstract class AdapterElement implements IPropertySource, Cloneable,
 	}
 
 	protected void fireStructureChange(String prop, Object child){
-//	    System.err.println("[AdapterElement] fireStructureChange");
 		listeners.firePropertyChange(prop, null, child);
 	}
 

@@ -70,10 +70,10 @@ public class NodeFigure extends RoundedRectangle {
     	if(numAgent == 1){
     		Rectangle f = Rectangle.SINGLETON;
     		graphics.drawString("A", f.x, f.y);
-    		System.out.println("Num Agent: = 1");
+    		//System.out.println("Num Agent: = 1");
     		
     	} else if (numAgent > 1){
-    		System.out.println("Num Agent: = " + this.numAgent);
+    		//System.out.println("Num Agent: = " + this.numAgent);
     	}
     	
 //    	Rectangle f = Rectangle.SINGLETON;

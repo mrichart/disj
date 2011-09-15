@@ -27,7 +27,6 @@ public class BiLinkPart extends LinkPart {
      */
     public BiLinkPart() {
         super();
-//        System.err.println("[BiLinkPart] created");
     }
 
     /**
@@ -35,8 +34,6 @@ public class BiLinkPart extends LinkPart {
      */
     protected IFigure createFigure() {
         IFigure connectionFigure = super.createFigure();
-//        System.err.println("[BiLinkPart] createFigure " + connectionFigure);
-
         return connectionFigure;
     }
     
@@ -47,8 +44,6 @@ public class BiLinkPart extends LinkPart {
      */
     public void propertyChange(PropertyChangeEvent event) {
         super.propertyChange(event);
-//        System.err.println("[BiLinkPart] propertyChange: "
-//                + event.getPropertyName());
     }
 
     /**

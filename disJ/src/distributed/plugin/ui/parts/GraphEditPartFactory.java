@@ -30,12 +30,11 @@ public class GraphEditPartFactory implements EditPartFactory {
 		String NodeId;
 		if (model instanceof GraphElement)
 			part = new GraphPart();
-		else if (model instanceof NodeElement){
+		else if (model instanceof NodeElement) {
 			nodeElement = (NodeElement) model;
 
-		 NodeId=nodeElement.getName();
-		 part = new NodePart(NodeId);
-//		part = new NodePart();
+			NodeId = nodeElement.getName();
+			part = new NodePart(NodeId);
 		}
 		if (part != null)
 			part.setModel(model);
