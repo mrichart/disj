@@ -152,7 +152,9 @@ public class Edge implements Serializable {
 		if(!curPackets.contains(packet)){
 			this.curPackets.add(packet);
 			
+			
 			if(packet instanceof Agent){
+				System.out.println("@addPacket() at edge " + this.getEdgeId());
 				this.firePropertyChange(IConstants.PROPERTY_CHANGE_AGENT_AT_EDGE, null,
 					this);
 			}
@@ -168,6 +170,7 @@ public class Edge implements Serializable {
 			this.curPackets.remove(packet);
 			
 			if(packet instanceof Agent){
+				System.out.println("@removePacket() at edge " + this.getEdgeId());
 				this.firePropertyChange(IConstants.PROPERTY_CHANGE_AGENT_AT_EDGE, null,
 					this);
 			}

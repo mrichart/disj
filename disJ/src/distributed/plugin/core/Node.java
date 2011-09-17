@@ -275,6 +275,7 @@ public class Node implements Serializable {
 		if(!curAgents.contains(agent)){
 			this.curAgents.add(agent);
 			
+			System.out.println("@addAgent() at node " + this.getNodeId());
 			this.firePropertyChange(IConstants.PROPERTY_CHANGE_AGENT_AT_NODE, null,
 					this);
 		}
@@ -289,6 +290,7 @@ public class Node implements Serializable {
 			this.curAgents.remove(agent);
 			this.removeRegistee(agent.getAgentId());
 			
+			System.out.println("@removeAgent() at node " +  this.getNodeId());
 			this.firePropertyChange(IConstants.PROPERTY_CHANGE_AGENT_AT_NODE, null,
 					this);
 		}
@@ -710,8 +712,12 @@ public class Node implements Serializable {
 	 * @param isInit True is to be an initializer,
 	 * otherwise false
 	 */
-	public void setInit(boolean isInit) {
-		this.isInit = isInit;
+	public void setInit(boolean isInit) {		
+		if(this.isInit != isInit){
+			this.isInit = isInit;
+			this.firePropertyChange(IConstants.PROPERTY_CHANGE_INIT_NODE, null,
+					new Boolean(this.isInit));
+		}
 	}
 	
 	/**

@@ -49,7 +49,10 @@ import distributed.plugin.ui.parts.policies.NodeGraphicalEditPolicy;
 public class NodePart extends AbstractGraphicalEditPart implements
 		NodeEditPart, PropertyChangeListener {
 
-	String NodeId;
+	private boolean isInit;
+	
+	private String NodeId;
+	
 
 	/** The figure's anchors. */
 	private ChopboxAnchor anchor;
@@ -59,10 +62,12 @@ public class NodePart extends AbstractGraphicalEditPart implements
 	 */
 	public NodePart() {
 		super();
+		this.isInit = false;
 	}
 
-	public NodePart(String NodeId) {
+	public NodePart(String NodeId, boolean isInit) {
 		super();
+		this.isInit = isInit;
 		this.NodeId = NodeId;
 	}
 
@@ -101,7 +106,7 @@ public class NodePart extends AbstractGraphicalEditPart implements
 	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
 	 */
 	protected IFigure createFigure() {
-		Figure fig = new NodeFigure(NodeId);
+		Figure fig = new NodeFigure(this.NodeId, this.isInit);
 		this.anchor = new ChopboxAnchor(fig);
 		return fig;
 	}
@@ -282,7 +287,19 @@ public class NodePart extends AbstractGraphicalEditPart implements
 				}
 			} else if (prop.equals(IConstants.PROPERTY_CHANGE_NAME)) {
 				final String newName = (String) evt.getNewValue();
-				this.getNodeFigure().getLabel().setText(newName);
+				this.getNodeFigure().setName(newName);
+				if (display == null) {
+					ui = new Runnable() {
+						public void run() {
+							refreshVisuals();
+						}
+					};
+				} else {
+					this.refreshVisuals();
+				}
+			} else if (prop.equals(IConstants.PROPERTY_CHANGE_INIT_NODE)) {
+				final Boolean isInit = (Boolean) evt.getNewValue();
+				this.getNodeFigure().setIsInit(isInit.booleanValue());				
 				if (display == null) {
 					ui = new Runnable() {
 						public void run() {
@@ -293,7 +310,7 @@ public class NodePart extends AbstractGraphicalEditPart implements
 					this.refreshVisuals();
 				}
 			} else if (prop.equals(IConstants.PROPERTY_CHANGE_AGENT_AT_NODE)) {
-				final Object o = evt.getNewValue();
+				final Object o = evt.getNewValue();				
 				if(o instanceof Node){
 					Node temp = (Node)o;
 					int numAgent = temp.countAgent();
@@ -305,8 +322,6 @@ public class NodePart extends AbstractGraphicalEditPart implements
 							}
 						};
 					} 
-				} else {
-					this.refreshVisuals();
 				}
 			} else {
 				return;
@@ -328,8 +343,6 @@ public class NodePart extends AbstractGraphicalEditPart implements
 	}
 
 	/**
-	 * TODO update visual of node here i.e. node's color
-	 * 
 	 * @see org.eclipse.gef.editparts.AbstractEditPart#refreshVisuals()
 	 */
 	protected void refreshVisuals() {

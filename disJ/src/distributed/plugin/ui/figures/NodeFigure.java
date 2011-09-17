@@ -14,6 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.RoundedRectangle;
 import org.eclipse.draw2d.Shape;
@@ -41,6 +42,12 @@ public class NodeFigure extends RoundedRectangle {
     
     private int numAgent;
     
+    private boolean isInit;
+    
+    private String nodeName;
+    
+    private String labelText;
+    
 	static {
 		try {
 			URL installUrl = Activator.getDefault().getBundle().getEntry("/");
@@ -48,18 +55,24 @@ public class NodeFigure extends RoundedRectangle {
 			IDSC_AGENT = ImageDescriptor.createFromURL(imageUrl);
 			IMG_AGENT = IDSC_AGENT.createImage();
 		}catch (MalformedURLException e) {
+			e.printStackTrace();
 		}
 	}   
     
-    public NodeFigure(String name) {
-        super();
-        label = new Label(name);
-        add(label);
+    public NodeFigure(String name, boolean isInit) {
+        super();            
+        this.nodeName = name;
+        this.isInit = isInit;
+        this.labelText = "";        
+        this.label = new Label();
+        
+        this.setIsInit(this.isInit);
+        this.add(label);
         ToolbarLayout layout = new ToolbarLayout();
-        setLayoutManager(layout);
-        setBackgroundColor(IGraphEditorConstants.DEFAULT_NODE_COLOR);
-        setOpaque(true);
-        setSize(IGraphEditorConstants.NODE_SIZE, IGraphEditorConstants.NODE_SIZE);
+        this.setLayoutManager(layout);
+        this.setBackgroundColor(IGraphEditorConstants.DEFAULT_NODE_COLOR);
+        this.setOpaque(true);
+        this.setSize(IGraphEditorConstants.NODE_SIZE, IGraphEditorConstants.NODE_SIZE);
     }
 
     /**
@@ -67,14 +80,21 @@ public class NodeFigure extends RoundedRectangle {
      */
     public void outlineShape(Graphics graphics) {
     	super.outlineShape(graphics);
-    	if(numAgent == 1){
-    		Rectangle f = Rectangle.SINGLETON;
-    		graphics.drawString("A", f.x, f.y);
-    		//System.out.println("Num Agent: = 1");
-    		
-    	} else if (numAgent > 1){
-    		//System.out.println("Num Agent: = " + this.numAgent);
-    	}
+    			
+       	if(this.numAgent >= 1){
+			this.label.setIcon(IMG_AGENT);
+		}else{
+			this.label.setIcon(null);
+		}
+       	
+//    	if(numAgent == 1){
+//    		Rectangle f = Rectangle.SINGLETON;
+//    		graphics.drawString("A", f.x, f.y);
+//    		System.out.println(this.label.getText() + " num Agent: = 1");
+//    		
+//    	} else if (numAgent > 1){
+//    		//System.out.println("Num Agent: = " + this.numAgent);
+//    	}
     	
 //    	Rectangle f = Rectangle.SINGLETON;
 //    	Rectangle r = getBounds();
@@ -86,32 +106,24 @@ public class NodeFigure extends RoundedRectangle {
     	
     }
     
-	public Label getLabel() {
-		return label;
+	public void setName(String newName) {
+		this.nodeName = newName;
+		this.label.setText(this.nodeName);
 	}
     
 	public void setNumAgent(int num){
 		this.numAgent = num;
+
 	}
     
-
-
-    // /**
-    // * TODO need to have 2 type of anchors
-    // * @param terminal
-    // * @return
-    // */
-    // public ConnectionAnchor getConnectionAnchor(String terminal) {
-    // return this.anchor;
-    // }
-    //    
-    // /**
-    // * TODO still dont understand
-    // * @param p
-    // * @return
-    // */
-    // public ConnectionAnchor getSourceConnectionAnchorAt(Point p) {
-    // return this.anchor;
-    // }
+	public void setIsInit(boolean isInit){
+		this.isInit = isInit;
+		if(this.isInit){
+			this.labelText = "#" + this.nodeName;   		
+    	}else{
+    		this.labelText = this.nodeName;    		
+    	}
+		this.label.setText(this.labelText);
+	}
 
 }
