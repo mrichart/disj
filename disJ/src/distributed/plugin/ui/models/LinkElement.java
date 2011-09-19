@@ -56,14 +56,16 @@ public abstract class LinkElement extends AdapterElement {
 	private static final String PROPERTY_DELAY_SEED = "L08 Delay Time";   
 	private static final String PROPERTY_RELIABLE = "L09 Reliable";   
 	private static final String PROPERTY_PROB_FAILURE = "L10 Probability of Failure";
-	private static final String PROPERTY_TOTAL_MSG = "L11 Total In Traffic";
+	private static final String PROPERTY_TOTAL_IN_MSG = "L11 Total In Traffic";
 	private static final String PROPERTY_TOTAL_OUT_MSG = "L12 Total Out Traffic";
+	private static final String PROPERTY_CURRENT_MSG = "L13 Current Traffic";
 
 	private static final String[] propertyArray = {PROPERTY_DIRECTION_TYPE, 
 		PROPERTY_START_PORT, PROPERTY_END_PORT, PROPERTY_MSG_FLOW_TYPE, 
 		PROPERTY_DELAY_TYPE, PROPERTY_DELAY_SEED, PROPERTY_RELIABLE,
-		PROPERTY_PROB_FAILURE,PROPERTY_TOTAL_MSG, PROPERTY_EDGE_ID,
-		PROPERTY_SOURCE, PROPERTY_TARGET, PROPERTY_TOTAL_OUT_MSG};
+		PROPERTY_PROB_FAILURE,PROPERTY_TOTAL_IN_MSG, PROPERTY_EDGE_ID,
+		PROPERTY_SOURCE, PROPERTY_TARGET, PROPERTY_TOTAL_OUT_MSG,
+		PROPERTY_CURRENT_MSG};
 
 	private static final int NUM_PROPERTIES = propertyArray.length;
    
@@ -88,8 +90,8 @@ public abstract class LinkElement extends AdapterElement {
         		IConstants.RANDOM_UNIFORM, IConstants.RANDOM_POISSON, 
         		IConstants.RANDOM_CUSTOMS});
 
-        descriptors[4] = new PropertyDescriptor(PROPERTY_TOTAL_MSG,
-                PROPERTY_TOTAL_MSG);
+        descriptors[4] = new PropertyDescriptor(PROPERTY_TOTAL_IN_MSG,
+                PROPERTY_TOTAL_IN_MSG);
 
         descriptors[5] = new TextPropertyDescriptor(PROPERTY_DELAY_SEED,
                 PROPERTY_DELAY_SEED);
@@ -122,6 +124,9 @@ public abstract class LinkElement extends AdapterElement {
         
         descriptors[12] = new PropertyDescriptor(PROPERTY_TOTAL_OUT_MSG,
                 PROPERTY_TOTAL_OUT_MSG);
+        
+        descriptors[13] = new PropertyDescriptor(PROPERTY_CURRENT_MSG,
+        		PROPERTY_CURRENT_MSG);
 
         
     }
@@ -208,11 +213,14 @@ public abstract class LinkElement extends AdapterElement {
         } else if (propName.equals(PROPERTY_DELAY_TYPE)) {
             return new Integer(this.mapDelayType(this.edge.getDelayType()));
 
-        } else if (propName.equals(PROPERTY_TOTAL_MSG)) {
+        } else if (propName.equals(PROPERTY_TOTAL_IN_MSG)) {
             return "" + this.edge.getStat().getTotalEdgeEnter();
 
         }  else if (propName.equals(PROPERTY_TOTAL_OUT_MSG)) {
             return "" + this.edge.getStat().getTotalEdgeLeave();
+
+        } else if (propName.equals(PROPERTY_CURRENT_MSG)) {
+            return "" + this.edge.countTransmission();
 
         } else if (propName.equals(PROPERTY_DELAY_SEED)) {
             return "" + this.edge.getDelaySeed();

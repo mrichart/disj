@@ -53,10 +53,11 @@ public interface IConstants {
     public static final String RANDOM_CUSTOMS = "Random Customs";
     public static final String MIX_TYPE = "Mix Type";
     
-	
+    // message time delay values
 	public static final short MSGDELAY_SEED_DEFAULT = 1;
 	public static final short MSGDELAY_SEED_MIX = 0;
-	
+
+	// message reliability probability value
 	public static final short MSGFAILURE_DEFAULT_PROB = 5;
 
 	// board access type
@@ -104,6 +105,7 @@ public interface IConstants {
 	public static final String RUNTIME_ERROR_0 = "Parameter cannot be null";
 
 	// general constants
+	public static final int RESET_NODE_STATE = -1;
 	public static final int DEFAULT_MAX_NUM_TOKEN = 1;
 	public static final int SPEED_MAX_RATE = 100;
 	public static final int SPEED_MIN_RATE = 0;

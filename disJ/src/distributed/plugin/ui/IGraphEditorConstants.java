@@ -142,7 +142,7 @@ public interface IGraphEditorConstants {
 	public static final String CREATE_SPATIAL_COMD = "Create Spatial Graph";
 	
 	// general constants
-	public static final int NODE_SIZE = 30;
+	public static final int NODE_SIZE = 40;
 	public static final String CONTEXT_MENU = "distributed.plugin.ui.actions";
 	public static final String ERROR_NAN = "It has to be an integer number";
 	public static final String ERROR_NEGATIVE = "It has to be positive integer number";

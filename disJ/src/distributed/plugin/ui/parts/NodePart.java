@@ -41,10 +41,7 @@ import distributed.plugin.ui.parts.policies.ElementComponentEditPolicy;
 import distributed.plugin.ui.parts.policies.NodeGraphicalEditPolicy;
 
 /**
- * @author Me
- * 
- *         TODO To change the template for this generated type comment go to
- *         Window - Preferences - Java - Code Style - Code Templates
+ *
  */
 public class NodePart extends AbstractGraphicalEditPart implements
 		NodeEditPart, PropertyChangeListener {
@@ -147,9 +144,6 @@ public class NodePart extends AbstractGraphicalEditPart implements
 			connectPart.setModel(link);
 		}
 
-		// System.out.println("[NodePart] createConnection() returns "
-		// + connectPart);
-
 		return connectPart;
 	}
 
@@ -172,9 +166,7 @@ public class NodePart extends AbstractGraphicalEditPart implements
 	 * @return List of connections.
 	 */
 	protected List getModelSourceConnections() {
-		List conns = this.getNodeElement().getSourceConnections();
-		// System.out.println("[NodePart] getModelSourceConnections() returns "
-		// + conns);
+		List conns = this.getNodeElement().getSourceConnections();		
 		return conns;
 	}
 
@@ -185,8 +177,6 @@ public class NodePart extends AbstractGraphicalEditPart implements
 	 */
 	protected List getModelTargetConnections() {
 		List conns = this.getNodeElement().getTargetConnections();
-		// System.out.println("[NodePart] getModelTargetConnections() returns "
-		// + conns);
 		return conns;
 	}
 

@@ -275,7 +275,7 @@ public class Node implements Serializable {
 		if(!curAgents.contains(agent)){
 			this.curAgents.add(agent);
 			
-			System.out.println("@addAgent() at node " + this.getNodeId());
+			//System.out.println("@addAgent() at node " + this.getNodeId());
 			this.firePropertyChange(IConstants.PROPERTY_CHANGE_AGENT_AT_NODE, null,
 					this);
 		}
@@ -290,7 +290,7 @@ public class Node implements Serializable {
 			this.curAgents.remove(agent);
 			this.removeRegistee(agent.getAgentId());
 			
-			System.out.println("@removeAgent() at node " +  this.getNodeId());
+			//System.out.println("@removeAgent() at node " +  this.getNodeId());
 			this.firePropertyChange(IConstants.PROPERTY_CHANGE_AGENT_AT_NODE, null,
 					this);
 		}
@@ -817,7 +817,7 @@ public class Node implements Serializable {
 				this);
 	
 		// it is not a reset action
-		if(this.curState != -1){
+		if(this.curState != IConstants.RESET_NODE_STATE){
 			this.stat.addPastState(this.getStateName(state));			
 			if(log != null){
 				this.log.logNode(logTag.NODE_STATE, this.nodeId, this.curState+"");	
@@ -835,7 +835,7 @@ public class Node implements Serializable {
 	}
 
 	public void resetState() {		
-		this.setCurState(-1);
+		this.setCurState(IConstants.RESET_NODE_STATE);
 	}
 
 	public List<String> getStateList() {

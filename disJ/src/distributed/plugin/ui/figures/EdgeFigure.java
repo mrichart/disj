@@ -8,7 +8,7 @@ import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
-import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 
@@ -19,6 +19,10 @@ public class EdgeFigure extends PolylineConnection {
 	private static Image IMG_AGENT;
 	
 	private static ImageDescriptor IDSC_AGENT;
+	
+	private static Image IMG_AGENTS;
+	
+	private static ImageDescriptor IDSC_AGENTS;
 
 	private Label label;
 	
@@ -30,6 +34,11 @@ public class EdgeFigure extends PolylineConnection {
 			URL imageUrl = new URL(installUrl, "icons/agent.png");
 			IDSC_AGENT = ImageDescriptor.createFromURL(imageUrl);
 			IMG_AGENT = IDSC_AGENT.createImage();
+			
+			imageUrl = new URL(installUrl, "icons/agents.png");
+			IDSC_AGENTS = ImageDescriptor.createFromURL(imageUrl);
+			IMG_AGENTS = IDSC_AGENTS.createImage();
+			
 		}catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -45,32 +54,26 @@ public class EdgeFigure extends PolylineConnection {
 	 * @see Shape#outlineShape(Graphics)
 	 */
     public void outlineShape(Graphics graphics) {
-    	super.outlineShape(graphics);
-    	
-//    	if(this.numPacket == 1){
-//			this.label.setText("A");
-//			
-//		}else if (numPacket > 1){
-//			this.label.setText("AA");
-//		}
-    	
-//       	if(this.numPacket >= 1){
-//			this.label.setIcon(IMG_AGENT);
-//		}else{
-//			this.label.setIcon(null);
-//		}
-    	
-    	if(numPacket == 1){
-    		Rectangle f = Rectangle.SINGLETON;
-    		Point p = f.getCenter();
-    		graphics.drawImage(IMG_AGENT, p.x, p.y);
-    		//System.out.println("Num Packet: = 1");
+       	super.outlineShape(graphics); 
+       	
+    	if(numPacket == 1){  
+    		PointList points = this.getPoints();
+    		Point p = points.getMidpoint();
+    		graphics.drawImage(IMG_AGENT, p);
     		
     	} else if (numPacket > 1){
-    		//System.out.println("Num Packet: = " + this.numPacket);
+    		PointList points = this.getPoints();
+    		Point p = points.getMidpoint();
+    		graphics.drawImage(IMG_AGENTS, p);
+    		
+    	} else {
+    		
     	}
     }
-    
+    /**
+     * Set current number of packets under transmission
+     * @param num
+     */
     public void setNumPacket(int num){
 		this.numPacket = num;
     	

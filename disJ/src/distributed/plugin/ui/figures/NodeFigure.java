@@ -14,12 +14,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.RoundedRectangle;
 import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.ToolbarLayout;
-import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 
@@ -38,6 +36,10 @@ public class NodeFigure extends RoundedRectangle {
 	
 	private static ImageDescriptor IDSC_AGENT;
 	
+	private static Image IMG_AGENTS;
+	
+	private static ImageDescriptor IDSC_AGENTS;
+	
 	private Label label;
     
     private int numAgent;
@@ -50,10 +52,17 @@ public class NodeFigure extends RoundedRectangle {
     
 	static {
 		try {
+			
 			URL installUrl = Activator.getDefault().getBundle().getEntry("/");
 			URL imageUrl = new URL(installUrl, "icons/agent.png");
 			IDSC_AGENT = ImageDescriptor.createFromURL(imageUrl);
 			IMG_AGENT = IDSC_AGENT.createImage();
+			
+			imageUrl = new URL(installUrl, "icons/agents.png");
+			IDSC_AGENTS = ImageDescriptor.createFromURL(imageUrl);
+			IMG_AGENTS = IDSC_AGENTS.createImage();
+			
+		
 		}catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -81,29 +90,25 @@ public class NodeFigure extends RoundedRectangle {
     public void outlineShape(Graphics graphics) {
     	super.outlineShape(graphics);
     			
-       	if(this.numAgent >= 1){
+    	
+    	
+//    	if(numAgent == 1){   		
+//    		Point p = this.getLocation();
+//    		graphics.drawImage(IMG_AGENT, p.x, p.y);
+//    		
+//    	} else if (numAgent > 1){
+//    		//System.out.println("Num Packet: = " + this.numPacket);
+//    	} 
+    	
+       	if(this.numAgent == 1){
 			this.label.setIcon(IMG_AGENT);
+			
+		} else if (this.numAgent > 1){
+			this.label.setIcon(IMG_AGENTS);    		
+    	
 		}else{
 			this.label.setIcon(null);
 		}
-       	
-//    	if(numAgent == 1){
-//    		Rectangle f = Rectangle.SINGLETON;
-//    		graphics.drawString("A", f.x, f.y);
-//    		System.out.println(this.label.getText() + " num Agent: = 1");
-//    		
-//    	} else if (numAgent > 1){
-//    		//System.out.println("Num Agent: = " + this.numAgent);
-//    	}
-    	
-//    	Rectangle f = Rectangle.SINGLETON;
-//    	Rectangle r = getBounds();
-//    	f.x = r.x + lineWidth / 2;
-//    	f.y = r.y + lineWidth / 2;
-//    	f.width = r.width - lineWidth;
-//    	f.height = r.height - lineWidth;
-//    	graphics.drawRoundRectangle(f, corner.width, corner.height);
-    	
     }
     
 	public void setName(String newName) {

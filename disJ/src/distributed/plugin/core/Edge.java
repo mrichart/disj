@@ -139,8 +139,9 @@ public class Edge implements Serializable {
 	}
 	
 	public void cleanUp(){
+		this.clearCurTransmission();
 		this.lastestMsgTimeForEnd = 0;
-		this.lastestMsgTimeForStart = 0;	
+		this.lastestMsgTimeForStart = 0;		
 		this.stat.reset();		
 	}
 	
@@ -154,7 +155,7 @@ public class Edge implements Serializable {
 			
 			
 			if(packet instanceof Agent){
-				System.out.println("@addPacket() at edge " + this.getEdgeId());
+				//System.out.println("@addPacket() at edge " + this.getEdgeId());
 				this.firePropertyChange(IConstants.PROPERTY_CHANGE_AGENT_AT_EDGE, null,
 					this);
 			}
@@ -170,7 +171,7 @@ public class Edge implements Serializable {
 			this.curPackets.remove(packet);
 			
 			if(packet instanceof Agent){
-				System.out.println("@removePacket() at edge " + this.getEdgeId());
+				//System.out.println("@removePacket() at edge " + this.getEdgeId());
 				this.firePropertyChange(IConstants.PROPERTY_CHANGE_AGENT_AT_EDGE, null,
 					this);
 			}
@@ -187,10 +188,12 @@ public class Edge implements Serializable {
 	
 	public void clearCurTransmission(){
 		this.curPackets.clear();
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_AGENT_AT_EDGE, null,
+				this);
 	}
 	
 	/**
-	 * Count number of packets under transmission
+	 * Count current number of packets under transmission
 	 * @return
 	 */
 	public int countTransmission(){
