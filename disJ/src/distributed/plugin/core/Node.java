@@ -297,26 +297,33 @@ public class Node implements Serializable {
 	}
 	
 	/**
-	 * Get a list of all agent currently reside at this node
+	 * Get a list of all agents currently reside at this node
 	 * 
 	 * @return
 	 */
 	public List<Agent> getAllAgents(){
 		return this.curAgents;
 	}
-
-	public void clearAllAgents(){
-		this.curAgents.clear();
-	}
 	
 	/**
-	 * Count number of agent currently reside at this node
+	 * Count number of agents currently reside at this node
 	 * 
 	 * @return
 	 */
-	public int countAgent(){
+	public int countAllAgents(){
 		return this.curAgents.size();
 	}
+	
+	/**
+	 * Remove all agents at this node
+	 */
+	public void clearAllAgents(){
+		this.curAgents.clear();		
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_AGENT_AT_NODE, null,
+				this);
+	}
+	
+
 	/**
 	 * Add more link out of this node
 	 * 
@@ -735,7 +742,7 @@ public class Node implements Serializable {
 	 * be started at this node
 	 *            
 	 */
-	public void setNumAgent(int numInitAgent) {
+	public void setNumInitAgent(int numInitAgent) {
 		this.numInitAgent = numInitAgent;
 	}
 

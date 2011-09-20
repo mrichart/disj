@@ -303,7 +303,7 @@ public class NodePart extends AbstractGraphicalEditPart implements
 				final Object o = evt.getNewValue();				
 				if(o instanceof Node){
 					Node temp = (Node)o;
-					int numAgent = temp.countAgent();
+					int numAgent = temp.countAllAgents();
 					this.getNodeFigure().setNumAgent(numAgent);
 					if (display == null) {
 						ui = new Runnable() {

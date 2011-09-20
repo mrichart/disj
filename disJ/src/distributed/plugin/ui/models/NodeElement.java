@@ -327,7 +327,7 @@ public class NodeElement extends AdapterElement {
 			return "" + this.node.getNumInitAgent();
 
 		} else if (propName.equals(PROPERTY_NUM_AGENT)) {
-			return "" + this.node.getAllAgents().size();
+			return "" + this.node.countAllAgents();
 
 		} else if (propName.equals(PROPERTY_NUM_TOKEN)) {
 			return "" + this.node.getNumToken();
@@ -393,10 +393,10 @@ public class NodeElement extends AdapterElement {
 			}
 			if(this.node.isInitializer()){				
 				if(this.node.getStateList().isEmpty()){			
-					this.node.setNumAgent(numAgent);
+					this.node.setNumInitAgent(numAgent);
 				}				
 			}else{				
-				this.node.setNumAgent(0);
+				this.node.setNumInitAgent(0);
 			}
 		} else {
 			return;
@@ -440,7 +440,7 @@ public class NodeElement extends AdapterElement {
 //		} else
 //			
 		if (propName.equals(PROPERTY_NUM_AGENT)) {
-			this.node.getAllAgents().size();
+			this.node.countAllAgents();
 			return;
 		}
 

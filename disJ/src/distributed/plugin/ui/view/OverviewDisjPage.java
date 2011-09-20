@@ -208,7 +208,7 @@ public class OverviewDisjPage extends DisJViewPage {
 					return a.getNumToken()+"";
 
 				} else if (index == 4) {
-					return a.getAllAgents().size()+"";
+					return a.countAllAgents()+"";
 
 				}
 			}
@@ -335,9 +335,8 @@ public class OverviewDisjPage extends DisJViewPage {
 				rc = (p1.getNumToken() + "").compareTo(p2.getNumToken() + "");
 				break;
 			case 4:
-				rc = (p1.getAllAgents().size() + "").compareTo(p2
-						.getAllAgents().size()
-						+ "");
+				rc = (p1.countAllAgents()+ "").compareTo(p2
+						.countAllAgents()+ "");
 				break;
 			default:
 				rc = 0;
