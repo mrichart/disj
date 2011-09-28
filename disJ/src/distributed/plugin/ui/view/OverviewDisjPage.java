@@ -205,7 +205,7 @@ public class OverviewDisjPage extends DisJViewPage {
 					return a.getCurStateName();
 
 				} else if (index == 3) {
-					return a.getNumToken()+"";
+					return a.countAllTokens()+"";
 
 				} else if (index == 4) {
 					return a.countAllAgents()+"";
@@ -332,7 +332,7 @@ public class OverviewDisjPage extends DisJViewPage {
 				rc = p1.getCurStateName().compareTo(p2.getCurStateName());
 				break;
 			case 3:
-				rc = (p1.getNumToken() + "").compareTo(p2.getNumToken() + "");
+				rc = (p1.countAllTokens() + "").compareTo(p2.countAllTokens() + "");
 				break;
 			case 4:
 				rc = (p1.countAllAgents()+ "").compareTo(p2

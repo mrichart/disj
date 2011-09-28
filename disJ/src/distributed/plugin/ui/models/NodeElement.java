@@ -330,7 +330,7 @@ public class NodeElement extends AdapterElement {
 			return "" + this.node.countAllAgents();
 
 		} else if (propName.equals(PROPERTY_NUM_TOKEN)) {
-			return "" + this.node.getNumToken();
+			return "" + this.node.countAllTokens();
 
 		}else {
 			return "unknown property id";

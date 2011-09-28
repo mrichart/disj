@@ -30,7 +30,7 @@ public abstract class TokenAgent extends AgentModel implements ITokenModel {
 
 	public final int countHostToken() {		
 		Node node = this.agentOwner.getCurNode();
-		return node.getNumToken();
+		return node.countAllTokens();
 	}
 
 	public final int countMyToken() {

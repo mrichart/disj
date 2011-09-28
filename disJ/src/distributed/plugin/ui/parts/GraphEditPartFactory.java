@@ -35,7 +35,8 @@ public class GraphEditPartFactory implements EditPartFactory {
 
 			NodeId = nodeElement.getName();
 			boolean isInit = nodeElement.getNode().isInitializer();
-			part = new NodePart(NodeId, isInit);
+			boolean isAlive = nodeElement.getNode().isAlive();
+			part = new NodePart(NodeId, isInit, isAlive);
 		}
 		if (part != null)
 			part.setModel(model);

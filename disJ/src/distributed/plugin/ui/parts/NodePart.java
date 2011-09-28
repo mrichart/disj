@@ -48,6 +48,8 @@ public class NodePart extends AbstractGraphicalEditPart implements
 
 	private boolean isInit;
 	
+	private boolean isAlive;
+	
 	private String NodeId;
 	
 
@@ -60,11 +62,13 @@ public class NodePart extends AbstractGraphicalEditPart implements
 	public NodePart() {
 		super();
 		this.isInit = false;
+		this.isAlive = true;
 	}
 
-	public NodePart(String NodeId, boolean isInit) {
+	public NodePart(String NodeId, boolean isInit, boolean isAlive) {
 		super();
 		this.isInit = isInit;
+		this.isAlive = isAlive;
 		this.NodeId = NodeId;
 	}
 
@@ -103,7 +107,7 @@ public class NodePart extends AbstractGraphicalEditPart implements
 	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
 	 */
 	protected IFigure createFigure() {
-		Figure fig = new NodeFigure(this.NodeId, this.isInit);
+		Figure fig = new NodeFigure(this.NodeId, this.isInit, this.isAlive);
 		this.anchor = new ChopboxAnchor(fig);
 		return fig;
 	}
@@ -299,12 +303,38 @@ public class NodePart extends AbstractGraphicalEditPart implements
 				} else {
 					this.refreshVisuals();
 				}
+			}  else if (prop.equals(IConstants.PROPERTY_CHANGE_REM_NODE)) {
+				final Node n = (Node) evt.getNewValue();
+				this.getNodeFigure().setIsAlive(n.isAlive());				
+				if (display == null) {
+					ui = new Runnable() {
+						public void run() {
+							refreshVisuals();
+						}
+					};
+				} else {
+					this.refreshVisuals();
+				}
 			} else if (prop.equals(IConstants.PROPERTY_CHANGE_AGENT_AT_NODE)) {
 				final Object o = evt.getNewValue();				
 				if(o instanceof Node){
 					Node temp = (Node)o;
 					int numAgent = temp.countAllAgents();
 					this.getNodeFigure().setNumAgent(numAgent);
+					if (display == null) {
+						ui = new Runnable() {
+							public void run() {
+								refreshVisuals();				
+							}
+						};
+					} 
+				}
+			} else if (prop.equals(IConstants.PROPERTY_CHANGE_NUM_TOK_NODE)) {
+				final Object o = evt.getNewValue();				
+				if(o instanceof Node){
+					Node temp = (Node)o;
+					int numTok = temp.countAllTokens();
+					this.getNodeFigure().setNumToken(numTok);
 					if (display == null) {
 						ui = new Runnable() {
 							public void run() {

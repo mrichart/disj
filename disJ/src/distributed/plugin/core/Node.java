@@ -750,12 +750,20 @@ public class Node implements Serializable {
 		this.graphId = id;
 	}
 
-	public int getNumToken() {
+	/**
+	 * Count number of token are currently located in this node
+	 * @return
+	 */
+	public int countAllTokens() {
 		return numToken;
 	}
 
 	public void clearTokens() {
 		this.numToken = 0;
+		
+		// for GUI View
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_NUM_TOK_NODE, null, 
+				this);
 	}
 	
 	public void decrementToken(int numDecrease) {
@@ -767,7 +775,7 @@ public class Node implements Serializable {
 		}
 		this.numToken -= numDecrease;
 		
-		// for DisJView
+		// for GUI View
 		this.firePropertyChange(IConstants.PROPERTY_CHANGE_NUM_TOK_NODE, null, 
 				this);
 	}
@@ -780,7 +788,7 @@ public class Node implements Serializable {
 		}
 		this.numToken += numIncrease;
 
-		// for DisJView
+		// for GUI JView
 		this.firePropertyChange(IConstants.PROPERTY_CHANGE_NUM_TOK_NODE, null, 
 				this);
 	}
@@ -897,6 +905,30 @@ public class Node implements Serializable {
 	}
 
 	/**
+	 * Set this node to be alive (not a failure node)
+	 * @param alive
+	 *            
+	 */
+	public void setAlive(boolean alive) {
+		this.isAlive = alive;
+		if(this.isAlive == false){
+			if(log != null){
+				this.log.logNode(logTag.NODE_DIE, this.nodeId, null);
+			}			
+			// every agent resides in the node must die as well
+			for(int i = 0; i < this.curAgents.size(); i++){
+				Agent agent = this.curAgents.get(i);
+				agent.setAlive(false);
+				this.removeAgent(agent);
+			}
+		}
+		
+		this.firePropertyChange(IConstants.PROPERTY_CHANGE_REM_NODE, null,
+				this);
+
+	}
+
+	/**
 	 * @return Returns the hasInit.
 	 */
 	public boolean isInitExec() {
@@ -951,29 +983,7 @@ public class Node implements Serializable {
 		}
 		return in;
 	}
-
-	/**
-	 * Set this node to be alive (not a failure node)
-	 * @param alive
-	 *            
-	 */
-	public void setAlive(boolean alive) {
-		this.isAlive = alive;
-		if(alive = false){
-			if(log != null){
-				this.log.logNode(logTag.NODE_DIE, this.nodeId, null);
-			}
-			this.firePropertyChange(IConstants.PROPERTY_CHANGE_REM_NODE, null, this);
-			
-			// every agent resides in the node must die as well
-			for(int i = 0; i < this.curAgents.size(); i++){
-				Agent agent = this.curAgents.get(i);
-				agent.setAlive(false);
-				this.removeAgent(agent);
-			}
-		}
-	}
-
+	
 	/**
 	 * @param name
 	 *            The name to set.
