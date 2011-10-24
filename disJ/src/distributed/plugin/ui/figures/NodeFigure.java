@@ -78,7 +78,7 @@ public class NodeFigure extends RoundedRectangle {
 			IDSC_TOKEN = ImageDescriptor.createFromURL(imageUrl);
 			IMG_TOKEN = IDSC_TOKEN.createImage();
 			
-			imageUrl = new URL(installUrl, "icons/token.png");
+			imageUrl = new URL(installUrl, "icons/token_agent.png");
 			IDSC_TOKEN_AGENT = ImageDescriptor.createFromURL(imageUrl);
 			IMG_TOKEN_AGENT = IDSC_TOKEN_AGENT.createImage();
 		
@@ -94,7 +94,7 @@ public class NodeFigure extends RoundedRectangle {
         this.numAgent = 0;
         this.isInit = isInit;
         this.isAlive = isAlive;
-        this.labelText = "";        
+        this.labelText = "";
         this.label = new Label();
         
         this.setIsInit(this.isInit);
