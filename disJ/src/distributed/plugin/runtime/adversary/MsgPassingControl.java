@@ -41,7 +41,8 @@ public abstract class MsgPassingControl extends AbstractControl {
 	 * 
 	 * @param msg A message that is arriving
 	 * @param nodeId An ID of a node that receives the message
-	 * @param incomingPort A port label that the message is entering through
+	 * @param incomingPort A port label of the nodeId that the message 
+	 * 		  is entering 
 	 * 
 	 * @return BlockFlag.PASS if this message must be received now, 
 	 * 		   BlockFlag.BLOCK if the message has to be blocked,
@@ -50,8 +51,9 @@ public abstract class MsgPassingControl extends AbstractControl {
 	public abstract BlockFlag arrivalControl(final IMessage msg, String nodeId, String incomingPort);
 
 	/**
-	 * Allow adversary to configure an arrival time for message while it is
-	 * in an edge
+	 * A default implementation:
+	 * Allows adversary to configure an arrival time for message when
+	 * the message entering the edge
 	 * 
 	 * Note: A returning time MUST be more than a current time, 
 	 * otherwise a current time + 1 will be returned. 
