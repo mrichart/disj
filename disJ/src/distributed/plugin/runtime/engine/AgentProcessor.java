@@ -420,7 +420,7 @@ public abstract class AgentProcessor implements IProcessor {
 					}
 				}
 			} else {
-				if (this.adversary.setDrop(agent.getAgentId(),
+				if (this.adversary.dropControl(agent.getAgentId(),
 						link.getEdgeId(), target.getNodeId())) {
 
 					this.systemOut.println("Agent " + agentId
@@ -442,7 +442,7 @@ public abstract class AgentProcessor implements IProcessor {
 				execTime = link.getDelayTime(sNode, curTime);
 
 			} else {
-				execTime = this.adversary.setArrivalTime(agent.getAgentId(),
+				execTime = this.adversary.arrivalTimeControl(agent.getAgentId(),
 						link.getEdgeId(), target.getNodeId());
 				if (execTime <= curTime) {
 					execTime = curTime + 1;
@@ -769,8 +769,8 @@ public abstract class AgentProcessor implements IProcessor {
 		if (this.adversary != null) {
 			// allow adversary to do some actions at a node before
 			// agent arrives
-			pass = this.adversary.arrivalControl(agent.getAgentId(), node
-					.getNodeId(), port);
+			pass = this.adversary.arrivalControl(agent.getAgentId(), 
+					link.getEdgeId(), node.getNodeId());
 
 		}
 

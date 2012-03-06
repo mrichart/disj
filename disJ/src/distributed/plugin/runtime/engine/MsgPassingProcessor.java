@@ -30,8 +30,8 @@ import distributed.plugin.core.Edge;
 import distributed.plugin.core.Graph;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Logger;
-import distributed.plugin.core.Node;
 import distributed.plugin.core.Logger.logTag;
+import distributed.plugin.core.Node;
 import distributed.plugin.random.IRandom;
 import distributed.plugin.random.Poisson;
 import distributed.plugin.random.Uniform;
@@ -289,7 +289,7 @@ public class MsgPassingProcessor implements IProcessor {
 				// Use provided adversary to validate
 				if(!recvEdge.isReliable()){
 					Node rNode = recvEdge.getOthereEnd(sNode);
-					if(this.adversary.setDrop(message, recvEdge.getEdgeId(), rNode.getNodeId())){
+					if(this.adversary.dropControl(message, recvEdge.getEdgeId(), rNode.getNodeId())){
 						// log for losing msg
 						this.logEdgeFailurMsg(recvEdge, sender, message);
 						continue;		
@@ -305,7 +305,7 @@ public class MsgPassingProcessor implements IProcessor {
 			}else{
 				Node rNode = recvEdge.getOthereEnd(sNode);
 				
-				execTime = this.adversary.setArrivalTime(message, recvEdge.getEdgeId(), rNode.getNodeId());
+				execTime = this.adversary.arrivalTimeControl(message, recvEdge.getEdgeId(), rNode.getNodeId());
 				if(execTime <= curTime){
 					execTime = curTime + 1;
 				}
@@ -698,7 +698,7 @@ public class MsgPassingProcessor implements IProcessor {
 					// allow adversary to do some actions at a node before 
 					// this msg arrives
 					IMessage msg = event.getMessage();					
-					pass = this.adversary.arrivalControl(msg, recv.getNodeId(), port);
+					pass = this.adversary.arrivalControl(msg, link.getEdgeId(),recv.getNodeId());
 										
 				}
 				if(pass == BlockFlag.DEFAULT){				

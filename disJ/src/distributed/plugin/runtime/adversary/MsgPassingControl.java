@@ -40,15 +40,14 @@ public abstract class MsgPassingControl extends AbstractControl {
 	 * 		unblocked
 	 * 
 	 * @param msg A message that is arriving
-	 * @param nodeId An ID of a node that receives the message
-	 * @param incomingPort A port label of the nodeId that the message 
-	 * 		  is entering 
+	 * @param edgeId An ID of a link that message is traveling 
+	 * @param nodeId An ID of a destination node
 	 * 
 	 * @return BlockFlag.PASS if this message must be received now, 
 	 * 		   BlockFlag.BLOCK if the message has to be blocked,
 	 * 		   BlockFlag.DEFAULT no overriding
 	 */
-	public abstract BlockFlag arrivalControl(final IMessage msg, String nodeId, String incomingPort);
+	public abstract BlockFlag arrivalControl(final IMessage msg,String edgeId, String nodeId);
 
 	/**
 	 * A default implementation:
@@ -64,7 +63,7 @@ public abstract class MsgPassingControl extends AbstractControl {
 	 * 
 	 * @return A simulation time that message will be arrived at the node
 	 */
-	public int setArrivalTime(final IMessage msg, String edgeId, String nodeId) {
+	public int arrivalTimeControl(final IMessage msg, String edgeId, String nodeId) {
 		Node sender;
 		int delay = 0;
 		int curTime = this.getCurrentTime();
@@ -86,7 +85,7 @@ public abstract class MsgPassingControl extends AbstractControl {
 	 * @return True if the message will be lost before a node receive,
 	 * otherwise false
 	 */
-	public boolean setDrop(final IMessage msg, String edgeId, String nodeId) {
+	public boolean dropControl(final IMessage msg, String edgeId, String nodeId) {
 		Random ran = new Random(System.currentTimeMillis());
 		Edge edge = this.getEdge(edgeId);
 		if(!edge.isReliable()){

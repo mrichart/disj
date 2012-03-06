@@ -36,15 +36,15 @@ public abstract class AgentControl extends AbstractControl {
 	 * Note: It is adversary duty to make sure any blocked message will be 
 	 * 		unblocked
 	 * 
-	 * @param agentId An of agent that arrives
-	 * @param nodeId An ID of a node that the agent is arriving
-	 * @param incomingPort A port label that the agent is entering through
+	 * @param agentId An ID of an agent that arrives
+	 * @param edgeId An ID of an edge that agent is traveling
+	 * @param nodeId An ID of a destination node
 	 * 
 	 * @return BlockFlag.PASS if this agent must arrive now, 
 	 * 		   BlockFlag.BLOCK if the agent has to be blocked,
 	 * 		   BlockFlag.DEFAULT no overriding
 	 */
-	public abstract BlockFlag arrivalControl(String agentId, String nodeId, String incomingPort);
+	public abstract BlockFlag arrivalControl(String agentId, String edgeId, String nodeId);
 
 	
 	/**
@@ -60,7 +60,7 @@ public abstract class AgentControl extends AbstractControl {
 	 * 
 	 * @return A simulation time that the agent will be arrived at the node
 	 */
-	public int setArrivalTime(String agentId, String edgeId, String nodeId) {
+	public int arrivalTimeControl(String agentId, String edgeId, String nodeId) {
 		Node sender;
 		int delay = 0;
 		int curTime = this.getCurrentTime();
@@ -81,7 +81,7 @@ public abstract class AgentControl extends AbstractControl {
 	 * @return True if the agent will die before arrive at a node,
 	 * otherwise false
 	 */
-	public boolean setDrop(String agentId, String edgeId, String nodeId) {
+	public boolean dropControl(String agentId, String edgeId, String nodeId) {
 		Edge edge = this.getEdge(edgeId);
 		if(!edge.isReliable()){
 			int prob = this.getRandomGen().nextInt(100);
