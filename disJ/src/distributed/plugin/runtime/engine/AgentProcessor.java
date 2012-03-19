@@ -142,6 +142,22 @@ public abstract class AgentProcessor implements IProcessor {
 			this.adversary.setProcessor(this);
 		}
 	}
+	
+	/**
+	 * Get current number of agent that has been initiated and still alive
+	 * @return
+	 */
+	public int countAliveAgent(){
+		int count = 0;
+		Agent temp;
+		for (String id : this.allAgents.keySet()) {
+			temp = this.allAgents.get(id);
+			if(temp.isAlive() && temp.hasInitExec()){
+				count++;
+			}
+		}
+		return count;
+	}
 
 	/**
 	 * Push all given events to a processing queue

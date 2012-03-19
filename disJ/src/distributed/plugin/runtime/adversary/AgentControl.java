@@ -171,4 +171,14 @@ public abstract class AgentControl extends AbstractControl {
 		Node recv = this.getNode(nodeId);
 		return recv.isVisitorBlocked(agentId, incomingPort);
 	}
+	
+	/**
+	 * Count current number of agent that has been initiated and still alive in 
+	 * the environment
+	 * 
+	 * @return a number of agent that is alive and has been initiated
+	 */
+	public final int getTotalAliveAgent(){
+		return ((AgentProcessor)this.proc).countAliveAgent();
+	}
 }
