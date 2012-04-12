@@ -51,6 +51,8 @@ public class DisJException extends Exception {
         ERROR_CODE[IConstants.ERROR_22] = "Parameter cannot be null";
         ERROR_CODE[IConstants.ERROR_23] = "Does not met the condition to execute";
         
+        ERROR_CODE[IConstants.ERROR_24] = "Agent not found";
+        
     }
 
     private short errorCode;

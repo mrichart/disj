@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import distributed.plugin.core.Agent;
+import distributed.plugin.core.DisJException;
 import distributed.plugin.core.Edge;
 import distributed.plugin.core.IConstants;
 import distributed.plugin.core.Node;
@@ -180,5 +182,20 @@ public abstract class AgentControl extends AbstractControl {
 	 */
 	public final int getTotalAliveAgent(){
 		return ((AgentProcessor)this.proc).countAliveAgent();
+	}
+	
+	/**
+	 * Get current state of a agent with a given ID in the environment
+	 * 
+	 * @return a current state of a given Agent ID, if agent
+	 * @throws DisJException when there is no agent with a given ID
+	 * 		alive in the network
+	 */
+	public final int getAgentState(String id) throws DisJException {
+		Agent agent = this.proc.getGraph().getAgent(id);
+		if(agent == null){
+			throw new DisJException(IConstants.ERROR_24);
+		}
+		return agent.getCurState();
 	}
 }
