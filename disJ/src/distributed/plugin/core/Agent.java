@@ -53,9 +53,14 @@ public class Agent implements ITransmissible {
 	private String homeId;	
 	
 	/*
-	 * An external name label
+	 * An external agent name label
 	 */
 	private String name;
+	
+	/*
+	 * An external homebase name label
+	 */
+	private String homeName;
 	
 	/*
 	 * A port that it entered w.r.t a current node
@@ -109,14 +114,16 @@ public class Agent implements ITransmissible {
 		this.starter = true;
 		this.hasInitExec = false;
 		this.alive = true;
+		this.name = agentId;
 		this.agentId = agentId;
 		this.homeId = hostId;
-		this.maxSlot = 128;
+		this.homeName = hostId;
+		this.maxSlot = IConstants.MAX_SUITCASE_SLOT;
 		this.lastPortEnter = null;
 		this.data = null;
 		this.curNode = null;
 		this.log = null;
-		this.info = null;
+		this.info = new String[this.maxSlot];
 		this.entity = null;
 		this.stat = new AgentStat(this.agentId);
 
@@ -139,7 +146,7 @@ public class Agent implements ITransmissible {
 	}
 	
 	/**
-	 * Set a state-name pairs list of this node
+	 * Set a state-name pairs list of this agent
 	 * 
 	 * @param states
 	 */
@@ -291,6 +298,18 @@ public class Agent implements ITransmissible {
 		return name;
 	}
 
+	public void setName(String newName){
+		this.name = newName;
+	}
+	
+	public String getHomeName() {
+		return homeName;
+	}
+
+	public void setHomeName(String newName){
+		this.homeName = newName;
+	}
+	
 	/**
 	 * Binding client implementation object
 	 * 
@@ -308,7 +327,7 @@ public class Agent implements ITransmissible {
 		return this.maxSlot;
 	}
 	
-	public void setMaxSlot(int maxSlot){
+	private void setMaxSlot(int maxSlot){
 		this.maxSlot = maxSlot;
 	}
 
@@ -316,7 +335,7 @@ public class Agent implements ITransmissible {
 		return info;
 	}
 
-	public void setInfo(String[] info) {
+	private void setInfo(String[] info) {
 		this.info = info;
 	}
 	

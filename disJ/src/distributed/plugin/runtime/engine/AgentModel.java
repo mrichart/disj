@@ -35,7 +35,7 @@ public abstract class AgentModel implements IAgentModel {
 	public enum NotifyType{TOKEN_UPDATE, BOARD_UPDATE, 
 		AGENT_ARRIVAL, AGENT_DEPARTURE};
 	
-	int curState;
+	int initState;
 
 	transient Agent agentOwner;
 
@@ -44,7 +44,7 @@ public abstract class AgentModel implements IAgentModel {
 	MessageConsoleStream systemOut;
 	
 	protected AgentModel(int state) {
-		this.curState = state;
+		this.initState = state;
 		this.processor = null;
 		this.agentOwner = null;
 	}
@@ -52,14 +52,21 @@ public abstract class AgentModel implements IAgentModel {
 	/**
 	 * Initialize all necessary references for an agent
 	 * 
-	 * @param agentId
-	 *            An agent unique ID
+	 * @param isOrg 
+	 * 			  A flag is True if an agent is not a duplicate agent
+	 * 				otherwise False
+	 * @param agent
+	 *            An agent
 	 * @param processor
 	 *            A simulation processor where an agent belong
 	 */
-	void initAgent(Agent agent, IProcessor processor) {
-		if (this.agentOwner == null)
+	void initAgent(boolean isOrg, Agent agent, IProcessor processor) {
+		if (this.agentOwner == null){
 			this.agentOwner = agent;
+			if(isOrg){
+				this.agentOwner.setCurState(this.initState);
+			}
+		}
 
 		if (this.processor == null){
 			this.processor = processor;
@@ -73,18 +80,35 @@ public abstract class AgentModel implements IAgentModel {
 		return this.agentOwner.getInfo();
 	}
 
+	/**
+	 * Get this agent Name
+	 */
 	public final String getAgentId() {
-		return this.agentOwner.getAgentId();
+		return this.agentOwner.getName();
 	}
 
+	/**
+	 * Get a node name that this agent currently resides
+	 */
 	public final String getNodeId() {
-		return this.agentOwner.getCurNode().getNodeId();
+		return this.agentOwner.getCurNode().getName();
 	}
 
+	/**
+	 * Get a max number of suitcase memory size that
+	 * this agent can carry
+	 */
 	public final int getMaxMemorySlot() {
 		return this.agentOwner.getMaxSlot();
 	}
 
+	/**
+	 * Command this agent to exit at a given outgoing port
+	 * of a node that this agent is currently resides.
+	 * 
+	 * @param outPort an outgoing port of a node that this agent
+	 *       is currently resides
+	 */
 	public final void moveTo(String outPort) {
 		// add destination
 		List<String> recv = new ArrayList<String>();
@@ -98,6 +122,9 @@ public abstract class AgentModel implements IAgentModel {
 		}
 	}
 
+	/**
+	 * Get current state of this agent
+	 */
 	public final int getState() {
 		try {
 			if (this.agentOwner == null)
@@ -106,31 +133,47 @@ public abstract class AgentModel implements IAgentModel {
 			e.printStackTrace();
 			this.systemOut.println("@getState() " + e.toString());
 		}
-		return this.curState;
+		return this.agentOwner.getCurState();
 	}
 
+	/**
+	 * Set current state of this agent to be a given state
+	 * 
+	 * @param state a new state
+	 */
 	public final void become(int state) {
 		try {
 			if (this.agentOwner == null)
 				throw new DisJException(IConstants.ERROR_7);
 
-			this.curState = state;
-			this.agentOwner.setCurState(this.curState);
+			this.agentOwner.setCurState(state);
 		} catch (Exception e) {
 			e.printStackTrace();
 			this.systemOut.println("@become() " + e.toString());
 		}
 	}
 
+	/**
+	 * Get a current state of a node that this agent currently 
+	 * resides
+	 */
 	public final int getNodeState() {
 		return this.agentOwner.getCurNode().getCurState();
 	}
 
+	/**
+	 * Set state of a node that this agent currently resides
+	 * 
+	 * @param state a new state
+	 */
 	public final void setNodeState(int state) {
 		Node node = this.agentOwner.getCurNode();
 		node.setCurState(state);
 	}
 
+	/**
+	 * Set an internal alarm clock of this agent to ring
+	 */
 	public final void setAlarm(int time) {
 		if (time > 0) {
 			// No receiver
@@ -151,8 +194,11 @@ public abstract class AgentModel implements IAgentModel {
 		}
 	}
 
+	/**
+	 * Get a home base name of this agent
+	 */
 	public final String getHomeId() {
-		return this.agentOwner.getHomeId();
+		return this.agentOwner.getHomeName();
 	}
 
 	/**
@@ -227,5 +273,25 @@ public abstract class AgentModel implements IAgentModel {
 	 */
 	public final int getNetworkSize(){
 		return this.processor.getNetworkSize();
+	}
+	
+	/**
+	 * Create a replica of this agent and present it at a node that
+	 * this agent is currently resides.
+	 * 
+	 * The replica agent is indistinguishable with this agent
+	 * at the time it created except an agent name
+	 * 
+	 * The replica agent is activate right after it has been created
+	 * by performing an initialize function init()
+	 * 
+	 * @throws DisJException
+	 */
+	public final void duplicate() {
+		try {
+			((AgentProcessor)this.processor).duplicateAgent(this.agentOwner);
+		} catch (DisJException e) {
+			e.printStackTrace();
+		}		
 	}
 }

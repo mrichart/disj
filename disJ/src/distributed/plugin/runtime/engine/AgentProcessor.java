@@ -253,13 +253,86 @@ public abstract class AgentProcessor implements IProcessor {
 	}
 
 	/*
+	 * Duplicate a given agent and present it at current node where
+	 * the given agent is located
+	 */
+	protected void duplicateAgent(Agent agent) throws DisJException {
+
+		try {
+			// use current number of agent created
+			// to be a unique ID
+			int agentId = this.allAgents.size() + 1;
+
+			// create and initialize replica agent instance and present
+			// it at the same node where the original agent is
+			Agent dup = new Agent(agentId + "", agent.getHomeId());
+			dup.setCurState(agent.getCurState());
+			dup.setCurNode(agent.getCurNode());
+			dup.setHomeName(agent.getHomeName());
+			dup.setLogger(this.log);
+			dup.setStateNames(this.stateFields);
+
+			// copy internal states to replica agent
+			dup.setHasInitExec(agent.hasInitExec());
+			dup.setCurState(agent.getCurState());
+			dup.setAlive(agent.isAlive());
+			dup.setStarter(agent.isStarter());
+			dup.setLastPortEnter(agent.getLastPortEnter());
+			//dup.setMaxSlot(agent.getInfo().length);
+			
+			// copy memory suitcase to replica agent			
+			String[] suitcase = dup.getInfo();
+			String[] org = agent.getInfo();
+			for(int i = 0; i < suitcase.length; i++){
+				suitcase[i] = org[i];
+			}
+
+			AgentModel clientAgent = this.createClientAgent();
+			dup.setClientEntity(clientAgent);
+			clientAgent.initAgent(false, dup, this);
+
+			// add replica to current host
+			dup.getCurNode().addAgent(dup);
+
+			// add to global/graph for UI tracking list
+			this.allAgents.put(agentId + "", dup);
+			this.graph.addAgent(agentId + "", dup);
+			
+			// activate a duplicate agent
+			int execTime = 0;
+			int eventId;
+			IMessage msg;
+			List<Event> events = new ArrayList<Event>();
+
+			eventId = this.getNextId();
+			msg = new Message("Initialized", new Integer(execTime));
+
+			// let a duplicate agent activate right after it's created
+			execTime = this.getCurrentTime()+1;
+					
+			// add the activate event into a queue
+			Event e = new AgentEvent(IConstants.EVENT_INITIATE_TYPE,
+					eventId, execTime, dup.getCurNode().getNodeId(), dup
+							.getAgentId(), msg);
+
+			// add to the queue
+			events.add(e);		
+			this.pushEvents(events);
+			
+			//System.out.println("@duplicateAgent() duplicated agent is created");
+		} catch (Exception e) {
+			throw new DisJException(IConstants.ERROR_8, e.toString());
+		}
+
+	}
+	/*
 	 * Load every agent(s) into host nodes and initialize event(s)
 	 */
 	private void loadAgent() throws DisJException {
 
 		int agentId = 0;
 		int totalAgent = 0;
-		String[] suitcase;
+		//String[] suitcase;
 		List<Node> hosts = GraphLoader.getInitNodes(this.graph);
 		try {
 			// load host nodes that contain agent(s)
@@ -275,13 +348,13 @@ public abstract class AgentProcessor implements IProcessor {
 					agent.setLogger(this.log);
 					agent.setStateNames(this.stateFields);
 
-					// initialize memory suitcase for agent
-					suitcase = new String[agent.getMaxSlot()];
-					agent.setInfo(suitcase);
+					// Dont need it for now initialize memory suitcase for agent
+					//suitcase = new String[agent.getMaxSlot()];
+					//agent.setInfo(suitcase);
 
 					AgentModel clientAgent = this.createClientAgent();
 					agent.setClientEntity(clientAgent);
-					clientAgent.initAgent(agent, this);
+					clientAgent.initAgent(true, agent, this);
 
 					// add to home host
 					host.addAgent(agent);

@@ -170,7 +170,7 @@ public interface IConstants {
 	public static final int MODEL_AGENT_WHITEBOARD = 1;
 	public static final int MODEL_AGENT_TOKEN = 2;
 	
-	
+	public static final int MAX_SUITCASE_SLOT = 128;
 	
 	
 }
