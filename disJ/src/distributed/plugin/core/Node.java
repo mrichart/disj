@@ -310,14 +310,14 @@ public class Node implements Serializable {
 	 * 
 	 * @return
 	 */
-	public int countAllAgents(){
+	public final int countAllAgents(){
 		return this.curAgents.size();
 	}
 	
 	/**
 	 * Remove all agents at this node
 	 */
-	public void clearAllAgents(){
+	public final void clearAllAgents(){
 		this.curAgents.clear();		
 		this.firePropertyChange(IConstants.PROPERTY_CHANGE_AGENT_AT_NODE, null,
 				this);
@@ -334,7 +334,7 @@ public class Node implements Serializable {
 	 * @param edge
 	 * @throws DisJException
 	 */
-	public void addEdge(String label, short type, Edge edge)
+	public final void addEdge(String label, short type, Edge edge)
 			throws DisJException {
 
 		if (label == null) {
@@ -359,7 +359,7 @@ public class Node implements Serializable {
 	 * @param edge
 	 * @throws DisJException
 	 */
-	public void removeEdge(Edge edge) throws DisJException {
+	public final void removeEdge(Edge edge) throws DisJException {
 		if (!this.edges.containsValue(edge))
 			return;
 
@@ -370,20 +370,36 @@ public class Node implements Serializable {
 	}
 
 	/**
-	 * Get a link from this node w.r.t a given name
+	 * Get a link from this node w.r.t a given name. It is case sensitive
 	 * 
-	 * @param label
-	 *            A local label of the edge
-	 * @return
+	 * @param portLabel
+	 *            A local label of the edge in this node
+	 * @return An edge of a given port label
 	 * @throws DisJException
 	 */
-	public Edge getEdge(String label) throws DisJException {
-		if (this.edges.containsKey(label))
-			return (Edge) this.edges.get(label);
+	public final Edge getEdge(String portLabel) throws DisJException {
+		if (this.edges.containsKey(portLabel))
+			return (Edge) this.edges.get(portLabel);
 		else
-			throw new DisJException(IConstants.ERROR_1, label);
+			throw new DisJException(IConstants.ERROR_1, portLabel);
 	}
 
+	/**
+	 * Get a destination node of a given port label of this node
+	 * 
+	 * @param portLabel A port label of this node
+	 * @return A node that a given port leads to
+	 */
+	public final Node getDestinationNode(String portLabel){
+		try {
+			Edge edge = this.getEdge(portLabel);
+			Node node = edge.getOthereEnd(this);
+			return node;
+		} catch (DisJException e) {
+			throw new IllegalArgumentException("A port " + portLabel + " not found");
+		}		
+	}
+	
 	public List<String> getWhiteboard() {
 		return whiteboard;
 	}

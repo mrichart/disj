@@ -261,7 +261,7 @@ public abstract class AgentProcessor implements IProcessor {
 		try {
 			// use current number of agent created
 			// to be a unique ID
-			int agentId = this.allAgents.size() + 1;
+			int agentId = this.allAgents.size();
 
 			// create and initialize replica agent instance and present
 			// it at the same node where the original agent is

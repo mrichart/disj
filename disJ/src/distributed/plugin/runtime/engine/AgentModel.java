@@ -294,4 +294,22 @@ public abstract class AgentModel implements IAgentModel {
 			e.printStackTrace();
 		}		
 	}
+	
+	/**
+	 * Get a node name on the another end that connects to a given port 
+	 * of a current node that this agent resides
+	 * 
+	 * @param portLabel A given port label
+	 * @return A name of a node on the another end of this node that connected
+	 * via a give port label if exist, otherwise NULL is returned
+	 */
+	public final String getDestinationNode(String portLabel){
+		Node curNode = this.agentOwner.getCurNode();
+		try{
+			curNode.getDestinationNode(portLabel);
+			return curNode.getName();
+		}catch(IllegalArgumentException e){
+			return null;
+		}
+	}
 }

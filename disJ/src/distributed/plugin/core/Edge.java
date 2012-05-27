@@ -417,7 +417,7 @@ public class Edge implements Serializable {
 	 * @param node
 	 * @return
 	 */
-	public Node getOthereEnd(Node node) {
+	public final Node getOthereEnd(Node node) {
 
 		if (node == null){
 			throw new IllegalArgumentException("@Edge.getOtherEnd() node is NULL");

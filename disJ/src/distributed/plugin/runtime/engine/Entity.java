@@ -1243,5 +1243,22 @@ public abstract class Entity implements IMessagePassingModel {
 	public final int getNetworkSize(){
 		return this.processor.getNetworkSize();
 	}
+	
+	/**
+	 * Get a node name on the another end that connects to a given port 
+	 * of this node
+	 * 
+	 * @param portLabel A given port label
+	 * @return A name of a node on the another end of this node that connected
+	 * via a give port label if exist, otherwise NULL is returned
+	 */
+	public final String getDestinationNode(String portLabel){
+		try{
+			Node opNode = this.getNodeOwner().getDestinationNode(portLabel);
+			return opNode.getName();
+		}catch(IllegalArgumentException e){
+			return null;
+		}		
+	}
 
 }
