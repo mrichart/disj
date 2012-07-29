@@ -76,6 +76,8 @@ public interface IGraphEditorConstants {
 	public static final String CONNECTED_DESC = "Draw a random connected network";
 	public static final String SPATIAL = "Spatial";
 	public static final String SPATIAL_DESC = "Draw a random spatial triangulation polygon";
+	public static final String MATRIX = "Load Matrix";
+	public static final String MATRIX_DESC = "Draw from a matrix file";
 	
 	// action bar constants
 	public static final String EXECUTE_MENU = "Simulator";
@@ -123,6 +125,7 @@ public interface IGraphEditorConstants {
 	public static final String TEMPLATE_GENERIC = "11";
 	public static final String TEMPLATE_CONNECTED = "12";
 	public static final String TEMPLATE_SPATIAL = "13";
+	public static final String TEMPLATE_MATRIX = "14";
 	
 	
 	// command label
@@ -140,6 +143,7 @@ public interface IGraphEditorConstants {
 	public static final String CREATE_HYPECUBE_COMD = "Create HyperCube";
 	public static final String CREATE_GENERIC_COMD = "Create Generic Graph";
 	public static final String CREATE_SPATIAL_COMD = "Create Spatial Graph";
+	public static final String CREATE_MATRIX_COMD = "Create Graph from Matrix";
 	
 	// general constants
 	public static final int NODE_SIZE = 40;

@@ -589,42 +589,58 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_NODE,
 				new GraphElementFactory(this.getGraphElement(),
 						IGraphEditorConstants.TEMPLATE_NODE));
+		
 		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_UNI_LINK,
 				new GraphElementFactory(this.getGraphElement(),
 						IGraphEditorConstants.TEMPLATE_UNI_LINK));
+		
 		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_BI_LINK,
 				new GraphElementFactory(this.getGraphElement(),
 						IGraphEditorConstants.TEMPLATE_BI_LINK));
+		
 		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_RING,
 				new GraphElementFactory(this.getGraphElement(),
 						IGraphEditorConstants.TEMPLATE_RING));
+		
 		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_TREE,
 				new GraphElementFactory(this.getGraphElement(),
 						IGraphEditorConstants.TEMPLATE_TREE));
+		
 		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_COMPLETE,
 				new GraphElementFactory(this.getGraphElement(),
 						IGraphEditorConstants.TEMPLATE_COMPLETE));
+		
 		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_MESH,
 				new GraphElementFactory(this.getGraphElement(),
 						IGraphEditorConstants.TEMPLATE_MESH));
+		
 		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_HYPER_CUBE,
 				new GraphElementFactory(this.getGraphElement(),
 						IGraphEditorConstants.TEMPLATE_HYPER_CUBE));
+		
 		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_TORUS_1,
 				new GraphElementFactory(this.getGraphElement(),
 						IGraphEditorConstants.TEMPLATE_TORUS_1));
+		
 		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_TORUS_2,
 				new GraphElementFactory(this.getGraphElement(),
 						IGraphEditorConstants.TEMPLATE_TORUS_2));
+		
 		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_GENERIC,
 				new GraphElementFactory(this.getGraphElement(),
 						IGraphEditorConstants.TEMPLATE_GENERIC));
+		
 		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_CONNECTED,
 				new GraphElementFactory(this.getGraphElement(),
 						IGraphEditorConstants.TEMPLATE_CONNECTED));
+		
 		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_SPATIAL,
 				new GraphElementFactory(this.getGraphElement(),
 						IGraphEditorConstants.TEMPLATE_SPATIAL));
+		
+		this.graphFactories.put(IGraphEditorConstants.TEMPLATE_MATRIX,
+				new GraphElementFactory(this.getGraphElement(),
+						IGraphEditorConstants.TEMPLATE_MATRIX));
 	}
 
 	private CreationFactory getFactory(String template) {
@@ -913,6 +929,20 @@ public class GraphEditor extends GraphicalEditorWithFlyoutPalette {
 		);
 		random.add(combined);
 		entries.add(random);
+		
+		try {
+			imageUrl = new URL(installUrl, "icons/torus2.png");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		combined = new CombinedTemplateCreationEntry(
+				IGraphEditorConstants.MATRIX, IGraphEditorConstants.MATRIX_DESC,
+				IGraphEditorConstants.TEMPLATE_MATRIX, this
+						.getFactory(IGraphEditorConstants.TEMPLATE_MATRIX),
+						ImageDescriptor.createFromURL(imageUrl), //$NON-NLS-1$
+						ImageDescriptor.createFromURL(imageUrl)//$NON-NLS-1$
+		);
+		entries.add(combined);
 
 		drawer.addAll(entries);
 		return drawer;

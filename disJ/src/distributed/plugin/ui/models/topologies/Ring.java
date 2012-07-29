@@ -38,6 +38,8 @@ public class Ring extends AbstractGraph {
     private String linkType;
     
     private boolean isOriented;
+    
+    private boolean isCancel;
 
     /**
      * Constructor;
@@ -45,6 +47,7 @@ public class Ring extends AbstractGraph {
     public Ring(GraphElementFactory factory, Shell shell) {
     	super(factory, shell);
     	this.isOriented = false;
+    	this.isCancel = true;
         this.radius = 0;
         this.linkType = IGraphEditorConstants.BI;      
       
@@ -69,6 +72,7 @@ public class Ring extends AbstractGraph {
         dialog.open();
         
         if(!dialog.isCancel()){
+        	this.isCancel = false;
 	        this.numNode = dialog.getNumNode();
 	        this.linkType = dialog.getLinkType();
 	        this.numInit = dialog.getNumInit();
@@ -106,6 +110,10 @@ public class Ring extends AbstractGraph {
      * @see distributed.plugin.ui.models.topologies.ITopology#applyLocation(org.eclipse.draw2d.geometry.Point)
      */
     public void applyLocation(Point point) {
+    	if(this.isCancel){
+    		return;
+    	}
+    	
         NodeElement node;
         double dTheta = 360.0 / (double) this.numNode;
         double thetaDeg, thetaRad, x, y;
@@ -134,6 +142,10 @@ public class Ring extends AbstractGraph {
      * @see distributed.plugin.ui.models.topologies.ITopology#setConnections()
      */
     public void setConnections() {
+    	if(this.isCancel){
+    		return;
+    	}
+    	
         for(int i =0; i < this.links.size(); i++){
             LinkElement link = (LinkElement)this.links.get(i);
             NodeElement source = (NodeElement)this.nodes.get(i);

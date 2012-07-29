@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: DisJ Simulator
 Bundle-SymbolicName: org.carleton.scs.disj; singleton:=true
-Bundle-Version: 1.1
+Bundle-Version: 1.2
 Bundle-ClassPath: disJ.jar
 Bundle-Activator: distributed.plugin.ui.Activator
 Bundle-Vendor: SCS Carleton University

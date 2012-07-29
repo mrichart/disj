@@ -64,6 +64,12 @@ public class Graph implements Serializable {
 	
 	transient private Map<Integer, String> stateFields;
 	
+	private int[][] matrix;
+	
+	// FOR NOW: flag if matrix cannot be used e.g. graph modified or 
+	// the user created by drawing not loading
+	private boolean isMatrixDirty;
+	
 	protected PropertyChangeSupport listeners;
 	
 	public Graph() {
@@ -88,6 +94,8 @@ public class Graph implements Serializable {
 		this.nodes = new HashMap<String, Node>();
 		this.edges = new HashMap<String, Edge>();
 		this.agents = new HashMap<String, Agent>();
+		this.matrix = null;
+		this.isMatrixDirty = true;
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener l) {
@@ -169,6 +177,7 @@ public class Graph implements Serializable {
 	 */
 	public void addEdge(String id, Edge edge) throws DisJException {
 		if (!edges.containsKey(id)){
+			this.isMatrixDirty = true;
 			edges.put(id, edge);
 			PropertyChangeListener[] lis = this.listeners.getPropertyChangeListeners();
 			for(int i =0; i < lis.length; i++){				
@@ -188,6 +197,7 @@ public class Graph implements Serializable {
 	 */
 	public void addNode(String id, Node node) throws DisJException {
 		if (!nodes.containsKey(id)){
+			this.isMatrixDirty = true;
 			nodes.put(id, node);
 			PropertyChangeListener[] lis = this.listeners.getPropertyChangeListeners();
 			for(int i =0; i < lis.length; i++){				
@@ -224,6 +234,7 @@ public class Graph implements Serializable {
 	 */
 	public boolean removeNode(String id) {
 		if (nodes.containsKey(id)){		
+			this.isMatrixDirty = true;
 			Node n = nodes.remove(id);
 			return (n != null);
 		}
@@ -239,6 +250,7 @@ public class Graph implements Serializable {
 	 */
 	public boolean removeEdge(String id) {
 		if (!this.edges.containsKey(id)){
+			this.isMatrixDirty = true;
 			Edge e = edges.remove(id);
 			return (e != null);
 		}
@@ -438,7 +450,35 @@ public class Graph implements Serializable {
 	public void setProtocol(String protocol) {
 		this.protocol = protocol;
 	}
+	
+	/**
+	 * Get a matrix that represents a network topology that 
+	 * has been loaded to the simulation
+	 * @return A matrix of double array of integer if the graph
+	 * has been loaded by the matrix file and has not been modified, 
+	 * otherwise null
+	 */
+	public int[][] getMatrix(){
+		if(!this.isMatrixDirty){
+			return this.matrix;
+		}else {
+			return null;
+		}
+	}
 
+	/**
+	 * Set a matrix that represent a network topology to be
+	 * a new network topology
+	 * @param newMatrix a new matrix
+	 */
+	public void setMatrix(int[][] newMatrix){
+		if(newMatrix != null){
+			this.matrix = newMatrix;
+			this.isMatrixDirty = false;
+		}
+		
+	}
+	
 	/**
 	 * Get a statistic of current state vs number of node
 	 * 

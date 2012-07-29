@@ -19,6 +19,7 @@ import distributed.plugin.ui.models.topologies.CompletGraph;
 import distributed.plugin.ui.models.topologies.GenericGraph;
 import distributed.plugin.ui.models.topologies.HyperCube;
 import distributed.plugin.ui.models.topologies.ITopology;
+import distributed.plugin.ui.models.topologies.Matrix;
 import distributed.plugin.ui.models.topologies.Mesh;
 import distributed.plugin.ui.models.topologies.Ring;
 import distributed.plugin.ui.models.topologies.Spatial;
@@ -125,6 +126,10 @@ public class GraphElementFactory implements CreationFactory {
         
         } else if (template.equals(IGraphEditorConstants.TEMPLATE_CONNECTED)){
             return this.createGeneric_C();
+            
+        } else if (template.equals(IGraphEditorConstants.TEMPLATE_MATRIX)){
+            return this.createMatrix();
+            
         } else{
             return null;
         }
@@ -190,6 +195,13 @@ public class GraphElementFactory implements CreationFactory {
         return gen;
     }
 
+    private ITopology createMatrix(){
+    	Matrix matrix = new Matrix(this, this.shell);
+        matrix.createTopology();
+        this.graphElement.getGraph().setMatrix(matrix.getMatrix());
+        return matrix;
+    }
+    
     /**
      * @see org.eclipse.gef.requests.CreationFactory#getObjectType()
      */

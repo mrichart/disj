@@ -306,8 +306,8 @@ public abstract class AgentModel implements IAgentModel {
 	public final String getDestinationNode(String portLabel){
 		Node curNode = this.agentOwner.getCurNode();
 		try{
-			curNode.getDestinationNode(portLabel);
-			return curNode.getName();
+			Node desNode = curNode.getDestinationNode(portLabel);
+			return desNode.getName();
 		}catch(IllegalArgumentException e){
 			return null;
 		}
