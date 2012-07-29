@@ -276,6 +276,17 @@ public abstract class AgentModel implements IAgentModel {
 	}
 	
 	/**
+	 * Get an integer matrix of this graph if this graph is created by
+	 * a given matrix file .mtx, and the graph structure has not been
+	 *  modified by the user in the editor. 
+	 * @return A copy of matrix of integer, if exit and a graph view  
+	 * has not been modified, otherwise null.
+	 */
+	public final int[][] getGraphMatrix(){
+		return this.processor.getGraphMatrix();
+	}
+	
+	/**
 	 * Create a replica of this agent and present it at a node that
 	 * this agent is currently resides.
 	 * 

@@ -60,6 +60,15 @@ public interface IProcessor extends Runnable {
 	public int getNetworkSize();
 	
 	/**
+	 * Get an integer matrix of this graph if this graph is created by
+	 * a given matrix file .mtx, and the graph has not been modified
+	 * by the user in the editor. 
+	 * @return A matrix of integer, if exit and a graph view has not 
+	 * been modified, otherwise null.
+	 */
+	public int[][] getGraphMatrix();
+	
+	/**
 	 * Get a graph that currently simulate
 	 * @return a graph instance
 	 */

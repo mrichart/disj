@@ -454,13 +454,19 @@ public class Graph implements Serializable {
 	/**
 	 * Get a matrix that represents a network topology that 
 	 * has been loaded to the simulation
-	 * @return A matrix of double array of integer if the graph
+	 * @return A copy of matrix of double array of integer if the graph
 	 * has been loaded by the matrix file and has not been modified, 
 	 * otherwise null
 	 */
 	public int[][] getMatrix(){
-		if(!this.isMatrixDirty){
-			return this.matrix;
+		if(this.matrix != null && !this.isMatrixDirty){
+			int [][] copy = new int[this.matrix.length][this.matrix.length];
+			for(int i = 0; i < copy.length; i++){
+				for(int k =0; k < copy.length; k++){
+					copy[i][k] = this.matrix[i][k];
+				}
+			}
+			return copy;
 		}else {
 			return null;
 		}

@@ -890,4 +890,15 @@ public class MsgPassingProcessor implements IProcessor {
 		}
 		return size;
 	}
+	
+	/**
+	 * Get an integer matrix of this graph if this graph is created by
+	 * a given matrix file .mtx, and the graph structure has not been
+	 *  modified by the user in the editor. 
+	 * @return A copy of matrix of integer, if exit and a graph view 
+	 * has not been modified, otherwise null.
+	 */
+	public int[][] getGraphMatrix(){
+		return this.graph.getMatrix();
+	}
 }

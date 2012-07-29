@@ -1245,6 +1245,17 @@ public abstract class Entity implements IMessagePassingModel {
 	}
 	
 	/**
+	 * Get an integer matrix of this graph if this graph is created by
+	 * a given matrix file .mtx, and the graph structure has not been
+	 *  modified by the user in the editor. 
+	 * @return A copy of matrix of integer, if exit and a graph view 
+	 * has not been modified, otherwise null.
+	 */
+	public final int[][] getGraphMatrix(){
+		return this.processor.getGraphMatrix();
+	}
+	
+	/**
 	 * Get a node name on the another end that connects to a given port 
 	 * of this node
 	 * 

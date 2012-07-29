@@ -167,13 +167,14 @@ public class Matrix extends AbstractGraph {
         int y = point.y;        
         int px, py;
         int k = 0;
+        int r = 0;
         NodeElement node;
         while (k < this.nodes.size()) {
         	for (int i = 0; i < col; i++) {
         		if(k < this.nodes.size()){
 	                node = this.nodes.get(k);
 	                px = x + (i * GAP);
-	                py = y + (k * GAP);           	            
+	                py = y + (r * GAP);           	            
 	                Point p = new Point(px, py);                              
 	                node.setLocation(p);
 	                node.setSize(new Dimension(
@@ -183,7 +184,8 @@ public class Matrix extends AbstractGraph {
                 } else {
                 	break;
                 }
-            }        	
+            }
+        	r++;
 		}    	
     }
 
