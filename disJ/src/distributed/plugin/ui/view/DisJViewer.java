@@ -8,7 +8,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.internal.views.ViewsPlugin;
+import org.eclipse.core.runtime.Adapters;
 import org.eclipse.ui.part.IContributedContentsView;
 import org.eclipse.ui.part.IPage;
 import org.eclipse.ui.part.IPageBookViewPage;
@@ -113,7 +113,7 @@ public class DisJViewer extends PageBookView implements ISelectionProvider,
      */
     protected PageRec doCreatePage(IWorkbenchPart part) {
         // Try to get a disJ page.
-        Object obj = ViewsPlugin.getAdapter(part, IDisJViewable.class, false);
+        Object obj = Adapters.adapt(part, IDisJViewable.class, false);
         if (obj instanceof IDisJViewable) {
             IDisJViewable page = (IDisJViewable) obj;
             if (page instanceof IPageBookViewPage) {
